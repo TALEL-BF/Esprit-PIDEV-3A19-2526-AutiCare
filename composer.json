@@ -98,7 +98,11 @@
         "symfony/browser-kit": "6.4.*",
         "symfony/css-selector": "6.4.*",
         "symfony/debug-bundle": "6.4.*",
+<<<<<<< HEAD
         "symfony/maker-bundle": "^1.67",
+=======
+        "symfony/maker-bundle": "^1.0",
+>>>>>>> 64a84cbd1ba1321852f1fea8f7b2556daebb4f48
         "symfony/stopwatch": "6.4.*",
         "symfony/web-profiler-bundle": "6.4.*"
     }
