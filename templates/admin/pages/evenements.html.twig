@@ -1,0 +1,277 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Auticare — Gestion des Événements{% endblock %}
+
+{% block page_title %}Gestion des Événements{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .filter-input {
+        width: 200px;
+        font-size: .8rem;
+        padding: 6px 12px;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div class="page-header">
+    <h2><i class="fas fa-calendar-alt me-2" style="color:var(--purple-500)"></i>Gestion des Événements</h2>
+    <p>Organiser les ateliers, sorties et activités spéciales</p>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-4">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Total</div>
+                    <div class="stat-value">{{ totalEvents|default(17) }}</div>
+                </div>
+                <div class="stat-icon purple"><i class="fas fa-calendar"></i></div>
+            </div>
+            <div class="stat-change up"><i class="fas fa-arrow-up"></i> +2 cette semaine</div>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">À venir</div>
+                    <div class="stat-value">{{ upcomingEvents|default(8) }}</div>
+                </div>
+                <div class="stat-icon violet"><i class="fas fa-calendar-plus"></i></div>
+            </div>
+            <div class="stat-change up"><i class="fas fa-arrow-up"></i> planifiés</div>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Participants</div>
+                    <div class="stat-value">{{ totalParticipants|default(215) }}</div>
+                </div>
+                <div class="stat-icon pink"><i class="fas fa-user-friends"></i></div>
+            </div>
+            <div class="stat-change up"><i class="fas fa-arrow-up"></i> inscrits</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-8">
+        <div class="card-box">
+            <div class="card-box-header">
+                <span class="card-box-title"><i class="fas fa-plus-circle"></i> Créer / Modifier un Événement</span>
+                <span class="form-mode-badge" id="formMode">Mode : Ajout</span>
+            </div>
+            <div class="card-box-body">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">Titre de l'événement</label>
+                        <input type="text" class="form-control" id="eventTitle" placeholder="Ex: Atelier peinture sensorielle">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Date de début</label>
+                        <input type="datetime-local" class="form-control" id="eventStartDate">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Date de fin</label>
+                        <input type="datetime-local" class="form-control" id="eventEndDate">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Lieu</label>
+                        <input type="text" class="form-control" id="eventLocation" placeholder="Adresse ou en ligne">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Capacité max.</label>
+                        <input type="number" class="form-control" id="eventCapacity" placeholder="20">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Type</label>
+                        <select class="form-select" id="eventType">
+                            <option>Atelier</option>
+                            <option>Conférence</option>
+                            <option>Sortie</option>
+                            <option>Formation</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Statut</label>
+                        <select class="form-select" id="eventStatus">
+                            <option>Planifié</option>
+                            <option>Ouvert aux inscriptions</option>
+                            <option>Complet</option>
+                            <option>Annulé</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" id="eventDescription" rows="2" placeholder="Détails de l'événement..."></textarea>
+                    </div>
+                    <div class="col-12 d-flex gap-2">
+                        <button class="btn-purple" id="saveEventBtn"><i class="fas fa-save"></i> Enregistrer</button>
+                        <button class="btn-outline-purple" id="cancelEventBtn"><i class="fas fa-times"></i> Annuler</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card-box h-100">
+            <div class="card-box-header">
+                <span class="card-box-title"><i class="fas fa-chart-pie"></i> Types d'événements</span>
+            </div>
+            <div class="card-box-body">
+                <canvas id="eventTypeChart" height="240"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card-box mb-4">
+    <div class="card-box-header">
+        <span class="card-box-title"><i class="fas fa-list"></i> Liste des Événements</span>
+        <input type="text" class="form-control filter-input" id="eventFilterInput" placeholder="Filtrer...">
+    </div>
+    <div class="card-box-body p-0">
+        <div class="table-wrapper">
+            <table class="custom-table" id="eventTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Titre</th>
+                        <th>Date</th>
+                        <th>Lieu</th>
+                        <th>Type</th>
+                        <th>Inscrits</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Atelier peinture sensorielle</td>
+                        <td>20/04/2024</td>
+                        <td>Centre Auticare</td>
+                        <td>Atelier</td>
+                        <td>14/20</td>
+                        <td><span class="badge-status badge-active">Ouvert</span></td>
+                        <td>
+                            <button class="btn-edit-soft me-1" onclick="document.getElementById('formMode').textContent='Mode : Modification'">Modifier</button>
+                            <button class="btn-danger-soft" onclick="if(confirm('Supprimer ?'))this.closest('tr').remove()">Supprimer</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Conférence parents</td>
+                        <td>25/04/2024</td>
+                        <td>Salle Liberté, Tunis</td>
+                        <td>Conférence</td>
+                        <td>45/60</td>
+                        <td><span class="badge-status badge-active">Ouvert</span></td>
+                        <td>
+                            <button class="btn-edit-soft me-1" onclick="document.getElementById('formMode').textContent='Mode : Modification'">Modifier</button>
+                            <button class="btn-danger-soft" onclick="if(confirm('Supprimer ?'))this.closest('tr').remove()">Supprimer</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Sortie au parc Belvedere</td>
+                        <td>02/05/2024</td>
+                        <td>Parc Belvedere</td>
+                        <td>Sortie</td>
+                        <td>18/18</td>
+                        <td><span class="badge-status badge-inactive">Complet</span></td>
+                        <td>
+                            <button class="btn-edit-soft me-1" onclick="document.getElementById('formMode').textContent='Mode : Modification'">Modifier</button>
+                            <button class="btn-danger-soft" onclick="if(confirm('Supprimer ?'))this.closest('tr').remove()">Supprimer</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="card-box">
+    <div class="card-box-header">
+        <span class="card-box-title"><i class="fas fa-chart-bar"></i> Participation mensuelle</span>
+    </div>
+    <div class="card-box-body">
+        <canvas id="eventParticipChart" height="80"></canvas>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const P = { p500:'#9333ea', p400:'#a855f7', p300:'#c084fc', pink:'#ec4899', indigo:'#6366f1', accent:'#e040fb' };
+    const months6 = ['Jan','Fév','Mar','Avr','Mai','Juin'];
+
+    new Chart(document.getElementById('eventTypeChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Atelier', 'Conférence', 'Sortie', 'Formation'],
+            datasets: [{
+                data: [8, 3, 4, 2],
+                backgroundColor: [P.p500, P.indigo, P.pink, P.accent],
+                borderWidth: 0,
+                hoverOffset: 8
+            }]
+        },
+        options: {
+            plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, font: { family: 'DM Sans', size: 11 } } } },
+            cutout: '60%',
+            responsive: true
+        }
+    });
+
+    new Chart(document.getElementById('eventParticipChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: months6,
+            datasets: [{
+                label: 'Participants',
+                data: [35, 52, 48, 78, 65, 90],
+                backgroundColor: [P.p500, P.p400, P.p300, P.pink, P.indigo, P.accent],
+                borderRadius: 6,
+                borderWidth: 0
+            }]
+        },
+        options: {
+            plugins: { legend: { display: false } },
+            scales: { x: { grid: { display: false } }, y: { grid: { color: '#f3e8ff' } } },
+            responsive: true
+        }
+    });
+
+    // Filtre
+    document.getElementById('eventFilterInput')?.addEventListener('input', function(e) {
+        const val = e.target.value.toLowerCase();
+        document.querySelectorAll('#eventTable tbody tr').forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(val) ? '' : 'none';
+        });
+    });
+
+    // Annuler
+    document.getElementById('cancelEventBtn')?.addEventListener('click', function() {
+        document.getElementById('formMode').textContent = 'Mode : Ajout';
+        document.getElementById('eventTitle').value = '';
+        document.getElementById('eventStartDate').value = '';
+        document.getElementById('eventEndDate').value = '';
+        document.getElementById('eventLocation').value = '';
+        document.getElementById('eventCapacity').value = '';
+        document.getElementById('eventDescription').value = '';
+    });
+});
+</script>
+{% endblock %}
