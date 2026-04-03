@@ -1,0 +1,288 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Auticare — Planning des Thérapeutes{% endblock %}
+
+{% block page_title %}Planning des Thérapeutes{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .filter-input {
+        width: 200px;
+        font-size: .8rem;
+        padding: 6px 12px;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div class="page-header">
+    <h2><i class="fas fa-clock me-2" style="color:var(--purple-500)"></i>Planning des Thérapeutes</h2>
+    <p>Gérer les horaires et plages de disponibilité</p>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Thérapeutes</div>
+                    <div class="stat-value">{{ therapists|default(24) }}</div>
+                </div>
+                <div class="stat-icon purple"><i class="fas fa-user-md"></i></div>
+            </div>
+            <div class="stat-change up"><i class="fas fa-arrow-up"></i> actifs</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Séances/sem</div>
+                    <div class="stat-value">{{ sessionsPerWeek|default(186) }}</div>
+                </div>
+                <div class="stat-icon violet"><i class="fas fa-calendar-week"></i></div>
+            </div>
+            <div class="stat-change up"><i class="fas fa-arrow-up"></i> cette semaine</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Taux occupation</div>
+                    <div class="stat-value">{{ occupancyRate|default(78) }}%</div>
+                </div>
+                <div class="stat-icon pink"><i class="fas fa-percent"></i></div>
+            </div>
+            <div class="stat-change up"><i class="fas fa-arrow-up"></i> bon niveau</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Heures/semaine</div>
+                    <div class="stat-value">{{ hoursPerWeek|default(312) }}h</div>
+                </div>
+                <div class="stat-icon indigo"><i class="fas fa-clock"></i></div>
+            </div>
+            <div class="stat-change up"><i class="fas fa-arrow-up"></i> planifiées</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-8">
+        <div class="card-box">
+            <div class="card-box-header">
+                <span class="card-box-title"><i class="fas fa-plus-circle"></i> Ajouter / Modifier une Plage Horaire</span>
+                <span class="form-mode-badge" id="formMode">Mode : Ajout</span>
+            </div>
+            <div class="card-box-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Thérapeute</label>
+                        <select class="form-select" id="therapistName">
+                            <option>Dr. Fatma Trabelsi</option>
+                            <option>Dr. Amine Karray</option>
+                            <option>Dr. Sana Mejri</option>
+                            <option>Dr. Kamel Nasri</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Jour</label>
+                        <select class="form-select" id="dayOfWeek">
+                            <option>Lundi</option>
+                            <option>Mardi</option>
+                            <option>Mercredi</option>
+                            <option>Jeudi</option>
+                            <option>Vendredi</option>
+                            <option>Samedi</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Heure début</label>
+                        <input type="time" class="form-control" id="startTime">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Heure fin</label>
+                        <input type="time" class="form-control" id="endTime">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Type de séance</label>
+                        <select class="form-select" id="sessionType">
+                            <option>Individuelle</option>
+                            <option>Groupe</option>
+                            <option>Évaluation</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Récurrence</label>
+                        <select class="form-select" id="recurrence">
+                            <option>Chaque semaine</option>
+                            <option>Toutes les 2 semaines</option>
+                            <option>Unique</option>
+                        </select>
+                    </div>
+                    <div class="col-12 d-flex gap-2">
+                        <button class="btn-purple" id="savePlanningBtn"><i class="fas fa-save"></i> Enregistrer</button>
+                        <button class="btn-outline-purple" id="cancelPlanningBtn"><i class="fas fa-times"></i> Annuler</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card-box h-100">
+            <div class="card-box-header">
+                <span class="card-box-title"><i class="fas fa-chart-pie"></i> Occupation par jour</span>
+            </div>
+            <div class="card-box-body">
+                <canvas id="planningChart" height="240"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card-box">
+    <div class="card-box-header">
+        <span class="card-box-title"><i class="fas fa-list"></i> Planning Hebdomadaire</span>
+        <input type="text" class="form-control filter-input" id="planningFilterInput" placeholder="Filtrer...">
+    </div>
+    <div class="card-box-body p-0">
+        <div class="table-wrapper">
+            <table class="custom-table" id="planningTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Thérapeute</th>
+                        <th>Jour</th>
+                        <th>Horaire</th>
+                        <th>Type</th>
+                        <th>Récurrence</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for schedule in schedules|default([
+                        {id:1, therapist:'Dr. Fatma Trabelsi', day:'Lundi', startTime:'09:00', endTime:'10:00', type:'Individuelle', recurrence:'Chaque semaine'},
+                        {id:2, therapist:'Dr. Amine Karray', day:'Mardi', startTime:'10:30', endTime:'12:00', type:'Groupe', recurrence:'Chaque semaine'},
+                        {id:3, therapist:'Dr. Sana Mejri', day:'Mercredi', startTime:'14:00', endTime:'15:00', type:'Évaluation', recurrence:'Unique'},
+                        {id:4, therapist:'Dr. Kamel Nasri', day:'Jeudi', startTime:'08:30', endTime:'09:30', type:'Individuelle', recurrence:'Toutes les 2 sem'}
+                    ]) %}
+                        <tr>
+                            <td>{{ schedule.id }}</td>
+                            <td>{{ schedule.therapist }}</td>
+                            <td>{{ schedule.day }}</td>
+                            <td>{{ schedule.startTime }} – {{ schedule.endTime }}</td>
+                            <td>{{ schedule.type }}</td>
+                            <td>{{ schedule.recurrence }}</td>
+                            <td>
+                                <button class="btn-edit-soft me-1 edit-schedule-btn" data-id="{{ schedule.id }}">Modifier</button>
+                                <button class="btn-danger-soft delete-schedule-btn" data-id="{{ schedule.id }}">Supprimer</button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const P = { p400:'#a855f7', pink:'#f472b6', indigo:'#818cf8', accent:'#e040fb', p300:'#c084fc', p500:'#9333ea' };
+
+    // Polar Area Chart - Occupation par jour
+    new Chart(document.getElementById('planningChart').getContext('2d'), {
+        type: 'polarArea',
+        data: {
+            labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
+            datasets: [{
+                data: [32, 38, 28, 40, 35, 13],
+                backgroundColor: [
+                    'rgba(168,85,247,.7)',
+                    'rgba(244,114,182,.7)',
+                    'rgba(129,140,248,.7)',
+                    'rgba(192,132,252,.7)',
+                    'rgba(224,64,251,.7)',
+                    'rgba(147,51,234,.7)'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        usePointStyle: true,
+                        font: { family: 'DM Sans', size: 11 }
+                    }
+                }
+            },
+            responsive: true
+        }
+    });
+
+    // Filter table
+    document.getElementById('planningFilterInput')?.addEventListener('input', function(e) {
+        const val = e.target.value.toLowerCase();
+        document.querySelectorAll('#planningTable tbody tr').forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(val) ? '' : 'none';
+        });
+    });
+
+    // Edit button
+    document.querySelectorAll('.edit-schedule-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.getElementById('formMode').textContent = 'Mode : Modification';
+            const id = this.getAttribute('data-id');
+            console.log('Edit schedule:', id);
+        });
+    });
+
+    // Delete button
+    document.querySelectorAll('.delete-schedule-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (confirm('Supprimer cette plage horaire ?')) {
+                this.closest('tr').remove();
+            }
+        });
+    });
+
+    // Cancel button
+    document.getElementById('cancelPlanningBtn')?.addEventListener('click', function() {
+        document.getElementById('formMode').textContent = 'Mode : Ajout';
+        document.getElementById('startTime').value = '';
+        document.getElementById('endTime').value = '';
+    });
+
+    // Save button
+    document.getElementById('savePlanningBtn')?.addEventListener('click', function() {
+        const therapist = document.getElementById('therapistName')?.value;
+        if (!therapist) {
+            alert('Veuillez sélectionner un thérapeute');
+            return;
+        }
+        console.log('Save schedule:', {
+            therapist: therapist,
+            day: document.getElementById('dayOfWeek')?.value,
+            startTime: document.getElementById('startTime')?.value,
+            endTime: document.getElementById('endTime')?.value,
+            type: document.getElementById('sessionType')?.value,
+            recurrence: document.getElementById('recurrence')?.value
+        });
+        alert('Plage horaire enregistrée (démo)');
+        document.getElementById('formMode').textContent = 'Mode : Ajout';
+    });
+});
+</script>
+{% endblock %}

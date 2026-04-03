@@ -1,0 +1,295 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Auticare — Thérapie{% endblock %}
+
+{% block page_title %}Gestion de la Thérapie{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .filter-input {
+        width: 200px;
+        font-size: .8rem;
+        padding: 6px 12px;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div class="page-header">
+    <h2><i class="fas fa-heartbeat me-2" style="color:var(--purple-500)"></i>Gestion de la Thérapie</h2>
+    <p>Suivre les plans thérapeutiques et les thérapeutes</p>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Thérapeutes</div>
+                    <div class="stat-value">{{ therapists|default(24) }}</div>
+                </div>
+                <div class="stat-icon purple"><i class="fas fa-user-md"></i></div>
+            </div>
+            <div class="stat-change up"><i class="fas fa-arrow-up"></i> actifs</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Plans actifs</div>
+                    <div class="stat-value">{{ activePlans|default(186) }}</div>
+                </div>
+                <div class="stat-icon violet"><i class="fas fa-clipboard-list"></i></div>
+            </div>
+            <div class="stat-change up"><i class="fas fa-arrow-up"></i> +12 ce mois</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Types thérapie</div>
+                    <div class="stat-value">{{ therapyTypes|default(4) }}</div>
+                </div>
+                <div class="stat-icon pink"><i class="fas fa-heartbeat"></i></div>
+            </div>
+            <div class="stat-change up"><i class="fas fa-arrow-up"></i> disponibles</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Taux succès</div>
+                    <div class="stat-value">{{ successRate|default(87) }}%</div>
+                </div>
+                <div class="stat-icon indigo"><i class="fas fa-chart-line"></i></div>
+            </div>
+            <div class="stat-change up"><i class="fas fa-arrow-up"></i> +3% ce mois</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-8">
+        <div class="card-box">
+            <div class="card-box-header">
+                <span class="card-box-title"><i class="fas fa-plus-circle"></i> Nouveau Plan Thérapeutique</span>
+                <span class="form-mode-badge" id="formMode">Mode : Ajout</span>
+            </div>
+            <div class="card-box-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Patient</label>
+                        <input type="text" class="form-control" id="patientName" placeholder="Nom du patient">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Thérapeute assigné</label>
+                        <select class="form-select" id="therapistName">
+                            <option>Dr. Fatma Trabelsi</option>
+                            <option>Dr. Sana Mejri</option>
+                            <option>Dr. Amine Karray</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Type de thérapie</label>
+                        <select class="form-select" id="therapyType">
+                            <option>Orthophonie</option>
+                            <option>ABA</option>
+                            <option>Psychomotricité</option>
+                            <option>Ergothérapie</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Fréquence</label>
+                        <select class="form-select" id="frequency">
+                            <option>1x/semaine</option>
+                            <option>2x/semaine</option>
+                            <option>3x/semaine</option>
+                            <option>Quotidien</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Date de début</label>
+                        <input type="date" class="form-control" id="startDate">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Durée du plan (mois)</label>
+                        <input type="number" class="form-control" id="duration" placeholder="6">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Objectifs thérapeutiques</label>
+                        <textarea class="form-control" id="objectives" rows="2" placeholder="Décrivez les objectifs..."></textarea>
+                    </div>
+                    <div class="col-12 d-flex gap-2">
+                        <button class="btn-purple" id="savePlanBtn"><i class="fas fa-save"></i> Enregistrer</button>
+                        <button class="btn-outline-purple" id="cancelPlanBtn"><i class="fas fa-times"></i> Annuler</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card-box h-100">
+            <div class="card-box-header">
+                <span class="card-box-title"><i class="fas fa-chart-pie"></i> Types de thérapie</span>
+            </div>
+            <div class="card-box-body">
+                <canvas id="therapieChart" height="240"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card-box">
+    <div class="card-box-header">
+        <span class="card-box-title"><i class="fas fa-list"></i> Plans Thérapeutiques</span>
+        <input type="text" class="form-control filter-input" id="planFilterInput" placeholder="Filtrer...">
+    </div>
+    <div class="card-box-body p-0">
+        <div class="table-wrapper">
+            <table class="custom-table" id="therapieTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Patient</th>
+                        <th>Thérapeute</th>
+                        <th>Type</th>
+                        <th>Fréquence</th>
+                        <th>Début</th>
+                        <th>Progrès</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for plan in therapyPlans|default([
+                        {id:1, patient:'Adam Mejri', therapist:'Dr. Fatma Trabelsi', type:'Orthophonie', frequency:'2x/sem', startDate:'Jan 2024', progress:85, status:'active'},
+                        {id:2, patient:'Sara Hamdi', therapist:'Dr. Amine Karray', type:'ABA', frequency:'3x/sem', startDate:'Fév 2024', progress:60, status:'pending'},
+                        {id:3, patient:'Youssef Ben Amor', therapist:'Dr. Sana Mejri', type:'Psychomotricité', frequency:'1x/sem', startDate:'Mar 2024', progress:92, status:'active'},
+                        {id:4, patient:'Nour Gharbi', therapist:'Dr. Fatma Trabelsi', type:'Ergothérapie', frequency:'2x/sem', startDate:'Avr 2024', progress:40, status:'inactive'}
+                    ]) %}
+                        <tr>
+                            <td>{{ plan.id }}</td>
+                            <td>{{ plan.patient }}</td>
+                            <td>{{ plan.therapist }}</td>
+                            <td>{{ plan.type }}</td>
+                            <td>{{ plan.frequency }}</td>
+                            <td>{{ plan.startDate }}</td>
+                            <td>
+                                {% if plan.progress >= 80 %}
+                                    <span class="badge-status badge-active">{{ plan.progress }}%</span>
+                                {% elseif plan.progress >= 50 %}
+                                    <span class="badge-status badge-pending">{{ plan.progress }}%</span>
+                                {% else %}
+                                    <span class="badge-status badge-inactive">{{ plan.progress }}%</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button class="btn-edit-soft me-1 edit-plan-btn" data-id="{{ plan.id }}">Modifier</button>
+                                <button class="btn-danger-soft delete-plan-btn" data-id="{{ plan.id }}">Supprimer</button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const P = { p400: '#a855f7', pink: '#f472b6', indigo: '#818cf8', accent: '#e040fb' };
+
+    // Chart Types de thérapie
+    new Chart(document.getElementById('therapieChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Orthophonie', 'ABA', 'Psychomotricité', 'Ergothérapie'],
+            datasets: [{
+                data: [120, 90, 80, 36],
+                backgroundColor: [P.p400, P.pink, P.indigo, P.accent],
+                borderWidth: 0,
+                hoverOffset: 8
+            }]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        usePointStyle: true,
+                        font: { family: 'DM Sans', size: 11 }
+                    }
+                }
+            },
+            cutout: '60%',
+            responsive: true
+        }
+    });
+
+    // Filter table
+    document.getElementById('planFilterInput')?.addEventListener('input', function(e) {
+        const val = e.target.value.toLowerCase();
+        document.querySelectorAll('#therapieTable tbody tr').forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(val) ? '' : 'none';
+        });
+    });
+
+    // Edit button
+    document.querySelectorAll('.edit-plan-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.getElementById('formMode').textContent = 'Mode : Modification';
+            const id = this.getAttribute('data-id');
+            console.log('Edit plan:', id);
+        });
+    });
+
+    // Delete button
+    document.querySelectorAll('.delete-plan-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (confirm('Supprimer ce plan thérapeutique ?')) {
+                this.closest('tr').remove();
+            }
+        });
+    });
+
+    // Cancel button
+    document.getElementById('cancelPlanBtn')?.addEventListener('click', function() {
+        document.getElementById('formMode').textContent = 'Mode : Ajout';
+        document.getElementById('patientName').value = '';
+        document.getElementById('patientName').value = '';
+        document.getElementById('startDate').value = '';
+        document.getElementById('duration').value = '';
+        document.getElementById('objectives').value = '';
+    });
+
+    // Save button
+    document.getElementById('savePlanBtn')?.addEventListener('click', function() {
+        const patient = document.getElementById('patientName')?.value;
+        if (!patient) {
+            alert('Veuillez saisir un nom de patient');
+            return;
+        }
+        console.log('Save therapy plan:', {
+            patient: patient,
+            therapist: document.getElementById('therapistName')?.value,
+            therapyType: document.getElementById('therapyType')?.value,
+            frequency: document.getElementById('frequency')?.value,
+            startDate: document.getElementById('startDate')?.value,
+            duration: document.getElementById('duration')?.value,
+            objectives: document.getElementById('objectives')?.value
+        });
+        alert('Plan thérapeutique enregistré (démo)');
+        document.getElementById('formMode').textContent = 'Mode : Ajout';
+    });
+});
+</script>
+{% endblock %}
