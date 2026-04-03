@@ -117,16 +117,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getRoles(): array
-    {
-        if (!$this->role) {
-            return ['ROLE_USER'];
-        }
-
-        $role = 'ROLE_' . strtoupper($this->role);
-
-        return array_unique([$role]);
+   public function getRoles(): array
+{
+    if (!$this->role) {
+        return ['ROLE_USER'];
     }
+
+    return match (strtolower($this->role)) {
+        'admin' => ['ROLE_ADMIN'],
+        'parent' => ['ROLE_PARENT'],
+        'psychologue' => ['ROLE_PSYCHOLOGUE'],
+        'professeur' => ['ROLE_PROFESSEUR'],
+        'enfant' => ['ROLE_ENFANT'],
+        'user' => ['ROLE_USER'],
+        default => ['ROLE_USER'],
+    };
+}
 
     public function eraseCredentials(): void
     {

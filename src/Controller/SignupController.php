@@ -46,8 +46,7 @@ class SignupController extends AbstractController
                     default => 'user',
                 });
                 $user->setStatus('active');
-                $user->setCreatedAt(new \DateTimeImmutable());
-
+$user->setCreatedAt(new \DateTime());
                 $entityManager->persist($user);
                 $entityManager->flush();
 
