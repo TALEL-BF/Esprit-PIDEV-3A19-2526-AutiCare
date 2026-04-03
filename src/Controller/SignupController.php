@@ -3,57 +3,28 @@
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
-class SignupController extends AbstractController
+class SecurityController extends AbstractController
 {
-    #[Route('/signup', name: 'app_signup')]
-    #[Route('/inscription', name: 'app_inscription')]
-    public function index(Request $request): Response
+    #[Route('/login', name: 'app_login')]
+    public function login(AuthenticationUtils $authenticationUtils): Response
     {
-        if ($request->isMethod('POST')) {
-            $firstname = $request->request->get('firstname');
-            $lastname = $request->request->get('lastname');
-            $email = $request->request->get('email');
-            $password = $request->request->get('password');
-            $confirmPassword = $request->request->get('confirm_password');
-            $profileType = $request->request->get('profile_type');
-            $terms = $request->request->get('terms');
-            
-            // Validation basique
-            $errors = [];
-            
-            if (!$firstname || !$lastname || !$email || !$password) {
-                $errors[] = 'Veuillez remplir tous les champs obligatoires.';
-            }
-            
-            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $errors[] = 'Veuillez saisir une adresse email valide.';
-            }
-            
-            if (strlen($password) < 6) {
-                $errors[] = 'Le mot de passe doit contenir au moins 6 caractères.';
-            }
-            
-            if ($password !== $confirmPassword) {
-                $errors[] = 'Les mots de passe ne correspondent pas.';
-            }
-            
-            if (!$terms) {
-                $errors[] = 'Vous devez accepter les conditions d\'utilisation.';
-            }
-            
-            if (count($errors) > 0) {
-                $this->addFlash('error', implode('<br>', $errors));
-            } else {
-                // Ici vous ajouterez la logique d'enregistrement en base de données
-                $this->addFlash('success', 'Votre compte a été créé avec succès ! Vous pouvez maintenant vous connecter.');
-                return $this->redirectToRoute('app_signin');
-            }
+        if ($this->getUser()) {
+            return $this->redirectToRoute('app_user_index');
         }
-        
-        return $this->render('front/signup/index.html.twig');
+
+        return $this->render('security/login.html.twig', [
+            'last_username' => $authenticationUtils->getLastUsername(),
+            'error' => $authenticationUtils->getLastAuthenticationError(),
+        ]);
+    }
+
+    #[Route('/logout', name: 'app_logout')]
+    public function logout(): void
+    {
+        throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
     }
 }
