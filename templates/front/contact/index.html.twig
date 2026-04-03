@@ -1,0 +1,395 @@
+{# templates/front/contact/index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}AutiCare - Contact{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        :root {
+            --primary: #4d65f9;
+            --secondary: #ff4880;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #4d65f9 0%, #ff4880 100%);
+        }
+        
+        .contact-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            height: 100%;
+            border: 1px solid rgba(77,101,249,0.1);
+        }
+        
+        .contact-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(77,101,249,0.15);
+            border-color: var(--primary);
+        }
+        
+        .contact-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+        
+        .contact-icon i {
+            font-size: 2rem;
+            color: white;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 12px;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(77,101,249,0.1);
+        }
+        
+        .btn-submit {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 50px;
+            padding: 14px 40px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-submit:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 25px rgba(77,101,249,0.3);
+        }
+        
+        .map-container {
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .social-link {
+            width: 45px;
+            height: 45px;
+            background: rgba(77,101,249,0.1);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+        
+        .social-link:hover {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            transform: translateY(-3px);
+        }
+        
+        .alert-success {
+            background: linear-gradient(135deg, #d4fc79, #96e6a1);
+            border: none;
+            border-radius: 15px;
+            color: #1e7b1e;
+        }
+        
+        .alert-danger {
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            border: none;
+            border-radius: 15px;
+            color: #c62828;
+        }
+        
+        .faq-item {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(77,101,249,0.1);
+        }
+        
+        .faq-item:hover {
+            border-color: var(--primary);
+            transform: translateX(5px);
+        }
+        
+        .faq-question {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .faq-answer {
+            display: none;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+            color: #666;
+        }
+        
+        .faq-item.active .faq-answer {
+            display: block;
+        }
+        
+        .faq-item.active .faq-icon {
+            transform: rotate(180deg);
+        }
+        
+        .faq-icon {
+            transition: transform 0.3s ease;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <!-- Page Header -->
+    <div class="container-fluid page-header py-5 wow fadeIn" data-wow-delay="0.1s">
+        <div class="container text-center py-5">
+            <h1 class="display-3 text-white mb-3">Contactez-nous</h1>
+            <p class="text-white opacity-75 mb-3">Une question ? Un besoin d'accompagnement ? Notre équipe est là pour vous aider.</p>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb justify-content-center mb-0">
+                    <li class="breadcrumb-item"><a href="{{ path('app_home') }}" class="text-white">Accueil</a></li>
+                    <li class="breadcrumb-item text-secondary active">Contact</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    {% for message in app.flashes('success') %}
+        <div class="container mt-4">
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i> {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    {% endfor %}
+    
+    {% for message in app.flashes('error') %}
+        <div class="container mt-4">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i> {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    {% endfor %}
+
+    <!-- Contact Info Cards -->
+    <div class="container-fluid py-5">
+        <div class="container py-4">
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="contact-card wow fadeInUp" data-wow-delay="0.1s">
+                        <div class="contact-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">Notre Adresse</h5>
+                        <p class="text-muted mb-0">{{ contactInfo.address }}</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="contact-card wow fadeInUp" data-wow-delay="0.2s">
+                        <div class="contact-icon">
+                            <i class="fas fa-phone-alt"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">Téléphone</h5>
+                        <p class="text-muted mb-0">{{ contactInfo.phone }}</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="contact-card wow fadeInUp" data-wow-delay="0.3s">
+                        <div class="contact-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">Email</h5>
+                        <p class="text-muted mb-0">{{ contactInfo.email }}</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="contact-card wow fadeInUp" data-wow-delay="0.4s">
+                        <div class="contact-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">Horaires</h5>
+                        <p class="text-muted mb-0">{{ contactInfo.hours }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Form & Map -->
+    <div class="container-fluid py-5 bg-light">
+        <div class="container py-4">
+            <div class="row g-5">
+                <!-- Contact Form -->
+                <div class="col-lg-6 wow fadeInLeft" data-wow-delay="0.1s">
+                    <div class="bg-white rounded-4 p-4 shadow-sm">
+                        <div class="text-center mb-4">
+                            <div class="bg-secondary text-primary rounded d-inline-block px-3 mb-3" style="border-radius:25% 10% !important">
+                                <small>Envoyez-nous un message</small>
+                            </div>
+                            <h3 class="display-6 mb-3">Écrivez-nous</h3>
+                            <p class="text-muted">Nous vous répondrons dans les plus brefs délais</p>
+                        </div>
+                        
+                        <form method="POST" action="{{ path('app_contact') }}">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <input type="text" name="name" class="form-control" placeholder="Votre nom complet" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="email" name="email" class="form-control" placeholder="Votre adresse email" required>
+                                </div>
+                                <div class="col-12">
+                                    <input type="text" name="subject" class="form-control" placeholder="Sujet de votre message" required>
+                                </div>
+                                <div class="col-12">
+                                    <textarea name="message" class="form-control" rows="5" placeholder="Votre message..." required></textarea>
+                                </div>
+                                <div class="col-12 text-center">
+                                    <button type="submit" class="btn btn-submit text-white">
+                                        <i class="fas fa-paper-plane me-2"></i> Envoyer le message
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Map & Social -->
+                <div class="col-lg-6 wow fadeInRight" data-wow-delay="0.2s">
+                    <div class="map-container mb-4">
+                        <iframe 
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d255659.2572344338!2d10.0496593!3d36.7528878!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x12fd337f5e7ef4a3%3A0x6b2b2b2b2b2b2b2b!2sTunis%2C%20Tunisie!5e0!3m2!1sfr!2s!4v1700000000000!5m2!1sfr!2s" 
+                            width="100%" 
+                            height="300" 
+                            style="border:0;" 
+                            allowfullscreen="" 
+                            loading="lazy">
+                        </iframe>
+                    </div>
+                    
+                    <div class="bg-white rounded-4 p-4 text-center shadow-sm">
+                        <h5 class="fw-bold mb-3">Suivez-nous sur les réseaux sociaux</h5>
+                        <div class="d-flex justify-content-center gap-3">
+                            <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="container-fluid py-5">
+        <div class="container py-4">
+            <div class="text-center mx-auto mb-5 wow fadeInUp" style="max-width: 700px;">
+                <div class="bg-secondary text-primary rounded d-inline-block px-3 mb-3" style="border-radius:25% 10% !important">
+                    <small>Questions fréquentes</small>
+                </div>
+                <h1 class="display-5">Vous avez des questions ?</h1>
+                <p class="text-muted">Retrouvez les réponses aux questions les plus fréquemment posées</p>
+            </div>
+            
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="faq-item wow fadeInUp" data-wow-delay="0.1s">
+                        <div class="faq-question">
+                            <span>Comment puis-je m'inscrire à un cours ?</span>
+                            <i class="fas fa-chevron-down faq-icon"></i>
+                        </div>
+                        <div class="faq-answer">
+                            Pour vous inscrire à un cours, créez d'abord un compte gratuit sur notre plateforme. Une fois connecté, vous pourrez parcourir notre catalogue de cours et réserver ceux qui vous intéressent.
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item wow fadeInUp" data-wow-delay="0.2s">
+                        <div class="faq-question">
+                            <span>Les séances de thérapie sont-elles remboursées ?</span>
+                            <i class="fas fa-chevron-down faq-icon"></i>
+                        </div>
+                        <div class="faq-answer">
+                            Certaines séances peuvent être prises en charge par la sécurité sociale ou les mutuelles selon votre contrat. Nous vous conseillons de vous renseigner auprès de votre caisse d'assurance maladie.
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item wow fadeInUp" data-wow-delay="0.3s">
+                        <div class="faq-question">
+                            <span>Comment se déroulent les séances en ligne ?</span>
+                            <i class="fas fa-chevron-down faq-icon"></i>
+                        </div>
+                        <div class="faq-answer">
+                            Les séances se déroulent via notre plateforme de visioconférence sécurisée. Vous recevrez un lien de connexion par email après votre réservation. Il vous suffit de cliquer sur le lien à l'heure de la séance.
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item wow fadeInUp" data-wow-delay="0.4s">
+                        <div class="faq-question">
+                            <span>Puis-je annuler ou modifier une réservation ?</span>
+                            <i class="fas fa-chevron-down faq-icon"></i>
+                        </div>
+                        <div class="faq-answer">
+                            Oui, vous pouvez annuler ou modifier votre réservation jusqu'à 24 heures avant la séance depuis votre espace personnel. Pour toute annulation tardive, veuillez nous contacter directement.
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item wow fadeInUp" data-wow-delay="0.5s">
+                        <div class="faq-question">
+                            <span>Les jeux sont-ils gratuits ?</span>
+                            <i class="fas fa-chevron-down faq-icon"></i>
+                        </div>
+                        <div class="faq-answer">
+                            Oui, tous nos jeux éducatifs sont entièrement gratuits après inscription. Créez simplement un compte pour y accéder sans aucune restriction.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="container-fluid bg-primary py-5 wow fadeIn">
+        <div class="container py-3 text-center">
+            <h2 class="text-white mb-3">Rejoignez la communauté AutiCare</h2>
+            <p class="text-white opacity-75 mb-4">Inscrivez-vous gratuitement et accédez à tous nos services</p>
+            <a href="#" class="btn btn-secondary btn-border-radius py-3 px-5">
+                <i class="fas fa-user-plus me-2"></i> Créer un compte gratuit
+            </a>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        // FAQ Accordion
+        document.querySelectorAll('.faq-item').forEach(item => {
+            item.addEventListener('click', function() {
+                this.classList.toggle('active');
+            });
+        });
+    </script>
+{% endblock %}
