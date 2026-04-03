@@ -1,0 +1,465 @@
+{# templates/front/cours/show.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}AutiCare - {{ cours.titre }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        :root {
+            --primary: #6c4ff6;
+            --primary-light: #ede9fe;
+            --secondary: #ff4880;
+            --dark: #1e293b;
+            --bg: #f0f4ff;
+        }
+
+        body { background: var(--bg); }
+
+        /* ── Hero ── */
+        .cours-hero {
+            background: linear-gradient(135deg, var(--primary) 0%, #a855f7 100%);
+            padding: 3rem 0 5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .cours-hero::before {
+            content: '';
+            position: absolute;
+            width: 350px; height: 350px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.08);
+            top: -80px; right: -80px;
+        }
+        .cours-hero::after {
+            content: '';
+            position: absolute;
+            width: 200px; height: 200px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.06);
+            bottom: -60px; left: 10%;
+        }
+        .cours-hero h1 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: white;
+        }
+        .hero-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 6px 18px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.3);
+            margin-bottom: 1rem;
+        }
+        .hero-stats {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1.2rem;
+        }
+        .hero-stat {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            font-family: 'Fredoka', sans-serif;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .cours-hero-image {
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-height: 260px;
+        }
+        .cours-hero-image img {
+            width: 100%;
+            height: 260px;
+            object-fit: cover;
+        }
+        .cours-hero-emoji {
+            background: rgba(255,255,255,0.15);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            font-size: 7rem;
+            backdrop-filter: blur(8px);
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        /* ── Main Content Card ── */
+        .content-card {
+            background: white;
+            border-radius: 28px;
+            padding: 2rem;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.07);
+            margin-top: -3rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* ── Description Section ── */
+        .section-title {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1.2rem;
+        }
+        .section-icon {
+            font-size: 1.3rem;
+        }
+        .description-box {
+            background: var(--primary-light);
+            border: 2px solid #c4b5fd;
+            border-radius: 18px;
+            padding: 1.4rem 1.6rem;
+            color: #4c1d95;
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        /* ── Word Cards ── */
+        .mots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.2rem;
+        }
+        .mot-card {
+            background: white;
+            border: 3px solid #e9d5ff;
+            border-radius: 22px;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(108,79,246,0.08);
+        }
+        .mot-card:hover {
+            transform: translateY(-8px) scale(1.03);
+            border-color: var(--primary);
+            box-shadow: 0 16px 40px rgba(108,79,246,0.2);
+        }
+        .mot-card:nth-child(3n+1) { border-color: #fca5a5; }
+        .mot-card:nth-child(3n+1):hover { border-color: #ef4444; box-shadow: 0 16px 40px rgba(239,68,68,0.2); }
+        .mot-card:nth-child(3n+2) { border-color: #86efac; }
+        .mot-card:nth-child(3n+2):hover { border-color: #22c55e; box-shadow: 0 16px 40px rgba(34,197,94,0.2); }
+        .mot-card:nth-child(3n+3) { border-color: #93c5fd; }
+        .mot-card:nth-child(3n+3):hover { border-color: #3b82f6; box-shadow: 0 16px 40px rgba(59,130,246,0.2); }
+
+        .mot-image-wrapper {
+            width: 120px;
+            height: 120px;
+            border-radius: 16px;
+            overflow: hidden;
+            margin: 0 auto 1rem;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #f1f5f9;
+        }
+        .mot-image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 14px;
+        }
+        .mot-image-placeholder {
+            font-size: 3.5rem;
+            line-height: 1;
+        }
+        .mot-label {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 0.75rem;
+            letter-spacing: 0.02em;
+        }
+        .btn-audio {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), #a855f7);
+            border: none;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(108,79,246,0.35);
+        }
+        .btn-audio:hover {
+            transform: scale(1.15);
+            box-shadow: 0 8px 25px rgba(108,79,246,0.5);
+        }
+        .btn-audio.playing {
+            background: linear-gradient(135deg, #ff4880, #f43f5e);
+            animation: pulse 1s ease infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 4px 15px rgba(255,72,128,0.4); }
+            50% { box-shadow: 0 8px 30px rgba(255,72,128,0.7); }
+        }
+
+        /* ── Evaluation Section ── */
+        .evaluation-section {
+            background: linear-gradient(135deg, var(--primary) 0%, #a855f7 100%);
+            border-radius: 28px;
+            padding: 2.5rem;
+            text-align: center;
+            margin-top: 2rem;
+        }
+        .evaluation-section h3 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.8rem;
+            color: white;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+        .evaluation-section p {
+            color: rgba(255,255,255,0.85);
+            margin-bottom: 1.5rem;
+        }
+        .btn-quiz {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            color: var(--primary);
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-size: 1.15rem;
+            font-weight: 800;
+            font-family: 'Fredoka', sans-serif;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .btn-quiz:hover {
+            transform: translateY(-4px) scale(1.04);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.2);
+            color: var(--primary);
+        }
+
+        /* ── Back button ── */
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.3);
+            margin-bottom: 1.5rem;
+        }
+        .btn-back:hover {
+            background: rgba(255,255,255,0.3);
+            color: white;
+            transform: translateX(-4px);
+        }
+
+        /* ── No mots placeholder ── */
+        .no-mots {
+            text-align: center;
+            padding: 3rem;
+            color: #94a3b8;
+        }
+        .no-mots .icon { font-size: 3rem; margin-bottom: 1rem; }
+    </style>
+{% endblock %}
+
+{% block body %}
+
+    {# Parse mots and imagesMots #}
+    {% set motsArray = cours.mots ? cours.mots|split(';') : [] %}
+    {% set imagesMotsMap = {} %}
+    {% if cours.imagesMots %}
+        {% for entry in cours.imagesMots|split(';') %}
+            {% set parts = entry|split(':') %}
+            {% if parts|length >= 2 %}
+                {% set imagesMotsMap = imagesMotsMap|merge({(parts[0]|trim): parts[1]|split(',')}) %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    <!-- Hero Section -->
+    <div class="cours-hero">
+        <div class="container position-relative" style="z-index: 5;">
+            <a href="{{ path('app_cours') }}" class="btn-back">
+                ← Retour aux cours
+            </a>
+            <div class="row align-items-center">
+                <div class="col-lg-7">
+                    <span class="hero-badge">{{ cours.typeCours }}</span>
+                    <h1>{{ cours.titre }}</h1>
+                    <div class="hero-stats">
+                        <span class="hero-stat">📊 {{ cours.niveau }}</span>
+                        <span class="hero-stat">⏱ {{ cours.duree }} min</span>
+                        {% if motsArray|length > 0 %}
+                            <span class="hero-stat">🔤 {{ motsArray|length }} mots</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-lg-5 mt-4 mt-lg-0">
+                    {% if cours.image %}
+                        <div class="cours-hero-image">
+                            <img src="/uploads/images/{{ cours.image }}" alt="{{ cours.titre }}">
+                        </div>
+                    {% else %}
+                        {% set emojis = {'Académique': '📚', 'Social': '🤝', 'Motricité': '🏃', 'Langage': '💬'} %}
+                        <div class="cours-hero-emoji">
+                            {{ emojis[cours.typeCours] ?? '🎓' }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container pb-5">
+        <div class="content-card">
+
+            <!-- Description -->
+            <div class="mb-4">
+                <h2 class="section-title">
+                    <span class="section-icon">📝</span> Description du cours
+                </h2>
+                <div class="description-box">
+                    {{ cours.description }}
+                </div>
+            </div>
+
+            <!-- Mots à apprendre -->
+            {% if motsArray|length > 0 %}
+            <div class="mb-2">
+                <h2 class="section-title">
+                    <span class="section-icon">🔤</span> Mots à apprendre
+                </h2>
+                <div class="mots-grid">
+                    {% for mot in motsArray %}
+                        {% set mot = mot|trim %}
+                        {% set motImages = imagesMotsMap[mot] ?? [] %}
+                        <div class="mot-card" data-mot="{{ mot }}">
+                            <div class="mot-image-wrapper">
+                                {% if motImages|length > 0 %}
+                                    <img src="/uploads/images/{{ motImages[0]|trim }}"
+                                         alt="{{ mot }}"
+                                         onerror="this.parentElement.innerHTML='<span class=\'mot-image-placeholder\'>🖼️</span>'">
+                                {% else %}
+                                    <span class="mot-image-placeholder">🖼️</span>
+                                {% endif %}
+                            </div>
+                            <div class="mot-label">{{ mot }}</div>
+                            <button class="btn-audio" onclick="speakMot('{{ mot }}')" title="Écouter">
+                                <i class="fas fa-volume-up"></i>
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Evaluation -->
+            <div class="evaluation-section">
+                <h3>🎯 Évaluation du cours</h3>
+                <p>Testez vos connaissances avec notre quiz interactif !</p>
+                <a href="#" class="btn-quiz">
+                    <i class="fas fa-graduation-cap"></i> Passer le quiz
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        let currentUtterance = null;
+        let currentBtn = null;
+
+        function speakMot(mot) {
+            const btn = event.currentTarget;
+
+            // Stop if already speaking this word
+            if (currentUtterance && currentBtn === btn) {
+                window.speechSynthesis.cancel();
+                btn.classList.remove('playing');
+                btn.innerHTML = '<i class="fas fa-volume-up"></i>';
+                currentUtterance = null;
+                currentBtn = null;
+                return;
+            }
+
+            // Stop previous
+            if (currentUtterance) {
+                window.speechSynthesis.cancel();
+                if (currentBtn) {
+                    currentBtn.classList.remove('playing');
+                    currentBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+                }
+            }
+
+            const utterance = new SpeechSynthesisUtterance(mot);
+            utterance.lang = 'fr-FR';
+            utterance.rate = 0.8;
+            utterance.pitch = 1.1;
+
+            utterance.onstart = () => {
+                btn.classList.add('playing');
+                btn.innerHTML = '<i class="fas fa-stop"></i>';
+                currentBtn = btn;
+            };
+            utterance.onend = () => {
+                btn.classList.remove('playing');
+                btn.innerHTML = '<i class="fas fa-volume-up"></i>';
+                currentUtterance = null;
+                currentBtn = null;
+            };
+            utterance.onerror = () => {
+                btn.classList.remove('playing');
+                btn.innerHTML = '<i class="fas fa-volume-up"></i>';
+                currentUtterance = null;
+                currentBtn = null;
+            };
+
+            currentUtterance = utterance;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Card click also triggers audio
+        document.querySelectorAll('.mot-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                if (!e.target.closest('.btn-audio')) {
+                    const btn = this.querySelector('.btn-audio');
+                    if (btn) btn.click();
+                }
+            });
+        });
+    </script>
+{% endblock %}
