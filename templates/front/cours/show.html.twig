@@ -211,25 +211,101 @@
             border-color: rgba(155,107,255,0.25);
         }
 
-        .mot-icon-design {
-            width: 100px;
-            height: 100px;
-            margin: 0 auto 1rem auto;
+        /* ── Carousel image mot ── */
+        .mot-carousel {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 18px;
+            overflow: hidden;
             background: linear-gradient(135deg, #f5e8ff, #ffe8f4);
-            border-radius: 50%;
+            margin-bottom: 1rem;
+        }
+        .mot-carousel-track {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+        }
+        .mot-carousel-slide {
+            flex: 0 0 100%;
+            width: 100%;
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
         }
-        .mot-icon-design img {
+        .mot-carousel-slide img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            cursor: zoom-in;
+            border-radius: 18px;
         }
-        .mot-icon-emoji {
-            font-size: 3.5rem;
+        .mot-carousel-emoji {
+            font-size: 4.5rem;
         }
+        .mot-carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(6px);
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: #7c3aed;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.14);
+            transition: background 0.2s, transform 0.2s;
+            z-index: 3;
+        }
+        .mot-carousel-btn:hover { background: #fff; transform: translateY(-50%) scale(1.1); }
+        .mot-carousel-btn.prev { left: 8px; }
+        .mot-carousel-btn.next { right: 8px; }
+        .mot-carousel-dots {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 5px;
+            z-index: 3;
+        }
+        .mot-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            border: 1.5px solid rgba(255,255,255,0.8);
+            transition: background 0.2s, transform 0.2s;
+            cursor: pointer;
+        }
+        .mot-dot.active {
+            background: #fff;
+            transform: scale(1.3);
+        }
+        .mot-img-count {
+            position: absolute;
+            top: 9px;
+            right: 9px;
+            background: rgba(124,58,237,0.85);
+            color: #fff;
+            font-family: 'Baloo 2', cursive;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 2px 9px;
+            border-radius: 20px;
+            z-index: 3;
+            backdrop-filter: blur(4px);
+        }
+
         .mot-item-design h3 {
             font-family: 'Baloo 2', cursive;
             font-size: 1.5rem;
@@ -240,7 +316,8 @@
         .mot-item-design p {
             font-size: 0.85rem;
             color: #888;
-            margin-top: 0.5rem;
+            margin-top: 0.25rem;
+            margin-bottom: 0;
         }
 
         /* Section évaluation */
@@ -324,7 +401,8 @@
         }
         .sidebar-card-title {
             font-family: 'Baloo 2', cursive;
-            font-size: 0.95rem; font-weight: 800;
+            font-size: 0.95rem;
+            font-weight: 800;
             color: var(--dark);
             margin-bottom: 1rem;
             display: flex;
@@ -332,23 +410,39 @@
             gap: 7px;
         }
         .sidebar-stat-row {
-            display: flex; justify-content: space-between; align-items: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             padding: 9px 0;
             border-bottom: 1.5px dashed #F0F0F0;
         }
-        .sidebar-stat-row:last-child { border-bottom: none; padding-bottom: 0; }
+        .sidebar-stat-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
         .sidebar-stat-label {
-            font-size: 0.82rem; font-weight: 700; color: #888;
-            display: flex; align-items: center; gap: 6px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #888;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
         .sidebar-stat-value {
             font-family: 'Baloo 2', cursive;
-            font-size: 0.95rem; font-weight: 800; color: var(--dark);
-            display: flex; align-items: center; gap: 5px;
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
         .niveau-dot {
-            width: 10px; height: 10px; border-radius: 50%; display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
         }
         .dot-Débutant      { background: #6BCB77; }
         .dot-Intermédiaire { background: #FFD93D; }
@@ -358,13 +452,6 @@
             .mots-grid-design {
                 grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
                 gap: 20px;
-            }
-            .mot-icon-design {
-                width: 80px;
-                height: 80px;
-            }
-            .mot-icon-emoji {
-                font-size: 2.8rem;
             }
             .mot-item-design h3 {
                 font-size: 1.2rem;
@@ -387,9 +474,8 @@
 
     {% set emojis  = {'Académique': '📚', 'Social': '🤝', 'Motricité': '🏃', 'Langage': '💬'} %}
     {% set emoji   = emojis[cours.typeCours] ?? '🎓' %}
-    {% set motsList = cours.mots ? cours.mots|split(';')|filter(v => v|trim != '') : [] %}
-    {% set motsCount = motsList|length %}
     {% set typeClass = 'type-' ~ cours.typeCours %}
+    {% set motsCount = cours.getMotsCount() %}
 
     <!-- HERO -->
     <div class="course-hero">
@@ -456,41 +542,63 @@
                     </h2>
                 </div>
 
+                {% set wordEmojis = ['🐶', '🦁', '🦒', '🐘', '🐒', '🦓', '🐪', '🐅', '🐳', '🐋'] %}
+
                 <!-- Grille des mots avec images associées -->
                 <div class="mots-grid-design">
-                    {% for mot in motsList %}
-                        {% set mot = mot|trim %}
+                    {% for entry in motsWithImages %}
+                        {% set mot = entry.nom|trim %}
                         {% if mot %}
-                            {# Récupérer l'image associée au mot depuis la base de données #}
-                            {% set imageForMot = null %}
-                            {% if cours.imagesMots and cours.imagesMots != '' %}
-                                {% set items = cours.imagesMots|split(';') %}
-                                {% for item in items %}
-                                    {% if item and ':' in item %}
-                                        {% set parts = item|split(':', 2) %}
-                                        {% set motFromDb = parts[0]|trim %}
-                                        {% if motFromDb == mot %}
-                                            {% set imagesList = parts[1]|split(',') %}
-                                            {% set imageForMot = imagesList[0]|trim %}
-                                        {% endif %}
-                                    {% endif %}
-                                {% endfor %}
-                            {% endif %}
-                            
-                            {% set wordEmojis = ['🐶', '🦁', '🦒', '🐘', '🐒', '🦓', '🐪', '🐅', '🐘', '🐋'] %}
+                            {% set images = entry.toutes_images %}
+                            {% set imgCount = images|length %}
 
                             <div class="mot-item-design">
-                                <div class="mot-icon-design">
-                                    {% if imageForMot is not null and imageForMot != '' %}
-                                        <img src="/uploads/images/{{ imageForMot }}" alt="{{ mot }}" class="lightbox-trigger" data-src="/uploads/images/{{ imageForMot }}">
-                                    {% else %}
-                                        <span class="mot-icon-emoji">
-                                            {{ wordEmojis[loop.index0 % wordEmojis|length] }}
-                                        </span>
+
+                                {# ── Carousel ── #}
+                                <div class="mot-carousel" data-index="{{ loop.index0 }}">
+
+                                    {% if imgCount > 1 %}
+                                        <span class="mot-img-count">{{ imgCount }} 🖼</span>
                                     {% endif %}
+
+                                    <div class="mot-carousel-track">
+                                        {% if imgCount > 0 %}
+                                            {% for img in images %}
+                                                <div class="mot-carousel-slide">
+                                                    <img src="/uploads/images/{{ img|trim }}"
+                                                         alt="{{ mot }}"
+                                                         class="lightbox-trigger"
+                                                         data-src="/uploads/images/{{ img|trim }}">
+                                                </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <div class="mot-carousel-slide">
+                                                <span class="mot-carousel-emoji">
+                                                    {{ wordEmojis[loop.index0 % wordEmojis|length] }}
+                                                </span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    {% if imgCount > 1 %}
+                                        <button class="mot-carousel-btn prev" aria-label="Précédent">‹</button>
+                                        <button class="mot-carousel-btn next" aria-label="Suivant">›</button>
+                                        <div class="mot-carousel-dots">
+                                            {% for i in 0..(imgCount - 1) %}
+                                                <span class="mot-dot {{ i == 0 ? 'active' : '' }}" data-slide="{{ i }}"></span>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+
                                 </div>
-                                <h3>{{ mot|capitalize }}</h3>
-                                <p>Icone de {{ mot|lower }}</p>
+
+                                <h3>{{ mot|upper }}</h3>
+                                {% if imgCount > 0 %}
+                                    <p>{{ imgCount }} image{{ imgCount > 1 ? 's' : '' }}</p>
+                                {% else %}
+                                    <p>Aucune image</p>
+                                {% endif %}
+
                             </div>
                         {% endif %}
                     {% endfor %}
@@ -549,8 +657,8 @@
                     <div class="sidebar-card">
                         <div class="sidebar-card-title">🗂️ Liste des mots</div>
                         <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                            {% for mot in motsList %}
-                                {% set mot = mot|trim %}
+                            {% for entry in motsWithImages %}
+                                {% set mot = entry.nom|trim %}
                                 {% if mot %}
                                 <span style="
                                     background: linear-gradient(135deg,#fce7f3,#ede9fe);
@@ -637,9 +745,10 @@
     </style>
     <script>
     (function() {
-        // Lightbox
+
+        /* ══ LIGHTBOX ══ */
         const overlay = document.getElementById('lightbox');
-        const lbImg = document.getElementById('lbImg');
+        const lbImg   = document.getElementById('lbImg');
         const lbClose = document.getElementById('lbClose');
 
         function initLightbox() {
@@ -649,20 +758,51 @@
                 img.addEventListener('click', lightboxHandler);
             });
         }
-
         function lightboxHandler(e) {
             e.stopPropagation();
             lbImg.src = this.dataset.src || this.src;
             overlay.classList.add('open');
         }
-
-        if (lbClose) {
-            lbClose.addEventListener('click', () => overlay.classList.remove('open'));
-        }
-        if (overlay) {
-            overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
-        }
+        if (lbClose) lbClose.addEventListener('click', () => overlay.classList.remove('open'));
+        if (overlay) overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
         document.addEventListener('keydown', e => { if (e.key === 'Escape' && overlay) overlay.classList.remove('open'); });
+
+        /* ══ CAROUSEL ══ */
+        document.querySelectorAll('.mot-carousel').forEach(carousel => {
+            const track  = carousel.querySelector('.mot-carousel-track');
+            const slides = carousel.querySelectorAll('.mot-carousel-slide');
+            const dots   = carousel.querySelectorAll('.mot-dot');
+            const prevBtn = carousel.querySelector('.mot-carousel-btn.prev');
+            const nextBtn = carousel.querySelector('.mot-carousel-btn.next');
+
+            if (slides.length <= 1) return;
+
+            let current = 0;
+
+            function goTo(idx) {
+                current = (idx + slides.length) % slides.length;
+                track.style.transform = `translateX(-${current * 100}%)`;
+                if (dots.length) dots.forEach((d, i) => d.classList.toggle('active', i === current));
+            }
+
+            if (prevBtn) prevBtn.addEventListener('click', e => { e.stopPropagation(); goTo(current - 1); });
+            if (nextBtn) nextBtn.addEventListener('click', e => { e.stopPropagation(); goTo(current + 1); });
+
+            dots.forEach(dot => {
+                dot.addEventListener('click', e => {
+                    e.stopPropagation();
+                    goTo(parseInt(dot.dataset.slide));
+                });
+            });
+
+            // Swipe tactile
+            let startX = 0;
+            carousel.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
+            carousel.addEventListener('touchend', e => {
+                const diff = startX - e.changedTouches[0].clientX;
+                if (Math.abs(diff) > 40) goTo(diff > 0 ? current + 1 : current - 1);
+            });
+        });
 
         initLightbox();
     })();

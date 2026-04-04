@@ -11,10 +11,6 @@
 :root {
     --pastel-sky:         #dbeafe;
     --pastel-sky-b:       #9fc8f7;
-    --pastel-mint:        #d1fae5;
-    --pastel-mint-b:      #ccf6e5;
-    --pastel-peach:       #ffe4cc;
-    --pastel-peach-b:     #f1d2b0;
     --pastel-lavender:    #ede9fe;
     --pastel-lavender-b:  #c4b5fd;
     --pastel-rose:        #fce7f3;
@@ -57,20 +53,20 @@
 .fs-blue  .form-section-title { color:#1d4ed8; }
 .fs-blue  .section-icon       { background:#bfdbfe; color:#1d4ed8; }
 
-/* Vert – Niveau & Durée */
-.fs-mint  { background:var(--pastel-mint);     border-color:var(--pastel-mint-b);     }
-.fs-mint  .form-section-title { color:#065f46; }
-.fs-mint  .section-icon       { background:#a7f3d0; color:#065f46; }
+/* Lavande – Niveau & Durée */
+.fs-lavender-niveau { background:var(--pastel-lavender); border-color:var(--pastel-lavender-b); }
+.fs-lavender-niveau .form-section-title { color:#5b21b6; }
+.fs-lavender-niveau .section-icon { background:#ddd6fe; color:#6d28d9; }
 
-/* Pêche – Image */
-.fs-peach { background:var(--pastel-peach);    border-color:var(--pastel-peach-b);    }
-.fs-peach .form-section-title { color:#9a3412; }
-.fs-peach .section-icon       { background:#fed7aa; color:#c2410c; }
+/* Rose – Image */
+.fs-rose-image { background:var(--pastel-rose); border-color:var(--pastel-rose-b); }
+.fs-rose-image .form-section-title { color:#9d174d; }
+.fs-rose-image .section-icon { background:var(--pastel-rose); color:#be185d; }
 
 /* Lavande – Description */
 .fs-lavender { background:var(--pastel-lavender); border-color:var(--pastel-lavender-b); }
 .fs-lavender .form-section-title { color:#5b21b6; }
-.fs-lavender .section-icon       { background:#ddd6fe; color:#6d28d9; }
+.fs-lavender .section-icon { background:#ddd6fe; color:#6d28d9; }
 
 /* Rose – Mots & Images */
 .fs-rose  { background:var(--pastel-rose);     border-color:var(--pastel-rose-b);     }
@@ -95,8 +91,8 @@
 /* Badge mode */
 .form-mode-badge {
     font-size:.72rem; font-weight:600; padding:4px 12px;
-    border-radius:20px; background:var(--pastel-yellow);
-    color:#92400e; border:1px solid var(--pastel-yellow-b);
+    border-radius:20px; background:var(--pastel-lavender);
+    color:#5b21b6; border:1px solid var(--pastel-lavender-b);
 }
 
 /* ── Carte mot ── */
@@ -123,16 +119,16 @@
 
 /* ── Bouton ajouter mot ── */
 .btn-add-word {
-    background:linear-gradient(135deg,var(--pastel-mint),var(--pastel-sky));
-    color:#065f46; border:1.5px dashed var(--pastel-mint-b);
+    background:linear-gradient(135deg,var(--pastel-lavender),var(--pastel-sky));
+    color:#5b21b6; border:1.5px dashed var(--pastel-lavender-b);
     border-radius:14px; padding:.75rem; text-align:center;
     cursor:pointer; transition:all 0.2s; width:100%;
     font-weight:600; font-size:.85rem;
 }
 .btn-add-word:hover {
-    background:linear-gradient(135deg,#a7f3d0,#bfdbfe);
-    border-color:#6ee7b7; transform:translateY(-1px);
-    box-shadow:0 4px 12px rgba(110,231,183,.2);
+    background:linear-gradient(135deg,#c4b5fd,#bfdbfe);
+    border-color:#a78bfa; transform:translateY(-1px);
+    box-shadow:0 4px 12px rgba(167,139,250,.2);
 }
 
 /* ── Bouton sauvegarder ── */
@@ -150,12 +146,12 @@
 
 /* ── Bouton annuler ── */
 .btn-cancel-cours {
-    background:var(--pastel-peach); color:#9a3412;
-    border:1.5px solid var(--pastel-peach-b); border-radius:14px;
+    background:var(--pastel-rose); color:#9d174d;
+    border:1.5px solid var(--pastel-rose-b); border-radius:14px;
     padding:.65rem 1.4rem; font-weight:600; font-size:.9rem;
     cursor:pointer; transition:all 0.2s;
 }
-.btn-cancel-cours:hover { background:#fed7aa; transform:translateY(-1px); }
+.btn-cancel-cours:hover { background:#fce7f3; transform:translateY(-1px); }
 
 /* ── Bouton danger ── */
 .btn-danger-soft {
@@ -188,11 +184,11 @@
     border-radius:12px; border:2px solid var(--pastel-lavender-b);
 }
 
-/* Info-box pastel */
+/* Info-box pastel - Changé de jaune à lavande */
 .info-box-pastel {
-    background:var(--pastel-yellow); border:1.5px solid var(--pastel-yellow-b);
+    background:var(--pastel-lavender); border:1.5px solid var(--pastel-lavender-b);
     border-radius:12px; padding:.65rem 1rem;
-    font-size:.82rem; color:#78350f;
+    font-size:.82rem; color:#5b21b6;
     display:flex; align-items:center; gap:.6rem; margin-bottom:1rem;
 }
 
@@ -210,15 +206,15 @@
     display:flex; align-items:center; justify-content:center;
     font-size:1.3rem; flex-shrink:0;
 }
-.niveau-icon.debutant      { background:var(--pastel-mint);    color:#059669; }
-.niveau-icon.intermediaire { background:var(--pastel-sky);     color:#1d4ed8; }
+.niveau-icon.debutant      { background:var(--pastel-sky);    color:#1d4ed8; }
+.niveau-icon.intermediaire { background:var(--pastel-lavender); color:#5b21b6; }
 .niveau-icon.avance        { background:var(--pastel-rose);    color:#be185d; }
 .niveau-info { flex:1; min-width:0; }
 .niveau-label { font-size:.85rem; font-weight:700; color:#334155; margin-bottom:4px; }
 .niveau-bar-wrap { height:10px; background:#f1f5f9; border-radius:99px; overflow:hidden; }
 .niveau-bar-fill { height:100%; border-radius:99px; transition:width .8s cubic-bezier(.4,0,.2,1); }
-.niveau-bar-fill.debutant      { background:linear-gradient(90deg,#6ee7b7,#34d399); }
-.niveau-bar-fill.intermediaire { background:linear-gradient(90deg,#93c5fd,#60a5fa); }
+.niveau-bar-fill.debutant      { background:linear-gradient(90deg,#93c5fd,#60a5fa); }
+.niveau-bar-fill.intermediaire { background:linear-gradient(90deg,#c4b5fd,#a78bfa); }
 .niveau-bar-fill.avance        { background:linear-gradient(90deg,#f9a8d4,#f472b6); }
 .niveau-count { font-size:1.4rem; font-weight:800; color:#1e293b; min-width:32px; text-align:right; flex-shrink:0; }
 .niveau-pct   { font-size:.7rem; color:#94a3b8; text-align:right; margin-top:2px; }
@@ -236,16 +232,16 @@
     border-radius:20px; font-size:.72rem; font-weight:600;
 }
 .badge-type.academique { background:var(--pastel-sky);      color:#1d4ed8; }
-.badge-type.social     { background:var(--pastel-mint);     color:#065f46; }
-.badge-type.motricite  { background:var(--pastel-peach);    color:#9a3412; }
+.badge-type.social     { background:var(--pastel-lavender); color:#5b21b6; }
+.badge-type.motricite  { background:var(--pastel-rose);    color:#9d174d; }
 .badge-type.langage    { background:var(--pastel-lavender); color:#5b21b6; }
 
 .badge-niveau {
     display:inline-block; padding:3px 10px;
     border-radius:20px; font-size:.72rem; font-weight:600;
 }
-.badge-niveau.debutant      { background:var(--pastel-mint);  color:#065f46; }
-.badge-niveau.intermediaire { background:var(--pastel-sky);   color:#1d4ed8; }
+.badge-niveau.debutant      { background:var(--pastel-sky);   color:#1d4ed8; }
+.badge-niveau.intermediaire { background:var(--pastel-lavender); color:#5b21b6; }
 .badge-niveau.avance        { background:var(--pastel-rose);  color:#9d174d; }
 
 /* Bouton modifier tableau */
@@ -281,13 +277,13 @@
         </div>
     </div>
     <div class="col-4">
-        <div class="stat-card" style="background:var(--pastel-mint); border:1.5px solid var(--pastel-mint-b);">
+        <div class="stat-card" style="background:var(--pastel-lavender); border:1.5px solid var(--pastel-lavender-b);">
             <div class="stat-top">
                 <div>
-                    <div class="stat-label" style="color:#065f46;">Publiés</div>
-                    <div class="stat-value" style="color:#064e3b;">{{ publishedCount|default(cours_list|length) }}</div>
+                    <div class="stat-label" style="color:#5b21b6;">Publiés</div>
+                    <div class="stat-value" style="color:#4c1d95;">{{ publishedCount|default(cours_list|length) }}</div>
                 </div>
-                <div class="stat-icon" style="background:#a7f3d0; color:#065f46;"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-icon" style="background:#ddd6fe; color:#5b21b6;"><i class="fas fa-check-circle"></i></div>
             </div>
             <div class="stat-change up"><i class="fas fa-arrow-up"></i> actifs</div>
         </div>
@@ -349,7 +345,7 @@
                     </div>
 
                     {# ── Section 2 : Niveau & Durée ── #}
-                    <div class="form-section fs-mint">
+                    <div class="form-section fs-lavender-niveau">
                         <div class="form-section-title">
                             <span class="section-icon"><i class="fas fa-sliders-h"></i></span>
                             Niveau &amp; Durée
@@ -373,7 +369,7 @@
                     </div>
 
                     {# ── Section 3 : Image ── #}
-                    <div class="form-section fs-peach">
+                    <div class="form-section fs-rose-image">
                         <div class="form-section-title">
                             <span class="section-icon"><i class="fas fa-image"></i></span>
                             Image du cours
@@ -383,18 +379,18 @@
                                 <label class="form-label">🖼️ Choisir une image</label>
                                 <input type="file" class="form-control" name="image_file" id="courseImage"
                                        accept="image/*"
-                                       style="background:var(--pastel-peach); border-color:var(--pastel-peach-b);">
-                                <small style="color:#9a3412; font-size:.75rem; margin-top:4px; display:block;">
-                                    
+                                       style="background:var(--pastel-rose); border-color:var(--pastel-rose-b);">
+                                <small style="color:#9d174d; font-size:.75rem; margin-top:4px; display:block;">
+                                    Format recommandé : JPG ou PNG
                                 </small>
                             </div>
                             <div class="col-md-4 text-center">
                                 <div id="currentImagePreview" style="display:none;">
                                     <img id="currentImage" src=""
                                          style="max-width:90px; border-radius:14px;
-                                                border:2px solid var(--pastel-peach-b);
+                                                border:2px solid var(--pastel-rose-b);
                                                 box-shadow:0 2px 8px rgba(0,0,0,.08);">
-                                    <div style="font-size:.7rem; color:#9a3412; margin-top:4px;">Image actuelle</div>
+                                    <div style="font-size:.7rem; color:#9d174d; margin-top:4px;">Image actuelle</div>
                                 </div>
                             </div>
                         </div>
@@ -432,15 +428,13 @@
                                         <label class="form-label">🔤 Mot *</label>
                                         <input type="text" class="form-control word-input" name="mots[]"
                                                placeholder="Ex: CHEVAL" required
-                                               style="background:#fff8fb; border-color:#f9a8d4;
-                                                      text-transform:uppercase; font-weight:600; letter-spacing:.04em;">
+                                               style="background:#fff8fb; border-color:#f9a8d4;">
                                     </div>
                                     <div class="col-md-5">
                                         <label class="form-label">📷 Images du mot</label>
                                         <input type="file" class="form-control images-file" name="images_files_0[]"
                                                accept="image/*" multiple
                                                style="background:#fff8fb; border-color:#f9a8d4;">
-                                        
                                     </div>
                                     <div class="col-md-2">
                                         <button type="button" class="btn-danger-soft remove-mot"
@@ -542,7 +536,7 @@
                             </span>
                         </td>
                         <td>
-                            <span style="background:var(--pastel-peach); color:#9a3412;
+                            <span style="background:var(--pastel-rose); color:#9d174d;
                                          padding:2px 9px; border-radius:10px; font-size:.75rem; font-weight:600;">
                                 {{ item.imagesMots ? item.imagesMots|split(';')|length : 0 }}
                             </span>
@@ -576,14 +570,14 @@
 {% set nbAvance        = cours_list|default([])|filter(c => c.niveau == 'Avancé')|length %}
 {% set nbTotal         = nbDebutant + nbIntermediaire + nbAvance %}
 
-<div class="card-box mb-4" style="border-radius:20px; border:1.5px solid var(--pastel-mint-b);">
+<div class="card-box mb-4" style="border-radius:20px; border:1.5px solid var(--pastel-lavender-b);">
     <div class="card-box-header"
-         style="background:var(--pastel-mint); border-radius:18px 18px 0 0;
-                border-bottom:1.5px solid var(--pastel-mint-b);">
-        <span class="card-box-title" style="color:#065f46;">
-            <i class="fas fa-layer-group" style="color:#34d399;"></i> Répartition par niveau
+         style="background:var(--pastel-lavender); border-radius:18px 18px 0 0;
+                border-bottom:1.5px solid var(--pastel-lavender-b);">
+        <span class="card-box-title" style="color:#5b21b6;">
+            <i class="fas fa-layer-group" style="color:#a78bfa;"></i> Répartition par niveau
         </span>
-        <span style="font-size:.78rem; color:#047857; font-weight:600;">{{ nbTotal }} cours au total</span>
+        <span style="font-size:.78rem; color:#6d28d9; font-weight:600;">{{ nbTotal }} cours au total</span>
     </div>
     <div class="card-box-body">
         <div class="niveau-section">
@@ -630,7 +624,6 @@
                 </div>
             </div>
         </div>
-        
     </div>
 </div>
 
@@ -686,12 +679,15 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    function displayExistingImages(container, images) {
+    function displayExistingImages(container, images, idx) {
         container.innerHTML = '';
         images.forEach(image => {
             const div = document.createElement('div');
             div.className = 'existing-image';
-            div.innerHTML = `<img src="/uploads/images/${image}" alt="Image du mot"><span class="remove-existing">×</span>`;
+            div.innerHTML = `
+                <input type="hidden" name="existing_images_${idx}[]" value="${image}">
+                <img src="/uploads/images/${image}" alt="Image du mot">
+                <span class="remove-existing">×</span>`;
             div.querySelector('.remove-existing').onclick = () => div.remove();
             container.appendChild(div);
         });
@@ -707,10 +703,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function updateMotNumbers() {
         document.querySelectorAll('.mot-image-card').forEach((card, idx) => {
+            card.setAttribute('data-index', idx);
             const n = card.querySelector('.mot-number');
             if (n) n.textContent = idx + 1;
             const fi = card.querySelector('.images-file');
-            if (fi) fi.setAttribute('name', fi.getAttribute('name').replace(/images_files_\d+/, `images_files_${idx}`));
+            if (fi) fi.name = `images_files_${idx}[]`;
+            card.querySelectorAll('input[type="hidden"][name^="existing_images_"]').forEach(h => {
+                h.name = `existing_images_${idx}[]`;
+            });
             const rb = card.querySelector('.remove-mot');
             if (rb) rb.style.display = idx === 0 ? 'none' : 'inline-flex';
         });
@@ -739,7 +739,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <input type="text" class="form-control word-input" name="mots[]"
                            value="${(motVal || '').replace(/"/g,'&quot;')}"
                            placeholder="Ex: CHEVAL" required
-                           style="background:#fff8fb; border-color:#f9a8d4; text-transform:uppercase; font-weight:600; letter-spacing:.04em;">
+                           style="background:#fff8fb; border-color:#f9a8d4;">
                 </div>
                 <div class="col-md-5">
                     <label class="form-label">📷 Images du mot</label>
@@ -759,7 +759,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     <div class="new-images-list"></div>
                 </div>
             </div>`;
-        if (imgs && imgs.length) displayExistingImages(card.querySelector('.existing-images-list'), imgs);
+        if (imgs && imgs.length) displayExistingImages(card.querySelector('.existing-images-list'), imgs, idx);
         attachImagePreview(card.querySelector('.images-file'), card.querySelector('.new-images-list'));
         return card;
     }
@@ -820,14 +820,19 @@ document.addEventListener('DOMContentLoaded', function () {
                 const motImagesMap = {};
                 if (data.imagesMots) {
                     data.imagesMots.split(';').forEach(item => {
-                        const [k, v] = item.split(':');
-                        if (k && v) motImagesMap[k.trim()] = v.split(',');
+                        if (item.indexOf(':') !== -1) {
+                            const colonnePos = item.indexOf(':');
+                            const k = item.substring(0, colonnePos).trim();
+                            const v = item.substring(colonnePos + 1);
+                            if (k && v) motImagesMap[k] = v.split(',');
+                        }
                     });
                 }
                 const container = document.getElementById('motsImagesContainer');
                 container.innerHTML = '';
                 mots.forEach((mot, idx) => {
-                    container.appendChild(makeMotCard(idx, mot.trim(), motImagesMap[mot.trim()] || []));
+                    const motTrim = mot.trim();
+                    container.appendChild(makeMotCard(idx, motTrim, motImagesMap[motTrim] || []));
                 });
                 motIndex = mots.length;
                 updateMotNumbers();

@@ -23,9 +23,6 @@ class CoursController extends AbstractController
     // ROUTES PUBLIQUES (Front-end)
     // ─────────────────────────────────────────────────────────────────
 
-    /**
-     * Liste tous les cours (front)
-     */
     #[Route('/cours', name: 'app_cours')]
     public function index(CoursRepository $coursRepository): Response
     {
@@ -36,36 +33,34 @@ class CoursController extends AbstractController
         ]);
     }
 
-    /**
-     * Affiche le détail d'un cours avec ses mots et images (front)
-     */
     #[Route('/cours/{id}', name: 'app_cours_show', requirements: ['id' => '\d+'])]
     public function show(Cours $cours): Response
     {
-        // Préparer les données pour le template
-        $motsList = $cours->getMotsArray();
+        $motsList    = $cours->getMotsArray();
         $imagesByMot = $cours->getImagesByMot();
-        
-        // Construire un tableau complet pour chaque mot avec son image
+
         $motsWithImages = [];
         foreach ($motsList as $mot) {
+            $mot = strtoupper(trim($mot));
+            if ($mot === '') continue;
+            $toutesImages = array_values($imagesByMot[$mot] ?? []);
             $motsWithImages[] = [
-                'nom' => $mot,
-                'image' => $imagesByMot[$mot][0] ?? null, // Première image associée au mot
-                'toutes_images' => $imagesByMot[$mot] ?? [],
+                'nom'           => $mot,
+                'image'         => $toutesImages[0] ?? null,
+                'toutes_images' => $toutesImages,
             ];
         }
-        
+
         return $this->render('front/cours/show.html.twig', [
-            'cours' => $cours,
-            'motsList' => $motsList,
-            'motsCount' => $cours->getMotsCount(),
+            'cours'          => $cours,
+            'motsList'       => $motsList,
+            'motsCount'      => $cours->getMotsCount(),
             'motsWithImages' => $motsWithImages,
         ]);
     }
 
     // ─────────────────────────────────────────────────────────────────
-    // ROUTES ADMIN (reste identique)
+    // ROUTES ADMIN
     // ─────────────────────────────────────────────────────────────────
 
     #[Route('/admin/cours', name: 'admin_cours_list')]
@@ -76,16 +71,16 @@ class CoursController extends AbstractController
         $totalMots = 0;
         foreach ($cours as $c) {
             if ($c->getMots()) {
-                $totalMots += count(explode(';', $c->getMots()));
+                $totalMots += count(array_filter(explode(';', $c->getMots())));
             }
         }
 
         return $this->render('admin/pages/cours.html.twig', [
-            'cours_list'      => $cours,
-            'totalCourses'    => count($cours),
-            'publishedCount'  => count($cours),
-            'draftCount'      => 0,
-            'totalMots'       => $totalMots,
+            'cours_list'     => $cours,
+            'totalCourses'   => count($cours),
+            'publishedCount' => count($cours),
+            'draftCount'     => 0,
+            'totalMots'      => $totalMots,
         ]);
     }
 
@@ -118,30 +113,27 @@ class CoursController extends AbstractController
         $niveau      = $request->request->get('niveau');
         $duree       = $request->request->get('duree');
         $description = $request->request->get('description');
-        $mots        = $request->request->all('mots');
 
         if (empty($titre) || empty($typeCours) || empty($niveau) || empty($duree) || empty($description)) {
             $this->addFlash('error', 'Veuillez remplir tous les champs obligatoires');
             return $this->redirectToRoute('admin_cours_list');
         }
 
-        // Traitement des mots
+        // ── Traitement des mots ──────────────────────────────────────
+        // Le formulaire envoie mots[] (un mot par carte)
+        $mots = $request->request->all('mots');
         $motsArray = [];
         if ($mots && is_array($mots)) {
-            foreach ($mots as $motGroup) {
-                if (!empty($motGroup)) {
-                    if (strpos($motGroup, ';') !== false) {
-                        $splitMots = array_map('trim', explode(';', $motGroup));
-                        $motsArray = array_merge($motsArray, $splitMots);
-                    } else {
-                        $motsArray[] = trim($motGroup);
-                    }
+            foreach ($mots as $mot) {
+                $mot = strtoupper(trim($mot));
+                if (!empty($mot)) {
+                    $motsArray[] = $mot;
                 }
             }
         }
-        $motsString = implode(';', array_filter($motsArray));
+        $motsString = implode(';', $motsArray);
 
-        // Image du cours
+        // ── Image principale du cours ────────────────────────────────
         $imageFile = $request->files->get('image_file');
         if ($imageFile) {
             $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
@@ -155,41 +147,75 @@ class CoursController extends AbstractController
             }
         }
 
-        // Images des mots
-        $imagesMots = [];
-        $imgMots    = $request->request->all('img_mots');
+        // ── Images des mots ──────────────────────────────────────────
+        //
+        // Stratégie :
+        //  1. Charger les images déjà sauvegardées (existantes) depuis la BDD
+        //  2. Pour chaque mot (indexé par sa position dans mots[]) :
+        //     a. Récupérer les images existantes conservées via existing_images_<idx>[]
+        //     b. Uploader les nouveaux fichiers images_files_<idx>[]
+        //     c. Fusionner existantes + nouvelles
+        //  3. Sauvegarder le tout
 
-        if ($imgMots && is_array($imgMots)) {
-            foreach ($imgMots as $index => $mot) {
-                $mot = trim($mot);
-                if (!empty($mot)) {
-                    $files = $request->files->get('images_files_' . $index);
-                    if ($files && is_array($files)) {
-                        $motImages = [];
-                        foreach ($files as $file) {
-                            if ($file instanceof UploadedFile) {
-                                $filename    = $slugger->slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
-                                $newFilename = 'mot_' . $slugger->slug($mot) . '_' . $filename . '-' . uniqid() . '.' . $file->guessExtension();
-                                try {
-                                    $file->move($uploadDir, $newFilename);
-                                    $motImages[] = $newFilename;
-                                } catch (FileException $e) {
-                                    $this->addFlash('error', 'Erreur lors de l\'upload d\'une image pour le mot: ' . $mot);
-                                }
-                            }
-                        }
-                        if (!empty($motImages)) {
-                            $imagesMots[] = $mot . ':' . implode(',', $motImages);
+        // Carte { mot => [fichiers] } des images actuelles en BDD
+        $existingImagesByMot = $cours->getImagesByMot(); // retourne [mot => [img1, img2, ...]]
+
+        $imagesMots = [];
+
+        foreach ($motsArray as $index => $mot) {
+            $mot = strtoupper(trim($mot));
+            if (empty($mot)) {
+                continue;
+            }
+
+            $motImages = [];
+
+            // a) Images existantes conservées (envoyées via champs hidden existing_images_<idx>[])
+            $keptExisting = $request->request->all('existing_images_' . $index);
+            if ($keptExisting && is_array($keptExisting)) {
+                foreach ($keptExisting as $img) {
+                    $img = trim($img);
+                    if (!empty($img)) {
+                        $motImages[] = $img;
+                    }
+                }
+            } else {
+                // Si aucun champ hidden présent, on garde les images associées au même mot en BDD
+                // (compatibilité : cas où le JS n'a pas encore injecté les hidden fields)
+                if (isset($existingImagesByMot[$mot])) {
+                    $motImages = array_merge($motImages, $existingImagesByMot[$mot]);
+                }
+            }
+
+            // b) Nouveaux fichiers uploadés
+            $files = $request->files->get('images_files_' . $index);
+            if ($files && is_array($files)) {
+                foreach ($files as $file) {
+                    if ($file instanceof UploadedFile) {
+                        $filename    = $slugger->slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
+                        $newFilename = 'mot_' . $slugger->slug($mot) . '_' . $filename . '-' . uniqid() . '.' . $file->guessExtension();
+                        try {
+                            $file->move($uploadDir, $newFilename);
+                            $motImages[] = $newFilename;
+                        } catch (FileException $e) {
+                            $this->addFlash('error', 'Erreur lors de l\'upload d\'une image pour le mot : ' . $mot);
                         }
                     }
                 }
             }
+
+            // c) Sauvegarder même si vide (pour conserver la liste des mots)
+            if (!empty($motImages)) {
+                $imagesMots[] = $mot . ':' . implode(',', $motImages);
+            }
+            // Si pas d'images du tout pour ce mot, on n'ajoute pas de ligne
+            // (le mot est quand même sauvegardé dans $motsString)
         }
 
         $cours->setTitre($titre);
         $cours->setTypeCours($typeCours);
         $cours->setNiveau($niveau);
-        $cours->setDuree((int)$duree);
+        $cours->setDuree((int) $duree);
         $cours->setDescription($description);
         $cours->setMots($motsString);
         $cours->setImagesMots(implode(';', $imagesMots));
@@ -232,10 +258,10 @@ class CoursController extends AbstractController
 
             if ($cours->getImagesMots()) {
                 foreach (explode(';', $cours->getImagesMots()) as $imageMot) {
-                    $parts = explode(':', $imageMot);
+                    $parts = explode(':', $imageMot, 2);
                     if (isset($parts[1])) {
                         foreach (explode(',', $parts[1]) as $image) {
-                            $imagePath = $uploadDir . '/' . $image;
+                            $imagePath = $uploadDir . '/' . trim($image);
                             if (file_exists($imagePath)) {
                                 unlink($imagePath);
                             }

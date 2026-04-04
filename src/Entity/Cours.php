@@ -51,7 +51,7 @@ class Cours
         $this->evaluations = new ArrayCollection();
     }
 
-    // Getters et Setters existants...
+    // ========== GETTERS ET SETTERS ==========
 
     public function getIdCours(): ?int
     {
@@ -179,7 +179,7 @@ class Cours
         return $this;
     }
 
-    // ========== NOUVELLES METHODES POUR LES IMAGES DES MOTS ==========
+    // ========== METHODES POUR LES MOTS ET IMAGES ==========
 
     /**
      * Retourne la liste des mots sous forme de tableau
@@ -189,7 +189,7 @@ class Cours
         if (empty($this->mots)) {
             return [];
         }
-        return array_filter(array_map('trim', explode(';', $this->mots)));
+        return array_values(array_filter(array_map(fn($m) => strtoupper(trim($m)), explode(';', $this->mots))));
     }
 
     /**
@@ -202,6 +202,9 @@ class Cours
 
     /**
      * Retourne un tableau associatif [mot => [images]]
+     * Version corrigée qui supporte les deux formats :
+     * - Format normal: "MOT:image1,image2;AUTRE_MOT:image3"
+     * - Format incorrect (ancien): "image1;image2;image3"
      */
     public function getImagesByMot(): array
     {
@@ -212,22 +215,53 @@ class Cours
         }
 
         $items = explode(';', $this->imagesMots);
+        $motsArray = $this->getMotsArray();
         
+        // Vérifier si c'est le nouveau format (avec des ':')
+        $hasNewFormat = false;
         foreach ($items as $item) {
-            if (empty($item) || strpos($item, ':') === false) {
-                continue;
+            if (strpos($item, ':') !== false) {
+                $hasNewFormat = true;
+                break;
             }
-            
-            $parts = explode(':', $item, 2);
-            $mot = trim($parts[0]);
-            $imagesString = trim($parts[1]);
-            
-            if (empty($mot) || empty($imagesString)) {
-                continue;
+        }
+        
+        if ($hasNewFormat) {
+            // Nouveau format: MOT:image1,image2;AUTRE_MOT:image3
+            foreach ($items as $item) {
+                if (empty($item) || strpos($item, ':') === false) {
+                    continue;
+                }
+                
+                $parts = explode(':', $item, 2);
+                $mot = strtoupper(trim($parts[0]));
+                $imagesString = trim($parts[1]);
+                
+                if (empty($mot) || empty($imagesString)) {
+                    continue;
+                }
+                
+                $images = array_values(array_filter(array_map('trim', explode(',', $imagesString))));
+                $result[$mot] = $images;
             }
-            
-            $images = array_filter(array_map('trim', explode(',', $imagesString)));
-            $result[$mot] = $images;
+        } else {
+            // Ancien format (incorrect): image1;image2;image3
+            // On associe chaque image au mot correspondant par index
+            foreach ($items as $index => $item) {
+                $image = trim($item);
+                if (empty($image)) {
+                    continue;
+                }
+                
+                // Associer l'image au mot correspondant dans la même position
+                if (isset($motsArray[$index])) {
+                    $mot = $motsArray[$index];
+                    if (!isset($result[$mot])) {
+                        $result[$mot] = [];
+                    }
+                    $result[$mot][] = $image;
+                }
+            }
         }
         
         return $result;
@@ -239,12 +273,12 @@ class Cours
     public function getFirstImageForMot(string $mot): ?string
     {
         $imagesByMot = $this->getImagesByMot();
-        $motKey = trim($mot);
-        
+        $motKey = strtoupper(trim($mot));
+
         if (isset($imagesByMot[$motKey]) && !empty($imagesByMot[$motKey])) {
             return $imagesByMot[$motKey][0];
         }
-        
+
         return null;
     }
 
@@ -254,8 +288,8 @@ class Cours
     public function getImagesForMot(string $mot): array
     {
         $imagesByMot = $this->getImagesByMot();
-        $motKey = trim($mot);
-        
+        $motKey = strtoupper(trim($mot));
+
         return $imagesByMot[$motKey] ?? [];
     }
 }
