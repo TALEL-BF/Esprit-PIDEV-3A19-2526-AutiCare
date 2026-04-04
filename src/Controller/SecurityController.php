@@ -15,13 +15,21 @@ class SecurityController extends AbstractController
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
         if ($this->getUser()) {
-            $roles = $this->getUser()->getRoles();
-
-            if (in_array('ROLE_ADMIN', $roles, true)) {
+            $user = $this->getUser();
+            $role = $user->getRole();
+            
+            // Redirection selon le rôle
+            if ($role === 'admin') {
                 return $this->redirectToRoute('admin_dashboard');
+            } elseif ($role === 'parent') {
+                return $this->redirectToRoute('parent_dashboard');
+            } elseif ($role === 'professeur') {
+                return $this->redirectToRoute('professeur_dashboard');
+            } elseif ($role === 'psychologue') {
+                return $this->redirectToRoute('psychologue_dashboard');
+            } else {
+                return $this->redirectToRoute('enfant_dashboard');
             }
-
-            return $this->redirectToRoute('app_home');
         }
 
         return $this->render('front/signin/index.html.twig', [

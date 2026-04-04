@@ -40,13 +40,19 @@ class SignupController extends AbstractController
                 $user->setNom($lastname);
                 $user->setEmail($email);
                 $user->setPassword($passwordHasher->hashPassword($user, $password));
-                $user->setRole(match ($profileType) {
+                
+                // CORRECTION : Mapping correct des rôles
+                $role = match ($profileType) {
                     'parent' => 'parent',
-                    'professionnel' => 'psychologue',
-                    default => 'user',
-                });
+                    'professeur' => 'professeur',
+                    'psychologue' => 'psychologue',
+                    'enfant' => 'enfant',
+                    default => 'enfant',
+                };
+                $user->setRole($role);
+                
                 $user->setStatus('active');
-$user->setCreatedAt(new \DateTime());
+                $user->setCreatedAt(new \DateTime());
                 $entityManager->persist($user);
                 $entityManager->flush();
 

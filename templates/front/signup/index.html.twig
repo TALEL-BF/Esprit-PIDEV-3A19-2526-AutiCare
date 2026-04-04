@@ -274,29 +274,35 @@
                                         </div>
 
                                         <!-- Profile Type Selection -->
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold text-dark small">Je suis :</label>
-                                            <div class="row g-2">
-                                                <div class="col-4">
-                                                    <div class="profile-type-btn active" onclick="selectType(this)">
-                                                        <i class="fas fa-user text-primary"></i>
-                                                        <span class="small fw-bold">Personne autiste</span>
-                                                    </div>
-                                                </div>
-                                                <div class="col-4">
-                                                    <div class="profile-type-btn" onclick="selectType(this)">
-                                                        <i class="fas fa-home text-primary"></i>
-                                                        <span class="small fw-bold">Parent / Famille</span>
-                                                    </div>
-                                                </div>
-                                                <div class="col-4">
-                                                    <div class="profile-type-btn" onclick="selectType(this)">
-                                                        <i class="fas fa-user-md text-primary"></i>
-                                                        <span class="small fw-bold">Professionnel</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                    <div class="mb-3">
+    <label class="form-label fw-bold text-dark small">Je suis :</label>
+    <div class="row g-2">
+        <div class="col-6 col-md-3">
+            <div class="profile-type-btn active" onclick="selectType(this, 'enfant')">
+                <i class="fas fa-child text-primary"></i>
+                <span class="small fw-bold">Enfant autiste</span>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="profile-type-btn" onclick="selectType(this, 'parent')">
+                <i class="fas fa-home text-primary"></i>
+                <span class="small fw-bold">Parent</span>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="profile-type-btn" onclick="selectType(this, 'professeur')">
+                <i class="fas fa-chalkboard-teacher text-primary"></i>
+                <span class="small fw-bold">Professeur</span>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="profile-type-btn" onclick="selectType(this, 'psychologue')">
+                <i class="fas fa-user-md text-primary"></i>
+                <span class="small fw-bold">Psychologue</span>
+            </div>
+        </div>
+    </div>
+</div>
 
                                         <div class="mb-3">
                                             <a href="#" class="social-btn">
