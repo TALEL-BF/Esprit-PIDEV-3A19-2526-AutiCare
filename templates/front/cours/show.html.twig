@@ -25,19 +25,19 @@
 
         /* ══ TOP HERO ══ */
         .course-hero {
-            background: linear-gradient(150deg, #EEF6FF 0%, #FFF4FF 50%, #FFFCE8 100%);
+            background: linear-gradient(150deg, #5a288c 0%, #9b6bff 50%, #c77dff 100%);
             padding: 2.5rem 0 0;
             position: relative;
             overflow: hidden;
-            border-bottom: 4px dashed rgba(77,150,255,0.25);
+            border-bottom: 4px dashed rgba(255,158,207,0.35);
         }
         .course-hero::before {
             content: '';
             position: absolute; inset: 0;
             background-image:
-                radial-gradient(circle at 5%  30%, rgba(77,150,255,0.14) 0%, transparent 35%),
-                radial-gradient(circle at 95% 10%, rgba(199,125,255,0.14) 0%, transparent 35%),
-                radial-gradient(circle at 50% 90%, rgba(255,217,61,0.12) 0%, transparent 30%);
+                radial-gradient(circle at 5%  30%, rgba(255,105,180,0.18) 0%, transparent 35%),
+                radial-gradient(circle at 95% 10%, rgba(255,255,255,0.10) 0%, transparent 35%),
+                radial-gradient(circle at 50% 90%, rgba(183,148,244,0.20) 0%, transparent 30%);
             pointer-events: none;
         }
 
@@ -47,10 +47,10 @@
         }
 
         /* breadcrumb */
-        .bc-link { color: rgba(30,42,59,0.55); font-size: 0.85rem; font-weight: 700; text-decoration: none; transition: color 0.2s; }
-        .bc-link:hover { color: var(--ocean); }
-        .bc-sep { margin: 0 8px; color: rgba(30,42,59,0.3); }
-        .bc-current { color: var(--dark); font-size: 0.85rem; font-weight: 700; }
+        .bc-link { color: rgba(255,255,255,0.70); font-size: 0.85rem; font-weight: 700; text-decoration: none; transition: color 0.2s; }
+        .bc-link:hover { color: #fff; }
+        .bc-sep { margin: 0 8px; color: rgba(255,255,255,0.40); }
+        .bc-current { color: rgba(255,255,255,0.95); font-size: 0.85rem; font-weight: 700; }
 
         /* Course title area */
         .course-type-pill {
@@ -70,13 +70,14 @@
             font-family: 'Baloo 2', cursive;
             font-size: clamp(1.8rem, 4vw, 2.8rem);
             font-weight: 800;
-            color: var(--dark);
+            color: #fff;
             line-height: 1.15;
             margin-bottom: 0.7rem;
+            text-shadow: 0 3px 18px rgba(0,0,0,0.2);
         }
         .course-main-desc {
             font-size: 1rem;
-            color: #555;
+            color: rgba(255,255,255,0.85);
             line-height: 1.65;
             max-width: 560px;
             margin-bottom: 1.4rem;
@@ -86,15 +87,16 @@
         .info-chips { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 1.6rem; }
         .info-chip {
             display: inline-flex; align-items: center; gap: 7px;
-            background: white;
+            background: rgba(255,255,255,0.18);
+            backdrop-filter: blur(8px);
             padding: 9px 18px; border-radius: 50px;
             font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 800;
-            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
-            border: 2px solid transparent;
+            color: #fff;
+            border: 2px solid rgba(255,255,255,0.30);
         }
-        .chip-level  { border-color: #FFD93D; color: #92400E; }
-        .chip-time   { border-color: #6BCB77; color: #155724; }
-        .chip-words  { border-color: #4D96FF; color: #1B3A6B; }
+        .chip-level  { border-color: rgba(255,217,61,0.6); }
+        .chip-time   { border-color: rgba(107,203,119,0.6); }
+        .chip-words  { border-color: rgba(255,158,207,0.6); }
 
         /* Course image in hero */
         .course-hero-img-wrap {
@@ -123,16 +125,16 @@
         /* ── Back button ── */
         .btn-back {
             display: inline-flex; align-items: center; gap: 7px;
-            background: white;
-            color: var(--dark);
+            background: rgba(255,255,255,0.18);
+            backdrop-filter: blur(8px);
+            color: #fff;
             font-family: 'Baloo 2', cursive; font-size: 0.9rem; font-weight: 700;
             padding: 9px 20px; border-radius: 40px;
             text-decoration: none;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.08);
-            border: 2px solid #EBEBEB;
+            border: 2px solid rgba(255,255,255,0.35);
             transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-        .btn-back:hover { transform: translateX(-4px) scale(1.04); color: var(--ocean); border-color: var(--ocean); }
+        .btn-back:hover { transform: translateX(-4px) scale(1.04); background: rgba(255,255,255,0.28); color: #fff; }
 
         /* ══ CONTENT SECTION ══ */
         .content-section {
@@ -160,40 +162,57 @@
             margin-left: 8px;
         }
 
-        /* ══ MOTS GRID — centered & larger ══ */
+        /* ══ MOTS SECTION — full width centered ══ */
         .mots-section-wrap {
             display: flex;
             flex-direction: column;
             align-items: center;
+            width: 100%;
         }
 
         .mots-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-            gap: 22px;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 28px;
             width: 100%;
             justify-items: center;
         }
 
-        /* ══ MOT CARD — redesigned larger ══ */
+        /* ══ MOT CARD — creative rose/mauve ══ */
         .mot-card {
             background: white;
-            border-radius: 26px;
+            border-radius: 32px;
             overflow: hidden;
-            box-shadow: 0 8px 28px rgba(0,0,0,0.09);
-            border: 3px solid #F0F0F0;
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
-                        box-shadow 0.3s ease,
-                        border-color 0.2s;
+            box-shadow: 0 10px 36px rgba(155,107,255,0.13);
+            border: 2.5px solid rgba(183,148,244,0.18);
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+                        box-shadow 0.35s ease;
             cursor: default;
-            animation: cardIn 0.45s ease both;
+            animation: cardIn 0.5s ease both;
             width: 100%;
-            max-width: 240px;
+            max-width: 300px;
+            position: relative;
+        }
+        /* Decorative corner ribbon */
+        .mot-card::before {
+            content: '✦';
+            position: absolute;
+            top: 12px; right: 14px;
+            font-size: 0.75rem;
+            z-index: 3;
+            opacity: 0.55;
+            animation: twinkStar 2.5s ease-in-out infinite;
+        }
+        @keyframes twinkStar {
+            0%,100% { opacity: 0.55; transform: scale(1); }
+            50%      { opacity: 1;    transform: scale(1.4); }
         }
         .mot-card:hover {
-            transform: translateY(-10px) scale(1.04);
-            box-shadow: 0 22px 50px rgba(0,0,0,0.15);
+            transform: translateY(-12px) scale(1.03);
+            box-shadow: 0 28px 60px rgba(155,107,255,0.28);
         }
+
+        /* Staggered entrance */
         .mot-card:nth-child(1)  { animation-delay: 0.05s; }
         .mot-card:nth-child(2)  { animation-delay: 0.10s; }
         .mot-card:nth-child(3)  { animation-delay: 0.15s; }
@@ -202,98 +221,151 @@
         .mot-card:nth-child(6)  { animation-delay: 0.30s; }
         .mot-card:nth-child(7)  { animation-delay: 0.35s; }
         .mot-card:nth-child(8)  { animation-delay: 0.40s; }
-
         @keyframes cardIn {
-            from { opacity: 0; transform: translateY(28px) scale(0.93); }
+            from { opacity: 0; transform: translateY(32px) scale(0.92); }
             to   { opacity: 1; transform: translateY(0)    scale(1); }
         }
 
-        /* Colorful top strip on each mot card */
-        .mot-card:nth-child(6n+1) { border-top: 6px solid var(--ocean); }
-        .mot-card:nth-child(6n+1):hover { border-color: var(--ocean); box-shadow: 0 22px 50px rgba(77,150,255,0.22); }
-        .mot-card:nth-child(6n+2) { border-top: 6px solid var(--sky); }
-        .mot-card:nth-child(6n+2):hover { border-color: var(--sky); box-shadow: 0 22px 50px rgba(107,203,119,0.22); }
-        .mot-card:nth-child(6n+3) { border-top: 6px solid var(--coral); }
-        .mot-card:nth-child(6n+3):hover { border-color: var(--coral); box-shadow: 0 22px 50px rgba(255,107,107,0.22); }
-        .mot-card:nth-child(6n+4) { border-top: 6px solid var(--lavender); }
-        .mot-card:nth-child(6n+4):hover { border-color: var(--lavender); box-shadow: 0 22px 50px rgba(199,125,255,0.22); }
-        .mot-card:nth-child(6n+5) { border-top: 6px solid var(--mint); }
-        .mot-card:nth-child(6n+5):hover { border-color: var(--mint); box-shadow: 0 22px 50px rgba(46,196,182,0.22); }
-        .mot-card:nth-child(6n+0) { border-top: 6px solid var(--rose); }
-        .mot-card:nth-child(6n+0):hover { border-color: var(--rose); box-shadow: 0 22px 50px rgba(255,111,168,0.22); }
+        /* ── Alternating rose/mauve color palette ── */
+        .mot-card:nth-child(4n+1) { border-color: rgba(255,105,180,0.30); }
+        .mot-card:nth-child(4n+1)::before { color: #ff69b4; }
+        .mot-card:nth-child(4n+1):hover { box-shadow: 0 28px 60px rgba(255,105,180,0.30); }
 
-        /* Gradient background tints matching the top border */
-        .mot-card:nth-child(6n+1) .mot-img-wrap { background: linear-gradient(135deg, #EBF5FF, #DBEAFE); }
-        .mot-card:nth-child(6n+2) .mot-img-wrap { background: linear-gradient(135deg, #EBFFEE, #D1FAE5); }
-        .mot-card:nth-child(6n+3) .mot-img-wrap { background: linear-gradient(135deg, #FFF0EB, #FFE4E4); }
-        .mot-card:nth-child(6n+4) .mot-img-wrap { background: linear-gradient(135deg, #F5EBFF, #EDE9FE); }
-        .mot-card:nth-child(6n+5) .mot-img-wrap { background: linear-gradient(135deg, #E6FFFD, #CCFBF1); }
-        .mot-card:nth-child(6n+0) .mot-img-wrap { background: linear-gradient(135deg, #FFF0F7, #FCE7F3); }
+        .mot-card:nth-child(4n+2) { border-color: rgba(155,107,255,0.30); }
+        .mot-card:nth-child(4n+2)::before { color: #9b6bff; }
+        .mot-card:nth-child(4n+2):hover { box-shadow: 0 28px 60px rgba(155,107,255,0.30); }
 
+        .mot-card:nth-child(4n+3) { border-color: rgba(199,125,255,0.30); }
+        .mot-card:nth-child(4n+3)::before { color: #c77dff; }
+        .mot-card:nth-child(4n+3):hover { box-shadow: 0 28px 60px rgba(199,125,255,0.30); }
+
+        .mot-card:nth-child(4n+0) { border-color: rgba(255,158,207,0.30); }
+        .mot-card:nth-child(4n+0)::before { color: #ff9ecf; }
+        .mot-card:nth-child(4n+0):hover { box-shadow: 0 28px 60px rgba(255,158,207,0.30); }
+
+        /* ── IMAGE ZONE ── */
         .mot-img-wrap {
-            height: 160px;
+            height: 200px;
             overflow: hidden;
-            background: linear-gradient(135deg, #F5F5F5, #EBEBEB);
             display: flex; align-items: center; justify-content: center;
             position: relative;
         }
+        /* Gradient header per card color */
+        .mot-card:nth-child(4n+1) .mot-img-wrap {
+            background: linear-gradient(135deg, #ffe0ef 0%, #ffc8e4 50%, #f9d4ff 100%);
+        }
+        .mot-card:nth-child(4n+2) .mot-img-wrap {
+            background: linear-gradient(135deg, #ede0ff 0%, #ddc6ff 50%, #fce8ff 100%);
+        }
+        .mot-card:nth-child(4n+3) .mot-img-wrap {
+            background: linear-gradient(135deg, #f3e0ff 0%, #e8c8ff 50%, #fde8ff 100%);
+        }
+        .mot-card:nth-child(4n+0) .mot-img-wrap {
+            background: linear-gradient(135deg, #ffe8f4 0%, #ffd6ee 50%, #f8e0ff 100%);
+        }
+
+        /* Blob décoratif en arrière-plan de la zone image */
+        .mot-img-wrap::before {
+            content: '';
+            position: absolute;
+            width: 120px; height: 120px;
+            border-radius: 50%;
+            opacity: 0.18;
+            top: -30px; right: -30px;
+        }
+        .mot-card:nth-child(4n+1) .mot-img-wrap::before { background: #ff69b4; }
+        .mot-card:nth-child(4n+2) .mot-img-wrap::before { background: #9b6bff; }
+        .mot-card:nth-child(4n+3) .mot-img-wrap::before { background: #c77dff; }
+        .mot-card:nth-child(4n+0) .mot-img-wrap::before { background: #ff9ecf; }
+
         .mot-img-wrap img {
             width: 100%; height: 100%; object-fit: cover;
-            transition: transform 0.4s ease;
+            transition: transform 0.45s ease;
+            position: relative; z-index: 1;
         }
-        .mot-card:hover .mot-img-wrap img { transform: scale(1.1); }
+        .mot-card:hover .mot-img-wrap img { transform: scale(1.08); }
 
         .mot-placeholder-emoji {
-            font-size: 4.5rem;
+            font-size: 5.5rem;
             animation: floatEmoji 3s ease-in-out infinite;
-            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.12));
+            filter: drop-shadow(0 6px 14px rgba(155,107,255,0.3));
+            position: relative; z-index: 1;
         }
         @keyframes floatEmoji {
-            0%,100% { transform: translateY(0) rotate(-3deg); }
-            50%      { transform: translateY(-9px) rotate(3deg); }
+            0%,100% { transform: translateY(0) rotate(-4deg) scale(1); }
+            50%      { transform: translateY(-12px) rotate(4deg) scale(1.06); }
         }
 
+        /* ── LABEL ── */
         .mot-label {
-            padding: 14px 14px 16px;
+            padding: 18px 18px 20px;
             text-align: center;
             background: white;
+            position: relative;
         }
-        .mot-label span {
-            font-family: 'Baloo 2', cursive;
-            font-size: 1.18rem;
-            font-weight: 800;
-            color: var(--dark);
-            letter-spacing: 0.05em;
+        /* Wavy top border */
+        .mot-label::before {
+            content: '';
+            display: block;
+            height: 6px;
+            border-radius: 0 0 6px 6px;
+            margin-bottom: 12px;
+        }
+        .mot-card:nth-child(4n+1) .mot-label::before {
+            background: linear-gradient(90deg, #ff69b4, #ff9ecf, #c77dff);
+        }
+        .mot-card:nth-child(4n+2) .mot-label::before {
+            background: linear-gradient(90deg, #9b6bff, #c77dff, #ff9ecf);
+        }
+        .mot-card:nth-child(4n+3) .mot-label::before {
+            background: linear-gradient(90deg, #c77dff, #ff69b4, #9b6bff);
+        }
+        .mot-card:nth-child(4n+0) .mot-label::before {
+            background: linear-gradient(90deg, #ff9ecf, #9b6bff, #ff69b4);
         }
 
-        /* Label color accent strip under the word */
-        .mot-label-bar {
-            width: 40px; height: 4px; border-radius: 4px;
-            margin: 5px auto 0;
-            opacity: 0.6;
+        .mot-label span {
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.35rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            display: block;
         }
-        .mot-card:nth-child(6n+1) .mot-label-bar { background: var(--ocean); }
-        .mot-card:nth-child(6n+2) .mot-label-bar { background: var(--sky); }
-        .mot-card:nth-child(6n+3) .mot-label-bar { background: var(--coral); }
-        .mot-card:nth-child(6n+4) .mot-label-bar { background: var(--lavender); }
-        .mot-card:nth-child(6n+5) .mot-label-bar { background: var(--mint); }
-        .mot-card:nth-child(6n+0) .mot-label-bar { background: var(--rose); }
+        .mot-card:nth-child(4n+1) .mot-label span { color: #c0186a; }
+        .mot-card:nth-child(4n+2) .mot-label span { color: #6b35cc; }
+        .mot-card:nth-child(4n+3) .mot-label span { color: #8b2fc9; }
+        .mot-card:nth-child(4n+0) .mot-label span { color: #b5205e; }
+
+        /* Petits points décoratifs sous le mot */
+        .mot-label-bar {
+            display: flex; justify-content: center; gap: 5px;
+            margin-top: 8px;
+        }
+        .mot-label-bar span {
+            width: 7px; height: 7px; border-radius: 50%;
+            display: inline-block; font-size: 0; letter-spacing: 0;
+        }
+        .mot-card:nth-child(4n+1) .mot-label-bar span { background: #ff69b4; }
+        .mot-card:nth-child(4n+2) .mot-label-bar span { background: #9b6bff; }
+        .mot-card:nth-child(4n+3) .mot-label-bar span { background: #c77dff; }
+        .mot-card:nth-child(4n+0) .mot-label-bar span { background: #ff9ecf; }
 
         /* Multi-image mot: small thumbnails */
         .mot-img-thumbs {
-            display: flex; flex-wrap: wrap; gap: 5px; padding: 6px;
+            display: flex; flex-wrap: wrap; gap: 6px; padding: 8px;
             justify-content: center; align-items: center;
+            position: relative; z-index: 1;
         }
         .mot-img-thumbs img {
-            width: 62px; height: 62px;
+            width: 72px; height: 72px;
             object-fit: cover;
-            border-radius: 12px;
-            border: 2.5px solid white;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+            border-radius: 14px;
+            border: 3px solid white;
+            box-shadow: 0 4px 12px rgba(155,107,255,0.18);
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.25s, box-shadow 0.25s;
         }
-        .mot-img-thumbs img:hover { transform: scale(1.14); box-shadow: 0 6px 16px rgba(0,0,0,0.16); }
+        .mot-img-thumbs img:hover { transform: scale(1.16); box-shadow: 0 8px 22px rgba(155,107,255,0.3); }
 
         /* ── Progress bar style ── */
         .progress-wrap {
@@ -425,28 +497,36 @@
         /* ── Count badge ── */
         .mots-count-badge {
             display: inline-flex; align-items: center; gap: 6px;
-            background: linear-gradient(135deg, var(--ocean), var(--lavender));
+            background: linear-gradient(135deg, #ff69b4, #9b6bff);
             color: white;
             font-family: 'Baloo 2', cursive; font-size: 0.82rem; font-weight: 800;
             padding: 5px 16px; border-radius: 30px;
             margin-left: 8px;
-            box-shadow: 0 3px 10px rgba(77,150,255,0.3);
+            box-shadow: 0 3px 12px rgba(155,107,255,0.35);
         }
 
         /* ── Responsive ── */
+        @media (max-width: 992px) {
+            .mots-grid {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+                gap: 20px;
+            }
+        }
         @media (max-width: 768px) {
             .mots-grid {
-                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
                 gap: 16px;
             }
             .mot-card { max-width: 100%; }
-            .mot-img-wrap { height: 130px; }
+            .mot-img-wrap { height: 160px; }
         }
         @media (max-width: 480px) {
             .mots-grid {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 14px;
             }
+            .mot-img-wrap { height: 130px; }
+            .mot-placeholder-emoji { font-size: 4rem; }
         }
     </style>
 {% endblock %}
@@ -530,13 +610,13 @@
         <div class="container">
             <div class="row g-4">
 
-                <!-- ── MAIN: Mots ── -->
-                <div class="col-lg-8">
+                <!-- ── MAIN: Mots — FULL WIDTH ── -->
+                <div class="col-12">
 
                     {% if motsList|length > 0 %}
 
-                    <div class="section-heading">
-                        <span class="heading-dot" style="background:var(--ocean);"></span>
+                    <div class="section-heading" style="justify-content:center; text-align:center;">
+                        <span class="heading-dot" style="background:linear-gradient(135deg,#ff69b4,#9b6bff);"></span>
                         🔤 Les mots du cours
                         <span class="mots-count-badge">{{ motsCount }} mot{{ motsCount > 1 ? 's' : '' }}</span>
                     </div>
@@ -587,7 +667,9 @@
                                     <!-- Label -->
                                     <div class="mot-label">
                                         <span>{{ mot|upper }}</span>
-                                        <div class="mot-label-bar"></div>
+                                        <div class="mot-label-bar">
+                                            <span></span><span></span><span></span>
+                                        </div>
                                     </div>
                                 </div>
                                 {% endif %}
@@ -606,70 +688,78 @@
                 </div>
 
                 <!-- ── SIDEBAR ── -->
-                <div class="col-lg-4">
+                <div class="col-12">
+                    <div class="row justify-content-center g-4">
 
-                    <!-- Stats card -->
-                    <div class="sidebar-card">
-                        <div class="sidebar-card-title">📋 Informations</div>
-                        <div class="sidebar-stat-row">
-                            <span class="sidebar-stat-label">📊 Niveau</span>
-                            <span class="sidebar-stat-value">
-                                <span class="niveau-dot dot-{{ cours.niveau }}"></span>
-                                {{ cours.niveau }}
-                            </span>
+                        <!-- Stats card -->
+                        <div class="col-lg-4 col-md-6">
+                        <div class="sidebar-card">
+                            <div class="sidebar-card-title">📋 Informations</div>
+                            <div class="sidebar-stat-row">
+                                <span class="sidebar-stat-label">📊 Niveau</span>
+                                <span class="sidebar-stat-value">
+                                    <span class="niveau-dot dot-{{ cours.niveau }}"></span>
+                                    {{ cours.niveau }}
+                                </span>
+                            </div>
+                            <div class="sidebar-stat-row">
+                                <span class="sidebar-stat-label">⏱ Durée</span>
+                                <span class="sidebar-stat-value">{{ cours.duree }} min</span>
+                            </div>
+                            <div class="sidebar-stat-row">
+                                <span class="sidebar-stat-label">🏷️ Type</span>
+                                <span class="sidebar-stat-value">{{ cours.typeCours }}</span>
+                            </div>
+                            {% if motsCount > 0 %}
+                            <div class="sidebar-stat-row">
+                                <span class="sidebar-stat-label">🔤 Mots</span>
+                                <span class="sidebar-stat-value">{{ motsCount }} mots</span>
+                            </div>
+                            {% endif %}
                         </div>
-                        <div class="sidebar-stat-row">
-                            <span class="sidebar-stat-label">⏱ Durée</span>
-                            <span class="sidebar-stat-value">{{ cours.duree }} min</span>
                         </div>
-                        <div class="sidebar-stat-row">
-                            <span class="sidebar-stat-label">🏷️ Type</span>
-                            <span class="sidebar-stat-value">{{ cours.typeCours }}</span>
+
+                        <!-- Mots list mini -->
+                        {% if motsList|length > 0 %}
+                        <div class="col-lg-4 col-md-6">
+                        <div class="sidebar-card">
+                            <div class="sidebar-card-title">🗂️ Liste des mots</div>
+                            <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                                {% for mot in motsList %}
+                                    {% set mot = mot|trim %}
+                                    {% if mot %}
+                                    <span style="
+                                        background: linear-gradient(135deg,#fce7f3,#ede9fe);
+                                        color: #7c3aed;
+                                        font-family: 'Baloo 2',cursive;
+                                        font-weight: 800;
+                                        font-size: 0.82rem;
+                                        padding: 6px 14px;
+                                        border-radius: 20px;
+                                        border: 1.5px solid rgba(155,107,255,0.3);
+                                        transition: all 0.2s;
+                                        cursor: default;
+                                    ">{{ mot|upper }}</span>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
                         </div>
-                        {% if motsCount > 0 %}
-                        <div class="sidebar-stat-row">
-                            <span class="sidebar-stat-label">🔤 Mots</span>
-                            <span class="sidebar-stat-value">{{ motsCount }} mots</span>
                         </div>
                         {% endif %}
-                    </div>
 
-                    <!-- Mots list mini -->
-                    {% if motsList|length > 0 %}
-                    <div class="sidebar-card">
-                        <div class="sidebar-card-title">🗂️ Liste des mots</div>
-                        <div style="display:flex; flex-wrap:wrap; gap:8px;">
-                            {% for mot in motsList %}
-                                {% set mot = mot|trim %}
-                                {% if mot %}
-                                <span style="
-                                    background: #F0F6FF;
-                                    color: var(--ocean);
-                                    font-family: 'Baloo 2',cursive;
-                                    font-weight: 800;
-                                    font-size: 0.82rem;
-                                    padding: 6px 14px;
-                                    border-radius: 20px;
-                                    border: 1.5px solid #C5DFFF;
-                                    transition: all 0.2s;
-                                    cursor: default;
-                                ">{{ mot|upper }}</span>
-                                {% endif %}
-                            {% endfor %}
+                        <!-- CTA -->
+                        <div class="col-lg-4 col-md-6">
+                        <div class="cta-block">
+                            <div style="font-size:2.8rem; margin-bottom:0.6rem;">🚀</div>
+                            <h4>Prêt à apprendre ?</h4>
+                            <p>Explore ce cours et découvre tous ses mots et images !</p>
+                            <a href="{{ path('app_cours') }}" class="btn-cta-start">
+                                🌈 Voir tous les cours
+                            </a>
                         </div>
-                    </div>
-                    {% endif %}
+                        </div>
 
-                    <!-- CTA -->
-                    <div class="cta-block">
-                        <div style="font-size:2.8rem; margin-bottom:0.6rem;">🚀</div>
-                        <h4>Prêt à apprendre ?</h4>
-                        <p>Explore ce cours et découvre tous ses mots et images !</p>
-                        <a href="{{ path('app_cours') }}" class="btn-cta-start">
-                            🌈 Voir tous les cours
-                        </a>
                     </div>
-
                 </div>
 
             </div>
