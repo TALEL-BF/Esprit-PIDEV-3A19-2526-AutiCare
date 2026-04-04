@@ -51,10 +51,10 @@
                    href="{{ path('admin_cours') }}">
                     <i class="fas fa-book"></i> ajout Cours
                 </a>
-                <a class="nav-sub-link {% if app.request.get('_route') == 'admin_cours_modules' %}active{% endif %}" 
-                   href="{{ path('admin_cours_modules') }}">
-                    <i class="fas fa-layer-group"></i> ajout évaluation 
-                </a>
+               <a class="nav-sub-link {% if app.request.get('_route') == 'admin_evaluation' %}active{% endif %}" 
+   href="{{ path('admin_evaluation') }}">
+    <i class="fas fa-layer-group"></i> ajout évaluation 
+</a>
             </div>
         </div>
 

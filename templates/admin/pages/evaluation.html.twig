@@ -1,0 +1,606 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Auticare — Gestion des évaluations{% endblock %}
+
+{% block page_title %}Gestion des évaluations{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    /* ── Page header ── */
+    .eval-page-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 32px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f0ebff;
+    }
+    .eval-page-header .header-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #7c3aed, #a855f7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.3rem;
+        flex-shrink: 0;
+        box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
+    }
+    .eval-page-header h2 {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #1e1b4b;
+        margin: 0 0 3px 0;
+    }
+    .eval-page-header p {
+        color: #6b7280;
+        font-size: 0.85rem;
+        margin: 0;
+    }
+
+    /* ── Filter bar ── */
+    .filter-bar {
+        background: white;
+        border-radius: 16px;
+        padding: 18px 24px;
+        margin-bottom: 24px;
+        border: 1px solid #ede9fe;
+        box-shadow: 0 2px 8px rgba(124, 58, 237, 0.06);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .filter-bar .filter-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .filter-bar label {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #4b5563;
+        white-space: nowrap;
+    }
+    .filter-bar select {
+        border: 1.5px solid #ddd6fe;
+        border-radius: 10px;
+        padding: 7px 14px;
+        font-size: 0.82rem;
+        color: #374151;
+        background: #faf9ff;
+        outline: none;
+        min-width: 220px;
+        transition: border-color .2s;
+    }
+    .filter-bar select:focus { border-color: #7c3aed; }
+    .questions-count-badge {
+        background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+        color: #6d28d9;
+        font-size: 0.78rem;
+        font-weight: 700;
+        padding: 5px 14px;
+        border-radius: 20px;
+        letter-spacing: .3px;
+    }
+
+    /* ── Form card ── */
+    .form-card {
+        background: white;
+        border-radius: 20px;
+        padding: 28px 32px;
+        margin-bottom: 28px;
+        border: 1.5px solid #ede9fe;
+        box-shadow: 0 4px 20px rgba(124, 58, 237, 0.07);
+        position: relative;
+        overflow: hidden;
+    }
+    .form-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #7c3aed, #a855f7, #ec4899);
+        border-radius: 20px 20px 0 0;
+    }
+    .form-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+    }
+    .form-card-header h5 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1e1b4b;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .form-card-header h5 i { color: #7c3aed; }
+    .mode-pill {
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 4px 14px;
+        border-radius: 20px;
+        background: #ede9fe;
+        color: #6d28d9;
+        letter-spacing: .4px;
+        text-transform: uppercase;
+    }
+    .mode-pill.edit { background: #fef3c7; color: #b45309; }
+
+    /* ── Form elements ── */
+    .eval-form-label {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #4b5563;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        margin-bottom: 6px;
+        display: block;
+    }
+    .eval-form-control {
+        border: 1.5px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-size: 0.88rem;
+        color: #1f2937;
+        background: #fafafa;
+        width: 100%;
+        transition: border-color .2s, box-shadow .2s;
+        outline: none;
+    }
+    .eval-form-control:focus {
+        border-color: #7c3aed;
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        background: white;
+    }
+    textarea.eval-form-control { resize: vertical; min-height: 72px; }
+
+    /* ── Choice groups ── */
+    .choice-group {
+        background: linear-gradient(135deg, #faf9ff, #f5f3ff);
+        border-radius: 14px;
+        padding: 16px 18px;
+        border: 1.5px solid #ede9fe;
+        transition: border-color .2s, box-shadow .2s;
+    }
+    .choice-group:hover {
+        border-color: #c4b5fd;
+        box-shadow: 0 2px 8px rgba(124, 58, 237, 0.08);
+    }
+    .choice-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: #7c3aed;
+        color: white;
+        font-size: 0.7rem;
+        font-weight: 700;
+        margin-right: 6px;
+    }
+
+    /* ── Buttons ── */
+    .btn-save {
+        background: linear-gradient(135deg, #7c3aed, #a855f7);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 10px 24px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        transition: transform .15s, box-shadow .15s;
+        box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3);
+    }
+    .btn-save:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+    }
+    .btn-cancel-eval {
+        background: white;
+        color: #6b7280;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 10px 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        transition: border-color .2s, color .2s;
+    }
+    .btn-cancel-eval:hover { border-color: #9ca3af; color: #374151; }
+
+    /* ── Table card ── */
+    .table-card {
+        background: white;
+        border-radius: 20px;
+        border: 1.5px solid #ede9fe;
+        box-shadow: 0 4px 20px rgba(124, 58, 237, 0.06);
+        overflow: hidden;
+    }
+    .table-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 24px;
+        border-bottom: 1.5px solid #f3f0ff;
+        background: linear-gradient(135deg, #faf9ff, #f5f3ff);
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .table-card-title {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #1e1b4b;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .table-card-title i { color: #7c3aed; }
+    .filter-input {
+        border: 1.5px solid #ddd6fe;
+        border-radius: 10px;
+        padding: 7px 14px 7px 36px;
+        font-size: 0.82rem;
+        color: #374151;
+        background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2.5'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 12px center;
+        outline: none;
+        width: 200px;
+        transition: border-color .2s;
+    }
+    .filter-input:focus { border-color: #7c3aed; }
+
+    /* ── Table ── */
+    .eval-table { width: 100%; border-collapse: collapse; }
+    .eval-table thead tr {
+        background: #f9f7ff;
+    }
+    .eval-table th {
+        padding: 12px 16px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #6d28d9;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        border-bottom: 1.5px solid #ede9fe;
+        white-space: nowrap;
+    }
+    .eval-table td {
+        padding: 14px 16px;
+        font-size: 0.85rem;
+        color: #374151;
+        border-bottom: 1px solid #f3f0ff;
+        vertical-align: middle;
+    }
+    .eval-table tbody tr {
+        transition: background .15s;
+    }
+    .eval-table tbody tr:hover { background: #faf9ff; }
+    .eval-table tbody tr:last-child td { border-bottom: none; }
+
+    .cours-cell { font-weight: 600; color: #1e1b4b; }
+    .cours-cell small { font-weight: 400; color: #9ca3af; font-size: 0.75rem; }
+
+    .score-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+        color: #6d28d9;
+        font-weight: 700;
+        font-size: 0.82rem;
+    }
+
+    .correct-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: rgba(16, 185, 129, 0.1);
+        color: #059669;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    /* ── Action buttons ── */
+    .btn-edit-eval {
+        background: #ede9fe;
+        color: #6d28d9;
+        border: none;
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: background .15s, transform .1s;
+    }
+    .btn-edit-eval:hover { background: #ddd6fe; transform: translateY(-1px); }
+
+    .btn-del-eval {
+        background: #fef2f2;
+        color: #dc2626;
+        border: none;
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: background .15s, transform .1s;
+    }
+    .btn-del-eval:hover { background: #fee2e2; transform: translateY(-1px); }
+
+    .empty-state {
+        padding: 48px 24px;
+        text-align: center;
+        color: #9ca3af;
+    }
+    .empty-state i {
+        font-size: 2.5rem;
+        color: #ddd6fe;
+        margin-bottom: 12px;
+        display: block;
+    }
+    .empty-state p { font-size: 0.9rem; margin: 0; }
+</style>
+{% endblock %}
+
+{% block body %}
+
+<!-- Page header -->
+<div class="eval-page-header">
+    <div class="header-icon"><i class="fas fa-question-circle"></i></div>
+    <div>
+        <h2>Gestion des évaluations</h2>
+        <p>Ajoutez, modifiez ou supprimez les questions</p>
+    </div>
+</div>
+
+<!-- Filtre par cours -->
+<div class="filter-bar">
+    <div class="filter-left">
+        <label>Filtrer par cours :</label>
+        <select id="filterCourseSelect">
+            <option value="all">Tous les cours</option>
+            {% for cours in allCourses %}
+                <option value="{{ cours.idCours }}" {% if filterCourseId == cours.idCours %}selected{% endif %}>
+                    {{ cours.titre }} ({{ cours.niveau }})
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+    <span class="questions-count-badge">{{ totalQuestions }} question(s)</span>
+</div>
+
+<!-- Formulaire d'ajout / modification -->
+<div class="form-card" id="formCard">
+    <div class="form-card-header">
+        <h5><i class="fas fa-plus-circle"></i> <span id="formTitle">Ajouter une nouvelle question</span></h5>
+        <span class="mode-pill" id="formMode">Mode : Ajout</span>
+    </div>
+
+    <form id="evaluationForm" method="POST" action="{{ path('admin_evaluation_save') }}">
+        <input type="hidden" name="id_eval" id="id_eval">
+
+        <div class="row g-4">
+            <div class="col-12">
+                <label class="eval-form-label">Question :</label>
+                <textarea class="eval-form-control" name="question" id="question" rows="2" placeholder="Entrez votre question"></textarea>
+            </div>
+
+            <div class="col-md-4">
+                <div class="choice-group">
+                    <label class="eval-form-label"><span class="choice-number">1</span> Choix 1</label>
+                    <input type="text" class="eval-form-control" name="choix1" id="choix1" placeholder="Première option">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="choice-group">
+                    <label class="eval-form-label"><span class="choice-number">2</span> Choix 2</label>
+                    <input type="text" class="eval-form-control" name="choix2" id="choix2" placeholder="Deuxième option">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="choice-group">
+                    <label class="eval-form-label"><span class="choice-number">3</span> Choix 3</label>
+                    <input type="text" class="eval-form-control" name="choix3" id="choix3" placeholder="Troisième option">
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <label class="eval-form-label">Bonne réponse :</label>
+                <select class="eval-form-control" name="bonne_reponse" id="bonne_reponse">
+                    <option value="">Sélectionnez la bonne réponse</option>
+                    <option value="choix1">Choix 1</option>
+                    <option value="choix2">Choix 2</option>
+                    <option value="choix3">Choix 3</option>
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label class="eval-form-label">Score (points) :</label>
+                <input type="number" class="eval-form-control" name="score" id="score" placeholder="Ex: 1, 2, 5..." value="1">
+            </div>
+
+            <div class="col-md-4">
+                <label class="eval-form-label">Cours :</label>
+                <select class="eval-form-control" name="cours_id" id="cours_id" required>
+                    <option value="">Sélectionner un cours</option>
+                    {% for cours in allCourses %}
+                        <option value="{{ cours.idCours }}">{{ cours.titre }} ({{ cours.niveau }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-12 d-flex gap-2 mt-2">
+                <button type="submit" class="btn-save"><i class="fas fa-save"></i> Enregistrer</button>
+                <button type="button" class="btn-cancel-eval" id="cancelBtn"><i class="fas fa-times"></i> Annuler</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Liste des questions -->
+<div class="table-card">
+    <div class="table-card-header">
+        <span class="table-card-title"><i class="fas fa-list"></i> Liste des questions</span>
+        <input type="text" class="filter-input" id="questionFilterInput" placeholder="Filtrer...">
+    </div>
+    <div class="table-responsive">
+        <table class="eval-table" id="questionsTable">
+            <thead>
+                <tr>
+                    <th>Question</th>
+                    <th>Cours</th>
+                    <th>Choix 1</th>
+                    <th>Choix 2</th>
+                    <th>Choix 3</th>
+                    <th>Bonne réponse</th>
+                    <th>Score</th>
+                    <th>Activité</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for eval in evaluations %}
+                <tr data-id="{{ eval.idEval }}">
+                    <td style="max-width: 280px;">{{ eval.question|slice(0, 60) }}{% if eval.question|length > 60 %}…{% endif %}</td>
+                    <td>
+                        <span class="cours-cell">
+                            {{ eval.cours ? eval.cours.titre : '-' }}<br>
+                            <small>{{ eval.cours ? eval.cours.niveau : '' }}</small>
+                        </span>
+                    </td>
+                    <td>{{ eval.choix1 }}</td>
+                    <td>{{ eval.choix2 }}</td>
+                    <td>{{ eval.choix3 }}</td>
+                    <td>
+                        {% set bonneReponseText = '' %}
+                        {% if eval.bonneReponse == 'choix1' %}
+                            {% set bonneReponseText = eval.choix1 %}
+                        {% elseif eval.bonneReponse == 'choix2' %}
+                            {% set bonneReponseText = eval.choix2 %}
+                        {% elseif eval.bonneReponse == 'choix3' %}
+                            {% set bonneReponseText = eval.choix3 %}
+                        {% else %}
+                            {% set bonneReponseText = eval.bonneReponse %}
+                        {% endif %}
+                        <span class="correct-badge"><i class="fas fa-check-circle"></i> {{ bonneReponseText }}</span>
+                    </td>
+                    <td class="text-center"><span class="score-pill">{{ eval.score }}</span></td>
+                    <td>
+                        <button class="btn-edit-eval me-1 edit-question-btn" data-id="{{ eval.idEval }}"><i class="fas fa-edit"></i> Modifier</button>
+                        <form method="POST" action="{{ path('admin_evaluation_delete', {'id': eval.idEval}) }}" style="display: inline-block;" onsubmit="return confirm('Supprimer cette question ?')">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="submit" class="btn-del-eval"><i class="fas fa-trash"></i> Supprimer</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8">
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <p>Aucune question trouvée</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Filtre par cours
+    const filterSelect = document.getElementById('filterCourseSelect');
+    if (filterSelect) {
+        filterSelect.addEventListener('change', function() {
+            const coursId = this.value;
+            window.location.href = '{{ path('admin_evaluation') }}' + (coursId !== 'all' ? '?cours_id=' + coursId : '');
+        });
+    }
+
+    // Filtre texte
+    const filterInput = document.getElementById('questionFilterInput');
+    if (filterInput) {
+        filterInput.addEventListener('input', function(e) {
+            const val = e.target.value.toLowerCase();
+            document.querySelectorAll('#questionsTable tbody tr').forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(val) ? '' : 'none';
+            });
+        });
+    }
+
+    // Édition d'une question
+    document.querySelectorAll('.edit-question-btn').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const id = this.getAttribute('data-id');
+            const modePill = document.getElementById('formMode');
+            modePill.textContent = 'Mode : Modification';
+            modePill.classList.add('edit');
+            document.getElementById('formTitle').innerHTML = '<i class="fas fa-edit me-2"></i> Modifier la question';
+
+            try {
+                const response = await fetch(`/admin/evaluation/${id}/edit`);
+                const data = await response.json();
+
+                document.getElementById('id_eval').value = data.id_eval;
+                document.getElementById('question').value = data.question;
+                document.getElementById('choix1').value = data.choix1;
+                document.getElementById('choix2').value = data.choix2;
+                document.getElementById('choix3').value = data.choix3;
+                document.getElementById('bonne_reponse').value = data.bonne_reponse;
+                document.getElementById('score').value = data.score;
+                document.getElementById('cours_id').value = data.cours_id;
+
+                document.getElementById('formCard').scrollIntoView({ behavior: 'smooth' });
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('Erreur lors du chargement de la question');
+            }
+        });
+    });
+
+    // Annuler
+    document.getElementById('cancelBtn')?.addEventListener('click', function() {
+        const modePill = document.getElementById('formMode');
+        modePill.textContent = 'Mode : Ajout';
+        modePill.classList.remove('edit');
+        document.getElementById('formTitle').innerHTML = '<i class="fas fa-plus-circle me-2"></i> Ajouter une nouvelle question';
+        document.getElementById('evaluationForm').reset();
+        document.getElementById('id_eval').value = '';
+    });
+});
+</script>
+{% endblock %}

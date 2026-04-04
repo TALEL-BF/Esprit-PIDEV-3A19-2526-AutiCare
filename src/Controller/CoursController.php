@@ -19,9 +19,7 @@ class CoursController extends AbstractController
 {
     private const UPLOAD_DIR = '/public/uploads/images';
 
-    // ─────────────────────────────────────────────────────────────────
-    // ROUTES PUBLIQUES (Front-end)
-    // ─────────────────────────────────────────────────────────────────
+   
 
     #[Route('/cours', name: 'app_cours')]
     public function index(CoursRepository $coursRepository): Response
@@ -147,17 +145,7 @@ class CoursController extends AbstractController
             }
         }
 
-        // ── Images des mots ──────────────────────────────────────────
-        //
-        // Stratégie :
-        //  1. Charger les images déjà sauvegardées (existantes) depuis la BDD
-        //  2. Pour chaque mot (indexé par sa position dans mots[]) :
-        //     a. Récupérer les images existantes conservées via existing_images_<idx>[]
-        //     b. Uploader les nouveaux fichiers images_files_<idx>[]
-        //     c. Fusionner existantes + nouvelles
-        //  3. Sauvegarder le tout
-
-        // Carte { mot => [fichiers] } des images actuelles en BDD
+       
         $existingImagesByMot = $cours->getImagesByMot(); // retourne [mot => [img1, img2, ...]]
 
         $imagesMots = [];
