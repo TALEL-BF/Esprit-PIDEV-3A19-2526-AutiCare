@@ -83,6 +83,7 @@
         }
         .quiz-progress-inner {
             display: flex; align-items: center; gap: 16px;
+            flex-wrap: wrap;
         }
         .progress-label {
             font-family: 'Baloo 2', cursive;
@@ -238,7 +239,9 @@
             margin-bottom: 1.5rem;
             font-family: 'Baloo 2', cursive;
             font-size: 1rem; font-weight: 800;
-            display: flex; align-items: center; gap: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
             animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
         }
         @keyframes popIn {
@@ -396,6 +399,7 @@
             .question-text { font-size: 1.15rem; }
             .quiz-hero-title { font-size: 1.1rem; }
             .results-card { padding: 2rem 1.2rem; }
+            .quiz-progress-inner { flex-direction: column; align-items: stretch; }
         }
     </style>
 {% endblock %}
@@ -515,7 +519,20 @@
 <script>
 (function() {
     const raw = document.getElementById('questionsData').dataset.questions;
-    const questions = JSON.parse(raw);
+    let questions = [];
+    
+    try {
+        questions = JSON.parse(raw);
+    } catch(e) {
+        console.error('Erreur de parsing JSON:', e);
+        questions = [];
+    }
+    
+    if (!questions.length) {
+        document.getElementById('questionCard').innerHTML = '<div class="text-center p-5"><h3>Aucune question disponible</h3><a href="{{ path('app_cours_show', {'id': cours.idCours}) }}" class="btn btn-primary mt-3">Retour au cours</a></div>';
+        return;
+    }
+    
     const letters = ['A', 'B', 'C'];
     const choixKeys = ['choix1', 'choix2', 'choix3'];
 
@@ -544,7 +561,7 @@
         const q = questions[current];
 
         // Progress
-        const pct = (current / questions.length) * 100;
+        const pct = ((current) / questions.length) * 100;
         progressFill.style.width = pct + '%';
         progressLbl.textContent = `Question ${current + 1} / ${questions.length}`;
 
@@ -564,16 +581,20 @@
         // Build choices
         choicesGrid.innerHTML = '';
         choixKeys.forEach((key, i) => {
+            const choixValue = q[key];
+            if (!choixValue) return;
+            
             const btn = document.createElement('button');
             btn.className = 'choice-btn';
             btn.dataset.key = key;
-            btn.innerHTML = `<span class="choice-letter">${letters[i]}</span> ${q[key]}`;
-            btn.addEventListener('click', () => selectAnswer(btn, key, q));
+            btn.dataset.value = choixValue;
+            btn.innerHTML = `<span class="choice-letter">${letters[i]}</span> ${choixValue}`;
+            btn.addEventListener('click', () => selectAnswer(btn, choixValue, q));
             choicesGrid.appendChild(btn);
         });
     }
 
-    function selectAnswer(btn, chosenKey, q) {
+    function selectAnswer(btn, chosenValue, q) {
         if (answered) return;
         answered = true;
 
@@ -581,33 +602,37 @@
         allBtns.forEach(b => b.disabled = true);
         btn.classList.add('selected');
 
-        const isCorrect = chosenKey === q.bonneReponse;
+        const isCorrect = chosenValue.trim().toLowerCase() === q.bonneReponse.trim().toLowerCase();
 
         // Highlight correct & wrong
         allBtns.forEach(b => {
-            if (b.dataset.key === q.bonneReponse) b.classList.add('correct');
+            if (b.dataset.value.trim().toLowerCase() === q.bonneReponse.trim().toLowerCase()) {
+                b.classList.add('correct');
+            }
         });
         if (!isCorrect) btn.classList.add('wrong');
 
         // Feedback
         feedbackBox.style.display = 'flex';
         if (isCorrect) {
-            score += (q.score || 1);
+            const points = q.score || 1;
+            score += points;
             correct++;
             feedbackBox.className = 'feedback-box correct-feedback';
             feedbackIcon.textContent = '🎉';
-            feedbackTxt.textContent = `Bravo ! Bonne réponse ! +${q.score || 1} point${q.score > 1 ? 's' : ''}`;
+            feedbackTxt.textContent = `Bravo ! Bonne réponse ! +${points} point${points > 1 ? 's' : ''}`;
         } else {
             wrong++;
             feedbackBox.className = 'feedback-box wrong-feedback';
             feedbackIcon.textContent = '😕';
-            const correctText = q[q.bonneReponse];
-            feedbackTxt.textContent = `Pas tout à fait… La bonne réponse était : « ${correctText} »`;
+            feedbackTxt.textContent = `Pas tout à fait… La bonne réponse était : « ${q.bonneReponse} »`;
         }
 
         scoreDsp.textContent = score;
         btnNext.classList.add('visible');
-        btnNext.textContent = (current + 1 >= questions.length) ? '🏁 Voir les résultats' : 'Suivant →';
+        
+        const isLast = (current + 1 >= questions.length);
+        btnNext.innerHTML = isLast ? '🏁 Voir les résultats <span>🏆</span>' : 'Suivant <span>→</span>';
     }
 
     btnNext.addEventListener('click', () => {
@@ -631,13 +656,13 @@
         let emoji, title, subtitle;
         if (pct >= 80) {
             emoji = '🏆'; title = 'Excellent !';
-            subtitle = 'Tu maîtrises parfaitement ce cours !';
+            subtitle = 'Tu maîtrises parfaitement ce cours ! 🌟';
         } else if (pct >= 50) {
             emoji = '👍'; title = 'Bien joué !';
-            subtitle = 'Continue comme ça, tu progresses bien !';
+            subtitle = 'Continue comme ça, tu progresses bien ! 📈';
         } else {
             emoji = '💪'; title = 'Courage !';
-            subtitle = 'Relis le cours et réessaie, tu vas y arriver !';
+            subtitle = 'Relis le cours et réessaie, tu vas y arriver ! ✨';
         }
 
         document.getElementById('resultsEmoji').textContent = emoji;
