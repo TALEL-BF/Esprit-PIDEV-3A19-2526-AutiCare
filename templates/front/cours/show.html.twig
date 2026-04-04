@@ -1,397 +1,686 @@
 {# templates/front/cours/show.html.twig #}
 {% extends 'base.html.twig' %}
 
-{% block title %}AutiCare - {{ cours.titre }}{% endblock %}
+{% block title %}AutiCare – {{ cours.titre }}{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #6c4ff6;
-            --primary-light: #ede9fe;
-            --secondary: #ff4880;
-            --dark: #1e293b;
-            --bg: #f0f4ff;
+            --sun:      #FFD93D;
+            --sky:      #6BCB77;
+            --ocean:    #4D96FF;
+            --coral:    #FF6B6B;
+            --lavender: #C77DFF;
+            --peach:    #FF9A3C;
+            --mint:     #2EC4B6;
+            --rose:     #FF6FA8;
+            --bg:       #FFFBF4;
+            --dark:     #1E2A3B;
         }
 
-        body { background: var(--bg); }
+        * { box-sizing: border-box; }
+        body { background: var(--bg); font-family: 'Nunito', sans-serif; }
 
-        /* ── Hero ── */
-        .cours-hero {
-            background: linear-gradient(135deg, var(--primary) 0%, #a855f7 100%);
-            padding: 3rem 0 5rem;
+        /* ══ TOP HERO ══ */
+        .course-hero {
+            background: linear-gradient(150deg, #EEF6FF 0%, #FFF4FF 50%, #FFFCE8 100%);
+            padding: 2.5rem 0 0;
             position: relative;
             overflow: hidden;
+            border-bottom: 4px dashed rgba(77,150,255,0.25);
         }
-        .cours-hero::before {
+        .course-hero::before {
             content: '';
-            position: absolute;
-            width: 350px; height: 350px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.08);
-            top: -80px; right: -80px;
+            position: absolute; inset: 0;
+            background-image:
+                radial-gradient(circle at 5%  30%, rgba(77,150,255,0.14) 0%, transparent 35%),
+                radial-gradient(circle at 95% 10%, rgba(199,125,255,0.14) 0%, transparent 35%),
+                radial-gradient(circle at 50% 90%, rgba(255,217,61,0.12) 0%, transparent 30%);
+            pointer-events: none;
         }
-        .cours-hero::after {
-            content: '';
-            position: absolute;
-            width: 200px; height: 200px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.06);
-            bottom: -60px; left: 10%;
+
+        .course-hero-inner {
+            position: relative; z-index: 2;
+            padding-bottom: 2.5rem;
         }
-        .cours-hero h1 {
-            font-family: 'Fredoka', sans-serif;
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: white;
-        }
-        .hero-badge {
-            display: inline-block;
-            background: rgba(255,255,255,0.2);
-            color: white;
-            padding: 6px 18px;
-            border-radius: 30px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255,255,255,0.3);
+
+        /* breadcrumb */
+        .bc-link { color: rgba(30,42,59,0.55); font-size: 0.85rem; font-weight: 700; text-decoration: none; transition: color 0.2s; }
+        .bc-link:hover { color: var(--ocean); }
+        .bc-sep { margin: 0 8px; color: rgba(30,42,59,0.3); }
+        .bc-current { color: var(--dark); font-size: 0.85rem; font-weight: 700; }
+
+        /* Course title area */
+        .course-type-pill {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-family: 'Baloo 2', cursive; font-size: 0.78rem; font-weight: 800;
+            padding: 5px 15px; border-radius: 30px;
+            text-transform: uppercase; letter-spacing: 0.05em;
             margin-bottom: 1rem;
         }
-        .hero-stats {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            margin-top: 1.2rem;
-        }
-        .hero-stat {
-            background: rgba(255,255,255,0.15);
-            color: white;
-            padding: 8px 18px;
-            border-radius: 30px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            font-family: 'Fredoka', sans-serif;
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-        .cours-hero-image {
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-height: 260px;
-        }
-        .cours-hero-image img {
-            width: 100%;
-            height: 260px;
-            object-fit: cover;
-        }
-        .cours-hero-emoji {
-            background: rgba(255,255,255,0.15);
-            border-radius: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 200px;
-            font-size: 7rem;
-            backdrop-filter: blur(8px);
-            border: 2px solid rgba(255,255,255,0.2);
-        }
+        .type-Académique { background: #EBF5FF; color: var(--ocean); }
+        .type-Social     { background: #EBFFEE; color: #2EA043; }
+        .type-Motricité  { background: #FFF0EB; color: var(--coral); }
+        .type-Langage    { background: #F5EBFF; color: var(--lavender); }
+        .type-default    { background: #F5F5F5; color: #777; }
 
-        /* ── Main Content Card ── */
-        .content-card {
-            background: white;
-            border-radius: 28px;
-            padding: 2rem;
-            box-shadow: 0 8px 40px rgba(0,0,0,0.07);
-            margin-top: -3rem;
-            position: relative;
-            z-index: 10;
-        }
-
-        /* ── Description Section ── */
-        .section-title {
-            font-family: 'Fredoka', sans-serif;
-            font-size: 1.4rem;
-            font-weight: 800;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 1.2rem;
-        }
-        .section-icon {
-            font-size: 1.3rem;
-        }
-        .description-box {
-            background: var(--primary-light);
-            border: 2px solid #c4b5fd;
-            border-radius: 18px;
-            padding: 1.4rem 1.6rem;
-            color: #4c1d95;
-            font-size: 1rem;
-            line-height: 1.7;
-        }
-
-        /* ── Word Cards ── */
-        .mots-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 1.2rem;
-        }
-        .mot-card {
-            background: white;
-            border: 3px solid #e9d5ff;
-            border-radius: 22px;
-            padding: 1.5rem 1rem;
-            text-align: center;
-            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(108,79,246,0.08);
-        }
-        .mot-card:hover {
-            transform: translateY(-8px) scale(1.03);
-            border-color: var(--primary);
-            box-shadow: 0 16px 40px rgba(108,79,246,0.2);
-        }
-        .mot-card:nth-child(3n+1) { border-color: #fca5a5; }
-        .mot-card:nth-child(3n+1):hover { border-color: #ef4444; box-shadow: 0 16px 40px rgba(239,68,68,0.2); }
-        .mot-card:nth-child(3n+2) { border-color: #86efac; }
-        .mot-card:nth-child(3n+2):hover { border-color: #22c55e; box-shadow: 0 16px 40px rgba(34,197,94,0.2); }
-        .mot-card:nth-child(3n+3) { border-color: #93c5fd; }
-        .mot-card:nth-child(3n+3):hover { border-color: #3b82f6; box-shadow: 0 16px 40px rgba(59,130,246,0.2); }
-
-        .mot-image-wrapper {
-            width: 120px;
-            height: 120px;
-            border-radius: 16px;
-            overflow: hidden;
-            margin: 0 auto 1rem;
-            background: #f8fafc;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid #f1f5f9;
-        }
-        .mot-image-wrapper img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 14px;
-        }
-        .mot-image-placeholder {
-            font-size: 3.5rem;
-            line-height: 1;
-        }
-        .mot-label {
-            font-family: 'Fredoka', sans-serif;
-            font-size: 1.35rem;
+        .course-main-title {
+            font-family: 'Baloo 2', cursive;
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
             font-weight: 800;
             color: var(--dark);
-            margin-bottom: 0.75rem;
-            letter-spacing: 0.02em;
+            line-height: 1.15;
+            margin-bottom: 0.7rem;
         }
-        .btn-audio {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), #a855f7);
-            border: none;
-            color: white;
-            font-size: 1.1rem;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(108,79,246,0.35);
-        }
-        .btn-audio:hover {
-            transform: scale(1.15);
-            box-shadow: 0 8px 25px rgba(108,79,246,0.5);
-        }
-        .btn-audio.playing {
-            background: linear-gradient(135deg, #ff4880, #f43f5e);
-            animation: pulse 1s ease infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 4px 15px rgba(255,72,128,0.4); }
-            50% { box-shadow: 0 8px 30px rgba(255,72,128,0.7); }
+        .course-main-desc {
+            font-size: 1rem;
+            color: #555;
+            line-height: 1.65;
+            max-width: 560px;
+            margin-bottom: 1.4rem;
         }
 
-        /* ── Evaluation Section ── */
-        .evaluation-section {
-            background: linear-gradient(135deg, var(--primary) 0%, #a855f7 100%);
-            border-radius: 28px;
-            padding: 2.5rem;
-            text-align: center;
-            margin-top: 2rem;
-        }
-        .evaluation-section h3 {
-            font-family: 'Fredoka', sans-serif;
-            font-size: 1.8rem;
-            color: white;
-            font-weight: 800;
-            margin-bottom: 0.5rem;
-        }
-        .evaluation-section p {
-            color: rgba(255,255,255,0.85);
-            margin-bottom: 1.5rem;
-        }
-        .btn-quiz {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
+        /* Stats row */
+        .info-chips { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 1.6rem; }
+        .info-chip {
+            display: inline-flex; align-items: center; gap: 7px;
             background: white;
-            color: var(--primary);
-            padding: 1rem 2.5rem;
-            border-radius: 50px;
-            font-size: 1.15rem;
-            font-weight: 800;
-            font-family: 'Fredoka', sans-serif;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            padding: 9px 18px; border-radius: 50px;
+            font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 800;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+            border: 2px solid transparent;
         }
-        .btn-quiz:hover {
-            transform: translateY(-4px) scale(1.04);
-            box-shadow: 0 16px 40px rgba(0,0,0,0.2);
-            color: var(--primary);
+        .chip-level  { border-color: #FFD93D; color: #92400E; }
+        .chip-time   { border-color: #6BCB77; color: #155724; }
+        .chip-words  { border-color: #4D96FF; color: #1B3A6B; }
+
+        /* Course image in hero */
+        .course-hero-img-wrap {
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 16px 50px rgba(0,0,0,0.14);
+            border: 4px solid white;
+            aspect-ratio: 4/3;
+            background: linear-gradient(135deg, #E8F4FF, #F5EBFF);
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+        }
+        .course-hero-img-wrap img {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        .hero-img-emoji {
+            font-size: 7rem;
+            animation: float-em 3s ease-in-out infinite;
+            filter: drop-shadow(0 8px 16px rgba(0,0,0,0.12));
+        }
+        @keyframes float-em {
+            0%,100% { transform: translateY(0) rotate(-5deg); }
+            50%      { transform: translateY(-14px) rotate(5deg); }
         }
 
         /* ── Back button ── */
         .btn-back {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(255,255,255,0.2);
-            color: white;
-            padding: 8px 20px;
-            border-radius: 30px;
+            display: inline-flex; align-items: center; gap: 7px;
+            background: white;
+            color: var(--dark);
+            font-family: 'Baloo 2', cursive; font-size: 0.9rem; font-weight: 700;
+            padding: 9px 20px; border-radius: 40px;
             text-decoration: none;
-            font-weight: 700;
-            font-size: 0.9rem;
-            transition: all 0.3s;
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255,255,255,0.3);
-            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+            border: 2px solid #EBEBEB;
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-        .btn-back:hover {
-            background: rgba(255,255,255,0.3);
-            color: white;
-            transform: translateX(-4px);
+        .btn-back:hover { transform: translateX(-4px) scale(1.04); color: var(--ocean); border-color: var(--ocean); }
+
+        /* ══ CONTENT SECTION ══ */
+        .content-section {
+            background: linear-gradient(180deg, #F4F9FF 0%, var(--bg) 100%);
+            padding: 3.5rem 0 5rem;
         }
 
-        /* ── No mots placeholder ── */
-        .no-mots {
-            text-align: center;
-            padding: 3rem;
-            color: #94a3b8;
+        /* Section title */
+        .section-heading {
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.55rem;
+            font-weight: 800;
+            color: var(--dark);
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 1.6rem;
         }
-        .no-mots .icon { font-size: 3rem; margin-bottom: 1rem; }
+        .section-heading .heading-dot {
+            width: 14px; height: 14px; border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .section-heading::after {
+            content: '';
+            flex: 1; height: 3px; border-radius: 4px;
+            background: linear-gradient(to right, rgba(77,150,255,0.4), transparent);
+            margin-left: 8px;
+        }
+
+        /* ══ MOTS GRID — centered & larger ══ */
+        .mots-section-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .mots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+            gap: 22px;
+            width: 100%;
+            justify-items: center;
+        }
+
+        /* ══ MOT CARD — redesigned larger ══ */
+        .mot-card {
+            background: white;
+            border-radius: 26px;
+            overflow: hidden;
+            box-shadow: 0 8px 28px rgba(0,0,0,0.09);
+            border: 3px solid #F0F0F0;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                        box-shadow 0.3s ease,
+                        border-color 0.2s;
+            cursor: default;
+            animation: cardIn 0.45s ease both;
+            width: 100%;
+            max-width: 240px;
+        }
+        .mot-card:hover {
+            transform: translateY(-10px) scale(1.04);
+            box-shadow: 0 22px 50px rgba(0,0,0,0.15);
+        }
+        .mot-card:nth-child(1)  { animation-delay: 0.05s; }
+        .mot-card:nth-child(2)  { animation-delay: 0.10s; }
+        .mot-card:nth-child(3)  { animation-delay: 0.15s; }
+        .mot-card:nth-child(4)  { animation-delay: 0.20s; }
+        .mot-card:nth-child(5)  { animation-delay: 0.25s; }
+        .mot-card:nth-child(6)  { animation-delay: 0.30s; }
+        .mot-card:nth-child(7)  { animation-delay: 0.35s; }
+        .mot-card:nth-child(8)  { animation-delay: 0.40s; }
+
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(28px) scale(0.93); }
+            to   { opacity: 1; transform: translateY(0)    scale(1); }
+        }
+
+        /* Colorful top strip on each mot card */
+        .mot-card:nth-child(6n+1) { border-top: 6px solid var(--ocean); }
+        .mot-card:nth-child(6n+1):hover { border-color: var(--ocean); box-shadow: 0 22px 50px rgba(77,150,255,0.22); }
+        .mot-card:nth-child(6n+2) { border-top: 6px solid var(--sky); }
+        .mot-card:nth-child(6n+2):hover { border-color: var(--sky); box-shadow: 0 22px 50px rgba(107,203,119,0.22); }
+        .mot-card:nth-child(6n+3) { border-top: 6px solid var(--coral); }
+        .mot-card:nth-child(6n+3):hover { border-color: var(--coral); box-shadow: 0 22px 50px rgba(255,107,107,0.22); }
+        .mot-card:nth-child(6n+4) { border-top: 6px solid var(--lavender); }
+        .mot-card:nth-child(6n+4):hover { border-color: var(--lavender); box-shadow: 0 22px 50px rgba(199,125,255,0.22); }
+        .mot-card:nth-child(6n+5) { border-top: 6px solid var(--mint); }
+        .mot-card:nth-child(6n+5):hover { border-color: var(--mint); box-shadow: 0 22px 50px rgba(46,196,182,0.22); }
+        .mot-card:nth-child(6n+0) { border-top: 6px solid var(--rose); }
+        .mot-card:nth-child(6n+0):hover { border-color: var(--rose); box-shadow: 0 22px 50px rgba(255,111,168,0.22); }
+
+        /* Gradient background tints matching the top border */
+        .mot-card:nth-child(6n+1) .mot-img-wrap { background: linear-gradient(135deg, #EBF5FF, #DBEAFE); }
+        .mot-card:nth-child(6n+2) .mot-img-wrap { background: linear-gradient(135deg, #EBFFEE, #D1FAE5); }
+        .mot-card:nth-child(6n+3) .mot-img-wrap { background: linear-gradient(135deg, #FFF0EB, #FFE4E4); }
+        .mot-card:nth-child(6n+4) .mot-img-wrap { background: linear-gradient(135deg, #F5EBFF, #EDE9FE); }
+        .mot-card:nth-child(6n+5) .mot-img-wrap { background: linear-gradient(135deg, #E6FFFD, #CCFBF1); }
+        .mot-card:nth-child(6n+0) .mot-img-wrap { background: linear-gradient(135deg, #FFF0F7, #FCE7F3); }
+
+        .mot-img-wrap {
+            height: 160px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #F5F5F5, #EBEBEB);
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+        }
+        .mot-img-wrap img {
+            width: 100%; height: 100%; object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        .mot-card:hover .mot-img-wrap img { transform: scale(1.1); }
+
+        .mot-placeholder-emoji {
+            font-size: 4.5rem;
+            animation: floatEmoji 3s ease-in-out infinite;
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.12));
+        }
+        @keyframes floatEmoji {
+            0%,100% { transform: translateY(0) rotate(-3deg); }
+            50%      { transform: translateY(-9px) rotate(3deg); }
+        }
+
+        .mot-label {
+            padding: 14px 14px 16px;
+            text-align: center;
+            background: white;
+        }
+        .mot-label span {
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.18rem;
+            font-weight: 800;
+            color: var(--dark);
+            letter-spacing: 0.05em;
+        }
+
+        /* Label color accent strip under the word */
+        .mot-label-bar {
+            width: 40px; height: 4px; border-radius: 4px;
+            margin: 5px auto 0;
+            opacity: 0.6;
+        }
+        .mot-card:nth-child(6n+1) .mot-label-bar { background: var(--ocean); }
+        .mot-card:nth-child(6n+2) .mot-label-bar { background: var(--sky); }
+        .mot-card:nth-child(6n+3) .mot-label-bar { background: var(--coral); }
+        .mot-card:nth-child(6n+4) .mot-label-bar { background: var(--lavender); }
+        .mot-card:nth-child(6n+5) .mot-label-bar { background: var(--mint); }
+        .mot-card:nth-child(6n+0) .mot-label-bar { background: var(--rose); }
+
+        /* Multi-image mot: small thumbnails */
+        .mot-img-thumbs {
+            display: flex; flex-wrap: wrap; gap: 5px; padding: 6px;
+            justify-content: center; align-items: center;
+        }
+        .mot-img-thumbs img {
+            width: 62px; height: 62px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 2.5px solid white;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .mot-img-thumbs img:hover { transform: scale(1.14); box-shadow: 0 6px 16px rgba(0,0,0,0.16); }
+
+        /* ── Progress bar style ── */
+        .progress-wrap {
+            background: white;
+            border-radius: 20px;
+            padding: 1.2rem 1.6rem;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.07);
+            border: 2px solid #F0F0F0;
+            margin-bottom: 2rem;
+        }
+        .progress-label {
+            font-family: 'Baloo 2', cursive;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 6px;
+        }
+        .progress-bar-wrap {
+            height: 12px;
+            background: #EBEBEB;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            border-radius: 10px;
+            background: linear-gradient(90deg, var(--ocean), var(--lavender), var(--rose));
+            transition: width 1.4s cubic-bezier(0.34, 1.2, 0.64, 1);
+        }
+
+        /* ── Sidebar card ── */
+        .sidebar-card {
+            background: white;
+            border-radius: 24px;
+            padding: 1.5rem;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+            border: 2px solid #F0F0F0;
+            margin-bottom: 1.2rem;
+        }
+        .sidebar-card-title {
+            font-family: 'Baloo 2', cursive;
+            font-size: 0.95rem; font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 1rem;
+            display: flex; align-items: center; gap: 7px;
+        }
+        .sidebar-stat-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 9px 0;
+            border-bottom: 1.5px dashed #F0F0F0;
+        }
+        .sidebar-stat-row:last-child { border-bottom: none; padding-bottom: 0; }
+        .sidebar-stat-label {
+            font-size: 0.82rem; font-weight: 700; color: #888;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .sidebar-stat-value {
+            font-family: 'Baloo 2', cursive;
+            font-size: 0.95rem; font-weight: 800; color: var(--dark);
+            display: flex; align-items: center; gap: 5px;
+        }
+
+        /* niveau color dots */
+        .niveau-dot {
+            width: 10px; height: 10px; border-radius: 50%; display: inline-block;
+        }
+        .dot-Débutant      { background: #6BCB77; }
+        .dot-Intermédiaire { background: #FFD93D; }
+        .dot-Avancé        { background: #FF6B6B; }
+
+        /* ── CTA Block ── */
+        .cta-block {
+            background: linear-gradient(135deg, #4D96FF, #C77DFF);
+            border-radius: 24px;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            box-shadow: 0 10px 32px rgba(77,150,255,0.32);
+        }
+        .cta-block h4 {
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.25rem; font-weight: 800;
+            color: white; margin-bottom: 0.4rem;
+        }
+        .cta-block p {
+            font-size: 0.87rem; color: rgba(255,255,255,0.85);
+            margin-bottom: 1.2rem;
+        }
+        .btn-cta-start {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: white;
+            color: var(--ocean);
+            font-family: 'Baloo 2', cursive; font-size: 1rem; font-weight: 800;
+            padding: 12px 28px; border-radius: 50px;
+            text-decoration: none;
+            box-shadow: 0 5px 18px rgba(0,0,0,0.15);
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .btn-cta-start:hover { transform: scale(1.06) translateY(-2px); color: var(--lavender); }
+
+        /* ── Lightbox ── */
+        .lightbox-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(10,10,25,0.88); backdrop-filter: blur(8px);
+            z-index: 9999; align-items: center; justify-content: center;
+        }
+        .lightbox-overlay.open { display: flex; }
+        .lightbox-img-wrap {
+            max-width: 90vw; max-height: 85vh;
+            border-radius: 20px; overflow: hidden;
+            position: relative;
+        }
+        .lightbox-img-wrap img {
+            max-width: 100%; max-height: 85vh; object-fit: contain;
+            border-radius: 20px;
+        }
+        .lb-close {
+            position: absolute; top: -14px; right: -14px;
+            background: white; color: var(--coral);
+            width: 36px; height: 36px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; font-weight: 800; cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+        .lb-close:hover { transform: scale(1.15); }
+
+        /* ── Count badge ── */
+        .mots-count-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: linear-gradient(135deg, var(--ocean), var(--lavender));
+            color: white;
+            font-family: 'Baloo 2', cursive; font-size: 0.82rem; font-weight: 800;
+            padding: 5px 16px; border-radius: 30px;
+            margin-left: 8px;
+            box-shadow: 0 3px 10px rgba(77,150,255,0.3);
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .mots-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 16px;
+            }
+            .mot-card { max-width: 100%; }
+            .mot-img-wrap { height: 130px; }
+        }
+        @media (max-width: 480px) {
+            .mots-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 14px;
+            }
+        }
     </style>
 {% endblock %}
 
 {% block body %}
 
-    {# Parse mots and imagesMots #}
-    {% set motsArray = cours.mots ? cours.mots|split(';') : [] %}
+    {% set emojis  = {'Académique': '📚', 'Social': '🤝', 'Motricité': '🏃', 'Langage': '💬'} %}
+    {% set emoji   = emojis[cours.typeCours] ?? '🎓' %}
+    {% set motsList = cours.mots ? cours.mots|split(';') : [] %}
+    {% set motsCount = motsList|length %}
+    {% set typeClass = 'type-' ~ cours.typeCours %}
+
+    {# Build image map: {mot: [img1, img2, ...]} #}
     {% set imagesMotsMap = {} %}
     {% if cours.imagesMots %}
-        {% for entry in cours.imagesMots|split(';') %}
-            {% set parts = entry|split(':') %}
+        {% for item in cours.imagesMots|split(';') %}
+            {% set parts = item|split(':') %}
             {% if parts|length >= 2 %}
-                {% set imagesMotsMap = imagesMotsMap|merge({(parts[0]|trim): parts[1]|split(',')}) %}
+                {% set imagesMotsMap = imagesMotsMap|merge({(parts[0]): parts[1]|split(',')}) %}
             {% endif %}
         {% endfor %}
     {% endif %}
 
-    <!-- Hero Section -->
-    <div class="cours-hero">
-        <div class="container position-relative" style="z-index: 5;">
-            <a href="{{ path('app_cours') }}" class="btn-back">
-                ← Retour aux cours
-            </a>
-            <div class="row align-items-center">
-                <div class="col-lg-7">
-                    <span class="hero-badge">{{ cours.typeCours }}</span>
-                    <h1>{{ cours.titre }}</h1>
-                    <div class="hero-stats">
-                        <span class="hero-stat">📊 {{ cours.niveau }}</span>
-                        <span class="hero-stat">⏱ {{ cours.duree }} min</span>
-                        {% if motsArray|length > 0 %}
-                            <span class="hero-stat">🔤 {{ motsArray|length }} mots</span>
-                        {% endif %}
-                    </div>
+    <!-- ══ HERO ══ -->
+    <div class="course-hero">
+        <div class="course-hero-inner">
+            <div class="container">
+                <!-- Breadcrumb -->
+                <div class="mb-3">
+                    <a href="{{ path('app_home') }}" class="bc-link">🏠 Accueil</a>
+                    <span class="bc-sep">›</span>
+                    <a href="{{ path('app_cours') }}" class="bc-link">Cours</a>
+                    <span class="bc-sep">›</span>
+                    <span class="bc-current">{{ cours.titre }}</span>
                 </div>
-                <div class="col-lg-5 mt-4 mt-lg-0">
-                    {% if cours.image %}
-                        <div class="cours-hero-image">
-                            <img src="/uploads/images/{{ cours.image }}" alt="{{ cours.titre }}">
+
+                <div class="row align-items-center g-4">
+                    <!-- Left: info -->
+                    <div class="col-lg-7 col-md-6">
+                        <span class="course-type-pill {{ typeClass }}">{{ emoji }} {{ cours.typeCours }}</span>
+
+                        <h1 class="course-main-title">{{ cours.titre }}</h1>
+                        <p class="course-main-desc">{{ cours.description }}</p>
+
+                        <div class="info-chips">
+                            <span class="info-chip chip-level">
+                                📊 <strong>{{ cours.niveau }}</strong>
+                            </span>
+                            <span class="info-chip chip-time">
+                                ⏱ <strong>{{ cours.duree }} min</strong>
+                            </span>
+                            {% if motsCount > 0 %}
+                            <span class="info-chip chip-words">
+                                🔤 <strong>{{ motsCount }} mot{{ motsCount > 1 ? 's' : '' }}</strong>
+                            </span>
+                            {% endif %}
                         </div>
-                    {% else %}
-                        {% set emojis = {'Académique': '📚', 'Social': '🤝', 'Motricité': '🏃', 'Langage': '💬'} %}
-                        <div class="cours-hero-emoji">
-                            {{ emojis[cours.typeCours] ?? '🎓' }}
+
+                        <a href="{{ path('app_cours') }}" class="btn-back">
+                            ← Retour aux cours
+                        </a>
+                    </div>
+
+                    <!-- Right: image -->
+                    <div class="col-lg-5 col-md-6">
+                        <div class="course-hero-img-wrap">
+                            {% if cours.image %}
+                                <img src="/uploads/images/{{ cours.image }}" alt="{{ cours.titre }}">
+                            {% else %}
+                                <span class="hero-img-emoji">{{ emoji }}</span>
+                            {% endif %}
                         </div>
-                    {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="container pb-5">
-        <div class="content-card">
+    <!-- ══ CONTENT ══ -->
+    <div class="content-section">
+        <div class="container">
+            <div class="row g-4">
 
-            <!-- Description -->
-            <div class="mb-4">
-                <h2 class="section-title">
-                    <span class="section-icon">📝</span> Description du cours
-                </h2>
-                <div class="description-box">
-                    {{ cours.description }}
-                </div>
-            </div>
+                <!-- ── MAIN: Mots ── -->
+                <div class="col-lg-8">
 
-            <!-- Mots à apprendre -->
-            {% if motsArray|length > 0 %}
-            <div class="mb-2">
-                <h2 class="section-title">
-                    <span class="section-icon">🔤</span> Mots à apprendre
-                </h2>
-                <div class="mots-grid">
-                    {% for mot in motsArray %}
-                        {% set mot = mot|trim %}
-                        {% set motImages = imagesMotsMap[mot] ?? [] %}
-                        <div class="mot-card" data-mot="{{ mot }}">
-                            <div class="mot-image-wrapper">
-                                {% if motImages|length > 0 %}
-                                    <img src="/uploads/images/{{ motImages[0]|trim }}"
-                                         alt="{{ mot }}"
-                                         onerror="this.parentElement.innerHTML='<span class=\'mot-image-placeholder\'>🖼️</span>'">
-                                {% else %}
-                                    <span class="mot-image-placeholder">🖼️</span>
-                                {% endif %}
-                            </div>
-                            <div class="mot-label">{{ mot }}</div>
-                            <button class="btn-audio" onclick="speakMot('{{ mot }}')" title="Écouter">
-                                <i class="fas fa-volume-up"></i>
-                            </button>
+                    {% if motsList|length > 0 %}
+
+                    <div class="section-heading">
+                        <span class="heading-dot" style="background:var(--ocean);"></span>
+                        🔤 Les mots du cours
+                        <span class="mots-count-badge">{{ motsCount }} mot{{ motsCount > 1 ? 's' : '' }}</span>
+                    </div>
+
+                    <!-- Progress -->
+                    <div class="progress-wrap">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="progress-label">Contenu du cours</div>
+                            <span style="font-family:'Baloo 2',cursive; font-size:0.88rem; font-weight:800; color:var(--ocean);">{{ motsCount }} élément{{ motsCount > 1 ? 's' : '' }}</span>
                         </div>
-                    {% endfor %}
+                        <div class="progress-bar-wrap">
+                            <div class="progress-bar-fill" style="width:100%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Mots grid — centered -->
+                    <div class="mots-section-wrap">
+                        <div class="mots-grid">
+                            {% for mot in motsList %}
+                                {% set mot = mot|trim %}
+                                {% if mot %}
+                                {% set motImages = imagesMotsMap[mot] ?? [] %}
+
+                                <div class="mot-card">
+                                    <!-- Image(s) -->
+                                    <div class="mot-img-wrap">
+                                        {% if motImages|length == 1 %}
+                                            <img src="/uploads/images/{{ motImages[0]|trim }}"
+                                                 alt="{{ mot }}"
+                                                 class="lightbox-trigger"
+                                                 data-src="/uploads/images/{{ motImages[0]|trim }}">
+                                        {% elseif motImages|length > 1 %}
+                                            <div class="mot-img-thumbs">
+                                                {% for img in motImages %}
+                                                    <img src="/uploads/images/{{ img|trim }}"
+                                                         alt="{{ mot }}"
+                                                         class="lightbox-trigger"
+                                                         data-src="/uploads/images/{{ img|trim }}">
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            <span class="mot-placeholder-emoji">
+                                                {% set wordEmojis = ['🌸', '🎨', '⭐', '🎵', '🍎', '🐶', '🌈', '🏠', '🚗', '🌙'] %}
+                                                {{ wordEmojis[loop.index0 % 10] }}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                    <!-- Label -->
+                                    <div class="mot-label">
+                                        <span>{{ mot|upper }}</span>
+                                        <div class="mot-label-bar"></div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    {% else %}
+                    <div style="background:white; border-radius:24px; padding:3rem; text-align:center; box-shadow:0 5px 20px rgba(0,0,0,0.07); border:2px solid #F0F0F0;">
+                        <div style="font-size:4rem; margin-bottom:1rem;">📭</div>
+                        <h5 style="font-family:'Baloo 2',cursive; font-weight:800; color:#555;">Aucun mot dans ce cours</h5>
+                        <p style="color:#888; font-size:0.9rem;">Le contenu sera bientôt ajouté.</p>
+                    </div>
+                    {% endif %}
+
                 </div>
-            </div>
-            {% endif %}
 
-            <!-- Evaluation -->
-            <div class="evaluation-section">
-                <h3>🎯 Évaluation du cours</h3>
-                <p>Testez vos connaissances avec notre quiz interactif !</p>
-                <a href="#" class="btn-quiz">
-                    <i class="fas fa-graduation-cap"></i> Passer le quiz
-                </a>
-            </div>
+                <!-- ── SIDEBAR ── -->
+                <div class="col-lg-4">
 
+                    <!-- Stats card -->
+                    <div class="sidebar-card">
+                        <div class="sidebar-card-title">📋 Informations</div>
+                        <div class="sidebar-stat-row">
+                            <span class="sidebar-stat-label">📊 Niveau</span>
+                            <span class="sidebar-stat-value">
+                                <span class="niveau-dot dot-{{ cours.niveau }}"></span>
+                                {{ cours.niveau }}
+                            </span>
+                        </div>
+                        <div class="sidebar-stat-row">
+                            <span class="sidebar-stat-label">⏱ Durée</span>
+                            <span class="sidebar-stat-value">{{ cours.duree }} min</span>
+                        </div>
+                        <div class="sidebar-stat-row">
+                            <span class="sidebar-stat-label">🏷️ Type</span>
+                            <span class="sidebar-stat-value">{{ cours.typeCours }}</span>
+                        </div>
+                        {% if motsCount > 0 %}
+                        <div class="sidebar-stat-row">
+                            <span class="sidebar-stat-label">🔤 Mots</span>
+                            <span class="sidebar-stat-value">{{ motsCount }} mots</span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Mots list mini -->
+                    {% if motsList|length > 0 %}
+                    <div class="sidebar-card">
+                        <div class="sidebar-card-title">🗂️ Liste des mots</div>
+                        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                            {% for mot in motsList %}
+                                {% set mot = mot|trim %}
+                                {% if mot %}
+                                <span style="
+                                    background: #F0F6FF;
+                                    color: var(--ocean);
+                                    font-family: 'Baloo 2',cursive;
+                                    font-weight: 800;
+                                    font-size: 0.82rem;
+                                    padding: 6px 14px;
+                                    border-radius: 20px;
+                                    border: 1.5px solid #C5DFFF;
+                                    transition: all 0.2s;
+                                    cursor: default;
+                                ">{{ mot|upper }}</span>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- CTA -->
+                    <div class="cta-block">
+                        <div style="font-size:2.8rem; margin-bottom:0.6rem;">🚀</div>
+                        <h4>Prêt à apprendre ?</h4>
+                        <p>Explore ce cours et découvre tous ses mots et images !</p>
+                        <a href="{{ path('app_cours') }}" class="btn-cta-start">
+                            🌈 Voir tous les cours
+                        </a>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ LIGHTBOX ══ -->
+    <div class="lightbox-overlay" id="lightbox">
+        <div class="lightbox-img-wrap">
+            <div class="lb-close" id="lbClose">✕</div>
+            <img src="" id="lbImg" alt="Image agrandie">
         </div>
     </div>
 
@@ -400,66 +689,34 @@
 {% block javascripts %}
     {{ parent() }}
     <script>
-        let currentUtterance = null;
-        let currentBtn = null;
+    (function () {
+        // Lightbox
+        const overlay = document.getElementById('lightbox');
+        const lbImg   = document.getElementById('lbImg');
+        const lbClose = document.getElementById('lbClose');
 
-        function speakMot(mot) {
-            const btn = event.currentTarget;
-
-            // Stop if already speaking this word
-            if (currentUtterance && currentBtn === btn) {
-                window.speechSynthesis.cancel();
-                btn.classList.remove('playing');
-                btn.innerHTML = '<i class="fas fa-volume-up"></i>';
-                currentUtterance = null;
-                currentBtn = null;
-                return;
-            }
-
-            // Stop previous
-            if (currentUtterance) {
-                window.speechSynthesis.cancel();
-                if (currentBtn) {
-                    currentBtn.classList.remove('playing');
-                    currentBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
-                }
-            }
-
-            const utterance = new SpeechSynthesisUtterance(mot);
-            utterance.lang = 'fr-FR';
-            utterance.rate = 0.8;
-            utterance.pitch = 1.1;
-
-            utterance.onstart = () => {
-                btn.classList.add('playing');
-                btn.innerHTML = '<i class="fas fa-stop"></i>';
-                currentBtn = btn;
-            };
-            utterance.onend = () => {
-                btn.classList.remove('playing');
-                btn.innerHTML = '<i class="fas fa-volume-up"></i>';
-                currentUtterance = null;
-                currentBtn = null;
-            };
-            utterance.onerror = () => {
-                btn.classList.remove('playing');
-                btn.innerHTML = '<i class="fas fa-volume-up"></i>';
-                currentUtterance = null;
-                currentBtn = null;
-            };
-
-            currentUtterance = utterance;
-            window.speechSynthesis.speak(utterance);
-        }
-
-        // Card click also triggers audio
-        document.querySelectorAll('.mot-card').forEach(card => {
-            card.addEventListener('click', function(e) {
-                if (!e.target.closest('.btn-audio')) {
-                    const btn = this.querySelector('.btn-audio');
-                    if (btn) btn.click();
-                }
+        document.querySelectorAll('.lightbox-trigger').forEach(img => {
+            img.style.cursor = 'zoom-in';
+            img.addEventListener('click', function () {
+                lbImg.src = this.dataset.src || this.src;
+                overlay.classList.add('open');
             });
         });
+
+        lbClose.addEventListener('click',  () => overlay.classList.remove('open'));
+        overlay.addEventListener('click', e => {
+            if (e.target === overlay) overlay.classList.remove('open');
+        });
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') overlay.classList.remove('open');
+        });
+
+        // Animate progress bar on load
+        const fill = document.querySelector('.progress-bar-fill');
+        if (fill) {
+            fill.style.width = '0%';
+            setTimeout(() => fill.style.width = '100%', 300);
+        }
+    })();
     </script>
 {% endblock %}
