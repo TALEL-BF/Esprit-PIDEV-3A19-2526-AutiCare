@@ -22,10 +22,9 @@
             --bg:       #faf5ff;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { box-sizing: border-box; }
 
         body {
-            background: var(--bg);
             font-family: 'Nunito', sans-serif;
             min-height: 100vh;
             overflow-x: hidden;
@@ -37,7 +36,7 @@
         .quiz-bg {
             position: fixed;
             inset: 0;
-            z-index: 0;
+            z-index: -1;
             background: linear-gradient(160deg, #f0e8ff 0%, #faf5ff 40%, #fff0f8 100%);
             overflow: hidden;
             pointer-events: none;
@@ -1123,10 +1122,12 @@
         } else {
             wrong++;
             feedbackBox.className = 'feedback-box visible wrong-fb';
-            feedbackIcon.textContent = '😕';
+            feedbackIcon.textContent = '💔';
             feedbackTitle.textContent = `Pas tout à fait…`;
             feedbackDetail.textContent = `La bonne réponse était : « ${q.bonneReponse} »`;
+            launchShatter();
         }
+
 
         scoreDsp.textContent = score;
         const isLast = (current + 1 >= questions.length);
