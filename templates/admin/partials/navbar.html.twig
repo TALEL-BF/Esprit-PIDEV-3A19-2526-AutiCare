@@ -1,0 +1,31 @@
+<div id="navbar">
+    <button class="navbar-toggle" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <div class="navbar-page-title">
+        {% block page_title %}Dashboard{% endblock %}
+    </div>
+    
+    <div class="navbar-search">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Rechercher...">
+    </div>
+    
+    <div class="navbar-actions">
+        <button class="nav-action-btn">
+            <i class="fas fa-bell"></i>
+            <span class="nav-badge">3</span>
+        </button>
+        <button class="nav-action-btn">
+            <i class="fas fa-envelope"></i>
+            <span class="nav-badge">5</span>
+        </button>
+    </div>
+    
+    <div class="navbar-user">
+        <div class="navbar-user-avatar">A</div>
+        <span class="navbar-user-name">Admin</span>
+        <i class="fas fa-chevron-down" style="font-size: 0.7rem; color: #999;"></i>
+    </div>
+</div>

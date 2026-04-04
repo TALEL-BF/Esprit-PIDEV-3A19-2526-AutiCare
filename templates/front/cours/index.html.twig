@@ -1,0 +1,404 @@
+{# templates/front/cours/index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}AutiCare - Nos Cours Éducatifs{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        :root {
+            --primary: #4d65f9;
+            --secondary: #ff4880;
+            --dark: #1e293b;
+            --c1: #FFF3E0; --c1-deep: #FF9800;
+            --c2: #E8F5E9; --c2-deep: #4CAF50;
+            --c3: #E3F2FD; --c3-deep: #2196F3;
+            --c4: #FCE4EC; --c4-deep: #E91E63;
+            --c5: #F3E5F5; --c5-deep: #9C27B0;
+            --c6: #E0F7FA; --c6-deep: #00BCD4;
+        }
+
+        /* Course Card Styles */
+        .course-card {
+            border-radius: 32px;
+            overflow: hidden;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease;
+            background: white;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.07);
+            position: relative;
+            height: 100%;
+            border: 3px solid transparent;
+        }
+        .course-card:hover {
+            transform: translateY(-14px) rotate(-0.5deg);
+            box-shadow: 0 28px 55px rgba(0,0,0,0.13);
+        }
+        .course-card[data-color="1"] { border-color: var(--c1-deep); }
+        .course-card[data-color="2"] { border-color: var(--c2-deep); }
+        .course-card[data-color="3"] { border-color: var(--c3-deep); }
+        .course-card[data-color="4"] { border-color: var(--c4-deep); }
+        .course-card[data-color="5"] { border-color: var(--c5-deep); }
+        .course-card[data-color="6"] { border-color: var(--c6-deep); }
+
+        .course-emoji-banner {
+            height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .course-emoji-banner[data-bg="1"] { background: var(--c1); }
+        .course-emoji-banner[data-bg="2"] { background: var(--c2); }
+        .course-emoji-banner[data-bg="3"] { background: var(--c3); }
+        .course-emoji-banner[data-bg="4"] { background: var(--c4); }
+        .course-emoji-banner[data-bg="5"] { background: var(--c5); }
+        .course-emoji-banner[data-bg="6"] { background: var(--c6); }
+
+        .course-emoji {
+            font-size: 5rem;
+            line-height: 1;
+            filter: drop-shadow(0 6px 12px rgba(0,0,0,0.15));
+            animation: floatEmoji 3s ease-in-out infinite;
+            user-select: none;
+        }
+        @keyframes floatEmoji {
+            0%, 100% { transform: translateY(0px) rotate(-3deg); }
+            50% { transform: translateY(-8px) rotate(3deg); }
+        }
+        .course-card:hover .course-emoji {
+            animation: bounceEmoji 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards;
+        }
+        @keyframes bounceEmoji {
+            0% { transform: scale(1); }
+            60% { transform: scale(1.3) rotate(10deg); }
+            100% { transform: scale(1.1) rotate(-5deg); }
+        }
+
+        .course-emoji-banner::before {
+            content: '';
+            position: absolute;
+            width: 140px; height: 140px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.4);
+            top: -30px; right: -20px;
+        }
+        .course-emoji-banner::after {
+            content: '';
+            position: absolute;
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            bottom: -20px; left: 20px;
+        }
+
+        .course-badge {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            background: white;
+            color: var(--secondary);
+            padding: 5px 14px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            z-index: 2;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            font-family: 'Fredoka', sans-serif;
+        }
+        .course-price-tag {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            background: white;
+            color: var(--primary);
+            padding: 5px 14px;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: 800;
+            z-index: 2;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        .course-content {
+            padding: 1.4rem 1.5rem 1.6rem;
+        }
+        .course-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            margin-bottom: 0.4rem;
+            color: var(--dark);
+            line-height: 1.25;
+            font-family: 'Fredoka', sans-serif;
+        }
+        .course-desc {
+            color: #64748b;
+            font-size: 0.88rem;
+            line-height: 1.55;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .rating { display: flex; align-items: center; gap: 3px; margin-bottom: 0.9rem; }
+        .rating i { font-size: 0.75rem; color: #fbbf24; }
+        .rating span { font-size: 0.75rem; color: #94a3b8; margin-left: 5px; }
+
+        .course-stats {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 1.1rem;
+            flex-wrap: wrap;
+        }
+        .stat-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            font-family: 'Fredoka', sans-serif;
+        }
+        .stat-pill-sessions { background: #FFF3E0; color: #E65100; }
+        .stat-pill-lecons   { background: #E8F5E9; color: #1B5E20; }
+        .stat-pill-heures   { background: #E3F2FD; color: #0D47A1; }
+
+        .instructor-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 0.5rem;
+            padding-top: 1rem;
+            border-top: 2px dashed #e2e8f0;
+        }
+        .instructor-avatar-ring {
+            width: 46px; height: 46px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            font-weight: 800;
+            box-shadow: 0 4px 12px rgba(77,101,249,0.25);
+            flex-shrink: 0;
+        }
+        .instructor-meta { flex: 1; }
+        .instructor-name { font-weight: 800; font-size: 0.88rem; color: var(--dark); }
+        .instructor-title { font-size: 0.72rem; color: #94a3b8; }
+
+        .btn-enroll {
+            background: linear-gradient(135deg, var(--primary), #5d73ff);
+            border: none;
+            border-radius: 50px;
+            padding: 9px 20px;
+            font-weight: 800;
+            font-size: 0.82rem;
+            font-family: 'Fredoka', sans-serif;
+            transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+            box-shadow: 0 5px 15px rgba(77,101,249,0.3);
+            text-decoration: none;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .btn-enroll:hover {
+            transform: scale(1.08);
+            color: white;
+            box-shadow: 0 8px 22px rgba(77,101,249,0.45);
+        }
+
+        /* Filter Section */
+        .filter-section {
+            background: white;
+            border-radius: 60px;
+            padding: 10px 18px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.05);
+            border: 2px solid rgba(77,101,249,0.1);
+        }
+        .category-pill {
+            background: rgba(77,101,249,0.08);
+            color: var(--primary);
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 0.82rem;
+            font-weight: 800;
+            font-family: 'Fredoka', sans-serif;
+            transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .category-pill:hover, .category-pill.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 15px rgba(77,101,249,0.35);
+            transform: scale(1.05);
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+        #searchCourse {
+            border-radius: 40px;
+            border: 2px solid rgba(77,101,249,0.2);
+            font-family: 'Nunito', sans-serif;
+            font-weight: 600;
+        }
+        #searchCourse:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(77,101,249,0.15);
+        }
+
+        @media (max-width: 768px) {
+            .filter-section { border-radius: 24px; padding: 12px; }
+            .course-emoji { font-size: 4rem; }
+            .course-emoji-banner { height: 130px; }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <!-- Page Header -->
+    <div class="container-fluid page-header py-5 wow fadeIn" data-wow-delay="0.1s">
+        <div class="container text-center py-5">
+            <h1 class="display-3 text-white mb-3">Nos Cours</h1>
+            <p class="text-white opacity-75 mb-3">Des parcours éducatifs adaptés à chaque profil TSA</p>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb justify-content-center mb-0">
+                    <li class="breadcrumb-item"><a href="{{ path('app_home') }}" class="text-white">Accueil</a></li>
+                    <li class="breadcrumb-item text-white active">Cours</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="container-fluid py-4 bg-light wow fadeIn">
+        <div class="container">
+            <div class="filter-section d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div class="d-flex flex-wrap gap-2">
+                    <button class="category-pill active" data-filter="all">🌈 Tous les cours</button>
+                    <button class="category-pill" data-filter="communication">💬 Communication</button>
+                    <button class="category-pill" data-filter="motricite">🤸 Motricité</button>
+                    <button class="category-pill" data-filter="autonomie">⭐ Autonomie</button>
+                    <button class="category-pill" data-filter="social">🤝 Socialisation</button>
+                    <button class="category-pill" data-filter="sensoriel">🎨 Sensorialité</button>
+                </div>
+                <div class="position-relative">
+                    <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                    <input type="text" id="searchCourse" class="form-control ps-5 pe-4 py-2" placeholder="Rechercher un cours...">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Courses Grid -->
+    <div class="container-fluid py-5">
+        <div class="container py-4">
+            <div class="row g-4" id="coursesContainer">
+                {% for course in courses %}
+                    {% set colorIndex = (loop.index0 % 6) + 1 %}
+                    <div class="col-md-6 col-lg-4 course-item" data-category="{{ course.category }}">
+                        <div class="course-card" data-color="{{ colorIndex }}">
+                            <div class="course-emoji-banner" data-bg="{{ colorIndex }}">
+                                {% if course.badge %}
+                                    <span class="course-badge">{{ course.badge }}</span>
+                                {% endif %}
+                                <span class="course-price-tag">{{ course.price }} $</span>
+                                <span class="course-emoji">{{ course.emoji }}</span>
+                            </div>
+                            <div class="course-content">
+                                <h3 class="course-title">{{ course.title }}</h3>
+                                <p class="course-desc">{{ course.description }}</p>
+                                <div class="rating">
+                                    {% set fullStars = course.rating|round(0, 'floor') %}
+                                    {% set hasHalf = (course.rating - fullStars) >= 0.5 %}
+                                    {% for i in 1..5 %}
+                                        {% if i <= fullStars %}
+                                            <i class="fas fa-star"></i>
+                                        {% elseif hasHalf and i == fullStars + 1 %}
+                                            <i class="fas fa-star-half-alt"></i>
+                                        {% else %}
+                                            <i class="far fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                    <span>({{ course.reviews }} avis)</span>
+                                </div>
+                                <div class="course-stats">
+                                    <span class="stat-pill stat-pill-sessions">🕐 {{ course.sessions }} séances</span>
+                                    <span class="stat-pill stat-pill-lecons">📖 {{ course.lessons }} leçons</span>
+                                    <span class="stat-pill stat-pill-heures">⏱ {{ course.hours }}h</span>
+                                </div>
+                                <div class="instructor-row">
+                                    <div class="instructor-avatar-ring">{{ course.instructor|first }}</div>
+                                    <div class="instructor-meta">
+                                        <div class="instructor-name">{{ course.instructor }}</div>
+                                        <div class="instructor-title">{{ course.instructor_title }}</div>
+                                    </div>
+                                    <a href="#" class="btn-enroll">Rejoindre ✨</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- No Results Message -->
+            <div id="noResults" class="text-center py-5 d-none">
+                <div style="font-size:4rem;">🔍</div>
+                <h5 class="text-muted mt-3">Aucun cours trouvé</h5>
+                <p class="text-muted">Essayez de modifier votre recherche ou filtre.</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        // Filter functionality
+        document.querySelectorAll('.category-pill').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.category-pill').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                const filter = this.dataset.filter;
+                const items = document.querySelectorAll('.course-item');
+                let visibleCount = 0;
+                items.forEach(item => {
+                    if(filter === 'all' || item.dataset.category === filter) {
+                        item.style.display = 'block';
+                        visibleCount++;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+                document.getElementById('noResults').classList.toggle('d-none', visibleCount > 0);
+            });
+        });
+
+        // Search functionality
+        document.getElementById('searchCourse').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const items = document.querySelectorAll('.course-item');
+            let visibleCount = 0;
+            items.forEach(item => {
+                const title = item.querySelector('.course-title').textContent.toLowerCase();
+                const desc = item.querySelector('.course-desc').textContent.toLowerCase();
+                if(title.includes(searchTerm) || desc.includes(searchTerm)) {
+                    item.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            document.getElementById('noResults').classList.toggle('d-none', visibleCount > 0);
+        });
+    </script>
+{% endblock %}
