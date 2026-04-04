@@ -1,0 +1,8 @@
+<form method="post"
+      action="{{ path('app_suivi_total_delete', {'id': suivi_total.id}) }}"
+      onsubmit="return confirm('Supprimer ce suivi ?');">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ suivi_total.id) }}">
+    <button class="btn-danger-soft" style="border:none;">
+        <i class="fas fa-trash me-1"></i> Supprimer
+    </button>
+</form>

@@ -1,0 +1,52 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Ajouter un niveau{% endblock %}
+
+{% block page_title %}Ajouter un niveau{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4>Créer un nouveau niveau</h4>
+        </div>
+
+        <div class="card-body">
+
+            {{ form_start(form) }}
+
+            <div class="mb-3">
+                {{ form_label(form.libelle) }}
+                {{ form_widget(form.libelle, {'attr': {'class': 'form-control'}}) }}
+            </div>
+
+            <div class="mb-3">
+                {{ form_label(form.minMoyenne) }}
+                {{ form_widget(form.minMoyenne, {'attr': {'class': 'form-control'}}) }}
+            </div>
+
+            <div class="mb-3">
+                {{ form_label(form.maxMoyenne) }}
+                {{ form_widget(form.maxMoyenne, {'attr': {'class': 'form-control'}}) }}
+            </div>
+
+            <div class="mb-3">
+                {{ form_label(form.description) }}
+                {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
+            </div>
+
+            <button class="btn btn-success">💾 Enregistrer</button>
+
+            {{ form_end(form) }}
+
+            <br>
+            <a href="{{ path('app_niveau_jeu_index') }}" class="btn btn-secondary">
+                ← Retour à la liste
+            </a>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

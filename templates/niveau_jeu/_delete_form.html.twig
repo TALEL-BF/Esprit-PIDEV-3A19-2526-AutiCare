@@ -1,0 +1,8 @@
+<form method="post"
+      action="{{ path('app_niveau_jeu_delete', {'id': niveau_jeu.id}) }}"
+      onsubmit="return confirm('Supprimer ce niveau ?');">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ niveau_jeu.id) }}">
+    <button class="btn-danger-soft" style="border:none;">
+        <i class="fas fa-trash me-1"></i> Supprimer
+    </button>
+</form>

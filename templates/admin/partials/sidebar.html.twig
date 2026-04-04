@@ -114,20 +114,20 @@
         </div>
 
         {# ==================== JEU ==================== #}
-        <div class="nav-item-wrap {% if app.request.get('_route') starts with 'admin_jeu' %}open{% endif %}">
+        <div class="nav-item-wrap {% if app.request.get('_route') starts with 'app_niveau_jeu' or app.request.get('_route') starts with 'app_suivi_total' %}open{% endif %}">
             <div class="nav-link-item" onclick="toggleSection('jeu', event)">
                 <span class="nav-icon"><i class="fas fa-gamepad"></i></span>
                 Jeu
                 <span class="nav-chevron"><i class="fas fa-chevron-down"></i></span>
             </div>
             <div class="nav-sub">
-                <a class="nav-sub-link {% if app.request.get('_route') == 'admin_jeu' %}active{% endif %}" 
-                   href="{{ path('admin_jeu') }}">
-                    <i class="fas fa-gamepad"></i> Jeu
+                <a class="nav-sub-link {% if app.request.get('_route') starts with 'app_niveau_jeu' %}active{% endif %}" 
+                   href="{{ path('app_niveau_jeu_index') }}">
+                    <i class="fas fa-layer-group"></i> Niveaux
                 </a>
-                <a class="nav-sub-link {% if app.request.get('_route') == 'admin_jeu_score' %}active{% endif %}" 
-                   href="{{ path('admin_jeu_score') }}">
-                    <i class="fas fa-trophy"></i> Score
+                <a class="nav-sub-link {% if app.request.get('_route') starts with 'app_suivi_total' %}active{% endif %}" 
+                   href="{{ path('app_suivi_total_index') }}">
+                    <i class="fas fa-chart-line"></i> Suivi total
                 </a>
             </div>
         </div>

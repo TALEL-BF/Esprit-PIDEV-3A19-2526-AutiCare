@@ -1,0 +1,53 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Modifier niveau{% endblock %}
+
+{% block page_title %}Modifier un niveau{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+
+    <div class="card">
+        <div class="card-header bg-warning text-dark">
+            <h4>Modifier le niveau</h4>
+        </div>
+
+        <div class="card-body">
+
+            {{ form_start(form) }}
+
+            <div class="mb-3">
+                {{ form_label(form.libelle) }}
+                {{ form_widget(form.libelle, {'attr': {'class': 'form-control'}}) }}
+            </div>
+
+            <div class="mb-3">
+                {{ form_label(form.minMoyenne) }}
+                {{ form_widget(form.minMoyenne, {'attr': {'class': 'form-control'}}) }}
+            </div>
+
+            <div class="mb-3">
+                {{ form_label(form.maxMoyenne) }}
+                {{ form_widget(form.maxMoyenne, {'attr': {'class': 'form-control'}}) }}
+            </div>
+
+            <div class="mb-3">
+                {{ form_label(form.description) }}
+                {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
+            </div>
+
+            <button class="btn btn-primary">✏️ Modifier</button>
+
+            {{ form_end(form) }}
+
+            <br>
+
+            <a href="{{ path('app_niveau_jeu_index') }}" class="btn btn-secondary">
+                ← Retour
+            </a>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

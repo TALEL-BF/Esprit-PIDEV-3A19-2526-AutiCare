@@ -1,0 +1,52 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Détail niveau{% endblock %}
+
+{% block page_title %}Détail du niveau{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+
+    <div class="card">
+        <div class="card-header bg-info text-white">
+            <h4>Détails du niveau</h4>
+        </div>
+
+        <div class="card-body">
+
+            <table class="table table-bordered">
+                <tr>
+                    <th>ID</th>
+                    <td>{{ niveau_jeu.id }}</td>
+                </tr>
+                <tr>
+                    <th>Libellé</th>
+                    <td>{{ niveau_jeu.libelle }}</td>
+                </tr>
+                <tr>
+                    <th>Min Moyenne</th>
+                    <td>{{ niveau_jeu.minMoyenne }}</td>
+                </tr>
+                <tr>
+                    <th>Max Moyenne</th>
+                    <td>{{ niveau_jeu.maxMoyenne }}</td>
+                </tr>
+                <tr>
+                    <th>Description</th>
+                    <td>{{ niveau_jeu.description }}</td>
+                </tr>
+            </table>
+
+            <a href="{{ path('app_niveau_jeu_index') }}" class="btn btn-secondary">
+                ← Retour
+            </a>
+
+            <a href="{{ path('app_niveau_jeu_edit', {'id': niveau_jeu.id}) }}" class="btn btn-warning">
+                ✏️ Modifier
+            </a>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}
