@@ -1,335 +1,77 @@
+{# templates/admin/pages/dashboard.html.twig #}
 {% extends 'admin/base_admin.html.twig' %}
 
-{% block title %}Auticare — Tableau de bord{% endblock %}
+{% block title %}Admin Dashboard - AutiCare{% endblock %}
 
-{% block page_title %}Tableau de bord{% endblock %}
-
-{% block stylesheets %}
-{{ parent() }}
-<style>
-    .welcome-banner {
-        background: linear-gradient(135deg, var(--purple-700) 0%, var(--purple-500) 50%, var(--accent) 100%);
-        border-radius: 16px;
-        padding: 28px 32px;
-        color: #fff;
-        margin-bottom: 28px;
-        position: relative;
-        overflow: hidden;
-    }
-    .welcome-banner::after {
-        content: '';
-        position: absolute;
-        right: -40px;
-        top: -40px;
-        width: 200px;
-        height: 200px;
-        border-radius: 50%;
-        background: rgba(255,255,255,.08);
-    }
-    .welcome-banner::before {
-        content: '';
-        position: absolute;
-        right: 80px;
-        bottom: -30px;
-        width: 130px;
-        height: 130px;
-        border-radius: 50%;
-        background: rgba(255,255,255,.05);
-    }
-    .welcome-banner h3 {
-        font-family: 'Sora', sans-serif;
-        font-size: 1.5rem;
-        font-weight: 700;
-        position: relative;
-        z-index: 1;
-    }
-    .welcome-banner p {
-        font-size: .9rem;
-        opacity: .85;
-        margin-top: 6px;
-        position: relative;
-        z-index: 1;
-    }
-    .quick-link {
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 10px 14px;
-        border-radius: 8px;
-        background: var(--purple-50);
-        color: var(--purple-700);
-        font-weight: 600;
-        font-size: .875rem;
-        transition: background .2s;
-    }
-    .quick-link:hover {
-        background: var(--purple-100);
-        color: var(--purple-700);
-    }
-</style>
-{% endblock %}
+{% block page_title %}Dashboard Admin{% endblock %}
 
 {% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body">
+                    <h1 class="mb-3">
+                        <i class="fas fa-chart-line"></i> 
+                        Bienvenue {{ user.prenom }} {{ user.nom }} !
+                    </h1>
+                    <p class="mb-0">Vous êtes connecté en tant qu'administrateur</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<div class="welcome-banner">
-    <h3>Bienvenue sur Auticare 👋</h3>
-    <p>Plateforme d'administration dédiée à l'apprentissage autiste — <span id="currentDate"></span></p>
-</div>
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Utilisateurs</h5>
+                    <p class="card-text">Gérer tous les utilisateurs</p>
+                    <a href="{{ path('admin_users') }}" class="btn btn-primary">Accéder</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Rôles</h5>
+                    <p class="card-text">Gérer les rôles et permissions</p>
+                    <a href="{{ path('admin_users_roles') }}" class="btn btn-primary">Accéder</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-book-open fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Cours</h5>
+                    <p class="card-text">Gérer les cours</p>
+                    <a href="{{ path('admin_cours') }}" class="btn btn-primary">Accéder</a>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<div class="row g-3 mb-4">
-    <div class="col-6 col-xl-3">
-        <div class="stat-card">
-            <div class="stat-top">
-                <div>
-                    <div class="stat-label">Utilisateurs</div>
-                    <div class="stat-value">{{ totalUsers|default(1248) }}</div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Informations de connexion</h5>
                 </div>
-                <div class="stat-icon purple"><i class="fas fa-users"></i></div>
-            </div>
-            <div class="stat-change up"><i class="fas fa-arrow-up"></i> +12% ce mois</div>
-        </div>
-    </div>
-    <div class="col-6 col-xl-3">
-        <div class="stat-card">
-            <div class="stat-top">
-                <div>
-                    <div class="stat-label">Cours actifs</div>
-                    <div class="stat-value">{{ activeCourses|default(84) }}</div>
+                <div class="card-body">
+                    <p><strong>Email:</strong> {{ user.email }}</p>
+                    <p><strong>Rôle:</strong> {{ user.role }}</p>
+                    <p><strong>Status:</strong> {{ user.status }}</p>
                 </div>
-                <div class="stat-icon violet"><i class="fas fa-book-open"></i></div>
-            </div>
-            <div class="stat-change up"><i class="fas fa-arrow-up"></i> +5 nouveaux</div>
-        </div>
-    </div>
-    <div class="col-6 col-xl-3">
-        <div class="stat-card">
-            <div class="stat-top">
-                <div>
-                    <div class="stat-label">Consultations</div>
-                    <div class="stat-value">{{ totalConsultations|default(326) }}</div>
+                <div class="card-footer">
+                    <a href="{{ path('app_logout') }}" class="btn btn-danger">
+                        <i class="fas fa-sign-out-alt"></i> Déconnexion
+                    </a>
                 </div>
-                <div class="stat-icon pink"><i class="fas fa-stethoscope"></i></div>
-            </div>
-            <div class="stat-change down"><i class="fas fa-arrow-down"></i> -3% ce mois</div>
-        </div>
-    </div>
-    <div class="col-6 col-xl-3">
-        <div class="stat-card">
-            <div class="stat-top">
-                <div>
-                    <div class="stat-label">Événements</div>
-                    <div class="stat-value">{{ totalEvents|default(17) }}</div>
-                </div>
-                <div class="stat-icon indigo"><i class="fas fa-calendar-alt"></i></div>
-            </div>
-            <div class="stat-change up"><i class="fas fa-arrow-up"></i> +2 cette semaine</div>
-        </div>
-    </div>
-</div>
-
-<div class="row g-3 mb-4">
-    <div class="col-lg-8">
-        <div class="card-box">
-            <div class="card-box-header">
-                <span class="card-box-title"><i class="fas fa-chart-line"></i> Activité mensuelle</span>
-            </div>
-            <div class="card-box-body">
-                <canvas id="dashLineChart" height="110"></canvas>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-4">
-        <div class="card-box">
-            <div class="card-box-header">
-                <span class="card-box-title"><i class="fas fa-chart-pie"></i> Répartition globale</span>
-            </div>
-            <div class="card-box-body">
-                <canvas id="dashDoughnut" height="200"></canvas>
             </div>
         </div>
     </div>
 </div>
-
-<div class="row g-3">
-    <div class="col-lg-4">
-        <div class="card-box">
-            <div class="card-box-header">
-                <span class="card-box-title"><i class="fas fa-bolt"></i> Accès rapides</span>
-            </div>
-            <div class="card-box-body">
-                <div class="d-flex flex-column gap-2">
-                    <a href="{{ path('admin_users') }}" class="quick-link">
-                        <i class="fas fa-users" style="width: 18px"></i> Gestion des Utilisateurs
-                    </a>
-                    <a href="{{ path('admin_cours') }}" class="quick-link">
-                        <i class="fas fa-book-open" style="width: 18px"></i> Gestion des Cours
-                    </a>
-                    <a href="{{ path('admin_therapie') }}" class="quick-link">
-                        <i class="fas fa-stethoscope" style="width: 18px"></i> Gestion des Consultations
-                    </a>
-                    <a href="{{ path('admin_evenements') }}" class="quick-link">
-                        <i class="fas fa-calendar-alt" style="width: 18px"></i> Gestion des Événements
-                    </a>
-                    <a href="{{ path('admin_planning') }}" class="quick-link">
-                        <i class="fas fa-briefcase" style="width: 18px"></i> Gestion des Emplois
-                    </a>
-                    <a href="{{ path('admin_jeu') }}" class="quick-link">
-                        <i class="fas fa-gamepad" style="width: 18px"></i> Gestion du Jeu
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-8">
-        <div class="card-box">
-            <div class="card-box-header">
-                <span class="card-box-title"><i class="fas fa-chart-bar"></i> Jeux joués vs Consultations</span>
-            </div>
-            <div class="card-box-body">
-                <canvas id="dashBarChart" height="150"></canvas>
-            </div>
-        </div>
-    </div>
-</div>
-
-{% endblock %}
-
-{% block javascripts %}
-{{ parent() }}
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Date
-    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('fr-FR', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
-
-    const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
-    const P = { p500: '#9333ea', p400: '#a855f7', p300: '#c084fc', pink: '#ec4899', indigo: '#6366f1', accent: '#e040fb' };
-
-    // Line Chart - Activité mensuelle
-    new Chart(document.getElementById('dashLineChart').getContext('2d'), {
-        type: 'line',
-        data: {
-            labels: months,
-            datasets: [
-                {
-                    label: 'Utilisateurs',
-                    data: [80, 95, 110, 130, 120, 150, 175, 160, 190, 210, 240, 260],
-                    borderColor: P.p400,
-                    backgroundColor: 'rgba(168,85,247,.1)',
-                    fill: true,
-                    tension: .4,
-                    pointBackgroundColor: P.p400
-                },
-                {
-                    label: 'Cours',
-                    data: [20, 28, 35, 40, 38, 50, 55, 52, 60, 68, 75, 84],
-                    borderColor: P.pink,
-                    backgroundColor: 'rgba(236,72,153,.08)',
-                    fill: true,
-                    tension: .4,
-                    pointBackgroundColor: P.pink
-                },
-                {
-                    label: 'Consultations',
-                    data: [15, 22, 30, 28, 35, 40, 38, 45, 50, 48, 55, 60],
-                    borderColor: P.indigo,
-                    backgroundColor: 'rgba(99,102,241,.08)',
-                    fill: true,
-                    tension: .4,
-                    pointBackgroundColor: P.indigo
-                }
-            ]
-        },
-        options: {
-            plugins: {
-                legend: {
-                    position: 'top',
-                    labels: {
-                        usePointStyle: true,
-                        font: { family: 'DM Sans', size: 12 }
-                    }
-                }
-            },
-            scales: {
-                x: { grid: { display: false } },
-                y: { grid: { color: '#f3e8ff' } }
-            },
-            responsive: true
-        }
-    });
-
-    // Doughnut Chart - Répartition globale
-    new Chart(document.getElementById('dashDoughnut').getContext('2d'), {
-        type: 'doughnut',
-        data: {
-            labels: ['Utilisateurs', 'Cours', 'Consultations', 'Événements'],
-            datasets: [{
-                data: [1248, 84, 326, 17],
-                backgroundColor: [P.p500, P.pink, P.indigo, P.accent],
-                borderWidth: 0,
-                hoverOffset: 8
-            }]
-        },
-        options: {
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        usePointStyle: true,
-                        font: { family: 'DM Sans', size: 11 }
-                    }
-                }
-            },
-            cutout: '65%',
-            responsive: true
-        }
-    });
-
-    // Bar Chart - Jeux joués vs Consultations
-    new Chart(document.getElementById('dashBarChart').getContext('2d'), {
-        type: 'bar',
-        data: {
-            labels: months,
-            datasets: [
-                {
-                    label: 'Parties jouées',
-                    data: [280, 350, 420, 390, 460, 520, 490, 580, 620, 690, 750, 800],
-                    backgroundColor: 'rgba(147,51,234,.7)',
-                    borderRadius: 5,
-                    borderWidth: 0
-                },
-                {
-                    label: 'Consultations',
-                    data: [15, 22, 30, 28, 35, 40, 38, 45, 50, 48, 55, 60],
-                    backgroundColor: 'rgba(236,72,153,.7)',
-                    borderRadius: 5,
-                    borderWidth: 0
-                }
-            ]
-        },
-        options: {
-            plugins: {
-                legend: {
-                    position: 'top',
-                    labels: {
-                        usePointStyle: true,
-                        font: { family: 'DM Sans', size: 11 }
-                    }
-                }
-            },
-            scales: {
-                x: { grid: { display: false } },
-                y: { grid: { color: '#f3e8ff' } }
-            },
-            responsive: true
-        }
-    });
-});
-</script>
 {% endblock %}

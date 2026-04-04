@@ -41,16 +41,14 @@ class SignupController extends AbstractController
                 $user->setNom($lastname);
                 $user->setEmail($email);
                 $user->setPassword($passwordHasher->hashPassword($user, $password));
-                $user->setRole($profileType); // admin, parent, professeur, psychologue, enfant
+                $user->setRole($profileType);
                 $user->setStatus('active');
-                $user->setCreatedAt(new \DateTime());
+                $user->setCreatedAt(new \DateTime());  // ✅ CORRECTION ICI
                 
                 $entityManager->persist($user);
                 $entityManager->flush();
 
                 $this->addFlash('success', 'Compte créé avec succès. Veuillez vous connecter.');
-                
-                // Rediriger vers la page de connexion
                 return $this->redirectToRoute('app_signin');
             }
         }

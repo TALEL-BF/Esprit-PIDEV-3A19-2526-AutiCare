@@ -1,6 +1,9 @@
+# config/packages/security.yaml
 security:
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+        App\Entity\User:
+            algorithm: auto
 
     providers:
         app_user_provider:
@@ -12,22 +15,42 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
-
         main:
             lazy: true
             provider: app_user_provider
-            custom_authenticator: App\Security\LoginFormAuthenticator
+            form_login:
+                login_path: app_signin
+                check_path: app_signin
+                username_parameter: email
+                password_parameter: password
+                default_target_path: admin_dashboard
+                enable_csrf: true
             logout:
                 path: app_logout
+                target: app_home
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 604800
+                path: /
 
     access_control:
-        - { path: ^/login, roles: PUBLIC_ACCESS }
-        - { path: ^/signin, roles: PUBLIC_ACCESS }
-        - { path: ^/connexion, roles: PUBLIC_ACCESS }
-        - { path: ^/signup, roles: PUBLIC_ACCESS }
-        - { path: ^/logout, roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/parent, roles: ROLE_PARENT }
+        - { path: ^/professeur, roles: ROLE_PROFESSEUR }
+        - { path: ^/psychologue, roles: ROLE_PSYCHOLOGUE }
+        - { path: ^/enfant, roles: ROLE_ENFANT }
+        - { path: ^/signin, roles: PUBLIC_ACCESS }
+        - { path: ^/signup, roles: PUBLIC_ACCESS }
+        - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/connexion, roles: PUBLIC_ACCESS }
         - { path: ^/, roles: PUBLIC_ACCESS }
+
+    role_hierarchy:
+        ROLE_ADMIN: [ROLE_PARENT, ROLE_PROFESSEUR, ROLE_PSYCHOLOGUE, ROLE_ENFANT, ROLE_USER]
+        ROLE_PARENT: [ROLE_USER]
+        ROLE_PROFESSEUR: [ROLE_USER]
+        ROLE_PSYCHOLOGUE: [ROLE_USER]
+        ROLE_ENFANT: [ROLE_USER]
 
 when@test:
     security:
