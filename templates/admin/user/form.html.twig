@@ -1,0 +1,77 @@
+{# templates/admin/user/form.html.twig #}
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}{{ page_title }} - AutiCare{% endblock %}
+
+{% block page_title %}{{ page_title }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">
+            <h4>
+                {% if user is defined and user %}
+                    <i class="fas fa-edit"></i> {{ page_title }}
+                {% else %}
+                    <i class="fas fa-user-plus"></i> {{ page_title }}
+                {% endif %}
+            </h4>
+        </div>
+        <div class="card-body">
+            {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.prenom, 'Prénom', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.prenom, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Ahmed'}}) }}
+                    {{ form_errors(form.prenom) }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.nom, 'Nom', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Ben Ali'}}) }}
+                    {{ form_errors(form.nom) }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.email, 'Email', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.email, {'attr': {'class': 'form-control', 'placeholder': 'email@exemple.com'}}) }}
+                    {{ form_errors(form.email) }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.phone, 'Téléphone', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.phone, {'attr': {'class': 'form-control', 'placeholder': '+216 xx xxx xxx'}}) }}
+                    {{ form_errors(form.phone) }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.role, 'Rôle', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.role, {'attr': {'class': 'form-select'}}) }}
+                    {{ form_errors(form.role) }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.status, 'Statut', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.status, {'attr': {'class': 'form-select'}}) }}
+                    {{ form_errors(form.status) }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.plainPassword, 'Mot de passe', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.plainPassword, {'attr': {'class': 'form-control', 'placeholder': 'Laissez vide pour garder l\'ancien'}}) }}
+                    {{ form_errors(form.plainPassword) }}
+                    {% if user is not defined or not user %}
+                        <small class="text-muted">Laissez vide pour utiliser "password123" par défaut</small>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Enregistrer
+                </button>
+                <a href="{{ path('admin_users_index') }}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Annuler
+                </a>
+            </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}
