@@ -1,0 +1,673 @@
+{# templates/front/cours/quiz.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}AutiCare – Quiz : {{ cours.titre }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sun:      #FFD93D;
+            --sky:      #6BCB77;
+            --ocean:    #4D96FF;
+            --coral:    #FF6B6B;
+            --lavender: #C77DFF;
+            --peach:    #FF9A3C;
+            --mint:     #2EC4B6;
+            --rose:     #FF6FA8;
+            --bg:       #FFFBF4;
+            --dark:     #1E2A3B;
+        }
+
+        * { box-sizing: border-box; }
+        body { background: var(--bg); font-family: 'Nunito', sans-serif; min-height: 100vh; }
+
+        /* ── Hero bar ── */
+        .quiz-hero {
+            background: linear-gradient(135deg, #5a288c 0%, #9b6bff 60%, #c77dff 100%);
+            padding: 1.8rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .quiz-hero::before {
+            content: '';
+            position: absolute; inset: 0;
+            background-image: radial-gradient(circle at 10% 50%, rgba(255,105,180,0.15) 0%, transparent 40%),
+                              radial-gradient(circle at 90% 20%, rgba(255,255,255,0.08) 0%, transparent 35%);
+            pointer-events: none;
+        }
+        .quiz-hero-inner {
+            position: relative; z-index: 2;
+            display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+        }
+        .quiz-hero-left { display: flex; align-items: center; gap: 14px; }
+        .quiz-hero-icon {
+            width: 52px; height: 52px; border-radius: 16px;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(8px);
+            border: 2px solid rgba(255,255,255,0.35);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.6rem;
+        }
+        .quiz-hero-title {
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.3rem; font-weight: 800;
+            color: #fff;
+            margin: 0 0 2px 0;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.15);
+        }
+        .quiz-hero-sub { color: rgba(255,255,255,0.8); font-size: 0.82rem; font-weight: 700; }
+
+        .btn-back-quiz {
+            display: inline-flex; align-items: center; gap: 7px;
+            background: rgba(255,255,255,0.18);
+            backdrop-filter: blur(8px);
+            color: #fff;
+            font-family: 'Baloo 2', cursive; font-size: 0.88rem; font-weight: 700;
+            padding: 9px 20px; border-radius: 40px;
+            text-decoration: none;
+            border: 2px solid rgba(255,255,255,0.30);
+            transition: all 0.25s;
+            white-space: nowrap;
+        }
+        .btn-back-quiz:hover { background: rgba(255,255,255,0.28); color: #fff; transform: translateX(-3px); }
+
+        /* ── Progress bar ── */
+        .quiz-progress-wrap {
+            background: white;
+            border-bottom: 2px solid #f0ebff;
+            padding: 14px 0;
+            position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 2px 12px rgba(124,58,237,0.08);
+        }
+        .quiz-progress-inner {
+            display: flex; align-items: center; gap: 16px;
+        }
+        .progress-label {
+            font-family: 'Baloo 2', cursive;
+            font-size: 0.82rem; font-weight: 800;
+            color: #7c3aed;
+            white-space: nowrap;
+        }
+        .progress-track {
+            flex: 1;
+            height: 10px;
+            background: #ede9fe;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #7c3aed, #a855f7);
+            border-radius: 20px;
+            transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+        }
+        .progress-score-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+            color: #6d28d9;
+            font-family: 'Baloo 2', cursive;
+            font-size: 0.82rem; font-weight: 800;
+            padding: 5px 14px; border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        /* ── Quiz container ── */
+        .quiz-container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 3rem 1rem 5rem;
+        }
+
+        /* ── Question card ── */
+        .question-card {
+            background: white;
+            border-radius: 28px;
+            padding: 2.5rem;
+            box-shadow: 0 8px 32px rgba(124,58,237,0.1);
+            border: 2px solid rgba(155,107,255,0.15);
+            position: relative;
+            overflow: hidden;
+            animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(24px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .question-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 5px;
+            background: linear-gradient(90deg, #7c3aed, #a855f7, #ec4899);
+        }
+
+        .question-number {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+            color: #6d28d9;
+            font-family: 'Baloo 2', cursive;
+            font-size: 0.8rem; font-weight: 800;
+            padding: 4px 14px; border-radius: 20px;
+            margin-bottom: 1.2rem;
+            text-transform: uppercase; letter-spacing: .4px;
+        }
+
+        .question-text {
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.4rem; font-weight: 800;
+            color: var(--dark);
+            line-height: 1.4;
+            margin-bottom: 2rem;
+        }
+
+        /* ── Choices ── */
+        .choices-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .choice-btn {
+            display: flex; align-items: center; gap: 14px;
+            background: #faf9ff;
+            border: 2px solid #ede9fe;
+            border-radius: 16px;
+            padding: 14px 20px;
+            cursor: pointer;
+            transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-align: left;
+            width: 100%;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1rem; font-weight: 700;
+            color: #374151;
+            position: relative;
+            overflow: hidden;
+        }
+        .choice-btn:hover:not(:disabled):not(.selected) {
+            border-color: #a855f7;
+            background: #f5f0ff;
+            transform: translateX(6px);
+            box-shadow: 0 4px 16px rgba(124,58,237,0.12);
+        }
+        .choice-letter {
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+            color: #6d28d9;
+            font-family: 'Baloo 2', cursive;
+            font-size: 0.9rem; font-weight: 800;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .choice-btn.selected .choice-letter {
+            background: linear-gradient(135deg, #7c3aed, #a855f7);
+            color: white;
+        }
+        .choice-btn.selected {
+            border-color: #7c3aed;
+            background: #f5f0ff;
+            transform: translateX(4px);
+        }
+        .choice-btn.correct {
+            border-color: #10b981 !important;
+            background: rgba(16,185,129,0.08) !important;
+            transform: none !important;
+        }
+        .choice-btn.correct .choice-letter {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            color: white;
+        }
+        .choice-btn.wrong {
+            border-color: #ef4444 !important;
+            background: rgba(239,68,68,0.08) !important;
+            transform: none !important;
+        }
+        .choice-btn.wrong .choice-letter {
+            background: linear-gradient(135deg, #ef4444, #f87171);
+            color: white;
+        }
+        .choice-btn:disabled { cursor: default; }
+
+        /* ── Feedback ── */
+        .feedback-box {
+            display: none;
+            border-radius: 16px;
+            padding: 14px 20px;
+            margin-bottom: 1.5rem;
+            font-family: 'Baloo 2', cursive;
+            font-size: 1rem; font-weight: 800;
+            display: flex; align-items: center; gap: 10px;
+            animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.88); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+        .feedback-box.correct-feedback {
+            background: rgba(16,185,129,0.1);
+            border: 2px solid rgba(16,185,129,0.3);
+            color: #059669;
+        }
+        .feedback-box.wrong-feedback {
+            background: rgba(239,68,68,0.08);
+            border: 2px solid rgba(239,68,68,0.25);
+            color: #dc2626;
+        }
+        .feedback-icon { font-size: 1.5rem; }
+
+        /* ── Action button ── */
+        .btn-next {
+            display: inline-flex; align-items: center; gap: 10px;
+            background: linear-gradient(135deg, #7c3aed, #a855f7);
+            color: white;
+            font-family: 'Baloo 2', cursive;
+            font-size: 1rem; font-weight: 800;
+            padding: 13px 30px; border-radius: 50px;
+            border: none; cursor: pointer;
+            box-shadow: 0 6px 20px rgba(124,58,237,0.3);
+            transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+            display: none;
+        }
+        .btn-next:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 10px 28px rgba(124,58,237,0.4); }
+        .btn-next.visible { display: inline-flex; }
+
+        /* ── Results screen ── */
+        .results-card {
+            background: white;
+            border-radius: 32px;
+            padding: 3rem 2.5rem;
+            text-align: center;
+            box-shadow: 0 12px 40px rgba(124,58,237,0.12);
+            border: 2px solid rgba(155,107,255,0.2);
+            animation: slideIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+            display: none;
+        }
+        .results-emoji {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            display: block;
+            animation: bounce 0.7s cubic-bezier(0.34,1.56,0.64,1) 0.2s both;
+        }
+        @keyframes bounce {
+            from { opacity: 0; transform: scale(0.5) rotate(-15deg); }
+            to   { opacity: 1; transform: scale(1) rotate(0deg); }
+        }
+        .results-title {
+            font-family: 'Baloo 2', cursive;
+            font-size: 2rem; font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+        .results-subtitle {
+            color: #6b7280;
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+        }
+        .score-ring-wrap {
+            display: flex; justify-content: center;
+            margin: 1.5rem 0 2rem;
+        }
+        .score-ring {
+            width: 130px; height: 130px;
+            border-radius: 50%;
+            background: conic-gradient(var(--ring-color, #7c3aed) var(--ring-pct, 0%), #ede9fe 0%);
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+            box-shadow: 0 6px 24px rgba(124,58,237,0.2);
+        }
+        .score-ring::after {
+            content: '';
+            position: absolute;
+            width: 90px; height: 90px;
+            background: white;
+            border-radius: 50%;
+        }
+        .score-ring-text {
+            position: relative; z-index: 2;
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.6rem; font-weight: 800;
+            color: var(--dark);
+            text-align: center;
+        }
+        .score-ring-text small {
+            display: block;
+            font-size: 0.7rem;
+            color: #9ca3af;
+            font-weight: 700;
+        }
+
+        .results-stats {
+            display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+        .stat-pill {
+            display: inline-flex; flex-direction: column; align-items: center;
+            background: #faf9ff;
+            border: 2px solid #ede9fe;
+            border-radius: 20px;
+            padding: 12px 24px;
+            min-width: 100px;
+        }
+        .stat-pill-val {
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.6rem; font-weight: 800;
+            color: var(--dark);
+        }
+        .stat-pill-label {
+            font-size: 0.75rem; font-weight: 700;
+            color: #9ca3af;
+            text-transform: uppercase; letter-spacing: .4px;
+        }
+
+        .results-actions {
+            display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+        .btn-retry {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: linear-gradient(135deg, #7c3aed, #a855f7);
+            color: white;
+            font-family: 'Baloo 2', cursive;
+            font-size: 0.95rem; font-weight: 800;
+            padding: 12px 28px; border-radius: 50px;
+            border: none; cursor: pointer;
+            box-shadow: 0 6px 20px rgba(124,58,237,0.3);
+            transition: all 0.25s;
+            text-decoration: none;
+        }
+        .btn-retry:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(124,58,237,0.4); color: white; }
+        .btn-cours {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: white;
+            color: #6d28d9;
+            font-family: 'Baloo 2', cursive;
+            font-size: 0.95rem; font-weight: 800;
+            padding: 12px 28px; border-radius: 50px;
+            border: 2px solid #ddd6fe; cursor: pointer;
+            transition: all 0.25s;
+            text-decoration: none;
+        }
+        .btn-cours:hover { border-color: #a855f7; background: #faf9ff; color: #6d28d9; }
+
+        @media (max-width: 576px) {
+            .question-card { padding: 1.5rem; }
+            .question-text { font-size: 1.15rem; }
+            .quiz-hero-title { font-size: 1.1rem; }
+            .results-card { padding: 2rem 1.2rem; }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+
+{# Sérialiser les questions en JSON pour le JS #}
+{% set questionsJson = [] %}
+{% for eval in evaluations %}
+    {% set q = {
+        'id':           eval.idEval,
+        'question':     eval.question,
+        'choix1':       eval.choix1,
+        'choix2':       eval.choix2,
+        'choix3':       eval.choix3,
+        'bonneReponse': eval.bonneReponse,
+        'score':        eval.score
+    } %}
+    {% set questionsJson = questionsJson|merge([q]) %}
+{% endfor %}
+
+<div id="questionsData" data-questions="{{ questionsJson|json_encode }}"></div>
+
+<!-- Hero -->
+<div class="quiz-hero">
+    <div class="container">
+        <div class="quiz-hero-inner">
+            <div class="quiz-hero-left">
+                <div class="quiz-hero-icon">🎯</div>
+                <div>
+                    <div class="quiz-hero-title">Quiz : {{ cours.titre }}</div>
+                    <div class="quiz-hero-sub">{{ evaluations|length }} question{{ evaluations|length > 1 ? 's' : '' }} · Bonne chance !</div>
+                </div>
+            </div>
+            <a href="{{ path('app_cours_show', {'id': cours.idCours}) }}" class="btn-back-quiz">← Retour au cours</a>
+        </div>
+    </div>
+</div>
+
+<!-- Progress bar -->
+<div class="quiz-progress-wrap">
+    <div class="container">
+        <div class="quiz-progress-inner">
+            <span class="progress-label" id="progressLabel">Question 1 / {{ evaluations|length }}</span>
+            <div class="progress-track">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <span class="progress-score-badge">⭐ <span id="scoreDisplay">0</span> pts</span>
+        </div>
+    </div>
+</div>
+
+<!-- Quiz body -->
+<div class="quiz-container">
+
+    <!-- Question card -->
+    <div class="question-card" id="questionCard">
+        <div class="question-number" id="questionNumber">Question 1</div>
+        <div class="question-text" id="questionText"></div>
+
+        <div class="choices-grid" id="choicesGrid"></div>
+
+        <div class="feedback-box" id="feedbackBox">
+            <span class="feedback-icon" id="feedbackIcon"></span>
+            <span id="feedbackText"></span>
+        </div>
+
+        <div style="text-align: right;">
+            <button class="btn-next" id="btnNext">
+                Suivant <span>→</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Results card -->
+    <div class="results-card" id="resultsCard">
+        <span class="results-emoji" id="resultsEmoji">🏆</span>
+        <div class="results-title" id="resultsTitle">Bravo !</div>
+        <div class="results-subtitle" id="resultsSubtitle"></div>
+
+        <div class="score-ring-wrap">
+            <div class="score-ring" id="scoreRing">
+                <div class="score-ring-text">
+                    <span id="ringScore">0</span>
+                    <small>/ <span id="ringTotal">0</span></small>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-stats">
+            <div class="stat-pill">
+                <span class="stat-pill-val" id="statCorrect">0</span>
+                <span class="stat-pill-label">✅ Correctes</span>
+            </div>
+            <div class="stat-pill">
+                <span class="stat-pill-val" id="statWrong">0</span>
+                <span class="stat-pill-label">❌ Incorrectes</span>
+            </div>
+            <div class="stat-pill">
+                <span class="stat-pill-val" id="statPts">0</span>
+                <span class="stat-pill-label">⭐ Points</span>
+            </div>
+        </div>
+
+        <div class="results-actions">
+            <button class="btn-retry" id="btnRetry">🔁 Réessayer</button>
+            <a href="{{ path('app_cours_show', {'id': cours.idCours}) }}" class="btn-cours">📚 Retour au cours</a>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+(function() {
+    const raw = document.getElementById('questionsData').dataset.questions;
+    const questions = JSON.parse(raw);
+    const letters = ['A', 'B', 'C'];
+    const choixKeys = ['choix1', 'choix2', 'choix3'];
+
+    let current    = 0;
+    let score      = 0;
+    let correct    = 0;
+    let wrong      = 0;
+    let answered   = false;
+    let totalScore = questions.reduce((s, q) => s + (q.score || 1), 0);
+
+    const qCard      = document.getElementById('questionCard');
+    const qNum       = document.getElementById('questionNumber');
+    const qText      = document.getElementById('questionText');
+    const choicesGrid= document.getElementById('choicesGrid');
+    const feedbackBox= document.getElementById('feedbackBox');
+    const feedbackIcon=document.getElementById('feedbackIcon');
+    const feedbackTxt= document.getElementById('feedbackText');
+    const btnNext    = document.getElementById('btnNext');
+    const progressFill=document.getElementById('progressFill');
+    const progressLbl= document.getElementById('progressLabel');
+    const scoreDsp   = document.getElementById('scoreDisplay');
+    const resultsCard= document.getElementById('resultsCard');
+
+    function renderQuestion() {
+        answered = false;
+        const q = questions[current];
+
+        // Progress
+        const pct = (current / questions.length) * 100;
+        progressFill.style.width = pct + '%';
+        progressLbl.textContent = `Question ${current + 1} / ${questions.length}`;
+
+        // Question card animation
+        qCard.style.animation = 'none';
+        qCard.offsetHeight; // reflow
+        qCard.style.animation = 'slideIn 0.4s cubic-bezier(0.34,1.56,0.64,1)';
+
+        qNum.textContent = `Question ${current + 1}`;
+        qText.textContent = q.question;
+
+        // Reset feedback
+        feedbackBox.style.display = 'none';
+        feedbackBox.className = 'feedback-box';
+        btnNext.classList.remove('visible');
+
+        // Build choices
+        choicesGrid.innerHTML = '';
+        choixKeys.forEach((key, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.dataset.key = key;
+            btn.innerHTML = `<span class="choice-letter">${letters[i]}</span> ${q[key]}`;
+            btn.addEventListener('click', () => selectAnswer(btn, key, q));
+            choicesGrid.appendChild(btn);
+        });
+    }
+
+    function selectAnswer(btn, chosenKey, q) {
+        if (answered) return;
+        answered = true;
+
+        const allBtns = choicesGrid.querySelectorAll('.choice-btn');
+        allBtns.forEach(b => b.disabled = true);
+        btn.classList.add('selected');
+
+        const isCorrect = chosenKey === q.bonneReponse;
+
+        // Highlight correct & wrong
+        allBtns.forEach(b => {
+            if (b.dataset.key === q.bonneReponse) b.classList.add('correct');
+        });
+        if (!isCorrect) btn.classList.add('wrong');
+
+        // Feedback
+        feedbackBox.style.display = 'flex';
+        if (isCorrect) {
+            score += (q.score || 1);
+            correct++;
+            feedbackBox.className = 'feedback-box correct-feedback';
+            feedbackIcon.textContent = '🎉';
+            feedbackTxt.textContent = `Bravo ! Bonne réponse ! +${q.score || 1} point${q.score > 1 ? 's' : ''}`;
+        } else {
+            wrong++;
+            feedbackBox.className = 'feedback-box wrong-feedback';
+            feedbackIcon.textContent = '😕';
+            const correctText = q[q.bonneReponse];
+            feedbackTxt.textContent = `Pas tout à fait… La bonne réponse était : « ${correctText} »`;
+        }
+
+        scoreDsp.textContent = score;
+        btnNext.classList.add('visible');
+        btnNext.textContent = (current + 1 >= questions.length) ? '🏁 Voir les résultats' : 'Suivant →';
+    }
+
+    btnNext.addEventListener('click', () => {
+        current++;
+        if (current >= questions.length) {
+            showResults();
+        } else {
+            renderQuestion();
+        }
+    });
+
+    function showResults() {
+        qCard.style.display = 'none';
+        resultsCard.style.display = 'block';
+        progressFill.style.width = '100%';
+        progressLbl.textContent = `Terminé !`;
+
+        const pct = totalScore > 0 ? Math.round((score / totalScore) * 100) : 0;
+
+        // Emoji & message
+        let emoji, title, subtitle;
+        if (pct >= 80) {
+            emoji = '🏆'; title = 'Excellent !';
+            subtitle = 'Tu maîtrises parfaitement ce cours !';
+        } else if (pct >= 50) {
+            emoji = '👍'; title = 'Bien joué !';
+            subtitle = 'Continue comme ça, tu progresses bien !';
+        } else {
+            emoji = '💪'; title = 'Courage !';
+            subtitle = 'Relis le cours et réessaie, tu vas y arriver !';
+        }
+
+        document.getElementById('resultsEmoji').textContent = emoji;
+        document.getElementById('resultsTitle').textContent = title;
+        document.getElementById('resultsSubtitle').textContent = subtitle;
+
+        // Score ring
+        const ringColor = pct >= 80 ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444';
+        const ring = document.getElementById('scoreRing');
+        ring.style.setProperty('--ring-color', ringColor);
+        ring.style.setProperty('--ring-pct', pct + '%');
+        ring.style.background = `conic-gradient(${ringColor} ${pct}%, #ede9fe 0%)`;
+
+        document.getElementById('ringScore').textContent = score;
+        document.getElementById('ringTotal').textContent = totalScore;
+        document.getElementById('statCorrect').textContent = correct;
+        document.getElementById('statWrong').textContent = wrong;
+        document.getElementById('statPts').textContent = score;
+    }
+
+    document.getElementById('btnRetry').addEventListener('click', () => {
+        current = 0; score = 0; correct = 0; wrong = 0; answered = false;
+        scoreDsp.textContent = 0;
+        resultsCard.style.display = 'none';
+        qCard.style.display = 'block';
+        renderQuestion();
+    });
+
+    // Init
+    renderQuestion();
+})();
+</script>
+{% endblock %}

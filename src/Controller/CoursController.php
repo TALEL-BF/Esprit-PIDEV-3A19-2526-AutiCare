@@ -5,6 +5,7 @@ namespace App\Controller;
 
 use App\Entity\Cours;
 use App\Repository\CoursRepository;
+use App\Repository\EvaluationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
@@ -19,8 +20,6 @@ class CoursController extends AbstractController
 {
     private const UPLOAD_DIR = '/public/uploads/images';
 
-   
-
     #[Route('/cours', name: 'app_cours')]
     public function index(CoursRepository $coursRepository): Response
     {
@@ -32,7 +31,7 @@ class CoursController extends AbstractController
     }
 
     #[Route('/cours/{id}', name: 'app_cours_show', requirements: ['id' => '\d+'])]
-    public function show(Cours $cours): Response
+    public function show(Cours $cours, EvaluationRepository $evaluationRepository): Response
     {
         $motsList    = $cours->getMotsArray();
         $imagesByMot = $cours->getImagesByMot();
@@ -49,11 +48,32 @@ class CoursController extends AbstractController
             ];
         }
 
+        // Récupérer les évaluations liées à ce cours
+        $evaluations = $evaluationRepository->findByCoursId($cours->getIdCours());
+
         return $this->render('front/cours/show.html.twig', [
             'cours'          => $cours,
             'motsList'       => $motsList,
             'motsCount'      => $cours->getMotsCount(),
             'motsWithImages' => $motsWithImages,
+            'evaluations'    => $evaluations,
+            'hasQuiz'        => count($evaluations) > 0,
+        ]);
+    }
+
+    #[Route('/cours/{id}/quiz', name: 'app_cours_quiz', requirements: ['id' => '\d+'])]
+    public function quiz(Cours $cours, EvaluationRepository $evaluationRepository): Response
+    {
+        $evaluations = $evaluationRepository->findByCoursId($cours->getIdCours());
+
+        if (empty($evaluations)) {
+            $this->addFlash('info', 'Aucune question disponible pour ce cours.');
+            return $this->redirectToRoute('app_cours_show', ['id' => $cours->getIdCours()]);
+        }
+
+        return $this->render('front/cours/quiz.html.twig', [
+            'cours'       => $cours,
+            'evaluations' => $evaluations,
         ]);
     }
 
@@ -117,21 +137,16 @@ class CoursController extends AbstractController
             return $this->redirectToRoute('admin_cours_list');
         }
 
-        // ── Traitement des mots ──────────────────────────────────────
-        // Le formulaire envoie mots[] (un mot par carte)
         $mots = $request->request->all('mots');
         $motsArray = [];
         if ($mots && is_array($mots)) {
             foreach ($mots as $mot) {
                 $mot = strtoupper(trim($mot));
-                if (!empty($mot)) {
-                    $motsArray[] = $mot;
-                }
+                if (!empty($mot)) $motsArray[] = $mot;
             }
         }
         $motsString = implode(';', $motsArray);
 
-        // ── Image principale du cours ────────────────────────────────
         $imageFile = $request->files->get('image_file');
         if ($imageFile) {
             $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
@@ -145,37 +160,27 @@ class CoursController extends AbstractController
             }
         }
 
-       
-        $existingImagesByMot = $cours->getImagesByMot(); // retourne [mot => [img1, img2, ...]]
-
+        $existingImagesByMot = $cours->getImagesByMot();
         $imagesMots = [];
 
         foreach ($motsArray as $index => $mot) {
             $mot = strtoupper(trim($mot));
-            if (empty($mot)) {
-                continue;
-            }
+            if (empty($mot)) continue;
 
             $motImages = [];
 
-            // a) Images existantes conservées (envoyées via champs hidden existing_images_<idx>[])
             $keptExisting = $request->request->all('existing_images_' . $index);
             if ($keptExisting && is_array($keptExisting)) {
                 foreach ($keptExisting as $img) {
                     $img = trim($img);
-                    if (!empty($img)) {
-                        $motImages[] = $img;
-                    }
+                    if (!empty($img)) $motImages[] = $img;
                 }
             } else {
-                // Si aucun champ hidden présent, on garde les images associées au même mot en BDD
-                // (compatibilité : cas où le JS n'a pas encore injecté les hidden fields)
                 if (isset($existingImagesByMot[$mot])) {
                     $motImages = array_merge($motImages, $existingImagesByMot[$mot]);
                 }
             }
 
-            // b) Nouveaux fichiers uploadés
             $files = $request->files->get('images_files_' . $index);
             if ($files && is_array($files)) {
                 foreach ($files as $file) {
@@ -192,12 +197,9 @@ class CoursController extends AbstractController
                 }
             }
 
-            // c) Sauvegarder même si vide (pour conserver la liste des mots)
             if (!empty($motImages)) {
                 $imagesMots[] = $mot . ':' . implode(',', $motImages);
             }
-            // Si pas d'images du tout pour ce mot, on n'ajoute pas de ligne
-            // (le mot est quand même sauvegardé dans $motsString)
         }
 
         $cours->setTitre($titre);
@@ -239,9 +241,7 @@ class CoursController extends AbstractController
 
             if ($cours->getImage()) {
                 $imagePath = $uploadDir . '/' . $cours->getImage();
-                if (file_exists($imagePath)) {
-                    unlink($imagePath);
-                }
+                if (file_exists($imagePath)) unlink($imagePath);
             }
 
             if ($cours->getImagesMots()) {
@@ -250,9 +250,7 @@ class CoursController extends AbstractController
                     if (isset($parts[1])) {
                         foreach (explode(',', $parts[1]) as $image) {
                             $imagePath = $uploadDir . '/' . trim($image);
-                            if (file_exists($imagePath)) {
-                                unlink($imagePath);
-                            }
+                            if (file_exists($imagePath)) unlink($imagePath);
                         }
                     }
                 }

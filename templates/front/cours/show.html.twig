@@ -613,18 +613,31 @@
             {% endif %}
 
             <!-- Section Évaluation du cours -->
+             <!-- Section Évaluation du cours -->
             <div class="evaluation-section">
                 <h3>
                     <span>📝</span>
                     Évaluation du cours
                     <span>⭐</span>
                 </h3>
-                <div class="btn-quiz-disabled">
-                    <span>🎯</span>
-                    Passer le quiz (bientôt disponible)
-                    <span>⏳</span>
-                </div>
+                {% if hasQuiz %}
+                    <p style="color:#666; font-size:0.95rem; margin-bottom:1.2rem;">
+                        {{ evaluations|length }} question{{ evaluations|length > 1 ? 's' : '' }} t'attend{{ evaluations|length > 1 ? 'ent' : '' }} !
+                    </p>
+                    <a href="{{ path('app_cours_quiz', {'id': cours.idCours}) }}" class="btn-quiz">
+                        <span>🎯</span>
+                        Passer le quiz
+                        <span>🚀</span>
+                    </a>
+                {% else %}
+                    <div class="btn-quiz-disabled">
+                        <span>🎯</span>
+                        Passer le quiz (bientôt disponible)
+                        <span>⏳</span>
+                    </div>
+                {% endif %}
             </div>
+
 
             <!-- Sidebar Section - Informations supplémentaires -->
             <div class="row justify-content-center g-4 mt-4">
