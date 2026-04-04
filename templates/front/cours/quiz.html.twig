@@ -8,175 +8,393 @@
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --sun:      #FFD93D;
-            --sky:      #6BCB77;
-            --ocean:    #4D96FF;
-            --coral:    #FF6B6B;
-            --lavender: #C77DFF;
-            --peach:    #FF9A3C;
-            --mint:     #2EC4B6;
-            --rose:     #FF6FA8;
-            --bg:       #FFFBF4;
-            --dark:     #1E2A3B;
+            --violet:   #7c3aed;
+            --mauve:    #9b6bff;
+            --lavender: #c77dff;
+            --rose:     #ff69b4;
+            --peach:    #ff9a3c;
+            --sun:      #ffd93d;
+            --mint:     #2ec4b6;
+            --sky:      #4d96ff;
+            --coral:    #ff6b6b;
+            --green:    #10b981;
+            --dark:     #1e2a3b;
+            --bg:       #faf5ff;
         }
 
-        * { box-sizing: border-box; }
-        body { background: var(--bg); font-family: 'Nunito', sans-serif; min-height: 100vh; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        /* ── Hero bar ── */
+        body {
+            background: var(--bg);
+            font-family: 'Nunito', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ═══════════════════════════════════
+           ANIMATED BACKGROUND
+        ═══════════════════════════════════ */
+        .quiz-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background: linear-gradient(160deg, #f0e8ff 0%, #faf5ff 40%, #fff0f8 100%);
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .quiz-bg::before {
+            content: '';
+            position: absolute;
+            width: 600px; height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(155,107,255,0.12) 0%, transparent 70%);
+            top: -200px; left: -150px;
+            animation: drift1 12s ease-in-out infinite alternate;
+        }
+        .quiz-bg::after {
+            content: '';
+            position: absolute;
+            width: 500px; height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,105,180,0.10) 0%, transparent 70%);
+            bottom: -150px; right: -100px;
+            animation: drift2 10s ease-in-out infinite alternate;
+        }
+        @keyframes drift1 { from { transform: translate(0,0) scale(1); } to { transform: translate(60px,40px) scale(1.1); } }
+        @keyframes drift2 { from { transform: translate(0,0) scale(1); } to { transform: translate(-50px,-30px) scale(1.15); } }
+
+        .blob-mid {
+            position: absolute;
+            width: 350px; height: 350px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(77,150,255,0.08) 0%, transparent 70%);
+            top: 50%; left: 50%;
+            transform: translate(-50%,-50%);
+            animation: drift1 8s ease-in-out infinite alternate;
+        }
+
+        /* Floating stars */
+        .star {
+            position: absolute;
+            border-radius: 50%;
+            background: var(--sun);
+            animation: twinkle var(--d, 3s) ease-in-out infinite alternate;
+            opacity: 0.5;
+        }
+        @keyframes twinkle {
+            from { opacity: 0.2; transform: scale(0.8); }
+            to   { opacity: 0.7; transform: scale(1.2); }
+        }
+
+        /* ═══════════════════════════════════
+           HERO — identique à show.html.twig
+        ═══════════════════════════════════ */
         .quiz-hero {
-            background: linear-gradient(135deg, #5a288c 0%, #9b6bff 60%, #c77dff 100%);
-            padding: 1.8rem 0;
+            background: linear-gradient(150deg, #5a288c 0%, #9b6bff 50%, #c77dff 100%);
+            padding: 2.5rem 0 0;
             position: relative;
             overflow: hidden;
+            border-bottom: 4px dashed rgba(255,158,207,0.35);
         }
         .quiz-hero::before {
             content: '';
             position: absolute; inset: 0;
-            background-image: radial-gradient(circle at 10% 50%, rgba(255,105,180,0.15) 0%, transparent 40%),
-                              radial-gradient(circle at 90% 20%, rgba(255,255,255,0.08) 0%, transparent 35%);
+            background-image:
+                radial-gradient(circle at 5%  30%, rgba(255,105,180,0.18) 0%, transparent 35%),
+                radial-gradient(circle at 95% 10%, rgba(255,255,255,0.10) 0%, transparent 35%),
+                radial-gradient(circle at 50% 90%, rgba(183,148,244,0.20) 0%, transparent 30%);
             pointer-events: none;
         }
         .quiz-hero-inner {
             position: relative; z-index: 2;
-            display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+            padding-bottom: 2.5rem;
         }
-        .quiz-hero-left { display: flex; align-items: center; gap: 14px; }
-        .quiz-hero-icon {
-            width: 52px; height: 52px; border-radius: 16px;
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(8px);
-            border: 2px solid rgba(255,255,255,0.35);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.6rem;
-        }
-        .quiz-hero-title {
-            font-family: 'Baloo 2', cursive;
-            font-size: 1.3rem; font-weight: 800;
-            color: #fff;
-            margin: 0 0 2px 0;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.15);
-        }
-        .quiz-hero-sub { color: rgba(255,255,255,0.8); font-size: 0.82rem; font-weight: 700; }
 
+        /* Breadcrumb — copié de show.html.twig */
+        .bc-link { color: rgba(255,255,255,0.70); font-size: 0.85rem; font-weight: 700; text-decoration: none; transition: color 0.2s; }
+        .bc-link:hover { color: #fff; }
+        .bc-sep { margin: 0 8px; color: rgba(255,255,255,0.40); }
+        .bc-current { color: rgba(255,255,255,0.95); font-size: 0.85rem; font-weight: 700; }
+
+        /* Pill de type — copié de show.html.twig */
+        .course-type-pill {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-family: 'Baloo 2', cursive; font-size: 0.78rem; font-weight: 800;
+            padding: 5px 15px; border-radius: 30px;
+            text-transform: uppercase; letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+        .type-Académique { background: #EBF5FF; color: #4D96FF; }
+        .type-Social     { background: #EBFFEE; color: #2EA043; }
+        .type-Motricité  { background: #FFF0EB; color: #FF6B6B; }
+        .type-Langage    { background: #F5EBFF; color: #C77DFF; }
+        .type-default    { background: #F5F5F5; color: #777; }
+
+        /* Grand titre — copié de show.html.twig */
+        .quiz-main-title {
+            font-family: 'Baloo 2', cursive;
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.15;
+            margin-bottom: 0.7rem;
+            text-shadow: 0 3px 18px rgba(0,0,0,0.2);
+        }
+        .quiz-main-desc {
+            font-size: 1rem;
+            color: rgba(255,255,255,0.85);
+            line-height: 1.65;
+            max-width: 560px;
+            margin-bottom: 1.4rem;
+        }
+
+        /* Info chips — copié de show.html.twig */
+        .info-chips { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 1.6rem; }
+        .info-chip {
+            display: inline-flex; align-items: center; gap: 7px;
+            background: rgba(255,255,255,0.18);
+            backdrop-filter: blur(8px);
+            padding: 9px 18px; border-radius: 50px;
+            font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 800;
+            color: #fff;
+            border: 2px solid rgba(255,255,255,0.30);
+        }
+        .chip-quiz   { border-color: rgba(255,217,61,0.6); }
+        .chip-level  { border-color: rgba(107,203,119,0.6); }
+        .chip-time   { border-color: rgba(255,158,207,0.6); }
+
+        /* Bouton retour — copié de show.html.twig */
         .btn-back-quiz {
             display: inline-flex; align-items: center; gap: 7px;
             background: rgba(255,255,255,0.18);
             backdrop-filter: blur(8px);
             color: #fff;
-            font-family: 'Baloo 2', cursive; font-size: 0.88rem; font-weight: 700;
+            font-family: 'Baloo 2', cursive; font-size: 0.9rem; font-weight: 700;
             padding: 9px 20px; border-radius: 40px;
             text-decoration: none;
-            border: 2px solid rgba(255,255,255,0.30);
-            transition: all 0.25s;
-            white-space: nowrap;
+            border: 2px solid rgba(255,255,255,0.35);
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-        .btn-back-quiz:hover { background: rgba(255,255,255,0.28); color: #fff; transform: translateX(-3px); }
+        .btn-back-quiz:hover { transform: translateX(-4px) scale(1.04); background: rgba(255,255,255,0.28); color: #fff; }
 
-        /* ── Progress bar ── */
-        .quiz-progress-wrap {
-            background: white;
-            border-bottom: 2px solid #f0ebff;
-            padding: 14px 0;
+        /* Image/emoji hero — copié de show.html.twig */
+        .quiz-hero-img-wrap {
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 16px 50px rgba(0,0,0,0.14);
+            border: 4px solid white;
+            aspect-ratio: 4/3;
+            background: linear-gradient(135deg, #E8F4FF, #F5EBFF);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .quiz-hero-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+        .hero-img-emoji {
+            font-size: 7rem;
+            animation: float-em 3s ease-in-out infinite;
+            filter: drop-shadow(0 8px 16px rgba(0,0,0,0.12));
+        }
+        @keyframes float-em {
+            0%,100% { transform: translateY(0) rotate(-5deg); }
+            50%      { transform: translateY(-14px) rotate(5deg); }
+        }
+
+        /* ═══════════════════════════════════
+           PROGRESS STRIP
+        ═══════════════════════════════════ */
+        .quiz-progress-strip {
             position: sticky; top: 0; z-index: 100;
-            box-shadow: 0 2px 12px rgba(124,58,237,0.08);
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 2px solid rgba(155,107,255,0.15);
+            box-shadow: 0 4px 20px rgba(124,58,237,0.08);
+            padding: 12px 0;
         }
         .quiz-progress-inner {
-            display: flex; align-items: center; gap: 16px;
-            flex-wrap: wrap;
+            display: flex; align-items: center; gap: 14px;
         }
-        .progress-label {
-            font-family: 'Baloo 2', cursive;
-            font-size: 0.82rem; font-weight: 800;
-            color: #7c3aed;
-            white-space: nowrap;
-        }
-        .progress-track {
+
+        .progress-step-pills {
+            display: flex; gap: 5px;
             flex: 1;
-            height: 10px;
-            background: #ede9fe;
+        }
+        .step-pill {
+            flex: 1;
+            height: 8px;
             border-radius: 20px;
+            background: #ede9fe;
+            transition: all 0.45s cubic-bezier(0.4,0,0.2,1);
+            position: relative;
             overflow: hidden;
         }
-        .progress-fill {
-            height: 100%;
+        .step-pill.done {
             background: linear-gradient(90deg, #7c3aed, #a855f7);
-            border-radius: 20px;
-            transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
         }
-        .progress-score-badge {
-            display: inline-flex; align-items: center; gap: 5px;
+        .step-pill.done::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shimmer 1.5s ease-in-out;
+        }
+        @keyframes shimmer {
+            from { transform: translateX(-100%); }
+            to   { transform: translateX(100%); }
+        }
+        .step-pill.current {
+            background: linear-gradient(90deg, #a855f7, #c77dff);
+            box-shadow: 0 0 10px rgba(168,85,247,0.5);
+            animation: pulse-pill 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse-pill {
+            0%,100% { box-shadow: 0 0 8px rgba(168,85,247,0.5); }
+            50%      { box-shadow: 0 0 18px rgba(168,85,247,0.8); }
+        }
+
+        .progress-label {
+            font-family: 'Baloo 2', cursive;
+            font-size: 0.8rem; font-weight: 800;
+            color: var(--violet);
+            white-space: nowrap;
+        }
+        .score-gem {
+            display: inline-flex; align-items: center; gap: 6px;
             background: linear-gradient(135deg, #ede9fe, #ddd6fe);
             color: #6d28d9;
             font-family: 'Baloo 2', cursive;
             font-size: 0.82rem; font-weight: 800;
             padding: 5px 14px; border-radius: 20px;
+            border: 1.5px solid rgba(124,58,237,0.2);
             white-space: nowrap;
         }
-
-        /* ── Quiz container ── */
-        .quiz-container {
-            max-width: 720px;
-            margin: 0 auto;
-            padding: 3rem 1rem 5rem;
+        .score-gem .gem-icon {
+            font-size: 1rem;
+            animation: gem-spin 4s linear infinite;
+        }
+        @keyframes gem-spin {
+            0%,90%  { transform: rotateY(0); }
+            95%     { transform: rotateY(90deg); }
+            100%    { transform: rotateY(0); }
         }
 
-        /* ── Question card ── */
+        /* ═══════════════════════════════════
+           MAIN LAYOUT
+        ═══════════════════════════════════ */
+        .quiz-wrapper {
+            position: relative;
+            z-index: 5;
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 2.5rem 1rem 6rem;
+        }
+
+        /* ═══════════════════════════════════
+           QUESTION CARD
+        ═══════════════════════════════════ */
         .question-card {
             background: white;
-            border-radius: 28px;
-            padding: 2.5rem;
-            box-shadow: 0 8px 32px rgba(124,58,237,0.1);
-            border: 2px solid rgba(155,107,255,0.15);
+            border-radius: 32px;
+            padding: 2.8rem 2.5rem 2.2rem;
+            box-shadow:
+                0 0 0 1px rgba(155,107,255,0.12),
+                0 12px 40px rgba(124,58,237,0.10),
+                0 2px 8px rgba(124,58,237,0.06);
             position: relative;
             overflow: hidden;
-            animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(24px) scale(0.97); }
-            to   { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        .question-card::before {
-            content: '';
-            position: absolute; top: 0; left: 0; right: 0; height: 5px;
-            background: linear-gradient(90deg, #7c3aed, #a855f7, #ec4899);
         }
 
-        .question-number {
-            display: inline-flex; align-items: center; gap: 6px;
+        /* Rainbow top edge */
+        .question-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #7c3aed, #a855f7, #ec4899, #ff9a3c, #ffd93d);
+            background-size: 200% 100%;
+            animation: rainbow-shift 4s linear infinite;
+        }
+        @keyframes rainbow-shift {
+            from { background-position: 0% 0%; }
+            to   { background-position: 200% 0%; }
+        }
+
+        /* Decorative circles */
+        .question-card::after {
+            content: '';
+            position: absolute;
+            bottom: -60px; right: -60px;
+            width: 180px; height: 180px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(199,125,255,0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* Question number badge */
+        .q-badge-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.4rem;
+        }
+        .q-number-badge {
+            display: inline-flex; align-items: center; gap: 8px;
             background: linear-gradient(135deg, #ede9fe, #ddd6fe);
             color: #6d28d9;
             font-family: 'Baloo 2', cursive;
-            font-size: 0.8rem; font-weight: 800;
-            padding: 4px 14px; border-radius: 20px;
-            margin-bottom: 1.2rem;
-            text-transform: uppercase; letter-spacing: .4px;
+            font-size: 0.78rem; font-weight: 800;
+            padding: 5px 16px; border-radius: 30px;
+            text-transform: uppercase; letter-spacing: .5px;
+            border: 1.5px solid rgba(124,58,237,0.18);
+        }
+        .q-number-badge .q-dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: var(--violet);
+            animation: blink 1.4s ease-in-out infinite;
+        }
+        @keyframes blink {
+            0%,100% { opacity: 1; } 50% { opacity: 0.3; }
+        }
+        .q-score-tag {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: linear-gradient(135deg, #fff7ed, #fde68a);
+            color: #92400e;
+            font-family: 'Baloo 2', cursive;
+            font-size: 0.75rem; font-weight: 800;
+            padding: 5px 12px; border-radius: 30px;
+            border: 1.5px solid rgba(245,158,11,0.25);
         }
 
+        /* Question text */
         .question-text {
             font-family: 'Baloo 2', cursive;
-            font-size: 1.4rem; font-weight: 800;
+            font-size: clamp(1.2rem, 3vw, 1.45rem);
+            font-weight: 800;
             color: var(--dark);
-            line-height: 1.4;
+            line-height: 1.45;
             margin-bottom: 2rem;
+            position: relative;
         }
 
-        /* ── Choices ── */
+        /* ═══════════════════════════════════
+           CHOICES
+        ═══════════════════════════════════ */
         .choices-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 2rem;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 11px;
+            margin-bottom: 1.8rem;
         }
 
         .choice-btn {
-            display: flex; align-items: center; gap: 14px;
-            background: #faf9ff;
-            border: 2px solid #ede9fe;
-            border-radius: 16px;
-            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 15px 20px;
+            background: #faf8ff;
+            border: 2.5px solid #ede9fe;
+            border-radius: 18px;
             cursor: pointer;
-            transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1);
             text-align: left;
             width: 100%;
             font-family: 'Nunito', sans-serif;
@@ -185,188 +403,334 @@
             position: relative;
             overflow: hidden;
         }
-        .choice-btn:hover:not(:disabled):not(.selected) {
-            border-color: #a855f7;
-            background: #f5f0ff;
-            transform: translateX(6px);
-            box-shadow: 0 4px 16px rgba(124,58,237,0.12);
+
+        /* Hover shimmer effect */
+        .choice-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(168,85,247,0.06), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.4s ease;
         }
+        .choice-btn:hover:not(:disabled):not(.selected):not(.correct):not(.wrong)::before {
+            transform: translateX(100%);
+        }
+
+        .choice-btn:hover:not(:disabled):not(.selected):not(.correct):not(.wrong) {
+            border-color: var(--mauve);
+            background: #f5f0ff;
+            transform: translateX(8px);
+            box-shadow: 0 6px 20px rgba(124,58,237,0.12);
+        }
+
         .choice-letter {
-            width: 34px; height: 34px;
-            border-radius: 50%;
+            width: 36px; height: 36px;
+            border-radius: 12px;
             background: linear-gradient(135deg, #ede9fe, #ddd6fe);
             color: #6d28d9;
             font-family: 'Baloo 2', cursive;
-            font-size: 0.9rem; font-weight: 800;
+            font-size: 0.95rem; font-weight: 800;
             display: flex; align-items: center; justify-content: center;
             flex-shrink: 0;
-            transition: all 0.2s;
+            transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+        }
+
+        /* Selected state */
+        .choice-btn.selected {
+            border-color: var(--violet);
+            background: #f5f0ff;
+            transform: translateX(6px);
         }
         .choice-btn.selected .choice-letter {
             background: linear-gradient(135deg, #7c3aed, #a855f7);
             color: white;
         }
-        .choice-btn.selected {
-            border-color: #7c3aed;
-            background: #f5f0ff;
-            transform: translateX(4px);
-        }
+
+        /* Correct state */
         .choice-btn.correct {
-            border-color: #10b981 !important;
-            background: rgba(16,185,129,0.08) !important;
+            border-color: var(--green) !important;
+            background: rgba(16,185,129,0.07) !important;
             transform: none !important;
+            animation: correct-pop 0.4s cubic-bezier(0.34,1.56,0.64,1);
         }
         .choice-btn.correct .choice-letter {
-            background: linear-gradient(135deg, #10b981, #34d399);
-            color: white;
+            background: linear-gradient(135deg, #10b981, #34d399) !important;
+            color: white !important;
+            border-radius: 50%;
         }
+        @keyframes correct-pop {
+            0%   { transform: scale(0.97); }
+            60%  { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+
+        /* Wrong state */
         .choice-btn.wrong {
-            border-color: #ef4444 !important;
-            background: rgba(239,68,68,0.08) !important;
+            border-color: var(--coral) !important;
+            background: rgba(239,68,68,0.07) !important;
             transform: none !important;
+            animation: wrong-shake 0.4s ease;
         }
         .choice-btn.wrong .choice-letter {
-            background: linear-gradient(135deg, #ef4444, #f87171);
-            color: white;
+            background: linear-gradient(135deg, #ef4444, #f87171) !important;
+            color: white !important;
+            border-radius: 50%;
         }
-        .choice-btn:disabled { cursor: default; }
+        @keyframes wrong-shake {
+            0%,100% { transform: translateX(0); }
+            20%     { transform: translateX(-6px); }
+            40%     { transform: translateX(6px); }
+            60%     { transform: translateX(-4px); }
+            80%     { transform: translateX(4px); }
+        }
 
-        /* ── Feedback ── */
+        .choice-btn:disabled { cursor: default; }
+        .choice-text { flex: 1; }
+
+        /* ═══════════════════════════════════
+           FEEDBACK BOX
+        ═══════════════════════════════════ */
         .feedback-box {
             display: none;
-            border-radius: 16px;
-            padding: 14px 20px;
-            margin-bottom: 1.5rem;
+            border-radius: 18px;
+            padding: 14px 18px;
+            margin-bottom: 1.6rem;
             font-family: 'Baloo 2', cursive;
-            font-size: 1rem; font-weight: 800;
-            display: flex;
+            font-size: 0.98rem; font-weight: 800;
             align-items: center;
-            gap: 10px;
-            animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+            gap: 12px;
+            animation: pop-in 0.35s cubic-bezier(0.34,1.56,0.64,1);
         }
-        @keyframes popIn {
-            from { opacity: 0; transform: scale(0.88); }
-            to   { opacity: 1; transform: scale(1); }
+        .feedback-box.visible { display: flex; }
+        @keyframes pop-in {
+            from { opacity: 0; transform: scale(0.85) translateY(8px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
         }
-        .feedback-box.correct-feedback {
-            background: rgba(16,185,129,0.1);
-            border: 2px solid rgba(16,185,129,0.3);
-            color: #059669;
+        .feedback-box.correct-fb {
+            background: linear-gradient(135deg, rgba(16,185,129,0.10), rgba(52,211,153,0.08));
+            border: 2px solid rgba(16,185,129,0.28);
+            color: #065f46;
         }
-        .feedback-box.wrong-feedback {
-            background: rgba(239,68,68,0.08);
-            border: 2px solid rgba(239,68,68,0.25);
-            color: #dc2626;
+        .feedback-box.wrong-fb {
+            background: linear-gradient(135deg, rgba(239,68,68,0.08), rgba(248,113,113,0.06));
+            border: 2px solid rgba(239,68,68,0.22);
+            color: #991b1b;
         }
-        .feedback-icon { font-size: 1.5rem; }
+        .feedback-icon-big {
+            font-size: 1.7rem;
+            flex-shrink: 0;
+            animation: icon-bounce 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.1s both;
+        }
+        @keyframes icon-bounce {
+            from { transform: scale(0) rotate(-20deg); }
+            to   { transform: scale(1) rotate(0deg); }
+        }
+        .feedback-content {}
+        .feedback-title {
+            display: block;
+            font-size: 1rem; font-weight: 800;
+            margin-bottom: 2px;
+        }
+        .feedback-detail {
+            display: block;
+            font-size: 0.82rem; font-weight: 700;
+            opacity: 0.85;
+        }
 
-        /* ── Action button ── */
+        /* ═══════════════════════════════════
+           NEXT BUTTON
+        ═══════════════════════════════════ */
+        .btn-next-wrap {
+            display: flex;
+            justify-content: flex-end;
+        }
         .btn-next {
-            display: inline-flex; align-items: center; gap: 10px;
+            display: none;
+            align-items: center; gap: 10px;
             background: linear-gradient(135deg, #7c3aed, #a855f7);
             color: white;
             font-family: 'Baloo 2', cursive;
             font-size: 1rem; font-weight: 800;
-            padding: 13px 30px; border-radius: 50px;
+            padding: 14px 32px; border-radius: 50px;
             border: none; cursor: pointer;
-            box-shadow: 0 6px 20px rgba(124,58,237,0.3);
+            box-shadow: 0 8px 24px rgba(124,58,237,0.32);
             transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
-            display: none;
+            animation: pop-in 0.3s cubic-bezier(0.34,1.56,0.64,1);
+            position: relative;
+            overflow: hidden;
         }
-        .btn-next:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 10px 28px rgba(124,58,237,0.4); }
+        .btn-next::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+            border-radius: inherit;
+        }
         .btn-next.visible { display: inline-flex; }
+        .btn-next:hover {
+            transform: translateY(-3px) scale(1.04);
+            box-shadow: 0 14px 32px rgba(124,58,237,0.42);
+        }
+        .btn-next-arrow {
+            font-size: 1.1rem;
+            transition: transform 0.2s;
+        }
+        .btn-next:hover .btn-next-arrow { transform: translateX(4px); }
 
-        /* ── Results screen ── */
-        .results-card {
-            background: white;
-            border-radius: 32px;
-            padding: 3rem 2.5rem;
-            text-align: center;
-            box-shadow: 0 12px 40px rgba(124,58,237,0.12);
-            border: 2px solid rgba(155,107,255,0.2);
-            animation: slideIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+        /* ═══════════════════════════════════
+           CONFETTI BURST (canvas overlay)
+        ═══════════════════════════════════ */
+        #confetti-canvas {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 999;
             display: none;
         }
-        .results-emoji {
-            font-size: 5rem;
-            margin-bottom: 1rem;
+
+        /* ═══════════════════════════════════
+           RESULTS CARD
+        ═══════════════════════════════════ */
+        .results-card {
+            display: none;
+            background: white;
+            border-radius: 36px;
+            padding: 3.5rem 2.5rem;
+            text-align: center;
+            box-shadow:
+                0 0 0 1px rgba(155,107,255,0.12),
+                0 20px 60px rgba(124,58,237,0.14);
+            position: relative;
+            overflow: hidden;
+            animation: slide-in 0.5s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        @keyframes slide-in {
+            from { opacity: 0; transform: translateY(30px) scale(0.96); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .results-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #7c3aed, #a855f7, #ec4899, #ff9a3c, #ffd93d);
+            background-size: 200%;
+            animation: rainbow-shift 4s linear infinite;
+        }
+        /* Big decorative blob */
+        .results-card::after {
+            content: '';
+            position: absolute;
+            width: 320px; height: 320px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(199,125,255,0.06) 0%, transparent 70%);
+            top: -100px; right: -100px;
+            pointer-events: none;
+        }
+
+        .results-trophy {
+            font-size: 5.5rem;
             display: block;
-            animation: bounce 0.7s cubic-bezier(0.34,1.56,0.64,1) 0.2s both;
+            margin-bottom: 0.5rem;
+            animation: trophy-entrance 0.7s cubic-bezier(0.34,1.56,0.64,1) 0.1s both;
+            filter: drop-shadow(0 8px 24px rgba(255,217,61,0.5));
         }
-        @keyframes bounce {
-            from { opacity: 0; transform: scale(0.5) rotate(-15deg); }
-            to   { opacity: 1; transform: scale(1) rotate(0deg); }
+        @keyframes trophy-entrance {
+            from { opacity: 0; transform: scale(0.3) rotate(-15deg); }
+            to   { opacity: 1; transform: scale(1) rotate(0); }
         }
+
         .results-title {
             font-family: 'Baloo 2', cursive;
-            font-size: 2rem; font-weight: 800;
+            font-size: 2.2rem; font-weight: 800;
             color: var(--dark);
             margin-bottom: 0.5rem;
         }
         .results-subtitle {
-            color: #6b7280;
-            font-size: 0.95rem;
-            margin-bottom: 2rem;
+            font-size: 1rem; color: #6b7280;
+            margin-bottom: 2.2rem;
+            line-height: 1.6;
         }
+
+        /* Score ring */
         .score-ring-wrap {
             display: flex; justify-content: center;
-            margin: 1.5rem 0 2rem;
+            margin: 0 0 2rem;
         }
-        .score-ring {
-            width: 130px; height: 130px;
-            border-radius: 50%;
-            background: conic-gradient(var(--ring-color, #7c3aed) var(--ring-pct, 0%), #ede9fe 0%);
-            display: flex; align-items: center; justify-content: center;
+        .score-ring-outer {
             position: relative;
-            box-shadow: 0 6px 24px rgba(124,58,237,0.2);
+            width: 150px; height: 150px;
         }
-        .score-ring::after {
-            content: '';
+        .score-ring-svg {
+            width: 150px; height: 150px;
+            transform: rotate(-90deg);
+        }
+        .score-ring-bg { fill: none; stroke: #ede9fe; stroke-width: 10; }
+        .score-ring-fill {
+            fill: none;
+            stroke-width: 10;
+            stroke-linecap: round;
+            stroke-dasharray: 408;
+            stroke-dashoffset: 408;
+            transition: stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1) 0.3s;
+        }
+        .score-ring-center {
             position: absolute;
-            width: 90px; height: 90px;
-            background: white;
-            border-radius: 50%;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
-        .score-ring-text {
-            position: relative; z-index: 2;
+        .ring-score-num {
             font-family: 'Baloo 2', cursive;
-            font-size: 1.6rem; font-weight: 800;
+            font-size: 1.8rem; font-weight: 800;
             color: var(--dark);
-            text-align: center;
+            line-height: 1;
         }
-        .score-ring-text small {
-            display: block;
-            font-size: 0.7rem;
+        .ring-score-total {
+            font-size: 0.72rem; font-weight: 700;
             color: #9ca3af;
-            font-weight: 700;
         }
 
+        /* Stats row */
         .results-stats {
-            display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;
-            margin-bottom: 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-bottom: 2.2rem;
         }
-        .stat-pill {
-            display: inline-flex; flex-direction: column; align-items: center;
-            background: #faf9ff;
+        .stat-card {
+            background: #faf8ff;
             border: 2px solid #ede9fe;
-            border-radius: 20px;
-            padding: 12px 24px;
+            border-radius: 22px;
+            padding: 14px 22px;
             min-width: 100px;
+            text-align: center;
+            transition: transform 0.2s;
         }
-        .stat-pill-val {
+        .stat-card:hover { transform: translateY(-3px); }
+        .stat-icon { font-size: 1.6rem; display: block; margin-bottom: 4px; }
+        .stat-num {
             font-family: 'Baloo 2', cursive;
-            font-size: 1.6rem; font-weight: 800;
+            font-size: 1.7rem; font-weight: 800;
             color: var(--dark);
+            display: block; line-height: 1;
         }
-        .stat-pill-label {
-            font-size: 0.75rem; font-weight: 700;
+        .stat-label {
+            font-size: 0.72rem; font-weight: 800;
             color: #9ca3af;
-            text-transform: uppercase; letter-spacing: .4px;
+            text-transform: uppercase; letter-spacing: .5px;
         }
 
+        /* Actions */
         .results-actions {
-            display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;
-            margin-top: 1.5rem;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
         }
         .btn-retry {
             display: inline-flex; align-items: center; gap: 8px;
@@ -374,39 +738,54 @@
             color: white;
             font-family: 'Baloo 2', cursive;
             font-size: 0.95rem; font-weight: 800;
-            padding: 12px 28px; border-radius: 50px;
+            padding: 13px 28px; border-radius: 50px;
             border: none; cursor: pointer;
             box-shadow: 0 6px 20px rgba(124,58,237,0.3);
-            transition: all 0.25s;
+            transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
             text-decoration: none;
         }
-        .btn-retry:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(124,58,237,0.4); color: white; }
-        .btn-cours {
+        .btn-retry:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 12px 30px rgba(124,58,237,0.4);
+            color: white;
+        }
+        .btn-cours-back {
             display: inline-flex; align-items: center; gap: 8px;
             background: white;
             color: #6d28d9;
             font-family: 'Baloo 2', cursive;
             font-size: 0.95rem; font-weight: 800;
-            padding: 12px 28px; border-radius: 50px;
-            border: 2px solid #ddd6fe; cursor: pointer;
+            padding: 13px 28px; border-radius: 50px;
+            border: 2.5px solid #ddd6fe;
+            cursor: pointer;
             transition: all 0.25s;
             text-decoration: none;
         }
-        .btn-cours:hover { border-color: #a855f7; background: #faf9ff; color: #6d28d9; }
+        .btn-cours-back:hover {
+            border-color: var(--mauve);
+            background: #faf8ff;
+            color: #6d28d9;
+            transform: translateY(-2px);
+        }
 
+        /* ═══════════════════════════════════
+           RESPONSIVE
+        ═══════════════════════════════════ */
         @media (max-width: 576px) {
-            .question-card { padding: 1.5rem; }
-            .question-text { font-size: 1.15rem; }
-            .quiz-hero-title { font-size: 1.1rem; }
-            .results-card { padding: 2rem 1.2rem; }
-            .quiz-progress-inner { flex-direction: column; align-items: stretch; }
+            .question-card { padding: 1.8rem 1.4rem 1.6rem; }
+            .question-text { font-size: 1.1rem; }
+            .quiz-hero-title { font-size: 1.05rem; }
+            .results-card { padding: 2.5rem 1.4rem; }
+            .results-title { font-size: 1.7rem; }
+            .quiz-progress-inner { flex-wrap: wrap; gap: 8px; }
+            .progress-step-pills { order: 3; width: 100%; }
         }
     </style>
 {% endblock %}
 
 {% block body %}
 
-{# Sérialiser les questions en JSON pour le JS #}
+{# ─── Serialize questions to JSON ─── #}
 {% set questionsJson = [] %}
 {% for eval in evaluations %}
     {% set q = {
@@ -423,90 +802,159 @@
 
 <div id="questionsData" data-questions="{{ questionsJson|json_encode }}"></div>
 
-<!-- Hero -->
+{# ─── Animated background ─── #}
+<div class="quiz-bg" aria-hidden="true">
+    <div class="blob-mid"></div>
+    <span class="star" style="width:8px;height:8px;top:12%;left:8%;--d:2.8s"></span>
+    <span class="star" style="width:5px;height:5px;top:25%;left:78%;--d:3.5s"></span>
+    <span class="star" style="width:6px;height:6px;top:65%;left:15%;--d:2.2s"></span>
+    <span class="star" style="width:9px;height:9px;top:80%;left:85%;--d:4.1s"></span>
+    <span class="star" style="width:4px;height:4px;top:45%;left:92%;--d:3.0s"></span>
+    <span class="star" style="width:7px;height:7px;top:5%;left:55%;--d:2.5s"></span>
+</div>
+
+<canvas id="confetti-canvas"></canvas>
+
+{# ─── Hero — même structure que show.html.twig ─── #}
+{% set emojis = {'Académique': '📚', 'Social': '🤝', 'Motricité': '🏃', 'Langage': '💬'} %}
+{% set emoji = emojis[cours.typeCours] ?? '🎯' %}
+{% set typeClass = 'type-' ~ cours.typeCours %}
+
 <div class="quiz-hero">
-    <div class="container">
-        <div class="quiz-hero-inner">
-            <div class="quiz-hero-left">
-                <div class="quiz-hero-icon">🎯</div>
-                <div>
-                    <div class="quiz-hero-title">Quiz : {{ cours.titre }}</div>
-                    <div class="quiz-hero-sub">{{ evaluations|length }} question{{ evaluations|length > 1 ? 's' : '' }} · Bonne chance !</div>
+    <div class="quiz-hero-inner">
+        <div class="container">
+
+            {# Breadcrumb #}
+            <div class="mb-3">
+                <a href="{{ path('app_home') }}" class="bc-link">🏠 Accueil</a>
+                <span class="bc-sep">›</span>
+                <a href="{{ path('app_cours') }}" class="bc-link">Cours</a>
+                <span class="bc-sep">›</span>
+                <a href="{{ path('app_cours_show', {'id': cours.idCours}) }}" class="bc-link">{{ cours.titre }}</a>
+                <span class="bc-sep">›</span>
+                <span class="bc-current">Quiz</span>
+            </div>
+
+            <div class="row align-items-center g-4">
+                {# Colonne gauche : infos #}
+                <div class="col-lg-7 col-md-6">
+                    <span class="course-type-pill {{ typeClass }}">{{ emoji }} {{ cours.typeCours }}</span>
+                    <h1 class="quiz-main-title">🎯 Quiz · {{ cours.titre }}</h1>
+                    <p class="quiz-main-desc">{{ cours.description|slice(0, 140) ~ (cours.description|length > 140 ? '…' : '') }}</p>
+                    <div class="info-chips">
+                        <span class="info-chip chip-quiz">🧩 <strong>{{ evaluations|length }} question{{ evaluations|length > 1 ? 's' : '' }}</strong></span>
+                        <span class="info-chip chip-level">📊 <strong>{{ cours.niveau }}</strong></span>
+                        <span class="info-chip chip-time">⏱ <strong>{{ cours.duree }} min</strong></span>
+                    </div>
+                    <a href="{{ path('app_cours_show', {'id': cours.idCours}) }}" class="btn-back-quiz">← Retour au cours</a>
+                </div>
+
+                {# Colonne droite : image du cours #}
+                <div class="col-lg-5 col-md-6">
+                    <div class="quiz-hero-img-wrap">
+                        {% if cours.image %}
+                            <img src="/uploads/images/{{ cours.image }}" alt="{{ cours.titre }}">
+                        {% else %}
+                            <span class="hero-img-emoji">{{ emoji }}</span>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
-            <a href="{{ path('app_cours_show', {'id': cours.idCours}) }}" class="btn-back-quiz">← Retour au cours</a>
+
         </div>
     </div>
 </div>
 
-<!-- Progress bar -->
-<div class="quiz-progress-wrap">
+{# ─── Progress strip ─── #}
+<div class="quiz-progress-strip">
     <div class="container">
         <div class="quiz-progress-inner">
             <span class="progress-label" id="progressLabel">Question 1 / {{ evaluations|length }}</span>
-            <div class="progress-track">
-                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            <div class="progress-step-pills" id="stepPills">
+                {% for i in 1..evaluations|length %}
+                    <div class="step-pill{% if i == 1 %} current{% endif %}" data-step="{{ i }}"></div>
+                {% endfor %}
             </div>
-            <span class="progress-score-badge">⭐ <span id="scoreDisplay">0</span> pts</span>
+            <div class="score-gem">
+                <span class="gem-icon">💎</span>
+                <span id="scoreDisplay">0</span> pts
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Quiz body -->
-<div class="quiz-container">
+{# ─── Quiz body ─── #}
+<div class="quiz-wrapper">
 
-    <!-- Question card -->
+    {# Question card #}
     <div class="question-card" id="questionCard">
-        <div class="question-number" id="questionNumber">Question 1</div>
+        <div class="q-badge-row">
+            <span class="q-number-badge">
+                <span class="q-dot"></span>
+                <span id="questionNumber">Question 1</span>
+            </span>
+            <span class="q-score-tag" id="questionScoreTag">⭐ <span id="qScoreVal">?</span> pt(s)</span>
+        </div>
+
         <div class="question-text" id="questionText"></div>
 
         <div class="choices-grid" id="choicesGrid"></div>
 
         <div class="feedback-box" id="feedbackBox">
-            <span class="feedback-icon" id="feedbackIcon"></span>
-            <span id="feedbackText"></span>
+            <span class="feedback-icon-big" id="feedbackIcon"></span>
+            <div class="feedback-content">
+                <span class="feedback-title" id="feedbackTitle"></span>
+                <span class="feedback-detail" id="feedbackDetail"></span>
+            </div>
         </div>
 
-        <div style="text-align: right;">
+        <div class="btn-next-wrap">
             <button class="btn-next" id="btnNext">
-                Suivant <span>→</span>
+                Suivant <span class="btn-next-arrow">→</span>
             </button>
         </div>
     </div>
 
-    <!-- Results card -->
+    {# Results card #}
     <div class="results-card" id="resultsCard">
-        <span class="results-emoji" id="resultsEmoji">🏆</span>
+        <span class="results-trophy" id="resultsEmoji">🏆</span>
         <div class="results-title" id="resultsTitle">Bravo !</div>
         <div class="results-subtitle" id="resultsSubtitle"></div>
 
         <div class="score-ring-wrap">
-            <div class="score-ring" id="scoreRing">
-                <div class="score-ring-text">
-                    <span id="ringScore">0</span>
-                    <small>/ <span id="ringTotal">0</span></small>
+            <div class="score-ring-outer">
+                <svg class="score-ring-svg" viewBox="0 0 130 130">
+                    <circle class="score-ring-bg" cx="65" cy="65" r="55"/>
+                    <circle class="score-ring-fill" id="ringCircle" cx="65" cy="65" r="55"/>
+                </svg>
+                <div class="score-ring-center">
+                    <span class="ring-score-num" id="ringScore">0</span>
+                    <span class="ring-score-total">/ <span id="ringTotal">0</span> pts</span>
                 </div>
             </div>
         </div>
 
         <div class="results-stats">
-            <div class="stat-pill">
-                <span class="stat-pill-val" id="statCorrect">0</span>
-                <span class="stat-pill-label">✅ Correctes</span>
+            <div class="stat-card">
+                <span class="stat-icon">✅</span>
+                <span class="stat-num" id="statCorrect">0</span>
+                <span class="stat-label">Correctes</span>
             </div>
-            <div class="stat-pill">
-                <span class="stat-pill-val" id="statWrong">0</span>
-                <span class="stat-pill-label">❌ Incorrectes</span>
+            <div class="stat-card">
+                <span class="stat-icon">❌</span>
+                <span class="stat-num" id="statWrong">0</span>
+                <span class="stat-label">Incorrectes</span>
             </div>
-            <div class="stat-pill">
-                <span class="stat-pill-val" id="statPts">0</span>
-                <span class="stat-pill-label">⭐ Points</span>
+            <div class="stat-card">
+                <span class="stat-icon">💎</span>
+                <span class="stat-num" id="statPts">0</span>
+                <span class="stat-label">Points</span>
             </div>
         </div>
 
         <div class="results-actions">
             <button class="btn-retry" id="btnRetry">🔁 Réessayer</button>
-            <a href="{{ path('app_cours_show', {'id': cours.idCours}) }}" class="btn-cours">📚 Retour au cours</a>
+            <a href="{{ path('app_cours_show', {'id': cours.idCours}) }}" class="btn-cours-back">📚 Retour au cours</a>
         </div>
     </div>
 
@@ -517,83 +965,133 @@
 {% block javascripts %}
 {{ parent() }}
 <script>
-(function() {
+(function () {
+
+    /* ─── Data ─── */
     const raw = document.getElementById('questionsData').dataset.questions;
     let questions = [];
-    
-    try {
-        questions = JSON.parse(raw);
-    } catch(e) {
-        console.error('Erreur de parsing JSON:', e);
-        questions = [];
-    }
-    
+    try { questions = JSON.parse(raw); } catch(e) { console.error(e); }
+
     if (!questions.length) {
-        document.getElementById('questionCard').innerHTML = '<div class="text-center p-5"><h3>Aucune question disponible</h3><a href="{{ path('app_cours_show', {'id': cours.idCours}) }}" class="btn btn-primary mt-3">Retour au cours</a></div>';
+        document.getElementById('questionCard').innerHTML =
+            '<div style="text-align:center;padding:3rem"><h3>Aucune question disponible</h3>' +
+            '<a href="{{ path('app_cours_show', {'id': cours.idCours}) }}" class="btn-retry" style="margin-top:1rem;display:inline-flex">← Retour au cours</a></div>';
         return;
     }
-    
-    const letters = ['A', 'B', 'C'];
+
+    /* ─── State ─── */
+    const letters   = ['A', 'B', 'C'];
     const choixKeys = ['choix1', 'choix2', 'choix3'];
+    let current   = 0;
+    let score     = 0;
+    let correct   = 0;
+    let wrong     = 0;
+    let answered  = false;
+    const totalScore = questions.reduce((s, q) => s + (q.score || 1), 0);
 
-    let current    = 0;
-    let score      = 0;
-    let correct    = 0;
-    let wrong      = 0;
-    let answered   = false;
-    let totalScore = questions.reduce((s, q) => s + (q.score || 1), 0);
+    /* ─── DOM refs ─── */
+    const qCard       = document.getElementById('questionCard');
+    const qNum        = document.getElementById('questionNumber');
+    const qText       = document.getElementById('questionText');
+    const qScoreVal   = document.getElementById('qScoreVal');
+    const choicesGrid = document.getElementById('choicesGrid');
+    const feedbackBox = document.getElementById('feedbackBox');
+    const feedbackIcon= document.getElementById('feedbackIcon');
+    const feedbackTitle=document.getElementById('feedbackTitle');
+    const feedbackDetail=document.getElementById('feedbackDetail');
+    const btnNext     = document.getElementById('btnNext');
+    const progressLbl = document.getElementById('progressLabel');
+    const scoreDsp    = document.getElementById('scoreDisplay');
+    const resultsCard = document.getElementById('resultsCard');
+    const stepPills   = document.querySelectorAll('.step-pill');
 
-    const qCard      = document.getElementById('questionCard');
-    const qNum       = document.getElementById('questionNumber');
-    const qText      = document.getElementById('questionText');
-    const choicesGrid= document.getElementById('choicesGrid');
-    const feedbackBox= document.getElementById('feedbackBox');
-    const feedbackIcon=document.getElementById('feedbackIcon');
-    const feedbackTxt= document.getElementById('feedbackText');
-    const btnNext    = document.getElementById('btnNext');
-    const progressFill=document.getElementById('progressFill');
-    const progressLbl= document.getElementById('progressLabel');
-    const scoreDsp   = document.getElementById('scoreDisplay');
-    const resultsCard= document.getElementById('resultsCard');
+    /* ─── Confetti ─── */
+    const canvas = document.getElementById('confetti-canvas');
+    const ctx    = canvas.getContext('2d');
+    let confettiParticles = [];
+    let animFrame;
 
+    function launchConfetti() {
+        canvas.style.display = 'block';
+        canvas.width  = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const colors = ['#7c3aed','#a855f7','#ec4899','#ff9a3c','#ffd93d','#10b981','#4d96ff'];
+        confettiParticles = Array.from({length: 90}, () => ({
+            x: Math.random() * canvas.width,
+            y: -20,
+            r: Math.random() * 6 + 3,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            vx: (Math.random() - 0.5) * 4,
+            vy: Math.random() * 4 + 2,
+            alpha: 1,
+            rot: Math.random() * 360,
+            rotV: (Math.random() - 0.5) * 6
+        }));
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            confettiParticles.forEach(p => {
+                p.x += p.vx; p.y += p.vy; p.alpha -= 0.012; p.rot += p.rotV;
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, p.alpha);
+                ctx.fillStyle = p.color;
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.rot * Math.PI / 180);
+                ctx.fillRect(-p.r, -p.r, p.r * 2, p.r * 2);
+                ctx.restore();
+            });
+            confettiParticles = confettiParticles.filter(p => p.alpha > 0);
+            if (confettiParticles.length) { animFrame = requestAnimationFrame(animate); }
+            else { canvas.style.display = 'none'; ctx.clearRect(0,0,canvas.width,canvas.height); }
+        }
+        cancelAnimationFrame(animFrame);
+        animate();
+    }
+
+    /* ─── Update step pills ─── */
+    function updatePills(idx) {
+        stepPills.forEach((p, i) => {
+            p.classList.remove('done', 'current');
+            if (i < idx) p.classList.add('done');
+            else if (i === idx) p.classList.add('current');
+        });
+    }
+
+    /* ─── Render question ─── */
     function renderQuestion() {
         answered = false;
         const q = questions[current];
 
-        // Progress
-        const pct = ((current) / questions.length) * 100;
-        progressFill.style.width = pct + '%';
+        updatePills(current);
         progressLbl.textContent = `Question ${current + 1} / ${questions.length}`;
-
-        // Question card animation
-        qCard.style.animation = 'none';
-        qCard.offsetHeight; // reflow
-        qCard.style.animation = 'slideIn 0.4s cubic-bezier(0.34,1.56,0.64,1)';
-
         qNum.textContent = `Question ${current + 1}`;
         qText.textContent = q.question;
+        qScoreVal.textContent = q.score || 1;
 
-        // Reset feedback
-        feedbackBox.style.display = 'none';
+        /* Card entrance animation */
+        qCard.style.animation = 'none';
+        qCard.offsetHeight;
+        qCard.style.animation = 'slide-in 0.38s cubic-bezier(0.34,1.56,0.64,1)';
+
+        /* Reset feedback */
         feedbackBox.className = 'feedback-box';
+        feedbackBox.style.display = '';
         btnNext.classList.remove('visible');
 
-        // Build choices
+        /* Build choices */
         choicesGrid.innerHTML = '';
         choixKeys.forEach((key, i) => {
-            const choixValue = q[key];
-            if (!choixValue) return;
-            
+            const val = q[key];
+            if (!val) return;
             const btn = document.createElement('button');
             btn.className = 'choice-btn';
-            btn.dataset.key = key;
-            btn.dataset.value = choixValue;
-            btn.innerHTML = `<span class="choice-letter">${letters[i]}</span> ${choixValue}`;
-            btn.addEventListener('click', () => selectAnswer(btn, choixValue, q));
+            btn.dataset.value = val;
+            btn.innerHTML = `<span class="choice-letter">${letters[i]}</span><span class="choice-text">${val}</span>`;
+            btn.addEventListener('click', () => selectAnswer(btn, val, q));
             choicesGrid.appendChild(btn);
         });
     }
 
+    /* ─── Select answer ─── */
     function selectAnswer(btn, chosenValue, q) {
         if (answered) return;
         answered = true;
@@ -604,7 +1102,7 @@
 
         const isCorrect = chosenValue.trim().toLowerCase() === q.bonneReponse.trim().toLowerCase();
 
-        // Highlight correct & wrong
+        /* Highlight */
         allBtns.forEach(b => {
             if (b.dataset.value.trim().toLowerCase() === q.bonneReponse.trim().toLowerCase()) {
                 b.classList.add('correct');
@@ -612,54 +1110,56 @@
         });
         if (!isCorrect) btn.classList.add('wrong');
 
-        // Feedback
-        feedbackBox.style.display = 'flex';
+        /* Feedback */
+        feedbackBox.style.display = '';
         if (isCorrect) {
-            const points = q.score || 1;
-            score += points;
-            correct++;
-            feedbackBox.className = 'feedback-box correct-feedback';
+            const pts = q.score || 1;
+            score += pts; correct++;
+            feedbackBox.className = 'feedback-box visible correct-fb';
             feedbackIcon.textContent = '🎉';
-            feedbackTxt.textContent = `Bravo ! Bonne réponse ! +${points} point${points > 1 ? 's' : ''}`;
+            feedbackTitle.textContent = `Bravo ! Bonne réponse !`;
+            feedbackDetail.textContent = `+${pts} point${pts > 1 ? 's' : ''} 🌟`;
+            launchConfetti();
         } else {
             wrong++;
-            feedbackBox.className = 'feedback-box wrong-feedback';
+            feedbackBox.className = 'feedback-box visible wrong-fb';
             feedbackIcon.textContent = '😕';
-            feedbackTxt.textContent = `Pas tout à fait… La bonne réponse était : « ${q.bonneReponse} »`;
+            feedbackTitle.textContent = `Pas tout à fait…`;
+            feedbackDetail.textContent = `La bonne réponse était : « ${q.bonneReponse} »`;
         }
 
         scoreDsp.textContent = score;
-        btnNext.classList.add('visible');
-        
         const isLast = (current + 1 >= questions.length);
-        btnNext.innerHTML = isLast ? '🏁 Voir les résultats <span>🏆</span>' : 'Suivant <span>→</span>';
+        btnNext.innerHTML = isLast
+            ? '🏁 Voir les résultats <span class="btn-next-arrow">🏆</span>'
+            : 'Suivant <span class="btn-next-arrow">→</span>';
+        btnNext.classList.add('visible');
     }
 
+    /* ─── Next ─── */
     btnNext.addEventListener('click', () => {
         current++;
-        if (current >= questions.length) {
-            showResults();
-        } else {
-            renderQuestion();
-        }
+        if (current >= questions.length) showResults();
+        else renderQuestion();
     });
 
+    /* ─── Results ─── */
     function showResults() {
         qCard.style.display = 'none';
         resultsCard.style.display = 'block';
-        progressFill.style.width = '100%';
-        progressLbl.textContent = `Terminé !`;
+        updatePills(questions.length); // all done
+        progressLbl.textContent = 'Terminé ! 🎊';
 
         const pct = totalScore > 0 ? Math.round((score / totalScore) * 100) : 0;
 
-        // Emoji & message
         let emoji, title, subtitle;
         if (pct >= 80) {
             emoji = '🏆'; title = 'Excellent !';
-            subtitle = 'Tu maîtrises parfaitement ce cours ! 🌟';
+            subtitle = 'Tu maîtrises parfaitement ce cours ! Continue comme ça 🌟';
+            launchConfetti();
         } else if (pct >= 50) {
             emoji = '👍'; title = 'Bien joué !';
-            subtitle = 'Continue comme ça, tu progresses bien ! 📈';
+            subtitle = 'Tu progresses bien ! Encore un petit effort 📈';
         } else {
             emoji = '💪'; title = 'Courage !';
             subtitle = 'Relis le cours et réessaie, tu vas y arriver ! ✨';
@@ -669,20 +1169,35 @@
         document.getElementById('resultsTitle').textContent = title;
         document.getElementById('resultsSubtitle').textContent = subtitle;
 
-        // Score ring
-        const ringColor = pct >= 80 ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444';
-        const ring = document.getElementById('scoreRing');
-        ring.style.setProperty('--ring-color', ringColor);
-        ring.style.setProperty('--ring-pct', pct + '%');
-        ring.style.background = `conic-gradient(${ringColor} ${pct}%, #ede9fe 0%)`;
+        /* Animated SVG ring */
+        const circumference = 2 * Math.PI * 55; // 345.5
+        const ringEl = document.getElementById('ringCircle');
+        const color  = pct >= 80 ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444';
+        ringEl.style.stroke = color;
+        ringEl.style.strokeDasharray = circumference;
+        ringEl.style.strokeDashoffset = circumference;
+        requestAnimationFrame(() => {
+            ringEl.style.strokeDashoffset = circumference * (1 - pct / 100);
+        });
 
         document.getElementById('ringScore').textContent = score;
         document.getElementById('ringTotal').textContent = totalScore;
         document.getElementById('statCorrect').textContent = correct;
         document.getElementById('statWrong').textContent = wrong;
         document.getElementById('statPts').textContent = score;
+
+        // Animate stat numbers
+        document.querySelectorAll('.stat-num').forEach((el, i) => {
+            el.style.animation = 'none';
+            el.style.opacity = '0';
+            setTimeout(() => {
+                el.style.transition = 'opacity 0.4s';
+                el.style.opacity = '1';
+            }, 200 + i * 120);
+        });
     }
 
+    /* ─── Retry ─── */
     document.getElementById('btnRetry').addEventListener('click', () => {
         current = 0; score = 0; correct = 0; wrong = 0; answered = false;
         scoreDsp.textContent = 0;
@@ -691,8 +1206,9 @@
         renderQuestion();
     });
 
-    // Init
+    /* ─── Init ─── */
     renderQuestion();
+
 })();
 </script>
 {% endblock %}
