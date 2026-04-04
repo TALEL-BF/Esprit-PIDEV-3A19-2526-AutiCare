@@ -1,0 +1,32 @@
+{# templates/front/parent/dashboard.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard Parent - AutiCare{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="card bg-primary text-white p-4 mb-4">
+        <h1>👪 Dashboard Parent</h1>
+        <p>Bienvenue {{ user.prenom }} {{ user.nom }}</p>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5>📚 Suivi des enfants</h5>
+                    <a href="#" class="btn btn-primary">Voir progression</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5>📅 Rendez-vous</h5>
+                    <a href="#" class="btn btn-primary">Réserver</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

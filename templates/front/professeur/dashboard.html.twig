@@ -1,0 +1,204 @@
+{# 
+    DASHBOARD PROFESSEUR
+    Ce template est affiché quand un professeur se connecte
+    Route: professeur_dashboard
+    Contrôleur: ProfesseurController.php
+    Accessible uniquement aux utilisateurs avec ROLE_PROFESSEUR
+    Interface pour gérer les cours, les étudiants, et les contenus pédagogiques
+#}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Espace Professeur - AutiCare{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <!-- En-tête -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white p-4 shadow">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1><i class="fas fa-chalkboard-user"></i> Espace Professeur</h1>
+                        <p class="mb-0">Bienvenue <strong>{{ user.prenom }} {{ user.nom }}</strong>, gérez vos cours et vos étudiants</p>
+                    </div>
+                    <div>
+                        <span class="badge bg-light text-primary p-2">
+                            <i class="fas fa-graduation-cap"></i> Professeur certifié
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques rapides -->
+    <div class="row mb-4">
+        <div class="col-md-3 col-6 mb-2">
+            <div class="card text-center border-0 shadow-sm">
+                <div class="card-body">
+                    <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                    <h3 class="mb-0">24</h3>
+                    <small class="text-muted">Étudiants</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-2">
+            <div class="card text-center border-0 shadow-sm">
+                <div class="card-body">
+                    <i class="fas fa-book fa-2x text-success mb-2"></i>
+                    <h3 class="mb-0">8</h3>
+                    <small class="text-muted">Cours actifs</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-2">
+            <div class="card text-center border-0 shadow-sm">
+                <div class="card-body">
+                    <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                    <h3 class="mb-0">15</h3>
+                    <small class="text-muted">Heures/semaine</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-2">
+            <div class="card text-center border-0 shadow-sm">
+                <div class="card-body">
+                    <i class="fas fa-star fa-2x text-danger mb-2"></i>
+                    <h3 class="mb-0">4.8</h3>
+                    <small class="text-muted">Évaluation</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Section Gauche : Gestion des cours -->
+        <div class="col-lg-8">
+            <!-- Liste des cours -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-book-open me-2 text-primary"></i> Mes Cours</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-video me-2 text-primary"></i>
+                                <strong>Communication sociale</strong>
+                                <span class="badge bg-success ms-2">Actif</span>
+                            </div>
+                            <div>
+                                <span class="text-muted me-3">12 étudiants</span>
+                                <a href="#" class="btn btn-sm btn-outline-primary">Gérer</a>
+                            </div>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-puzzle-piece me-2 text-primary"></i>
+                                <strong>Habiletés motrices</strong>
+                                <span class="badge bg-success ms-2">Actif</span>
+                            </div>
+                            <div>
+                                <span class="text-muted me-3">18 étudiants</span>
+                                <a href="#" class="btn btn-sm btn-outline-primary">Gérer</a>
+                            </div>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-calculator me-2 text-primary"></i>
+                                <strong>Mathématiques adaptées</strong>
+                                <span class="badge bg-warning ms-2">Brouillon</span>
+                            </div>
+                            <div>
+                                <span class="text-muted me-3">0 étudiants</span>
+                                <a href="#" class="btn btn-sm btn-outline-primary">Publier</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <a href="#" class="btn btn-primary w-100">
+                        <i class="fas fa-plus"></i> Créer un nouveau cours
+                    </a>
+                </div>
+            </div>
+
+            <!-- Prochains événements -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-calendar-alt me-2 text-warning"></i> Agenda</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                        <div>
+                            <i class="fas fa-chalkboard me-2 text-primary"></i>
+                            <strong>Cours en ligne</strong>
+                            <p class="text-muted small mb-0">Aujourd'hui 14:00 - 15:30</p>
+                        </div>
+                        <a href="#" class="btn btn-sm btn-link">Rejoindre</a>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                        <div>
+                            <i class="fas fa-users me-2 text-success"></i>
+                            <strong>Réunion pédagogique</strong>
+                            <p class="text-muted small mb-0">Demain 10:00 - 11:00</p>
+                        </div>
+                        <a href="#" class="btn btn-sm btn-link">Détails</a>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-file-alt me-2 text-danger"></i>
+                            <strong>Correction des devoirs</strong>
+                            <p class="text-muted small mb-0">À rendre avant vendredi</p>
+                        </div>
+                        <a href="#" class="btn btn-sm btn-link">Corriger</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Droite : Actions rapides -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-bolt me-2 text-info"></i> Actions rapides</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="#" class="btn btn-outline-primary text-start">
+                            <i class="fas fa-user-plus me-2"></i> Ajouter un étudiant
+                        </a>
+                        <a href="#" class="btn btn-outline-success text-start">
+                            <i class="fas fa-upload me-2"></i> Publier un devoir
+                        </a>
+                        <a href="#" class="btn btn-outline-warning text-start">
+                            <i class="fas fa-file-pdf me-2"></i> Ajouter une ressource
+                        </a>
+                        <a href="#" class="btn btn-outline-danger text-start">
+                            <i class="fas fa-envelope me-2"></i> Envoyer un message
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Présence -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-calendar-check me-2 text-success"></i> Présence aujourd'hui</h5>
+                </div>
+                <div class="card-body">
+                    <div class="progress mb-3" style="height: 25px;">
+                        <div class="progress-bar bg-success" style="width: 75%">18/24 présents</div>
+                    </div>
+                    <div class="small text-muted">
+                        <i class="fas fa-check-circle text-success"></i> 18 présents<br>
+                        <i class="fas fa-times-circle text-danger"></i> 4 absents<br>
+                        <i class="fas fa-question-circle text-warning"></i> 2 excusés
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

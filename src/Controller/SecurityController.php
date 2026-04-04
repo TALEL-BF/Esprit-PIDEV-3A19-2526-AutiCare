@@ -1,4 +1,5 @@
 <?php
+// src/Controller/SecurityController.php
 
 namespace App\Controller;
 
@@ -11,7 +12,6 @@ class SecurityController extends AbstractController
 {
     #[Route('/login', name: 'app_login')]
     #[Route('/signin', name: 'app_signin')]
-    #[Route('/connexion', name: 'app_connexion')]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
         if ($this->getUser()) {
@@ -19,17 +19,13 @@ class SecurityController extends AbstractController
             $role = $user->getRole();
             
             // Redirection selon le rôle
-            if ($role === 'admin') {
-                return $this->redirectToRoute('admin_dashboard');
-            } elseif ($role === 'parent') {
-                return $this->redirectToRoute('parent_dashboard');
-            } elseif ($role === 'professeur') {
-                return $this->redirectToRoute('professeur_dashboard');
-            } elseif ($role === 'psychologue') {
-                return $this->redirectToRoute('psychologue_dashboard');
-            } else {
-                return $this->redirectToRoute('enfant_dashboard');
-            }
+            return match($role) {
+                'admin' => $this->redirectToRoute('admin_dashboard'),
+                'parent' => $this->redirectToRoute('parent_dashboard'),
+                'professeur' => $this->redirectToRoute('professeur_dashboard'),
+                'psychologue' => $this->redirectToRoute('psychologue_dashboard'),
+                default => $this->redirectToRoute('enfant_dashboard'),
+            };
         }
 
         return $this->render('front/signin/index.html.twig', [
@@ -39,8 +35,5 @@ class SecurityController extends AbstractController
     }
 
     #[Route('/logout', name: 'app_logout')]
-    public function logout(): void
-    {
-        throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
-    }
+    public function logout(): void {}
 }

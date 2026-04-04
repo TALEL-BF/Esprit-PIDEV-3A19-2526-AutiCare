@@ -1,4 +1,5 @@
 <?php
+// src/Controller/SignupController.php
 
 namespace App\Controller;
 
@@ -26,7 +27,7 @@ class SignupController extends AbstractController
             $email = trim((string) $request->request->get('email'));
             $password = (string) $request->request->get('password');
             $confirmPassword = (string) $request->request->get('confirm_password');
-            $profileType = (string) $request->request->get('profile_type', 'personne_autiste');
+            $profileType = (string) $request->request->get('profile_type', 'enfant');
 
             if ($firstname === '' || $lastname === '' || $email === '' || $password === '') {
                 $this->addFlash('error', 'Veuillez remplir tous les champs obligatoires.');
@@ -40,23 +41,16 @@ class SignupController extends AbstractController
                 $user->setNom($lastname);
                 $user->setEmail($email);
                 $user->setPassword($passwordHasher->hashPassword($user, $password));
-                
-                // CORRECTION : Mapping correct des rôles
-                $role = match ($profileType) {
-                    'parent' => 'parent',
-                    'professeur' => 'professeur',
-                    'psychologue' => 'psychologue',
-                    'enfant' => 'enfant',
-                    default => 'enfant',
-                };
-                $user->setRole($role);
-                
+                $user->setRole($profileType); // admin, parent, professeur, psychologue, enfant
                 $user->setStatus('active');
                 $user->setCreatedAt(new \DateTime());
+                
                 $entityManager->persist($user);
                 $entityManager->flush();
 
-                $this->addFlash('success', 'Compte créé avec succès. Vous pouvez vous connecter.');
+                $this->addFlash('success', 'Compte créé avec succès. Veuillez vous connecter.');
+                
+                // Rediriger vers la page de connexion
                 return $this->redirectToRoute('app_signin');
             }
         }
