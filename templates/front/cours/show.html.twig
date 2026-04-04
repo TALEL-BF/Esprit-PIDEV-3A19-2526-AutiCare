@@ -391,17 +391,6 @@
     {% set motsCount = motsList|length %}
     {% set typeClass = 'type-' ~ cours.typeCours %}
 
-    {# Build image map: {mot: [img1, img2, ...]} #}
-    {% set imagesMotsMap = {} %}
-    {% if cours.imagesMots %}
-        {% for item in cours.imagesMots|split(';') %}
-            {% set parts = item|split(':') %}
-            {% if parts|length >= 2 and parts[0]|trim %}
-                {% set imagesMotsMap = imagesMotsMap|merge({(parts[0]|trim): parts[1]|split(',')|map(v => v|trim)}) %}
-            {% endif %}
-        {% endfor %}
-    {% endif %}
-
     <!-- HERO -->
     <div class="course-hero">
         <div class="course-hero-inner">
@@ -467,27 +456,42 @@
                     </h2>
                 </div>
 
-                <!-- Grille des mots style design -->
+                <!-- Grille des mots avec images associées -->
                 <div class="mots-grid-design">
                     {% for mot in motsList %}
                         {% set mot = mot|trim %}
                         {% if mot %}
-                        {% set motImages = imagesMotsMap[mot] ?? [] %}
-                        {% set wordEmojis = ['🐶', '🦁', '🦒', '🐘', '🐒', '🦓', '🐪', '🐅', '🐘', '🐋'] %}
+                            {# Récupérer l'image associée au mot depuis la base de données #}
+                            {% set imageForMot = null %}
+                            {% if cours.imagesMots and cours.imagesMots != '' %}
+                                {% set items = cours.imagesMots|split(';') %}
+                                {% for item in items %}
+                                    {% if item and ':' in item %}
+                                        {% set parts = item|split(':', 2) %}
+                                        {% set motFromDb = parts[0]|trim %}
+                                        {% if motFromDb == mot %}
+                                            {% set imagesList = parts[1]|split(',') %}
+                                            {% set imageForMot = imagesList[0]|trim %}
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                            
+                            {% set wordEmojis = ['🐶', '🦁', '🦒', '🐘', '🐒', '🦓', '🐪', '🐅', '🐘', '🐋'] %}
 
-                        <div class="mot-item-design">
-                            <div class="mot-icon-design">
-                                {% if motImages|length >= 1 %}
-                                    <img src="/uploads/images/{{ motImages[0] }}" alt="{{ mot }}" class="lightbox-trigger" data-src="/uploads/images/{{ motImages[0] }}">
-                                {% else %}
-                                    <span class="mot-icon-emoji">
-                                        {{ wordEmojis[loop.index0 % wordEmojis|length] }}
-                                    </span>
-                                {% endif %}
+                            <div class="mot-item-design">
+                                <div class="mot-icon-design">
+                                    {% if imageForMot is not null and imageForMot != '' %}
+                                        <img src="/uploads/images/{{ imageForMot }}" alt="{{ mot }}" class="lightbox-trigger" data-src="/uploads/images/{{ imageForMot }}">
+                                    {% else %}
+                                        <span class="mot-icon-emoji">
+                                            {{ wordEmojis[loop.index0 % wordEmojis|length] }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                <h3>{{ mot|capitalize }}</h3>
+                                <p>Icone de {{ mot|lower }}</p>
                             </div>
-                            <h3>{{ mot|capitalize }}</h3>
-                            <p>Icone de {{ mot|lower }}</p>
-                        </div>
                         {% endif %}
                     {% endfor %}
                 </div>
@@ -507,19 +511,11 @@
                     Évaluation du cours
                     <span>⭐</span>
                 </h3>
-                {# Bouton quiz temporairement désactivé - page en cours de développement #}
                 <div class="btn-quiz-disabled">
                     <span>🎯</span>
                     Passer le quiz (bientôt disponible)
                     <span>⏳</span>
                 </div>
-                {# À activer quand la route app_quiz sera créée :
-                <a href="{{ path('app_quiz', {'id': cours.idCours}) }}" class="btn-quiz">
-                    <span>🎯</span>
-                    Passer le quiz
-                    <span>➡️</span>
-                </a>
-                #}
             </div>
 
             <!-- Sidebar Section - Informations supplémentaires -->
@@ -579,7 +575,7 @@
                     <div class="sidebar-card">
                         <div class="sidebar-card-title">🚀 Prêt à apprendre ?</div>
                         <p style="font-size: 0.85rem; color: #666; margin-bottom: 1rem;">Explore ce cours et découvre tous ses mots et images !</p>
-                        <a href="{{ path('app_cours') }}" class="btn-cta-start" style="
+                        <a href="{{ path('app_cours') }}" style="
                             display: inline-flex;
                             align-items: center;
                             gap: 8px;

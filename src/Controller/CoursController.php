@@ -42,13 +42,30 @@ class CoursController extends AbstractController
     #[Route('/cours/{id}', name: 'app_cours_show', requirements: ['id' => '\d+'])]
     public function show(Cours $cours): Response
     {
+        // Préparer les données pour le template
+        $motsList = $cours->getMotsArray();
+        $imagesByMot = $cours->getImagesByMot();
+        
+        // Construire un tableau complet pour chaque mot avec son image
+        $motsWithImages = [];
+        foreach ($motsList as $mot) {
+            $motsWithImages[] = [
+                'nom' => $mot,
+                'image' => $imagesByMot[$mot][0] ?? null, // Première image associée au mot
+                'toutes_images' => $imagesByMot[$mot] ?? [],
+            ];
+        }
+        
         return $this->render('front/cours/show.html.twig', [
             'cours' => $cours,
+            'motsList' => $motsList,
+            'motsCount' => $cours->getMotsCount(),
+            'motsWithImages' => $motsWithImages,
         ]);
     }
 
     // ─────────────────────────────────────────────────────────────────
-    // ROUTES ADMIN
+    // ROUTES ADMIN (reste identique)
     // ─────────────────────────────────────────────────────────────────
 
     #[Route('/admin/cours', name: 'admin_cours_list')]

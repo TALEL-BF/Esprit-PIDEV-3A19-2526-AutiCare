@@ -51,7 +51,7 @@ class Cours
         $this->evaluations = new ArrayCollection();
     }
 
-    // Getters et Setters
+    // Getters et Setters existants...
 
     public function getIdCours(): ?int
     {
@@ -177,5 +177,85 @@ class Cours
             }
         }
         return $this;
+    }
+
+    // ========== NOUVELLES METHODES POUR LES IMAGES DES MOTS ==========
+
+    /**
+     * Retourne la liste des mots sous forme de tableau
+     */
+    public function getMotsArray(): array
+    {
+        if (empty($this->mots)) {
+            return [];
+        }
+        return array_filter(array_map('trim', explode(';', $this->mots)));
+    }
+
+    /**
+     * Retourne le nombre de mots
+     */
+    public function getMotsCount(): int
+    {
+        return count($this->getMotsArray());
+    }
+
+    /**
+     * Retourne un tableau associatif [mot => [images]]
+     */
+    public function getImagesByMot(): array
+    {
+        $result = [];
+        
+        if (empty($this->imagesMots)) {
+            return $result;
+        }
+
+        $items = explode(';', $this->imagesMots);
+        
+        foreach ($items as $item) {
+            if (empty($item) || strpos($item, ':') === false) {
+                continue;
+            }
+            
+            $parts = explode(':', $item, 2);
+            $mot = trim($parts[0]);
+            $imagesString = trim($parts[1]);
+            
+            if (empty($mot) || empty($imagesString)) {
+                continue;
+            }
+            
+            $images = array_filter(array_map('trim', explode(',', $imagesString)));
+            $result[$mot] = $images;
+        }
+        
+        return $result;
+    }
+
+    /**
+     * Récupère la première image d'un mot spécifique
+     */
+    public function getFirstImageForMot(string $mot): ?string
+    {
+        $imagesByMot = $this->getImagesByMot();
+        $motKey = trim($mot);
+        
+        if (isset($imagesByMot[$motKey]) && !empty($imagesByMot[$motKey])) {
+            return $imagesByMot[$motKey][0];
+        }
+        
+        return null;
+    }
+
+    /**
+     * Récupère toutes les images d'un mot spécifique
+     */
+    public function getImagesForMot(string $mot): array
+    {
+        $imagesByMot = $this->getImagesByMot();
+        $motKey = trim($mot);
+        
+        return $imagesByMot[$motKey] ?? [];
     }
 }
