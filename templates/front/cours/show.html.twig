@@ -46,13 +46,11 @@
             padding-bottom: 2.5rem;
         }
 
-        /* breadcrumb */
         .bc-link { color: rgba(255,255,255,0.70); font-size: 0.85rem; font-weight: 700; text-decoration: none; transition: color 0.2s; }
         .bc-link:hover { color: #fff; }
         .bc-sep { margin: 0 8px; color: rgba(255,255,255,0.40); }
         .bc-current { color: rgba(255,255,255,0.95); font-size: 0.85rem; font-weight: 700; }
 
-        /* Course title area */
         .course-type-pill {
             display: inline-flex; align-items: center; gap: 6px;
             font-family: 'Baloo 2', cursive; font-size: 0.78rem; font-weight: 800;
@@ -83,7 +81,6 @@
             margin-bottom: 1.4rem;
         }
 
-        /* Stats row */
         .info-chips { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 1.6rem; }
         .info-chip {
             display: inline-flex; align-items: center; gap: 7px;
@@ -98,7 +95,6 @@
         .chip-time   { border-color: rgba(107,203,119,0.6); }
         .chip-words  { border-color: rgba(255,158,207,0.6); }
 
-        /* Course image in hero */
         .course-hero-img-wrap {
             border-radius: 28px;
             overflow: hidden;
@@ -122,7 +118,6 @@
             50%      { transform: translateY(-14px) rotate(5deg); }
         }
 
-        /* ── Back button ── */
         .btn-back {
             display: inline-flex; align-items: center; gap: 7px;
             background: rgba(255,255,255,0.18);
@@ -142,263 +137,183 @@
             padding: 3.5rem 0 5rem;
         }
 
-        /* Section title */
-        .section-heading {
+        /* Description du cours */
+        .course-description-card {
+            background: white;
+            border-radius: 28px;
+            padding: 2rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+            border: 2px solid rgba(155,107,255,0.12);
+            text-align: center;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .course-description-card h2 {
             font-family: 'Baloo 2', cursive;
-            font-size: 1.55rem;
+            font-size: 1.6rem;
             font-weight: 800;
             color: var(--dark);
-            display: flex; align-items: center; gap: 10px;
-            margin-bottom: 1.6rem;
-        }
-        .section-heading .heading-dot {
-            width: 14px; height: 14px; border-radius: 50%;
-            flex-shrink: 0;
-        }
-        .section-heading::after {
-            content: '';
-            flex: 1; height: 3px; border-radius: 4px;
-            background: linear-gradient(to right, rgba(77,150,255,0.4), transparent);
-            margin-left: 8px;
-        }
-
-        /* ══ MOTS SECTION — full width centered ══ */
-        .mots-section-wrap {
+            margin-bottom: 1rem;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            width: 100%;
+            justify-content: center;
+            gap: 10px;
+        }
+        .course-description-card p {
+            font-size: 1rem;
+            line-height: 1.7;
+            color: #555;
+            margin-bottom: 0;
         }
 
-        .mots-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 28px;
-            width: 100%;
-            justify-items: center;
-        }
-
-        /* ══ MOT CARD — creative rose/mauve ══ */
-        .mot-card {
-            background: white;
-            border-radius: 32px;
-            overflow: hidden;
-            box-shadow: 0 10px 36px rgba(155,107,255,0.13);
-            border: 2.5px solid rgba(183,148,244,0.18);
-            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
-                        box-shadow 0.35s ease;
-            cursor: default;
-            animation: cardIn 0.5s ease both;
-            width: 100%;
-            max-width: 300px;
-            position: relative;
-        }
-        /* Decorative corner ribbon */
-        .mot-card::before {
-            content: '✦';
-            position: absolute;
-            top: 12px; right: 14px;
-            font-size: 0.75rem;
-            z-index: 3;
-            opacity: 0.55;
-            animation: twinkStar 2.5s ease-in-out infinite;
-        }
-        @keyframes twinkStar {
-            0%,100% { opacity: 0.55; transform: scale(1); }
-            50%      { opacity: 1;    transform: scale(1.4); }
-        }
-        .mot-card:hover {
-            transform: translateY(-12px) scale(1.03);
-            box-shadow: 0 28px 60px rgba(155,107,255,0.28);
-        }
-
-        /* Staggered entrance */
-        .mot-card:nth-child(1)  { animation-delay: 0.05s; }
-        .mot-card:nth-child(2)  { animation-delay: 0.10s; }
-        .mot-card:nth-child(3)  { animation-delay: 0.15s; }
-        .mot-card:nth-child(4)  { animation-delay: 0.20s; }
-        .mot-card:nth-child(5)  { animation-delay: 0.25s; }
-        .mot-card:nth-child(6)  { animation-delay: 0.30s; }
-        .mot-card:nth-child(7)  { animation-delay: 0.35s; }
-        .mot-card:nth-child(8)  { animation-delay: 0.40s; }
-        @keyframes cardIn {
-            from { opacity: 0; transform: translateY(32px) scale(0.92); }
-            to   { opacity: 1; transform: translateY(0)    scale(1); }
-        }
-
-        /* ── Alternating rose/mauve color palette ── */
-        .mot-card:nth-child(4n+1) { border-color: rgba(255,105,180,0.30); }
-        .mot-card:nth-child(4n+1)::before { color: #ff69b4; }
-        .mot-card:nth-child(4n+1):hover { box-shadow: 0 28px 60px rgba(255,105,180,0.30); }
-
-        .mot-card:nth-child(4n+2) { border-color: rgba(155,107,255,0.30); }
-        .mot-card:nth-child(4n+2)::before { color: #9b6bff; }
-        .mot-card:nth-child(4n+2):hover { box-shadow: 0 28px 60px rgba(155,107,255,0.30); }
-
-        .mot-card:nth-child(4n+3) { border-color: rgba(199,125,255,0.30); }
-        .mot-card:nth-child(4n+3)::before { color: #c77dff; }
-        .mot-card:nth-child(4n+3):hover { box-shadow: 0 28px 60px rgba(199,125,255,0.30); }
-
-        .mot-card:nth-child(4n+0) { border-color: rgba(255,158,207,0.30); }
-        .mot-card:nth-child(4n+0)::before { color: #ff9ecf; }
-        .mot-card:nth-child(4n+0):hover { box-shadow: 0 28px 60px rgba(255,158,207,0.30); }
-
-        /* ── IMAGE ZONE ── */
-        .mot-img-wrap {
-            height: 200px;
-            overflow: hidden;
-            display: flex; align-items: center; justify-content: center;
-            position: relative;
-        }
-        /* Gradient header per card color */
-        .mot-card:nth-child(4n+1) .mot-img-wrap {
-            background: linear-gradient(135deg, #ffe0ef 0%, #ffc8e4 50%, #f9d4ff 100%);
-        }
-        .mot-card:nth-child(4n+2) .mot-img-wrap {
-            background: linear-gradient(135deg, #ede0ff 0%, #ddc6ff 50%, #fce8ff 100%);
-        }
-        .mot-card:nth-child(4n+3) .mot-img-wrap {
-            background: linear-gradient(135deg, #f3e0ff 0%, #e8c8ff 50%, #fde8ff 100%);
-        }
-        .mot-card:nth-child(4n+0) .mot-img-wrap {
-            background: linear-gradient(135deg, #ffe8f4 0%, #ffd6ee 50%, #f8e0ff 100%);
-        }
-
-        /* Blob décoratif en arrière-plan de la zone image */
-        .mot-img-wrap::before {
-            content: '';
-            position: absolute;
-            width: 120px; height: 120px;
-            border-radius: 50%;
-            opacity: 0.18;
-            top: -30px; right: -30px;
-        }
-        .mot-card:nth-child(4n+1) .mot-img-wrap::before { background: #ff69b4; }
-        .mot-card:nth-child(4n+2) .mot-img-wrap::before { background: #9b6bff; }
-        .mot-card:nth-child(4n+3) .mot-img-wrap::before { background: #c77dff; }
-        .mot-card:nth-child(4n+0) .mot-img-wrap::before { background: #ff9ecf; }
-
-        .mot-img-wrap img {
-            width: 100%; height: 100%; object-fit: cover;
-            transition: transform 0.45s ease;
-            position: relative; z-index: 1;
-        }
-        .mot-card:hover .mot-img-wrap img { transform: scale(1.08); }
-
-        .mot-placeholder-emoji {
-            font-size: 5.5rem;
-            animation: floatEmoji 3s ease-in-out infinite;
-            filter: drop-shadow(0 6px 14px rgba(155,107,255,0.3));
-            position: relative; z-index: 1;
-        }
-        @keyframes floatEmoji {
-            0%,100% { transform: translateY(0) rotate(-4deg) scale(1); }
-            50%      { transform: translateY(-12px) rotate(4deg) scale(1.06); }
-        }
-
-        /* ── LABEL ── */
-        .mot-label {
-            padding: 18px 18px 20px;
+        /* Section Mots à apprendre */
+        .mots-section-title {
             text-align: center;
-            background: white;
-            position: relative;
-        }
-        /* Wavy top border */
-        .mot-label::before {
-            content: '';
-            display: block;
-            height: 6px;
-            border-radius: 0 0 6px 6px;
-            margin-bottom: 12px;
-        }
-        .mot-card:nth-child(4n+1) .mot-label::before {
-            background: linear-gradient(90deg, #ff69b4, #ff9ecf, #c77dff);
-        }
-        .mot-card:nth-child(4n+2) .mot-label::before {
-            background: linear-gradient(90deg, #9b6bff, #c77dff, #ff9ecf);
-        }
-        .mot-card:nth-child(4n+3) .mot-label::before {
-            background: linear-gradient(90deg, #c77dff, #ff69b4, #9b6bff);
-        }
-        .mot-card:nth-child(4n+0) .mot-label::before {
-            background: linear-gradient(90deg, #ff9ecf, #9b6bff, #ff69b4);
-        }
-
-        .mot-label span {
-            font-family: 'Baloo 2', cursive;
-            font-size: 1.35rem;
-            font-weight: 800;
-            letter-spacing: 0.06em;
-            display: block;
-        }
-        .mot-card:nth-child(4n+1) .mot-label span { color: #c0186a; }
-        .mot-card:nth-child(4n+2) .mot-label span { color: #6b35cc; }
-        .mot-card:nth-child(4n+3) .mot-label span { color: #8b2fc9; }
-        .mot-card:nth-child(4n+0) .mot-label span { color: #b5205e; }
-
-        /* Petits points décoratifs sous le mot */
-        .mot-label-bar {
-            display: flex; justify-content: center; gap: 5px;
-            margin-top: 8px;
-        }
-        .mot-label-bar span {
-            width: 7px; height: 7px; border-radius: 50%;
-            display: inline-block; font-size: 0; letter-spacing: 0;
-        }
-        .mot-card:nth-child(4n+1) .mot-label-bar span { background: #ff69b4; }
-        .mot-card:nth-child(4n+2) .mot-label-bar span { background: #9b6bff; }
-        .mot-card:nth-child(4n+3) .mot-label-bar span { background: #c77dff; }
-        .mot-card:nth-child(4n+0) .mot-label-bar span { background: #ff9ecf; }
-
-        /* Multi-image mot: small thumbnails */
-        .mot-img-thumbs {
-            display: flex; flex-wrap: wrap; gap: 6px; padding: 8px;
-            justify-content: center; align-items: center;
-            position: relative; z-index: 1;
-        }
-        .mot-img-thumbs img {
-            width: 72px; height: 72px;
-            object-fit: cover;
-            border-radius: 14px;
-            border: 3px solid white;
-            box-shadow: 0 4px 12px rgba(155,107,255,0.18);
-            cursor: pointer;
-            transition: transform 0.25s, box-shadow 0.25s;
-        }
-        .mot-img-thumbs img:hover { transform: scale(1.16); box-shadow: 0 8px 22px rgba(155,107,255,0.3); }
-
-        /* ── Progress bar style ── */
-        .progress-wrap {
-            background: white;
-            border-radius: 20px;
-            padding: 1.2rem 1.6rem;
-            box-shadow: 0 4px 18px rgba(0,0,0,0.07);
-            border: 2px solid #F0F0F0;
             margin-bottom: 2rem;
         }
-        .progress-label {
+        .mots-section-title h2 {
             font-family: 'Baloo 2', cursive;
-            font-size: 0.82rem;
-            font-weight: 700;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            margin-bottom: 6px;
-        }
-        .progress-bar-wrap {
-            height: 12px;
-            background: #EBEBEB;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .progress-bar-fill {
-            height: 100%;
-            border-radius: 10px;
-            background: linear-gradient(90deg, var(--ocean), var(--lavender), var(--rose));
-            transition: width 1.4s cubic-bezier(0.34, 1.2, 0.64, 1);
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--dark);
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, #ff69b4, #9b6bff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
         }
 
-        /* ── Sidebar card ── */
+        /* Grille des mots style design image */
+        .mots-grid-design {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            max-width: 1000px;
+            margin: 0 auto 3rem auto;
+        }
+
+        .mot-item-design {
+            background: white;
+            border-radius: 24px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+            border: 2px solid rgba(155,107,255,0.12);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .mot-item-design:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(155,107,255,0.15);
+            border-color: rgba(155,107,255,0.25);
+        }
+
+        .mot-icon-design {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 1rem auto;
+            background: linear-gradient(135deg, #f5e8ff, #ffe8f4);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .mot-icon-design img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .mot-icon-emoji {
+            font-size: 3.5rem;
+        }
+        .mot-item-design h3 {
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--dark);
+            margin: 0.5rem 0 0;
+        }
+        .mot-item-design p {
+            font-size: 0.85rem;
+            color: #888;
+            margin-top: 0.5rem;
+        }
+
+        /* Section évaluation */
+        .evaluation-section {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, #f8f4ff, #fff8f0);
+            border-radius: 32px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .evaluation-section h3 {
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 1rem;
+        }
+        .btn-quiz {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, #4D96FF, #C77DFF);
+            color: white;
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.2rem;
+            font-weight: 800;
+            padding: 14px 40px;
+            border-radius: 60px;
+            text-decoration: none;
+            box-shadow: 0 8px 25px rgba(77,150,255,0.35);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: none;
+            cursor: pointer;
+        }
+        .btn-quiz:hover {
+            transform: scale(1.05) translateY(-3px);
+            box-shadow: 0 12px 35px rgba(77,150,255,0.45);
+        }
+        .btn-quiz-disabled {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, #b0b0b0, #d0d0d0);
+            color: white;
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.2rem;
+            font-weight: 800;
+            padding: 14px 40px;
+            border-radius: 60px;
+            text-decoration: none;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* Empty state */
+        .empty-state {
+            background: white;
+            border-radius: 32px;
+            padding: 3rem;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.07);
+            border: 2px solid #F0F0F0;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .empty-state-icon { font-size: 4rem; margin-bottom: 1rem; }
+        .empty-state-title { font-family: 'Baloo 2', cursive; font-size: 1.4rem; font-weight: 800; color: #555; margin-bottom: 0.5rem; }
+        .empty-state-text { color: #888; font-size: 0.9rem; }
+
+        /* Sidebar */
         .sidebar-card {
             background: white;
             border-radius: 24px;
@@ -412,7 +327,9 @@
             font-size: 0.95rem; font-weight: 800;
             color: var(--dark);
             margin-bottom: 1rem;
-            display: flex; align-items: center; gap: 7px;
+            display: flex;
+            align-items: center;
+            gap: 7px;
         }
         .sidebar-stat-row {
             display: flex; justify-content: space-between; align-items: center;
@@ -430,7 +347,6 @@
             display: flex; align-items: center; gap: 5px;
         }
 
-        /* niveau color dots */
         .niveau-dot {
             width: 10px; height: 10px; border-radius: 50%; display: inline-block;
         }
@@ -438,36 +354,265 @@
         .dot-Intermédiaire { background: #FFD93D; }
         .dot-Avancé        { background: #FF6B6B; }
 
-        /* ── CTA Block ── */
-        .cta-block {
-            background: linear-gradient(135deg, #4D96FF, #C77DFF);
-            border-radius: 24px;
-            padding: 2rem 1.5rem;
-            text-align: center;
-            box-shadow: 0 10px 32px rgba(77,150,255,0.32);
+        @media (max-width: 768px) {
+            .mots-grid-design {
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                gap: 20px;
+            }
+            .mot-icon-design {
+                width: 80px;
+                height: 80px;
+            }
+            .mot-icon-emoji {
+                font-size: 2.8rem;
+            }
+            .mot-item-design h3 {
+                font-size: 1.2rem;
+            }
+            .btn-quiz, .btn-quiz-disabled {
+                font-size: 1rem;
+                padding: 12px 30px;
+            }
         }
-        .cta-block h4 {
-            font-family: 'Baloo 2', cursive;
-            font-size: 1.25rem; font-weight: 800;
-            color: white; margin-bottom: 0.4rem;
+        @media (max-width: 480px) {
+            .mots-grid-design {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
         }
-        .cta-block p {
-            font-size: 0.87rem; color: rgba(255,255,255,0.85);
-            margin-bottom: 1.2rem;
-        }
-        .btn-cta-start {
-            display: inline-flex; align-items: center; gap: 8px;
-            background: white;
-            color: var(--ocean);
-            font-family: 'Baloo 2', cursive; font-size: 1rem; font-weight: 800;
-            padding: 12px 28px; border-radius: 50px;
-            text-decoration: none;
-            box-shadow: 0 5px 18px rgba(0,0,0,0.15);
-            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        .btn-cta-start:hover { transform: scale(1.06) translateY(-2px); color: var(--lavender); }
+    </style>
+{% endblock %}
 
-        /* ── Lightbox ── */
+{% block body %}
+
+    {% set emojis  = {'Académique': '📚', 'Social': '🤝', 'Motricité': '🏃', 'Langage': '💬'} %}
+    {% set emoji   = emojis[cours.typeCours] ?? '🎓' %}
+    {% set motsList = cours.mots ? cours.mots|split(';')|filter(v => v|trim != '') : [] %}
+    {% set motsCount = motsList|length %}
+    {% set typeClass = 'type-' ~ cours.typeCours %}
+
+    {# Build image map: {mot: [img1, img2, ...]} #}
+    {% set imagesMotsMap = {} %}
+    {% if cours.imagesMots %}
+        {% for item in cours.imagesMots|split(';') %}
+            {% set parts = item|split(':') %}
+            {% if parts|length >= 2 and parts[0]|trim %}
+                {% set imagesMotsMap = imagesMotsMap|merge({(parts[0]|trim): parts[1]|split(',')|map(v => v|trim)}) %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    <!-- HERO -->
+    <div class="course-hero">
+        <div class="course-hero-inner">
+            <div class="container">
+                <div class="mb-3">
+                    <a href="{{ path('app_home') }}" class="bc-link">🏠 Accueil</a>
+                    <span class="bc-sep">›</span>
+                    <a href="{{ path('app_cours') }}" class="bc-link">Cours</a>
+                    <span class="bc-sep">›</span>
+                    <span class="bc-current">{{ cours.titre }}</span>
+                </div>
+
+                <div class="row align-items-center g-4">
+                    <div class="col-lg-7 col-md-6">
+                        <span class="course-type-pill {{ typeClass }}">{{ emoji }} {{ cours.typeCours }}</span>
+                        <h1 class="course-main-title">{{ cours.titre }}</h1>
+                        <p class="course-main-desc">{{ cours.description|slice(0, 150) ~ (cours.description|length > 150 ? '...' : '') }}</p>
+                        <div class="info-chips">
+                            <span class="info-chip chip-level">📊 <strong>{{ cours.niveau }}</strong></span>
+                            <span class="info-chip chip-time">⏱ <strong>{{ cours.duree }} min</strong></span>
+                            {% if motsCount > 0 %}
+                            <span class="info-chip chip-words">🔤 <strong>{{ motsCount }} mot{{ motsCount > 1 ? 's' : '' }}</strong></span>
+                            {% endif %}
+                        </div>
+                        <a href="{{ path('app_cours') }}" class="btn-back">← Retour aux cours</a>
+                    </div>
+                    <div class="col-lg-5 col-md-6">
+                        <div class="course-hero-img-wrap">
+                            {% if cours.image %}
+                                <img src="/uploads/images/{{ cours.image }}" alt="{{ cours.titre }}">
+                            {% else %}
+                                <span class="hero-img-emoji">{{ emoji }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content-section">
+        <div class="container">
+
+            <!-- Description complète du cours -->
+            <div class="course-description-card">
+                <h2>
+                    <span>📖</span>
+                    Description du cours
+                    <span>✨</span>
+                </h2>
+                <p>{{ cours.description }}</p>
+            </div>
+
+            {% if motsCount > 0 %}
+
+                <!-- Section Mots à apprendre -->
+                <div class="mots-section-title">
+                    <h2>
+                        <span>🐾</span>
+                        Mots à apprendre
+                        <span>📚</span>
+                    </h2>
+                </div>
+
+                <!-- Grille des mots style design -->
+                <div class="mots-grid-design">
+                    {% for mot in motsList %}
+                        {% set mot = mot|trim %}
+                        {% if mot %}
+                        {% set motImages = imagesMotsMap[mot] ?? [] %}
+                        {% set wordEmojis = ['🐶', '🦁', '🦒', '🐘', '🐒', '🦓', '🐪', '🐅', '🐘', '🐋'] %}
+
+                        <div class="mot-item-design">
+                            <div class="mot-icon-design">
+                                {% if motImages|length >= 1 %}
+                                    <img src="/uploads/images/{{ motImages[0] }}" alt="{{ mot }}" class="lightbox-trigger" data-src="/uploads/images/{{ motImages[0] }}">
+                                {% else %}
+                                    <span class="mot-icon-emoji">
+                                        {{ wordEmojis[loop.index0 % wordEmojis|length] }}
+                                    </span>
+                                {% endif %}
+                            </div>
+                            <h3>{{ mot|capitalize }}</h3>
+                            <p>Icone de {{ mot|lower }}</p>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">📭</div>
+                    <div class="empty-state-title">Aucun mot dans ce cours</div>
+                    <div class="empty-state-text">Le contenu sera bientôt ajouté.</div>
+                </div>
+            {% endif %}
+
+            <!-- Section Évaluation du cours -->
+            <div class="evaluation-section">
+                <h3>
+                    <span>📝</span>
+                    Évaluation du cours
+                    <span>⭐</span>
+                </h3>
+                {# Bouton quiz temporairement désactivé - page en cours de développement #}
+                <div class="btn-quiz-disabled">
+                    <span>🎯</span>
+                    Passer le quiz (bientôt disponible)
+                    <span>⏳</span>
+                </div>
+                {# À activer quand la route app_quiz sera créée :
+                <a href="{{ path('app_quiz', {'id': cours.idCours}) }}" class="btn-quiz">
+                    <span>🎯</span>
+                    Passer le quiz
+                    <span>➡️</span>
+                </a>
+                #}
+            </div>
+
+            <!-- Sidebar Section - Informations supplémentaires -->
+            <div class="row justify-content-center g-4 mt-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="sidebar-card">
+                        <div class="sidebar-card-title">📋 Informations</div>
+                        <div class="sidebar-stat-row">
+                            <span class="sidebar-stat-label">📊 Niveau</span>
+                            <span class="sidebar-stat-value"><span class="niveau-dot dot-{{ cours.niveau }}"></span> {{ cours.niveau }}</span>
+                        </div>
+                        <div class="sidebar-stat-row">
+                            <span class="sidebar-stat-label">⏱ Durée</span>
+                            <span class="sidebar-stat-value">{{ cours.duree }} min</span>
+                        </div>
+                        <div class="sidebar-stat-row">
+                            <span class="sidebar-stat-label">🏷️ Type</span>
+                            <span class="sidebar-stat-value">{{ cours.typeCours }}</span>
+                        </div>
+                        {% if motsCount > 0 %}
+                        <div class="sidebar-stat-row">
+                            <span class="sidebar-stat-label">🔤 Mots</span>
+                            <span class="sidebar-stat-value">{{ motsCount }} mots</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if motsCount > 0 %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="sidebar-card">
+                        <div class="sidebar-card-title">🗂️ Liste des mots</div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            {% for mot in motsList %}
+                                {% set mot = mot|trim %}
+                                {% if mot %}
+                                <span style="
+                                    background: linear-gradient(135deg,#fce7f3,#ede9fe);
+                                    color: #7c3aed;
+                                    font-family: 'Baloo 2', cursive;
+                                    font-weight: 800;
+                                    font-size: 0.82rem;
+                                    padding: 6px 14px;
+                                    border-radius: 20px;
+                                    border: 1.5px solid rgba(155,107,255,0.3);
+                                    transition: all 0.2s;
+                                    cursor: default;
+                                ">{{ mot|upper }}</span>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="sidebar-card">
+                        <div class="sidebar-card-title">🚀 Prêt à apprendre ?</div>
+                        <p style="font-size: 0.85rem; color: #666; margin-bottom: 1rem;">Explore ce cours et découvre tous ses mots et images !</p>
+                        <a href="{{ path('app_cours') }}" class="btn-cta-start" style="
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 8px;
+                            background: linear-gradient(135deg, #4D96FF, #C77DFF);
+                            color: white;
+                            font-family: 'Baloo 2', cursive;
+                            font-size: 0.9rem;
+                            font-weight: 800;
+                            padding: 10px 20px;
+                            border-radius: 50px;
+                            text-decoration: none;
+                            width: 100%;
+                            justify-content: center;
+                        ">🌈 Voir tous les cours</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div class="lightbox-overlay" id="lightbox">
+        <div class="lightbox-img-wrap">
+            <div class="lb-close" id="lbClose">✕</div>
+            <img src="" id="lbImg" alt="Image agrandie">
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <style>
         .lightbox-overlay {
             display: none; position: fixed; inset: 0;
             background: rgba(10,10,25,0.88); backdrop-filter: blur(8px);
@@ -485,7 +630,7 @@
         }
         .lb-close {
             position: absolute; top: -14px; right: -14px;
-            background: white; color: var(--coral);
+            background: white; color: #FF6B6B;
             width: 36px; height: 36px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             font-size: 1.1rem; font-weight: 800; cursor: pointer;
@@ -493,320 +638,37 @@
             transition: transform 0.2s;
         }
         .lb-close:hover { transform: scale(1.15); }
-
-        /* ── Count badge ── */
-        .mots-count-badge {
-            display: inline-flex; align-items: center; gap: 6px;
-            background: linear-gradient(135deg, #ff69b4, #9b6bff);
-            color: white;
-            font-family: 'Baloo 2', cursive; font-size: 0.82rem; font-weight: 800;
-            padding: 5px 16px; border-radius: 30px;
-            margin-left: 8px;
-            box-shadow: 0 3px 12px rgba(155,107,255,0.35);
-        }
-
-        /* ── Responsive ── */
-        @media (max-width: 992px) {
-            .mots-grid {
-                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-                gap: 20px;
-            }
-        }
-        @media (max-width: 768px) {
-            .mots-grid {
-                grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
-                gap: 16px;
-            }
-            .mot-card { max-width: 100%; }
-            .mot-img-wrap { height: 160px; }
-        }
-        @media (max-width: 480px) {
-            .mots-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 14px;
-            }
-            .mot-img-wrap { height: 130px; }
-            .mot-placeholder-emoji { font-size: 4rem; }
-        }
     </style>
-{% endblock %}
-
-{% block body %}
-
-    {% set emojis  = {'Académique': '📚', 'Social': '🤝', 'Motricité': '🏃', 'Langage': '💬'} %}
-    {% set emoji   = emojis[cours.typeCours] ?? '🎓' %}
-    {% set motsList = cours.mots ? cours.mots|split(';') : [] %}
-    {% set motsCount = motsList|length %}
-    {% set typeClass = 'type-' ~ cours.typeCours %}
-
-    {# Build image map: {mot: [img1, img2, ...]} #}
-    {% set imagesMotsMap = {} %}
-    {% if cours.imagesMots %}
-        {% for item in cours.imagesMots|split(';') %}
-            {% set parts = item|split(':') %}
-            {% if parts|length >= 2 %}
-                {% set imagesMotsMap = imagesMotsMap|merge({(parts[0]): parts[1]|split(',')}) %}
-            {% endif %}
-        {% endfor %}
-    {% endif %}
-
-    <!-- ══ HERO ══ -->
-    <div class="course-hero">
-        <div class="course-hero-inner">
-            <div class="container">
-                <!-- Breadcrumb -->
-                <div class="mb-3">
-                    <a href="{{ path('app_home') }}" class="bc-link">🏠 Accueil</a>
-                    <span class="bc-sep">›</span>
-                    <a href="{{ path('app_cours') }}" class="bc-link">Cours</a>
-                    <span class="bc-sep">›</span>
-                    <span class="bc-current">{{ cours.titre }}</span>
-                </div>
-
-                <div class="row align-items-center g-4">
-                    <!-- Left: info -->
-                    <div class="col-lg-7 col-md-6">
-                        <span class="course-type-pill {{ typeClass }}">{{ emoji }} {{ cours.typeCours }}</span>
-
-                        <h1 class="course-main-title">{{ cours.titre }}</h1>
-                        <p class="course-main-desc">{{ cours.description }}</p>
-
-                        <div class="info-chips">
-                            <span class="info-chip chip-level">
-                                📊 <strong>{{ cours.niveau }}</strong>
-                            </span>
-                            <span class="info-chip chip-time">
-                                ⏱ <strong>{{ cours.duree }} min</strong>
-                            </span>
-                            {% if motsCount > 0 %}
-                            <span class="info-chip chip-words">
-                                🔤 <strong>{{ motsCount }} mot{{ motsCount > 1 ? 's' : '' }}</strong>
-                            </span>
-                            {% endif %}
-                        </div>
-
-                        <a href="{{ path('app_cours') }}" class="btn-back">
-                            ← Retour aux cours
-                        </a>
-                    </div>
-
-                    <!-- Right: image -->
-                    <div class="col-lg-5 col-md-6">
-                        <div class="course-hero-img-wrap">
-                            {% if cours.image %}
-                                <img src="/uploads/images/{{ cours.image }}" alt="{{ cours.titre }}">
-                            {% else %}
-                                <span class="hero-img-emoji">{{ emoji }}</span>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ══ CONTENT ══ -->
-    <div class="content-section">
-        <div class="container">
-            <div class="row g-4">
-
-                <!-- ── MAIN: Mots — FULL WIDTH ── -->
-                <div class="col-12">
-
-                    {% if motsList|length > 0 %}
-
-                    <div class="section-heading" style="justify-content:center; text-align:center;">
-                        <span class="heading-dot" style="background:linear-gradient(135deg,#ff69b4,#9b6bff);"></span>
-                        🔤 Les mots du cours
-                        <span class="mots-count-badge">{{ motsCount }} mot{{ motsCount > 1 ? 's' : '' }}</span>
-                    </div>
-
-                    <!-- Progress -->
-                    <div class="progress-wrap">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <div class="progress-label">Contenu du cours</div>
-                            <span style="font-family:'Baloo 2',cursive; font-size:0.88rem; font-weight:800; color:var(--ocean);">{{ motsCount }} élément{{ motsCount > 1 ? 's' : '' }}</span>
-                        </div>
-                        <div class="progress-bar-wrap">
-                            <div class="progress-bar-fill" style="width:100%;"></div>
-                        </div>
-                    </div>
-
-                    <!-- Mots grid — centered -->
-                    <div class="mots-section-wrap">
-                        <div class="mots-grid">
-                            {% for mot in motsList %}
-                                {% set mot = mot|trim %}
-                                {% if mot %}
-                                {% set motImages = imagesMotsMap[mot] ?? [] %}
-
-                                <div class="mot-card">
-                                    <!-- Image(s) -->
-                                    <div class="mot-img-wrap">
-                                        {% if motImages|length == 1 %}
-                                            <img src="/uploads/images/{{ motImages[0]|trim }}"
-                                                 alt="{{ mot }}"
-                                                 class="lightbox-trigger"
-                                                 data-src="/uploads/images/{{ motImages[0]|trim }}">
-                                        {% elseif motImages|length > 1 %}
-                                            <div class="mot-img-thumbs">
-                                                {% for img in motImages %}
-                                                    <img src="/uploads/images/{{ img|trim }}"
-                                                         alt="{{ mot }}"
-                                                         class="lightbox-trigger"
-                                                         data-src="/uploads/images/{{ img|trim }}">
-                                                {% endfor %}
-                                            </div>
-                                        {% else %}
-                                            <span class="mot-placeholder-emoji">
-                                                {% set wordEmojis = ['🌸', '🎨', '⭐', '🎵', '🍎', '🐶', '🌈', '🏠', '🚗', '🌙'] %}
-                                                {{ wordEmojis[loop.index0 % 10] }}
-                                            </span>
-                                        {% endif %}
-                                    </div>
-                                    <!-- Label -->
-                                    <div class="mot-label">
-                                        <span>{{ mot|upper }}</span>
-                                        <div class="mot-label-bar">
-                                            <span></span><span></span><span></span>
-                                        </div>
-                                    </div>
-                                </div>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                    </div>
-
-                    {% else %}
-                    <div style="background:white; border-radius:24px; padding:3rem; text-align:center; box-shadow:0 5px 20px rgba(0,0,0,0.07); border:2px solid #F0F0F0;">
-                        <div style="font-size:4rem; margin-bottom:1rem;">📭</div>
-                        <h5 style="font-family:'Baloo 2',cursive; font-weight:800; color:#555;">Aucun mot dans ce cours</h5>
-                        <p style="color:#888; font-size:0.9rem;">Le contenu sera bientôt ajouté.</p>
-                    </div>
-                    {% endif %}
-
-                </div>
-
-                <!-- ── SIDEBAR ── -->
-                <div class="col-12">
-                    <div class="row justify-content-center g-4">
-
-                        <!-- Stats card -->
-                        <div class="col-lg-4 col-md-6">
-                        <div class="sidebar-card">
-                            <div class="sidebar-card-title">📋 Informations</div>
-                            <div class="sidebar-stat-row">
-                                <span class="sidebar-stat-label">📊 Niveau</span>
-                                <span class="sidebar-stat-value">
-                                    <span class="niveau-dot dot-{{ cours.niveau }}"></span>
-                                    {{ cours.niveau }}
-                                </span>
-                            </div>
-                            <div class="sidebar-stat-row">
-                                <span class="sidebar-stat-label">⏱ Durée</span>
-                                <span class="sidebar-stat-value">{{ cours.duree }} min</span>
-                            </div>
-                            <div class="sidebar-stat-row">
-                                <span class="sidebar-stat-label">🏷️ Type</span>
-                                <span class="sidebar-stat-value">{{ cours.typeCours }}</span>
-                            </div>
-                            {% if motsCount > 0 %}
-                            <div class="sidebar-stat-row">
-                                <span class="sidebar-stat-label">🔤 Mots</span>
-                                <span class="sidebar-stat-value">{{ motsCount }} mots</span>
-                            </div>
-                            {% endif %}
-                        </div>
-                        </div>
-
-                        <!-- Mots list mini -->
-                        {% if motsList|length > 0 %}
-                        <div class="col-lg-4 col-md-6">
-                        <div class="sidebar-card">
-                            <div class="sidebar-card-title">🗂️ Liste des mots</div>
-                            <div style="display:flex; flex-wrap:wrap; gap:8px;">
-                                {% for mot in motsList %}
-                                    {% set mot = mot|trim %}
-                                    {% if mot %}
-                                    <span style="
-                                        background: linear-gradient(135deg,#fce7f3,#ede9fe);
-                                        color: #7c3aed;
-                                        font-family: 'Baloo 2',cursive;
-                                        font-weight: 800;
-                                        font-size: 0.82rem;
-                                        padding: 6px 14px;
-                                        border-radius: 20px;
-                                        border: 1.5px solid rgba(155,107,255,0.3);
-                                        transition: all 0.2s;
-                                        cursor: default;
-                                    ">{{ mot|upper }}</span>
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
-                        </div>
-                        </div>
-                        {% endif %}
-
-                        <!-- CTA -->
-                        <div class="col-lg-4 col-md-6">
-                        <div class="cta-block">
-                            <div style="font-size:2.8rem; margin-bottom:0.6rem;">🚀</div>
-                            <h4>Prêt à apprendre ?</h4>
-                            <p>Explore ce cours et découvre tous ses mots et images !</p>
-                            <a href="{{ path('app_cours') }}" class="btn-cta-start">
-                                🌈 Voir tous les cours
-                            </a>
-                        </div>
-                        </div>
-
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>
-
-    <!-- ══ LIGHTBOX ══ -->
-    <div class="lightbox-overlay" id="lightbox">
-        <div class="lightbox-img-wrap">
-            <div class="lb-close" id="lbClose">✕</div>
-            <img src="" id="lbImg" alt="Image agrandie">
-        </div>
-    </div>
-
-{% endblock %}
-
-{% block javascripts %}
-    {{ parent() }}
     <script>
-    (function () {
+    (function() {
         // Lightbox
         const overlay = document.getElementById('lightbox');
-        const lbImg   = document.getElementById('lbImg');
+        const lbImg = document.getElementById('lbImg');
         const lbClose = document.getElementById('lbClose');
 
-        document.querySelectorAll('.lightbox-trigger').forEach(img => {
-            img.style.cursor = 'zoom-in';
-            img.addEventListener('click', function () {
-                lbImg.src = this.dataset.src || this.src;
-                overlay.classList.add('open');
+        function initLightbox() {
+            document.querySelectorAll('.lightbox-trigger').forEach(img => {
+                img.style.cursor = 'zoom-in';
+                img.removeEventListener('click', lightboxHandler);
+                img.addEventListener('click', lightboxHandler);
             });
-        });
-
-        lbClose.addEventListener('click',  () => overlay.classList.remove('open'));
-        overlay.addEventListener('click', e => {
-            if (e.target === overlay) overlay.classList.remove('open');
-        });
-        document.addEventListener('keydown', e => {
-            if (e.key === 'Escape') overlay.classList.remove('open');
-        });
-
-        // Animate progress bar on load
-        const fill = document.querySelector('.progress-bar-fill');
-        if (fill) {
-            fill.style.width = '0%';
-            setTimeout(() => fill.style.width = '100%', 300);
         }
+
+        function lightboxHandler(e) {
+            e.stopPropagation();
+            lbImg.src = this.dataset.src || this.src;
+            overlay.classList.add('open');
+        }
+
+        if (lbClose) {
+            lbClose.addEventListener('click', () => overlay.classList.remove('open'));
+        }
+        if (overlay) {
+            overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+        }
+        document.addEventListener('keydown', e => { if (e.key === 'Escape' && overlay) overlay.classList.remove('open'); });
+
+        initLightbox();
     })();
     </script>
 {% endblock %}
