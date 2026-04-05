@@ -385,4 +385,12 @@
             renderSchedule(currentDay, currentSearch);
         });
 
-       
+     // Initialisation : activer le jour actuel
+        const today = getCurrentDay();
+        currentDay = (today !== 'Dimanche') ? today : 'Lundi';
+        document.querySelectorAll('.day-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.day === currentDay);
+        });
+        renderSchedule(currentDay);
+    </script>
+{% endblock %}   
