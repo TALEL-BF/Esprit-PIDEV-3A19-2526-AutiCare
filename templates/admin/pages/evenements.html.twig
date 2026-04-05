@@ -702,7 +702,7 @@ select[multiple] option:checked {
                 <i class="fas fa-trash-alt"></i> Réinitialiser
             </button>
         </div>
-        <small class="text-muted mt-1 d-block"><i class="fas fa-magic"></i> La recherche se fait automatiquement en tapant</small>
+       
     </div>
 </div>
 
@@ -1498,7 +1498,7 @@ function handleEventDeleteClick(e) {
     
     pendingDeleteId = id;
     pendingDeleteRow = row;
-    pendingDeleteTitle = title;
+    pendingDeleteTitle = title;  // ← ICI title est bien défini
     
     document.getElementById('deleteMessage').innerHTML = `Êtes-vous sûr de vouloir supprimer <strong>"${title}"</strong> ?<br>Cette action est irréversible.`;
     document.getElementById('deleteConfirmPopup').style.display = 'flex';
@@ -1687,8 +1687,12 @@ function submitEventForm() {
 }
 
 // ========== DELETE EVENT ==========
+// ========== DELETE EVENT ==========
 document.getElementById('confirmDeleteBtn')?.addEventListener('click', function() {
     if (pendingDeleteId) {
+        // Sauvegarder le titre localement avant la suppression
+        const titleToDelete = pendingDeleteTitle;
+        
         fetch('{{ path('admin_evenements_delete') }}', {
             method: 'DELETE',
             headers: {
@@ -1700,7 +1704,8 @@ document.getElementById('confirmDeleteBtn')?.addEventListener('click', function(
         .then(data => {
             if (data.success) {
                 closeDeletePopup();
-                showTempMessage(`✅ "${pendingDeleteTitle}" a été supprimé avec succès !`, 'success');
+                // Utiliser la variable sauvegardée
+                showTempMessage(`✅ "${titleToDelete}" a été supprimé avec succès !`, 'success');
                 loadEvents();
                 resetEventForm();
             } else {
