@@ -1561,7 +1561,7 @@ function loadEvents() {
                         `${event.dateDebut} à ${event.heureDebut || '--:--'}` : 
                         'Date non définie';
                     
-                    // 🔥 CORRECTION IMAGE - Utiliser event.imagePath directement
+                    //  CORRECTION IMAGE - Utiliser event.imagePath directement
                     let imageHtml = '';
                     if (event.imagePath && event.imagePath !== '') {
                         imageHtml = `<img src="${event.imagePath}" alt="${event.titre}" class="event-image" style="width:50px;height:50px;object-fit:cover;border-radius:10px;" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'event-image-placeholder\'><i class=\'fas fa-calendar-alt\'></i></div>'">`;
