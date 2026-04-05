@@ -1,0 +1,147 @@
+<div id="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-icon"><i class="fas fa-brain"></i></div>
+        <div class="brand-text">
+            <h1>Auticare</h1>
+            <span>Admin Panel</span>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Navigation</div>
+
+        <a class="nav-link-item {% if app.request.get('_route') == 'admin_dashboard' %}active{% endif %}" 
+           href="{{ path('admin_dashboard') }}">
+            <span class="nav-icon"><i class="fas fa-chart-pie"></i></span>
+            Tableau de bord
+        </a>
+
+        <div class="nav-section-label">Gestion</div>
+
+        {# ==================== UTILISATEURS ==================== #}
+        <div class="nav-item-wrap {% if app.request.get('_route') starts with 'admin_users' %}open{% endif %}">
+            <div class="nav-link-item" onclick="toggleSection('utilisateurs', event)">
+                <span class="nav-icon"><i class="fas fa-users"></i></span>
+                Utilisateurs
+                <span class="nav-chevron"><i class="fas fa-chevron-down"></i></span>
+            </div>
+            <div class="nav-sub">
+                <a class="nav-sub-link {% if app.request.get('_route') == 'admin_users' %}active{% endif %}" 
+                   href="{{ path('admin_users') }}">
+                    <i class="fas fa-list-ul"></i> Liste
+                </a>
+                <a class="nav-sub-link {% if app.request.get('_route') == 'admin_users_roles' %}active{% endif %}" 
+                   href="{{ path('admin_users_roles') }}">
+                    <i class="fas fa-shield-alt"></i> Rôles
+                </a>
+            </div>
+        </div>
+
+        {# ==================== COURS ==================== #}
+        <div class="nav-item-wrap {% if app.request.get('_route') starts with 'admin_cours' %}open{% endif %}">
+            <div class="nav-link-item" onclick="toggleSection('cours', event)">
+                <span class="nav-icon"><i class="fas fa-book-open"></i></span>
+                Cours
+                <span class="nav-chevron"><i class="fas fa-chevron-down"></i></span>
+            </div>
+            <div class="nav-sub">
+                <a class="nav-sub-link {% if app.request.get('_route') == 'admin_cours' %}active{% endif %}" 
+                   href="{{ path('admin_cours') }}">
+                    <i class="fas fa-book"></i> Cours
+                </a>
+                <a class="nav-sub-link {% if app.request.get('_route') == 'admin_cours_modules' %}active{% endif %}" 
+                   href="{{ path('admin_cours_modules') }}">
+                    <i class="fas fa-layer-group"></i> Modules
+                </a>
+            </div>
+        </div>
+
+        {# ==================== ÉVÉNEMENTS ==================== #}
+        <div class="nav-item-wrap {% if app.request.get('_route') starts with 'admin_evenements' %}open{% endif %}">
+            <div class="nav-link-item" onclick="toggleSection('evenements', event)">
+                <span class="nav-icon"><i class="fas fa-calendar-alt"></i></span>
+                Événements
+                <span class="nav-chevron"><i class="fas fa-chevron-down"></i></span>
+            </div>
+            <div class="nav-sub">
+                <a class="nav-sub-link {% if app.request.get('_route') == 'admin_evenements' %}active{% endif %}" 
+                   href="{{ path('admin_evenements') }}">
+                    <i class="fas fa-calendar"></i> Événement
+                </a>
+                <a class="nav-sub-link {% if app.request.get('_route') == 'admin_sponsors' %}active{% endif %}" 
+                   href="{{ path('admin_sponsors') }}">
+                    <i class="fas fa-handshake"></i> Sponsor
+                </a>
+            </div>
+        </div>
+
+        {# ==================== CONSULTATIONS ==================== #}
+        <div class="nav-item-wrap {% if app.request.get('_route') starts with 'admin_therapie' or app.request.get('_route') starts with 'admin_seance' or app.request.get('_route') starts with 'admin_rdv' %}open{% endif %}">
+            <div class="nav-link-item" onclick="toggleSection('consultations', event)">
+                <span class="nav-icon"><i class="fas fa-stethoscope"></i></span>
+                Consultations
+                <span class="nav-chevron"><i class="fas fa-chevron-down"></i></span>
+            </div>
+            <div class="nav-sub">
+             
+                <a class="nav-sub-link {% if app.request.get('_route') == 'admin_therapie' %}active{% endif %}" 
+                   href="{{ path('admin_therapie') }}">
+                    <i class="fas fa-brain"></i> Thérapie
+                </a>
+              
+            </div>
+        </div>
+
+        {# ==================== EMPLOIS ==================== #}
+        <div class="nav-item-wrap {% if app.request.get('_route') starts with 'admin_planning' or app.request.get('_route') starts with 'admin_rdv' or app.request.get('_route') starts with 'admin_seance' %}open{% endif %}">
+            <div class="nav-link-item" onclick="toggleSection('emplois', event)">
+                <span class="nav-icon"><i class="fas fa-briefcase"></i></span>
+                Emplois
+                <span class="nav-chevron"><i class="fas fa-chevron-down"></i></span>
+            </div>
+            <div class="nav-sub">
+                <a class="nav-sub-link {% if app.request.get('_route') == 'admin_rdv' or app.request.get('_route') == 'admin_rdv_edit' %}active{% endif %}" 
+                   href="{{ path('admin_rdv') }}">
+                    <i class="fas fa-user-clock"></i> RDV
+                </a>
+                <a class="nav-sub-link {% if app.request.get('_route') == 'admin_seance' or app.request.get('_route') == 'admin_seance_edit' %}active{% endif %}" 
+                   href="{{ path('admin_seance') }}">
+                    <i class="fas fa-clock"></i> Séance
+                </a>
+                <a class="nav-sub-link {% if app.request.get('_route') == 'admin_planning' or app.request.get('_route') == 'admin_planning_edit' %}active{% endif %}" 
+                   href="{{ path('admin_planning') }}">
+                    <i class="fas fa-calendar-week"></i> Planning
+                </a>
+            </div>
+        </div>
+
+        {# ==================== JEU ==================== #}
+        <div class="nav-item-wrap {% if app.request.get('_route') starts with 'admin_jeu' %}open{% endif %}">
+            <div class="nav-link-item" onclick="toggleSection('jeu', event)">
+                <span class="nav-icon"><i class="fas fa-gamepad"></i></span>
+                Jeu
+                <span class="nav-chevron"><i class="fas fa-chevron-down"></i></span>
+            </div>
+            <div class="nav-sub">
+                <a class="nav-sub-link {% if app.request.get('_route') == 'admin_jeu' %}active{% endif %}" 
+                   href="{{ path('admin_jeu') }}">
+                    <i class="fas fa-gamepad"></i> Jeu
+                </a>
+                <a class="nav-sub-link {% if app.request.get('_route') == 'admin_jeu_score' %}active{% endif %}" 
+                   href="{{ path('admin_jeu_score') }}">
+                    <i class="fas fa-trophy"></i> Score
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="sidebar-footer">
+        <div class="admin-info">
+            <div class="admin-avatar">A</div>
+            <div>
+                <div class="admin-name">Administrateur</div>
+                <div class="admin-role">Super Admin</div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,540 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Auticare — RDV{% endblock %}
+
+{% block page_title %}Gestion des Rendez-vous{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .filter-input {
+        width: 200px;
+        font-size: .8rem;
+        padding: 6px 12px;
+    }
+
+    .rdv-filters-panel {
+        width: 100%;
+        background: #faf8ff;
+        border: 1px solid #eadbff;
+        border-radius: 12px;
+        padding: 12px;
+        margin-top: 8px;
+    }
+
+    .rdv-filters-main {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .rdv-search-wrap {
+        position: relative;
+    }
+
+    .rdv-search-wrap i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9b6be8;
+        font-size: .9rem;
+    }
+
+    .rdv-search-wrap .form-control {
+        padding-left: 34px;
+    }
+
+    .rdv-filters-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(160px, 1fr));
+        gap: 10px;
+    }
+
+    @media (max-width: 1200px) {
+        .rdv-filters-main {
+            grid-template-columns: 1fr;
+        }
+
+        .rdv-filters-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .rdv-filters-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .pro-kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(180px, 1fr));
+        gap: 12px;
+    }
+
+    .pro-kpi-card {
+        background: linear-gradient(180deg, #ffffff 0%, #faf7ff 100%);
+        border: 1px solid #eadbff;
+        border-radius: 12px;
+        padding: 14px;
+    }
+
+    .pro-kpi-label {
+        font-size: .78rem;
+        color: #6b7280;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: .3px;
+    }
+
+    .pro-kpi-value {
+        font-size: 1.45rem;
+        font-weight: 700;
+        color: #5b21b6;
+        line-height: 1.1;
+    }
+
+    .pro-kpi-sub {
+        margin-top: 6px;
+        font-size: .8rem;
+        color: #7c3aed;
+    }
+
+    @media (max-width: 992px) {
+        .pro-kpi-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div class="page-header">
+    <h2><i class="fas fa-user-clock me-2" style="color:var(--purple-500)"></i>Gestion des Rendez-vous</h2>
+    <p>Planifier, suivre et administrer les rendez-vous de consultation</p>
+</div>
+
+{% for message in app.flashes('success') %}
+    <div class="alert alert-success">{{ message }}</div>
+{% endfor %}
+
+<div class="row g-3 mb-4">
+    {% set nb_total = rdvs|length %}
+    {% set nb_confirmes = 0 %}
+    {% set nb_planifies = 0 %}
+    {% set nb_annules = 0 %}
+    {% set total_duree = 0 %}
+    {% for item in rdvs %}
+        {% if item.statutRdv == 'confirme' %}
+            {% set nb_confirmes = nb_confirmes + 1 %}
+        {% elseif item.statutRdv == 'planifiee' or item.statutRdv == 'planifiée' %}
+            {% set nb_planifies = nb_planifies + 1 %}
+        {% elseif item.statutRdv == 'annule' or item.statutRdv == 'annulé' %}
+            {% set nb_annules = nb_annules + 1 %}
+        {% endif %}
+
+        {% set total_duree = total_duree + (item.dureeRdvMinutes ?? 0) %}
+    {% endfor %}
+
+    {% set taux_confirmation = nb_total > 0 ? ((nb_confirmes * 100) / nb_total)|round(1) : 0 %}
+    {% set taux_annulation = nb_total > 0 ? ((nb_annules * 100) / nb_total)|round(1) : 0 %}
+    {% set duree_moyenne = nb_total > 0 ? (total_duree / nb_total)|round(0) : 0 %}
+
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Total RDV</div>
+                    <div class="stat-value">{{ nb_total }}</div>
+                </div>
+                <div class="stat-icon purple"><i class="fas fa-calendar-check"></i></div>
+            </div>
+            <div class="stat-change up"><i class="fas fa-chart-line"></i> base globale</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Confirmés</div>
+                    <div class="stat-value">{{ nb_confirmes }}</div> 
+                </div>
+                <div class="stat-icon violet"><i class="fas fa-check-circle"></i></div>  
+            </div>
+            <div class="stat-change up"><i class="fas fa-thumbs-up"></i> actes validés</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Planifiés</div>
+                    <div class="stat-value">{{ nb_planifies }}</div>
+                </div>
+                <div class="stat-icon pink"><i class="fas fa-clock"></i></div>   
+            </div>
+            <div class="stat-change text-warning"><i class="fas fa-hourglass-half"></i> en attente</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Annulés</div>
+                    <div class="stat-value">{{ nb_annules }}</div>
+                </div>
+                <div class="stat-icon indigo"><i class="fas fa-times-circle"></i></div>
+            </div>
+            <div class="stat-change text-danger" style="color: var(--bs-danger);"><i class="fas fa-exclamation-circle"></i> à reprogrammer</div>
+        </div>
+    </div>
+</div>
+
+<div class="card-box mb-4">
+    <div class="card-box-header">
+        <span class="card-box-title"><i class="fas fa-chart-line"></i> Indicateurs de performance</span>
+    </div>
+    <div class="card-box-body">
+        <div class="pro-kpi-grid">
+            <div class="pro-kpi-card">
+                <div class="pro-kpi-label">Taux de confirmation</div>
+                <div class="pro-kpi-value">{{ taux_confirmation }}%</div>
+                <div class="pro-kpi-sub">{{ nb_confirmes }} RDV confirmés sur {{ nb_total }}</div>
+            </div>
+            <div class="pro-kpi-card">
+                <div class="pro-kpi-label">Taux d'annulation</div>
+                <div class="pro-kpi-value">{{ taux_annulation }}%</div>
+                <div class="pro-kpi-sub">{{ nb_annules }} RDV annulés sur {{ nb_total }}</div>
+            </div>
+            <div class="pro-kpi-card">
+                <div class="pro-kpi-label">Durée moyenne</div>
+                <div class="pro-kpi-value">{{ duree_moyenne }} min</div>
+                <div class="pro-kpi-sub">Total cumulé: {{ total_duree }} min</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-8">
+        <div class="card-box">
+            <div class="card-box-header">
+                <span class="card-box-title"><i class="fas fa-plus-circle"></i> {{ isEdit ? 'Modifier le rendez-vous' : 'Nouveau rendez-vous' }}</span>
+                <span class="form-mode-badge">Mode : {{ isEdit ? 'Modification' : 'Ajout' }}</span>
+            </div>
+            <div class="card-box-body">
+                {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+                {% if form.vars.submitted %}{{ form_errors(form) }}{% endif %}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        {{ form_label(form.typeConsultation, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.typeConsultation, {'attr': {'class': 'form-select'}}) }}
+                        {% if form.vars.submitted %}{{ form_errors(form.typeConsultation) }}{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_label(form.dateHeureRdv, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.dateHeureRdv, {'attr': {'class': 'form-control'}}) }}
+                        {% if form.vars.submitted %}{{ form_errors(form.dateHeureRdv) }}{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_label(form.statutRdv, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.statutRdv, {'attr': {'class': 'form-select'}}) }}
+                        {% if form.vars.submitted %}{{ form_errors(form.statutRdv) }}{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_label(form.dureeRdvMinutes, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.dureeRdvMinutes, {'attr': {'class': 'form-control'}}) }}
+                        {% if form.vars.submitted %}{{ form_errors(form.dureeRdvMinutes) }}{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_label(form.idPsychologue, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.idPsychologue, {'attr': {'class': 'form-control'}}) }}
+                        {% if form.vars.submitted %}{{ form_errors(form.idPsychologue) }}{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_label(form.idAutiste, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.idAutiste, {'attr': {'class': 'form-control'}}) }}
+                        {% if form.vars.submitted %}{{ form_errors(form.idAutiste) }}{% endif %}
+                    </div>
+                    <div class="col-12 d-flex gap-2">
+                        <button class="btn-purple"><i class="fas fa-save"></i> {{ isEdit ? 'Mettre à jour' : 'Enregistrer' }}</button>
+                        {% if isEdit %}
+                            <a href="{{ path('admin_rdv') }}" class="btn-outline-purple"><i class="fas fa-times"></i> Annuler</a>
+                        {% else %}
+                            <button type="reset" class="btn-outline-purple"><i class="fas fa-times"></i> Annuler</button>
+                        {% endif %}
+                    </div>
+                </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card-box h-100">
+            <div class="card-box-header">
+                <span class="card-box-title"><i class="fas fa-chart-pie"></i> Répartition des statuts</span>
+            </div>
+            <div class="card-box-body">
+                <canvas id="rdvChart" height="240"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card-box">
+    <div class="card-box-header">
+        <span class="card-box-title"><i class="fas fa-list"></i> Liste des rendez-vous</span>
+        <div class="rdv-filters-panel">
+            <div class="rdv-filters-main">
+                <div class="rdv-search-wrap">
+                    <i class="fas fa-search"></i>
+                    <input type="text" class="form-control" id="rdvSearchInput" placeholder="Rechercher par type, date, statut ou durée...">
+                </div>
+                <button type="button" class="btn-outline-purple" id="resetRdvFilters">
+                    <i class="fas fa-undo-alt me-1"></i> Réinitialiser
+                </button>
+            </div>
+
+            <div class="rdv-filters-grid">
+                <select class="form-select" id="rdvStatusFilter">
+                    <option value="">Statut: Tous</option>
+                    <option value="confirmé">Confirmé</option>
+                    <option value="planifiée">Planifiée</option>
+                    <option value="annulée">Annulée</option>
+                    <option value="autres">Autres</option>
+                </select>
+                <select class="form-select" id="rdvDurationFilter">
+                    <option value="">Durée: Toutes</option>
+                    <option value="short">Courte (<= 30 min)</option>
+                    <option value="medium">Moyenne (31 - 60 min)</option>
+                    <option value="long">Longue (> 60 min)</option>
+                </select>
+                <select class="form-select" id="rdvSortSelect">
+                    <option value="">Tri: défaut</option>
+                    <option value="date_asc">Date croissante</option>
+                    <option value="date_desc">Date décroissante</option>
+                    <option value="duree_asc">Durée croissante</option>
+                    <option value="duree_desc">Durée décroissante</option>
+                    <option value="type_asc">Type (A-Z)</option>
+                    <option value="type_desc">Type (Z-A)</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="card-box-body p-0">
+        <div class="table-wrapper">
+            <table class="custom-table" id="rdvTable">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Date/Heure</th>
+                        <th>Statut</th>
+                        <th>Durée</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for rdv in rdvs %}
+                    <tr>
+                        <td>{{ rdv.typeConsultation }}</td>
+                        <td>{{ rdv.dateHeureRdv ? rdv.dateHeureRdv|date('d/m/Y H:i') : '-' }}</td>
+                        <td>
+                            {% if rdv.statutRdv == 'confirme' %}
+                                <span class="badge-status badge-active">Confirmé</span>
+                            {% elseif rdv.statutRdv == 'planifiee' %}
+                                <span class="badge-status badge-pending">Planifiée</span>
+                            {% elseif rdv.statutRdv == 'annule' %}
+                                <span class="badge-status badge-inactive">Annulée</span>
+                            {% else %}
+                                <span class="badge-status badge-purple">{{ rdv.statutRdv|capitalize }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ rdv.dureeRdvMinutes }} min</td>
+                        <td>
+                            <a href="{{ path('admin_rdv_edit', {id: rdv.id}) }}" class="btn-edit-soft me-1">Modifier</a>
+                            <form method="post" action="{{ path('admin_rdv_delete', {id: rdv.id}) }}" style="display:inline" onsubmit="return confirm('Supprimer ce RDV ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_rdv_' ~ rdv.id) }}">
+                                <button class="btn-danger-soft">Supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="5" class="text-center py-3">Aucun rendez-vous enregistré.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const P = { p400: '#a855f7', pink: '#f472b6', indigo: '#818cf8', accent: '#e040fb' };
+
+    const stats = { planifiee: 0, confirme: 0, annule: 0, autres: 0 };
+    {% for rdv in rdvs %}
+        {% if rdv.statutRdv == 'planifiee' %}
+            stats.planifiee++;
+        {% elseif rdv.statutRdv == 'confirme' %}
+            stats.confirme++;
+        {% elseif rdv.statutRdv == 'annule' %}
+            stats.annule++;
+        {% else %}
+            stats.autres++;
+        {% endif %}
+    {% endfor %}
+
+    new Chart(document.getElementById('rdvChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Planifiée', 'Confirmée', 'Annulée', 'Autres'],
+            datasets: [{
+                data: [stats.planifiee, stats.confirme, stats.annule, stats.autres],
+                backgroundColor: [P.p400, P.pink, P.indigo, P.accent],
+                borderWidth: 0,
+                hoverOffset: 8
+            }]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        usePointStyle: true,
+                        font: { family: 'DM Sans', size: 11 }
+                    }
+                }
+            },
+            cutout: '60%',
+            responsive: true
+        }
+    });
+
+    const rdvSearchInput = document.getElementById('rdvSearchInput');
+    const rdvStatusFilter = document.getElementById('rdvStatusFilter');
+    const rdvDurationFilter = document.getElementById('rdvDurationFilter');
+    const rdvSortSelect = document.getElementById('rdvSortSelect');
+    const resetRdvFilters = document.getElementById('resetRdvFilters');
+    const rdvTableBody = document.querySelector('#rdvTable tbody');
+    const rdvDefaultSort = 'date_desc';
+
+    function getRdvCellText(row, index) {
+        return (row.children[index]?.textContent || '').trim();
+    }
+
+    function parseRdvDateTime(dateText) {
+        const normalized = (dateText || '').trim();
+        const parts = normalized.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})$/);
+        if (!parts) {
+            return null;
+        }
+
+        const [, day, month, year, hour, minute] = parts;
+        return new Date(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute));
+    }
+
+    function getRdvDuration(row) {
+        const durationText = getRdvCellText(row, 3);
+        const parsed = parseInt(durationText, 10);
+        return Number.isNaN(parsed) ? null : parsed;
+    }
+
+    function isOtherStatus(statusText) {
+        const normalized = statusText.toLowerCase();
+        return normalized !== ''
+            && normalized !== 'confirmé'
+            && normalized !== 'planifiée'
+            && normalized !== 'annulée';
+    }
+
+    function applyAdvancedRdvFilters() {
+        const searchValue = (rdvSearchInput?.value || '').toLowerCase();
+        const statusValue = (rdvStatusFilter?.value || '').toLowerCase();
+        const durationValue = rdvDurationFilter?.value || '';
+        const sortValue = rdvSortSelect?.value || '';
+
+        const rows = Array.from(document.querySelectorAll('#rdvTable tbody tr'));
+
+        rows.forEach((row) => {
+            const rowText = row.textContent.toLowerCase();
+            const statusText = getRdvCellText(row, 2).toLowerCase();
+            const duration = getRdvDuration(row);
+
+            const matchesSearch = searchValue === '' || rowText.includes(searchValue);
+            const matchesStatus = statusValue === ''
+                || (statusValue === 'autres' ? isOtherStatus(statusText) : statusText.includes(statusValue));
+
+            let matchesDuration = true;
+            if (durationValue === 'short') {
+                matchesDuration = duration !== null && duration <= 30;
+            } else if (durationValue === 'medium') {
+                matchesDuration = duration !== null && duration > 30 && duration <= 60;
+            } else if (durationValue === 'long') {
+                matchesDuration = duration !== null && duration > 60;
+            }
+
+            row.style.display = (matchesSearch && matchesStatus && matchesDuration) ? '' : 'none';
+        });
+
+        const visibleRows = rows.filter((row) => row.style.display !== 'none');
+        if (sortValue !== '' && visibleRows.length > 1) {
+            visibleRows.sort((a, b) => {
+                if (sortValue === 'date_asc') {
+                    const aDate = parseRdvDateTime(getRdvCellText(a, 1));
+                    const bDate = parseRdvDateTime(getRdvCellText(b, 1));
+                    if (!aDate || !bDate) return 0;
+                    return aDate - bDate;
+                }
+                if (sortValue === 'date_desc') {
+                    const aDate = parseRdvDateTime(getRdvCellText(a, 1));
+                    const bDate = parseRdvDateTime(getRdvCellText(b, 1));
+                    if (!aDate || !bDate) return 0;
+                    return bDate - aDate;
+                }
+                if (sortValue === 'duree_asc') {
+                    return (getRdvDuration(a) ?? 0) - (getRdvDuration(b) ?? 0);
+                }
+                if (sortValue === 'duree_desc') {
+                    return (getRdvDuration(b) ?? 0) - (getRdvDuration(a) ?? 0);
+                }
+                if (sortValue === 'type_asc') {
+                    return getRdvCellText(a, 0).localeCompare(getRdvCellText(b, 0), 'fr', { sensitivity: 'base' });
+                }
+                if (sortValue === 'type_desc') {
+                    return getRdvCellText(b, 0).localeCompare(getRdvCellText(a, 0), 'fr', { sensitivity: 'base' });
+                }
+                return 0;
+            });
+
+            visibleRows.forEach((row) => rdvTableBody.appendChild(row));
+        }
+    }
+
+    [rdvSearchInput, rdvStatusFilter, rdvDurationFilter, rdvSortSelect].forEach((el) => {
+        el?.addEventListener('input', applyAdvancedRdvFilters);
+        el?.addEventListener('change', applyAdvancedRdvFilters);
+    });
+
+    resetRdvFilters?.addEventListener('click', function() {
+        if (rdvSearchInput) rdvSearchInput.value = '';
+        if (rdvStatusFilter) rdvStatusFilter.value = '';
+        if (rdvDurationFilter) rdvDurationFilter.value = '';
+        if (rdvSortSelect) rdvSortSelect.value = rdvDefaultSort;
+        applyAdvancedRdvFilters();
+    });
+
+    if (rdvSortSelect && !rdvSortSelect.value) {
+        rdvSortSelect.value = rdvDefaultSort;
+    }
+    applyAdvancedRdvFilters();
+});
+</script>
+{% endblock %}
