@@ -58,7 +58,7 @@ class SponsorController extends AbstractController
         SluggerInterface $slugger,
         ValidatorInterface $validator
     ): Response {
-        // Check if AJAX request for real-time validation
+       
         $isAjax = $request->isXmlHttpRequest();
         
         $sponsor = new Sponsor();
@@ -70,17 +70,17 @@ class SponsorController extends AbstractController
         $sponsor->setDescription($request->request->get('sponsorDescription'));
         $sponsor->setMontant($request->request->get('sponsorAmount'));
         
-        // VALIDATION: Test de la validité (like Figure 3 in workshop)
+       
         $errors = $validator->validate($sponsor);
         
         if (count($errors) > 0) {
-            // Collect all error messages
+          
             $errorMessages = [];
             foreach ($errors as $error) {
                 $errorMessages[] = $error->getMessage();
             }
             
-            // For AJAX requests (real-time validation), return JSON
+           
             if ($isAjax) {
                 return $this->json([
                     'success' => false,
@@ -89,10 +89,10 @@ class SponsorController extends AbstractController
                 ], 400);
             }
             
-            // For normal form submission
+           
             $this->addFlash('error', 'Erreurs de validation : ' . implode(', ', $errorMessages));
             
-            // Return to form with errors (preserve submitted data)
+           
             $events = $em->getRepository(Event::class)->findAll();
             $sponsors = $em->getRepository(Sponsor::class)->findAll();
             $totalSponsors = count($sponsors);
@@ -124,7 +124,7 @@ class SponsorController extends AbstractController
             ]);
         }
         
-        // Gérer l'upload de l'image
+   
         $imageFile = $request->files->get('sponsorImage');
         if ($imageFile && $imageFile->getSize() > 0) {
             $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
@@ -145,7 +145,7 @@ class SponsorController extends AbstractController
             }
         }
         
-        // Gestion des événements
+     
         $eventIds = $request->request->all('sponsorEvents');
         if ($eventIds) {
             foreach ($eventIds as $eventId) {
@@ -179,7 +179,7 @@ class SponsorController extends AbstractController
     {
         $sponsor = new Sponsor();
         
-        // Set only the field being validated
+       
         $field = $request->request->get('field');
         $value = $request->request->get('value');
         
@@ -252,7 +252,7 @@ class SponsorController extends AbstractController
         SluggerInterface $slugger,
         ValidatorInterface $validator
     ): Response {
-        // Check if AJAX request for real-time validation
+       
         $isAjax = $request->isXmlHttpRequest();
         
         $id = $request->request->get('sponsorId');
@@ -273,17 +273,17 @@ class SponsorController extends AbstractController
         $sponsor->setDescription($request->request->get('sponsorDescription'));
         $sponsor->setMontant($request->request->get('sponsorAmount'));
         
-        // VALIDATION: Test de la validité (like Figure 3 in workshop)
+      
         $errors = $validator->validate($sponsor);
         
         if (count($errors) > 0) {
-            // Collect all error messages
+           
             $errorMessages = [];
             foreach ($errors as $error) {
                 $errorMessages[] = $error->getMessage();
             }
             
-            // For AJAX requests (real-time validation), return JSON
+           
             if ($isAjax) {
                 return $this->json([
                     'success' => false,
@@ -292,10 +292,10 @@ class SponsorController extends AbstractController
                 ], 400);
             }
             
-            // For normal form submission
+           
             $this->addFlash('error', 'Erreurs de validation : ' . implode(', ', $errorMessages));
             
-            // Return to form with errors
+           
             $events = $em->getRepository(Event::class)->findAll();
             $sponsors = $em->getRepository(Sponsor::class)->findAll();
             $totalSponsors = count($sponsors);
@@ -328,10 +328,10 @@ class SponsorController extends AbstractController
             ]);
         }
         
-        // Gérer la nouvelle image (si uploadée)
+       
         $imageFile = $request->files->get('sponsorImage');
         if ($imageFile && $imageFile->getSize() > 0) {
-            // Supprimer l'ancienne image si elle existe
+           
             if ($sponsor->getImage()) {
                 $oldImagePath = $this->getParameter('kernel.project_dir') . '/public' . $sponsor->getImage();
                 if (file_exists($oldImagePath)) {
@@ -357,13 +357,13 @@ class SponsorController extends AbstractController
             }
         }
         
-        // Mise à jour des événements
-        // 1. Supprimer tous les événements existants
+        
+       
         foreach ($sponsor->getEvents() as $existingEvent) {
             $sponsor->removeEvent($existingEvent);
         }
         
-        // 2. Ajouter les nouveaux événements
+      
         $eventIds = $request->request->all('sponsorEvents');
         if ($eventIds) {
             foreach ($eventIds as $eventId) {
@@ -424,7 +424,7 @@ class SponsorController extends AbstractController
         $qb->select('s')
            ->from(Sponsor::class, 's');
         
-        // 1. Recherche intelligente
+       
         if (!empty($searchTerm)) {
             $qb->andWhere($qb->expr()->orX(
                 $qb->expr()->like('s.nom', ':search'),
@@ -434,20 +434,20 @@ class SponsorController extends AbstractController
                 $qb->expr()->like('s.TypeSponsor', ':search')
             ))->setParameter('search', '%' . $searchTerm . '%');
             
-            // Recherche numérique pour le montant
+          
             if (is_numeric($searchTerm)) {
                 $qb->orWhere($qb->expr()->eq('s.montant', ':montant'))
                    ->setParameter('montant', (int)$searchTerm);
             }
         }
         
-        // 2. Filtre par type de sponsor
+      
         if (!empty($type) && $type !== 'tous') {
             $qb->andWhere('s.TypeSponsor = :type')
                ->setParameter('type', $type);
         }
         
-        // 3. Tri
+       
         switch ($sortBy) {
             case 'nom_asc':
                 $qb->orderBy('s.nom', 'ASC');
@@ -495,7 +495,7 @@ class SponsorController extends AbstractController
         ]);
     }
 
-    // Helper function to get field-specific errors
+ 
     private function getFieldErrors($errors): array
     {
         $fieldErrors = [];
