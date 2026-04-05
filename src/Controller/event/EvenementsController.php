@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controller\event;
 
 use App\Entity\Event;
 use App\Entity\Sponsor;
@@ -55,7 +55,7 @@ class EvenementsController extends AbstractController
             }
         }
         
-        return $this->render('admin/pages/evenements.html.twig', [
+        return $this->render('admin/pages/events/evenements.html.twig', [
             'events' => $events,
             'sponsors' => $sponsors,
             'totalEvents' => $totalEvents,
@@ -269,7 +269,7 @@ public function addEvent(
       
         $imageFile = $request->files->get('eventImage');
         if ($imageFile && $imageFile->getSize() > 0) {
-           
+            // Delete old image
             if ($event->getImage()) {
                 $oldImagePath = $this->getParameter('kernel.project_dir') . '/public/uploads/events/' . $event->getImage();
                 if (file_exists($oldImagePath)) {
@@ -293,7 +293,7 @@ public function addEvent(
             }
         }
         
-      
+        // Validate entity
         $errors = $validator->validate($event);
         
         if (count($errors) > 0) {
@@ -483,7 +483,7 @@ public function addEvent(
         $totalCapacity = array_sum(array_map(fn($e) => $e->getMaxParticipant(), $events));
         $averageFillRate = 0;
         
-        return $this->render('admin/pages/evenements_dashboard.html.twig', [
+        return $this->render('admin/pages/events/evenements_dashboard.html.twig', [
             'totalEvents' => $totalEvents,
             'upcomingEvents' => $upcomingEvents,
             'pastEvents' => $pastEvents,
@@ -505,7 +505,7 @@ public function addEvent(
             throw $this->createNotFoundException('Événement non trouvé');
         }
         
-        return $this->render('admin/pages/event_planning.html.twig', [
+        return $this->render('admin/pages/events/event_planning.html.twig', [
             'event' => $event
         ]);
     }

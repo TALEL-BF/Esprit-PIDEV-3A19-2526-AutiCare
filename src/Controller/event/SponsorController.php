@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controller\event;
 
 use App\Entity\Sponsor;
 use App\Entity\Event;
@@ -40,7 +40,7 @@ class SponsorController extends AbstractController
         
         $averageAmount = $totalSponsors > 0 ? round($totalBudget / $totalSponsors / 1000, 1) : 0;
         
-        return $this->render('admin/pages/sponsors.html.twig', [
+        return $this->render('admin/pages/events/sponsors.html.twig', [
             'sponsors' => $sponsors,
             'events' => $events,
             'totalSponsors' => $totalSponsors,
@@ -111,7 +111,7 @@ class SponsorController extends AbstractController
             }
             $averageAmount = $totalSponsors > 0 ? round($totalBudget / $totalSponsors / 1000, 1) : 0;
             
-            return $this->render('admin/pages/sponsors.html.twig', [
+            return $this->render('admin/pages/events/sponsors.html.twig', [
                 'sponsors' => $sponsors,
                 'events' => $events,
                 'totalSponsors' => $totalSponsors,
@@ -314,7 +314,7 @@ class SponsorController extends AbstractController
             }
             $averageAmount = $totalSponsors > 0 ? round($totalBudget / $totalSponsors / 1000, 1) : 0;
             
-            return $this->render('admin/pages/sponsors.html.twig', [
+            return $this->render('admin/pages/events/sponsors.html.twig', [
                 'sponsors' => $sponsors,
                 'events' => $events,
                 'totalSponsors' => $totalSponsors,
