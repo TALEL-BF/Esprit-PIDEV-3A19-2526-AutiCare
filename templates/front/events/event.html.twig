@@ -1,0 +1,771 @@
+{# templates/front/events/event.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}AutiCare - Événements Magiques{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --mauve: #9b6bff;
+            --mauve-light: #b794f4;
+            --rose: #ff69b4;
+            --rose-light: #ff9ecf;
+            --lavender: #c77dff;
+            --violet: #a855f7;
+            --peach: #ff9a3c;
+            --mint: #2ec4b6;
+            --sun: #ffd93d;
+            --dark: #1e2a3b;
+            --bg: #faf5ff;
+        }
+
+        * { box-sizing: border-box; }
+        body { background: var(--bg); font-family: 'Nunito', sans-serif; }
+
+        /* HERO BANNER */
+        .hero-banner {
+            position: relative;
+            min-height: 440px;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            background-image: url("{{ asset('uploads/images/autism.jpg') }}");
+            background-size: cover;
+            background-position: 50% 70%;
+            background-attachment: fixed;
+        }
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(105deg, rgba(155,107,255,0.55) 0%, rgba(183,148,244,0.45) 55%, rgba(199,125,255,0.35) 100%);
+            z-index: 1;
+        }
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px);
+            background-size: 28px 28px;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .hero-inner { position: relative; z-index: 2; width: 100%; padding: 3.5rem 0 3rem; }
+        .hero-bc a { color: rgba(255,255,255,0.70); font-size: .82rem; font-weight: 700; text-decoration: none; transition: color .2s; }
+        .hero-bc a:hover { color: #fff; }
+        .hero-bc .sep { color: rgba(255,255,255,0.40); margin: 0 7px; }
+        .hero-bc .cur { color: rgba(255,255,255,0.95); font-size: .82rem; font-weight: 700; }
+        .hero-title {
+            font-family: 'Baloo 2', cursive;
+            font-size: clamp(2.1rem, 5vw, 3.4rem);
+            font-weight: 800; color: #fff; line-height: 1.12;
+            margin-bottom: .7rem;
+            text-shadow: 0 3px 18px rgba(0,0,0,0.35);
+        }
+        .hero-title .accent {
+            background: linear-gradient(135deg, var(--rose), var(--rose-light));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .hero-sub {
+            font-size: 1.05rem; color: rgba(255,255,255,0.82); font-weight: 600;
+            max-width: 500px; line-height: 1.6; margin-bottom: 1.6rem;
+            text-shadow: 0 1px 6px rgba(0,0,0,0.2);
+        }
+        .hero-stats { display: flex; gap: 12px; flex-wrap: wrap; }
+        .hero-stat {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);
+            border: 1.5px solid rgba(255,255,255,0.25); color: #fff;
+            padding: 9px 20px; border-radius: 50px;
+            font-family: 'Baloo 2', cursive; font-size: .88rem; font-weight: 700;
+            transition: background .2s;
+        }
+        .hero-stat:hover { background: rgba(255,255,255,0.25); }
+        .hero-stat .hs-num { font-size: 1.15rem; font-weight: 800; color: var(--rose-light); }
+        .hero-mascot-wrap { text-align: center; position: relative; }
+        .hero-mascot-bubble { display: inline-flex; flex-direction: column; align-items: center; gap: 12px; }
+        .hero-mascot-icon { font-size: 6rem; animation: float-mascot 3s ease-in-out infinite; filter: drop-shadow(0 8px 24px rgba(0,0,0,0.25)); }
+        @keyframes float-mascot {
+            0%,100% { transform: translateY(0) rotate(-6deg) scale(1); }
+            50%      { transform: translateY(-18px) rotate(6deg) scale(1.05); }
+        }
+        .hero-mascot-label {
+            background: rgba(255,255,255,0.18); backdrop-filter: blur(8px);
+            border: 1.5px solid rgba(255,255,255,0.28); color: #fff;
+            font-family: 'Baloo 2', cursive; font-size: .88rem; font-weight: 700;
+            padding: 7px 20px; border-radius: 30px;
+        }
+        .hdeco { position: absolute; z-index: 2; pointer-events: none; animation: twinkle 2.5s ease-in-out infinite; }
+        @keyframes twinkle { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .3; transform: scale(.65); } }
+        .hdeco-1 { top: 14%; left: 14%; font-size: 1.6rem; animation-delay: 0s; }
+        .hdeco-2 { bottom: 18%; left: 8%; font-size: 1.2rem; animation-delay: .7s; }
+        .hdeco-3 { top: 20%; right: 10%; font-size: 1.4rem; animation-delay: 1.4s; }
+        .hdeco-4 { bottom: 12%; right: 16%; font-size: 1rem; animation-delay: .3s; }
+        .hero-wave { position: absolute; bottom: -2px; left: 0; right: 0; z-index: 2; line-height: 0; }
+        .hero-wave svg { display: block; width: 100%; }
+
+        /* FILTER BAR */
+        .filter-sticky {
+            position: sticky; top: 0; z-index: 200;
+            background: rgba(250,245,255,0.96); backdrop-filter: blur(12px);
+            border-bottom: 2px solid rgba(155,107,255,0.12); padding: 12px 0;
+        }
+        .filter-bar {
+            background: #fff; border-radius: 20px; padding: 12px 18px;
+            box-shadow: 0 4px 22px rgba(0,0,0,0.07);
+            display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+            justify-content: space-between; border: 2px solid rgba(155,107,255,0.10);
+        }
+        .filter-pills { display: flex; flex-wrap: wrap; gap: 7px; }
+        .f-pill {
+            font-family: 'Baloo 2', cursive; font-size: .88rem; font-weight: 700;
+            padding: 7px 16px; border-radius: 40px; border: 2px solid transparent;
+            background: #f3e8ff; color: #7c3aed; cursor: pointer;
+            transition: all .22s cubic-bezier(.34,1.56,.64,1); user-select: none;
+        }
+        .f-pill:hover { transform: scale(1.07); box-shadow: 0 4px 12px rgba(0,0,0,.09); }
+        .f-pill.active { color: #fff; box-shadow: 0 5px 16px rgba(0,0,0,.13); transform: scale(1.07); }
+        .f-pill[data-filter="all"].active       { background: linear-gradient(135deg, var(--mauve), var(--lavender)); }
+        .f-pill[data-filter="Atelier"].active    { background: linear-gradient(135deg, var(--mauve), var(--mauve-light)); }
+        .f-pill[data-filter="Conférence"].active { background: linear-gradient(135deg, var(--rose), var(--rose-light)); }
+        .f-pill[data-filter="Sortie"].active     { background: linear-gradient(135deg, var(--lavender), var(--violet)); }
+        .f-pill[data-filter="Training"].active   { background: linear-gradient(135deg, var(--violet), var(--mauve)); }
+        .search-wrap { position: relative; flex: 1; min-width: 280px; max-width: 450px; }
+        .search-wrap i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #a855f7; font-size: 1rem; z-index: 1; }
+        #searchInput {
+            font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 600;
+            padding: 12px 18px 12px 42px; border-radius: 50px;
+            border: 2px solid #e9d5ff; background: #faf5ff;
+            outline: none; width: 100%; transition: all 0.2s;
+        }
+        #searchInput:focus { border-color: var(--mauve); background: #fff; box-shadow: 0 0 0 4px rgba(155,107,255,.12); }
+        .search-hint {
+            position: absolute; bottom: -24px; left: 15px; font-size: 0.7rem;
+            color: var(--mauve); background: rgba(255,255,255,0.95);
+            padding: 3px 12px; border-radius: 20px; white-space: nowrap;
+            pointer-events: none; opacity: 0; transition: opacity 0.3s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .search-wrap:hover .search-hint { opacity: 1; }
+
+        /* EVENTS SECTION */
+        .events-section { background: var(--bg); padding: 2.8rem 0 5rem; min-height: 60vh; }
+        .section-heading {
+            font-family: 'Baloo 2', cursive; font-size: 1.5rem; font-weight: 800;
+            color: var(--dark); display: flex; align-items: center; gap: 10px; margin-bottom: 1.8rem;
+        }
+        .section-heading::after {
+            content: ''; flex: 1; height: 3px; border-radius: 4px;
+            background: linear-gradient(to right, rgba(155,107,255,.45), transparent);
+        }
+        .loading-spinner { text-align: center; padding: 60px 0; }
+        .loading-spinner i { font-size: 3rem; color: var(--mauve); animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* =============================================
+           CARD WRAPPER — gives top space for the badge
+           ============================================= */
+        .event-card-wrapper {
+            position: relative;
+            padding-top: 22px; /* room for the badge to poke above */
+        }
+
+        /* =============================================
+           EVENT CARD
+           KEY FIX: overflow: visible so badge is NEVER clipped
+           ============================================= */
+        .event-card {
+            position: relative;
+            border-radius: 24px;
+            overflow: visible;          /* ✅ badge not clipped */
+            background: #fff;
+            box-shadow: 0 6px 28px rgba(30,42,59,.09);
+            display: flex; flex-direction: column;
+            height: 100%;
+            border: 2.5px solid #f3e8ff;
+            transition: transform .35s cubic-bezier(.34,1.56,.64,1), box-shadow .35s ease, border-color .2s;
+            cursor: pointer;
+        }
+        .event-card:hover { transform: translateY(-10px) scale(1.015); box-shadow: 0 24px 56px rgba(30,42,59,.14); }
+        .event-card[data-color="1"]:hover { border-color: var(--mauve); }
+        .event-card[data-color="2"]:hover { border-color: var(--rose); }
+        .event-card[data-color="3"]:hover { border-color: var(--lavender); }
+        .event-card[data-color="4"]:hover { border-color: var(--violet); }
+        .event-card[data-color="5"]:hover { border-color: var(--rose-light); }
+        .event-card[data-color="6"]:hover { border-color: var(--mauve-light); }
+
+        /* ── DATE BADGE: centered, color matches card ── */
+        .date-badge-top {
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);  /* ✅ centered */
+            border-radius: 40px;
+            padding: 9px 22px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            z-index: 20;
+            border: 2px solid #fff;
+            white-space: nowrap;
+            transition: transform .2s ease, box-shadow .2s ease;
+        }
+        .date-badge-top:hover {
+            transform: translateX(-50%) translateY(-3px) scale(1.05);
+        }
+
+        /* Badge gradient per card color */
+        .event-card[data-color="1"] .date-badge-top {
+            background: linear-gradient(135deg, var(--mauve), var(--mauve-light));
+            box-shadow: 0 8px 22px rgba(155,107,255,0.50);
+        }
+        .event-card[data-color="2"] .date-badge-top {
+            background: linear-gradient(135deg, var(--rose), var(--rose-light));
+            box-shadow: 0 8px 22px rgba(255,105,180,0.50);
+        }
+        .event-card[data-color="3"] .date-badge-top {
+            background: linear-gradient(135deg, var(--lavender), var(--violet));
+            box-shadow: 0 8px 22px rgba(199,125,255,0.50);
+        }
+        .event-card[data-color="4"] .date-badge-top {
+            background: linear-gradient(135deg, var(--violet), var(--mauve));
+            box-shadow: 0 8px 22px rgba(168,85,247,0.50);
+        }
+        .event-card[data-color="5"] .date-badge-top {
+            background: linear-gradient(135deg, var(--rose-light), var(--lavender));
+            box-shadow: 0 8px 22px rgba(255,158,207,0.50);
+        }
+        .event-card[data-color="6"] .date-badge-top {
+            background: linear-gradient(135deg, var(--mauve-light), var(--rose));
+            box-shadow: 0 8px 22px rgba(183,148,244,0.50);
+        }
+
+        .date-badge-top .date-day   { font-family:'Baloo 2',cursive; font-size:1.25rem; font-weight:800; color:#fff; line-height:1; }
+        .date-badge-top .date-sep   { font-family:'Baloo 2',cursive; font-size:1rem;    font-weight:700; color:rgba(255,255,255,0.55); line-height:1; }
+        .date-badge-top .date-month { font-family:'Baloo 2',cursive; font-size:0.85rem; font-weight:700; color:rgba(255,255,255,0.95); text-transform:uppercase; letter-spacing:0.5px; }
+        .date-badge-top .date-year  { font-family:'Baloo 2',cursive; font-size:0.68rem; font-weight:600; color:rgba(255,255,255,0.78); margin-left:2px; }
+
+        /* ── IMAGE ZONE: keep top border-radius so image clips properly ── */
+        .card-img-zone {
+            height: 185px;
+            position: relative;
+            overflow: hidden;             /* ✅ image still clips */
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 21px 21px 0 0; /* ✅ top corners match card */
+        }
+        .card-img-zone[data-bg="1"] { background: linear-gradient(145deg, #f3e8ff, #e9d5ff); }
+        .card-img-zone[data-bg="2"] { background: linear-gradient(145deg, #fce7f3, #fbcfe8); }
+        .card-img-zone[data-bg="3"] { background: linear-gradient(145deg, #ede9fe, #ddd6fe); }
+        .card-img-zone[data-bg="4"] { background: linear-gradient(145deg, #fae8ff, #f3e8ff); }
+        .card-img-zone[data-bg="5"] { background: linear-gradient(145deg, #fce7f3, #f5d0fe); }
+        .card-img-zone[data-bg="6"] { background: linear-gradient(145deg, #e9d5ff, #fae8ff); }
+        .card-img-zone::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px; z-index: 4;
+        }
+        .event-card[data-color="1"] .card-img-zone::before { background: var(--mauve); }
+        .event-card[data-color="2"] .card-img-zone::before { background: var(--rose); }
+        .event-card[data-color="3"] .card-img-zone::before { background: var(--lavender); }
+        .event-card[data-color="4"] .card-img-zone::before { background: var(--violet); }
+        .event-card[data-color="5"] .card-img-zone::before { background: var(--rose-light); }
+        .event-card[data-color="6"] .card-img-zone::before { background: var(--mauve-light); }
+        .img-blob { position: absolute; border-radius: 50%; opacity: .22; pointer-events: none; }
+        .img-blob-1 { width: 110px; height: 110px; top: -30px; right: -30px; }
+        .img-blob-2 { width: 70px; height: 70px; bottom: -24px; left: 16px; }
+        .event-card[data-color="1"] .img-blob { background: var(--mauve); }
+        .event-card[data-color="2"] .img-blob { background: var(--rose); }
+        .event-card[data-color="3"] .img-blob { background: var(--lavender); }
+        .event-card[data-color="4"] .img-blob { background: var(--violet); }
+        .event-card[data-color="5"] .img-blob { background: var(--rose-light); }
+        .event-card[data-color="6"] .img-blob { background: var(--mauve-light); }
+        .card-img-zone img { width: 100%; height: 100%; object-fit: cover; transition: transform .45s ease; }
+        .event-card:hover .card-img-zone img { transform: scale(1.06); }
+        .card-emoji { font-size: 5.2rem; filter: drop-shadow(0 4px 12px rgba(0,0,0,.12)); animation: floatEmoji 3.5s ease-in-out infinite; user-select: none; position: relative; z-index: 2; }
+        @keyframes floatEmoji { 0%,100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-11px) rotate(4deg); } }
+
+        .status-badge {
+            position: absolute; bottom: 12px; right: 12px;
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(8px);
+            padding: 6px 14px; border-radius: 30px;
+            font-family: 'Baloo 2', cursive; font-size: 0.72rem; font-weight: 800;
+            z-index: 10; box-shadow: 0 3px 12px rgba(0,0,0,0.12); letter-spacing: 0.3px;
+        }
+        .status-badge.ouvert  { color: #10b981; border: 1.5px solid #d1fae5; }
+        .status-badge.complet { color: #ef4444; border: 1.5px solid #fee2e2; }
+        .status-badge.planifie{ color: #f59e0b; border: 1.5px solid #fed7aa; }
+        .status-badge.annule  { color: #6b7280; border: 1.5px solid #e5e7eb; }
+
+        .card-body-inner { padding: 1.25rem 1.4rem 1.4rem; flex: 1; display: flex; flex-direction: column; }
+        .card-type-tag {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-family: 'Baloo 2', cursive; font-size: .7rem; font-weight: 800;
+            padding: 4px 12px; border-radius: 20px; margin-bottom: .65rem;
+            width: fit-content; text-transform: uppercase; letter-spacing: .05em;
+        }
+        .tag-Atelier    { background: #f3e8ff; color: var(--mauve); }
+        .tag-Conférence { background: #fce7f3; color: var(--rose); }
+        .tag-Sortie     { background: #ede9fe; color: var(--lavender); }
+        .tag-Training   { background: #fae8ff; color: var(--violet); }
+        .card-title { font-family: 'Baloo 2', cursive; font-size: 1.15rem; font-weight: 800; color: var(--dark); margin-bottom: .35rem; line-height: 1.25; }
+        .card-desc { font-size: .85rem; color: #64748b; line-height: 1.6; margin-bottom: 1rem; flex: 1; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .card-badges { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+        .badge-calm, .badge-low, .badge-age { display: inline-flex; align-items: center; gap: 4px; font-family: 'Nunito', sans-serif; font-size: .7rem; font-weight: 700; padding: 4px 10px; border-radius: 30px; }
+        .badge-calm { background: #dcfce7; color: #16a34a; border: 1.5px solid #bbf7d0; }
+        .badge-low  { background: #ccfbf1; color: #0f766e; border: 1.5px solid #99f6e4; }
+        .badge-age  { background: #d1fae5; color: #059669; border: 1.5px solid #a7f3d0; }
+        .card-stats { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 1.2rem; }
+        .stat-chip { display: inline-flex; align-items: center; gap: 4px; font-family: 'Nunito', sans-serif; font-size: .74rem; font-weight: 800; padding: 4px 11px; border-radius: 50px; }
+        .chip-lieu   { background: #f3e8ff; color: var(--mauve);  border: 1.5px solid #e9d5ff; }
+        .chip-places { background: #fce7f3; color: var(--rose);   border: 1.5px solid #fbcfe8; }
+        .chip-time   { background: #e0f2fe; color: #0284c7;       border: 1.5px solid #bae6fd; }
+        .btn-start {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            width: 100%; padding: .82rem; border: none; border-radius: 16px;
+            font-family: 'Baloo 2', cursive; font-size: .98rem; font-weight: 800;
+            color: #fff; text-decoration: none; cursor: pointer; margin-top: auto;
+            transition: all .25s cubic-bezier(.34,1.56,.64,1);
+            position: relative; overflow: hidden;
+        }
+        .btn-start::after { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,.14); opacity: 0; transition: opacity .2s; }
+        .btn-start:hover::after { opacity: 1; }
+        .btn-start:hover { transform: scale(1.03) translateY(-2px); color: #fff; }
+        .event-card[data-color="1"] .btn-start { background: linear-gradient(135deg, var(--mauve),      var(--mauve-light)); box-shadow: 0 6px 18px rgba(155,107,255,.35); }
+        .event-card[data-color="2"] .btn-start { background: linear-gradient(135deg, var(--rose),       var(--rose-light));  box-shadow: 0 6px 18px rgba(255,105,180,.35); }
+        .event-card[data-color="3"] .btn-start { background: linear-gradient(135deg, var(--lavender),   var(--violet));      box-shadow: 0 6px 18px rgba(199,125,255,.35); }
+        .event-card[data-color="4"] .btn-start { background: linear-gradient(135deg, var(--violet),     var(--mauve));       box-shadow: 0 6px 18px rgba(168,85,247,.35);  }
+        .event-card[data-color="5"] .btn-start { background: linear-gradient(135deg, var(--rose-light), var(--lavender));    box-shadow: 0 6px 18px rgba(255,158,207,.35); }
+        .event-card[data-color="6"] .btn-start { background: linear-gradient(135deg, var(--mauve-light),var(--rose));        box-shadow: 0 6px 18px rgba(183,148,244,.35); }
+        .btn-icon { font-size: 1.15rem; transition: transform .3s; }
+        .btn-start:hover .btn-icon { transform: translateX(5px) scale(1.2); }
+        .event-item { animation: cardIn .5s ease both; }
+        @keyframes cardIn { from { opacity:0; transform:translateY(28px) scale(.96); } to { opacity:1; transform:translateY(0) scale(1); } }
+        .empty-state { text-align: center; padding: 4rem 0; animation: fadeIn .5s ease; }
+        .empty-icon  { font-size: 4.5rem; display: block; margin-bottom: 1rem; animation: floatEmoji 2.5s ease-in-out infinite; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* PAGINATION */
+        .pagination-wrapper { margin-top: 60px; margin-bottom: 20px; text-align: center; }
+        .pagination { display:flex; justify-content:center; gap:10px; flex-wrap:wrap; list-style:none; padding:0; margin:0 0 25px 0; }
+        .page-item { display: inline-block; margin: 0 2px; }
+        .page-link {
+            display:flex; align-items:center; justify-content:center;
+            min-width:48px; height:48px; padding:0 18px;
+            background:white; color:var(--mauve); text-decoration:none; border-radius:50px;
+            font-weight:700; font-family:'Nunito',sans-serif;
+            transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+            box-shadow:0 2px 8px rgba(0,0,0,0.06); border:2px solid transparent; font-size:0.95rem; cursor:pointer;
+        }
+        .page-link:hover { background:linear-gradient(135deg,var(--mauve),var(--violet)); color:white; transform:translateY(-3px); box-shadow:0 12px 28px rgba(155,107,255,0.35); }
+        .page-item.active .page-link { background:linear-gradient(135deg,var(--mauve),var(--rose)); color:white; box-shadow:0 8px 20px rgba(155,107,255,0.4); transform:scale(1.05); }
+        .page-item.disabled .page-link { background:#f1f5f9; color:#cbd5e1; cursor:not-allowed; transform:none; box-shadow:none; }
+        .pagination-info { text-align:center; margin-top:20px; color:#64748b; font-size:0.9rem; font-weight:500; background:rgba(255,255,255,0.7); display:inline-block; padding:8px 20px; border-radius:50px; backdrop-filter:blur(4px); }
+        .pagination-info i { color:var(--mauve); margin-right:6px; }
+        .pagination-info strong { color:var(--mauve); font-weight:800; }
+
+        @media (max-width: 768px) {
+            .hero-mascot-wrap { display: none; }
+            .hero-banner { background-attachment: scroll; }
+            .filter-bar { flex-direction: column; align-items: stretch; }
+            .search-wrap { width: 100%; max-width: 100%; }
+            #searchInput { width: 100%; }
+            .card-stats { gap: 12px; }
+            .pagination { gap: 6px; }
+            .page-link { min-width:40px; height:40px; padding:0 12px; font-size:0.85rem; }
+            .search-hint { display: none; }
+            .status-badge { bottom:8px; right:8px; padding:4px 10px; font-size:0.65rem; }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <!-- HERO BANNER -->
+    <div class="hero-banner">
+        <span class="hdeco hdeco-1">⭐</span>
+        <span class="hdeco hdeco-2">✨</span>
+        <span class="hdeco hdeco-3">🌟</span>
+        <span class="hdeco hdeco-4">💫</span>
+
+        <div class="hero-inner">
+            <div class="container">
+                <div class="row align-items-center g-4">
+                    <div class="col-lg-7 col-md-8">
+                        <div class="hero-bc mb-3">
+                            <a href="{{ path('app_home') }}">🏠 Accueil</a>
+                            <span class="sep">›</span>
+                            <span class="cur">Nos Événements</span>
+                        </div>
+                        <h1 class="hero-title">
+                            Événements <span class="accent">Magiques</span> 🎉
+                        </h1>
+                        <p class="hero-sub">
+                            Des aventures inoubliables, adaptées pour chaque enfant.<br>
+                            Rencontres, ateliers et sorties pour apprendre en s'amusant ! 🌈
+                        </p>
+                        <div class="hero-stats">
+                            <div class="hero-stat">🎪 <span class="hs-num" id="totalEventsCount">{{ totalEvents }}</span> événements disponibles</div>
+                            <div class="hero-stat">🎯 <span class="hs-num">4</span> types d'activités</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-5 col-md-4 hero-mascot-wrap">
+                        <a href="{{ path('voice_assistant') }}" class="hero-mascot-link" style="text-decoration:none;cursor:pointer;">
+                            <div class="hero-mascot-bubble">
+                                <span class="hero-mascot-icon">🌿</span>
+                                <span class="hero-mascot-label">Prêt pour les aventures des émotions ?</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-wave">
+            <svg viewBox="0 0 1440 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+                <path d="M0,80 C80,80 100,50 140,50 C160,50 180,60 200,60 C220,60 240,40 270,40 C300,40 320,60 340,60 C360,60 380,50 400,55 C420,55 440,70 470,70 C500,70 520,50 550,50 C580,50 600,65 620,65 C650,65 670,45 700,45 C730,45 750,60 770,60 C790,60 810,50 840,55 C860,55 880,70 910,70 C940,70 960,50 990,50 C1020,50 1040,65 1060,65 C1080,65 1100,55 1130,55 C1150,55 1170,40 1200,40 C1230,40 1250,60 1270,60 C1290,60 1310,50 1340,50 C1370,50 1390,60 1440,60 L1440,120 L0,120 Z" fill="#FAF5FF"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- FILTER STICKY BAR -->
+    <div class="filter-sticky">
+        <div class="container">
+            <div class="filter-bar">
+                <div class="filter-pills">
+                    <button class="f-pill {{ selectedType is null ? 'active' : '' }}" data-filter="all">🌈 Tous</button>
+                    <button class="f-pill {{ selectedType == 'Atelier' ? 'active' : '' }}" data-filter="Atelier">🎨 Atelier</button>
+                    <button class="f-pill {{ selectedType == 'Conférence' ? 'active' : '' }}" data-filter="Conférence">🎤 Conférence</button>
+                    <button class="f-pill {{ selectedType == 'Sortie' ? 'active' : '' }}" data-filter="Sortie">🚀 Sortie</button>
+                    <button class="f-pill {{ selectedType == 'Training' ? 'active' : '' }}" data-filter="Training">🏋️ Training</button>
+                </div>
+                <div class="search-wrap">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="🔍 Chercher par nom, lieu, ID, capacité..." value="{{ searchTerm }}">
+                    <span class="search-hint">💡 Tu peux chercher par ID ou capacité (ex: 10, 50)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EVENTS GRID -->
+    <div class="events-section">
+        <div class="container">
+            <div class="section-heading">🎪 Événements à venir</div>
+
+            <div id="loadingSpinner" class="loading-spinner d-none">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Recherche en cours... ✨</p>
+            </div>
+
+            <div class="row g-4" id="eventsContainer">
+                {% for event in events %}
+                    {% set colorIndex = (loop.index0 % 6) + 1 %}
+                    {% set typeEmojis = {'Atelier': '🎨', 'Conférence': '🎤', 'Sortie': '🚀', 'Training': '🏋️'} %}
+                    {% set emoji = typeEmojis[event.typeEvent] ?? '🎉' %}
+
+                    <div class="col-sm-6 col-lg-4 event-item" data-category="{{ event.typeEvent }}">
+                        {# Wrapper provides the top padding so badge never gets cropped by the row gap #}
+                        <div class="event-card-wrapper" style="height:100%;">
+                            <div class="event-card" data-color="{{ colorIndex }}">
+
+                                {# Date badge — centered, color auto-inherits from [data-color] CSS rules above #}
+                                <div class="date-badge-top">
+                                    <span class="date-day">{{ event.dateDebut|date('d') }}</span>
+                                    <span class="date-sep">·</span>
+                                    <span class="date-month">{{ event.dateDebut|date('M') }}</span>
+                                    <span class="date-year">{{ event.dateDebut|date('Y') }}</span>
+                                </div>
+
+                                <div class="card-img-zone" data-bg="{{ colorIndex }}">
+                                    <div class="img-blob img-blob-1"></div>
+                                    <div class="img-blob img-blob-2"></div>
+                                    {% if event.image %}
+                                        <img src="{{ event.image }}" alt="{{ event.titre }}">
+                                    {% else %}
+                                        <span class="card-emoji">{{ emoji }}</span>
+                                    {% endif %}
+                                    <span class="status-badge {{ event.status }}">
+                                        {% if event.status == 'planifie' %}📅 Planifié
+                                        {% elseif event.status == 'ouvert' %}🟢 Ouvert
+                                        {% elseif event.status == 'complet' %}🔴 Complet
+                                        {% elseif event.status == 'annule' %}❌ Annulé
+                                        {% else %}{{ event.status }}{% endif %}
+                                    </span>
+                                </div>
+
+                                <div class="card-body-inner">
+                                    <span class="card-type-tag tag-{{ event.typeEvent }}">{{ emoji }} {{ event.typeEvent }}</span>
+                                    <h3 class="card-title">{{ event.titre }}</h3>
+                                    <p class="card-desc">{{ event.description|slice(0,100) }}{% if event.description|length > 100 %}...{% endif %}</p>
+                                    <div class="card-badges">
+                                        <span class="badge-calm">🔇 Calme</span>
+                                        <span class="badge-low">🧘 Faible</span>
+                                        <span class="badge-age">👥 5-10 ans</span>
+                                    </div>
+                                    <div class="card-stats">
+                                        <span class="stat-chip chip-lieu">📍 {{ event.lieu }}</span>
+                                        <span class="stat-chip chip-places">🪑 {{ event.participantsCount|default(0) }}/{{ event.maxParticipant }}</span>
+                                        <span class="stat-chip chip-time">🕐 {{ event.heureDebut|date('H:i') }}</span>
+                                    </div>
+                                    {% if event.status == 'ouvert' %}
+                                        <a href="{{ path('app_event_show', {'id': event.idEvent}) }}" class="btn-start">
+                                            <span>Participer</span><span class="btn-icon">🎉</span>
+                                        </a>
+                                    {% elseif event.status == 'complet' %}
+                                        <span class="btn-start" style="background:#94a3b8;box-shadow:none;cursor:not-allowed;">
+                                            <span>🔒 Complet</span>
+                                        </span>
+                                    {% elseif event.status == 'annule' %}
+                                        <span class="btn-start" style="background:#94a3b8;box-shadow:none;cursor:not-allowed;">
+                                            <span>❌ Annulé</span>
+                                        </span>
+                                    {% else %}
+                                        <a href="{{ path('app_event_show', {'id': event.idEvent}) }}" class="btn-start">
+                                            <span>Voir détails</span><span class="btn-icon">👀</span>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="col-12 empty-state">
+                        <span class="empty-icon">📭</span>
+                        <h5 style="font-family:'Baloo 2',cursive;font-weight:800;color:#444;">Aucun événement disponible</h5>
+                        <p style="color:#888;">De nouveaux événements arrivent bientôt, reste à l'affût ! 🌟</p>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div id="noResults" class="empty-state d-none">
+                <span class="empty-icon">🔍</span>
+                <h5 style="font-family:'Baloo 2',cursive;font-weight:800;color:#444;">Aucun résultat</h5>
+                <p style="color:#888;">Aucun événement ne correspond à votre recherche</p>
+                <button class="btn-start" onclick="resetSearch()" style="margin-top:20px;display:inline-block;width:auto;padding:10px 30px;">
+                    🔄 Voir tous les événements
+                </button>
+            </div>
+
+            <!-- PAGINATION -->
+            <div id="paginationWrapper" class="pagination-wrapper">
+                {% if totalPages > 1 %}
+                <ul class="pagination">
+                    <li class="page-item {{ currentPage == 1 ? 'disabled' : '' }}">
+                        <a class="page-link" href="#" onclick="loadEvents({{ currentPage - 1 }}, '{{ selectedType }}', '{{ searchTerm }}'); return false;">
+                            <i class="fas fa-chevron-left"></i> Précédent
+                        </a>
+                    </li>
+                    {% for p in 1..totalPages %}
+                        {% if p == 1 or p == totalPages or (p >= currentPage - 2 and p <= currentPage + 2) %}
+                            <li class="page-item {{ p == currentPage ? 'active' : '' }}">
+                                <a class="page-link" href="#" onclick="loadEvents({{ p }}, '{{ selectedType }}', '{{ searchTerm }}'); return false;">{{ p }}</a>
+                            </li>
+                        {% elseif p == currentPage - 3 or p == currentPage + 3 %}
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                    {% endfor %}
+                    <li class="page-item {{ currentPage == totalPages ? 'disabled' : '' }}">
+                        <a class="page-link" href="#" onclick="loadEvents({{ currentPage + 1 }}, '{{ selectedType }}', '{{ searchTerm }}'); return false;">
+                            Suivant <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+                <div class="pagination-info">
+                    <i class="fas fa-calendar-alt"></i> Affichage de <strong>{{ events|length }}</strong> événement(s) sur <strong>{{ totalEvents }}</strong> total
+                    <i class="fas fa-chart-line ms-2 me-1"></i> Page <strong>{{ currentPage }}</strong> / <strong>{{ totalPages }}</strong>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        let currentPage   = {{ currentPage }};
+        let currentType   = "{{ selectedType|default('') }}";
+        let currentSearch = "{{ searchTerm|default('') }}";
+        let isAjaxLoading = false;
+        let searchTimeout = null;
+
+        async function loadEvents(page = 1, type = null, search = null) {
+            if (isAjaxLoading) return;
+            isAjaxLoading = true;
+            const spinner   = document.getElementById('loadingSpinner');
+            const container = document.getElementById('eventsContainer');
+            if (spinner)   spinner.classList.remove('d-none');
+            if (container) container.style.opacity = '0.5';
+            try {
+                let url = '{{ path('api_events_search') }}?page=' + page;
+                if (type && type !== 'all' && type !== 'null' && type !== '') url += '&type=' + encodeURIComponent(type);
+                if (search && search.trim() !== '')                            url += '&q='    + encodeURIComponent(search.trim());
+                const response = await fetch(url);
+                const data     = await response.json();
+                if (container) {
+                    if (data.events && data.events.length > 0) {
+                        container.innerHTML = renderEvents(data.events);
+                        document.getElementById('noResults').classList.add('d-none');
+                        document.getElementById('totalEventsCount').innerText = data.totalEvents;
+                    } else {
+                        container.innerHTML = '';
+                        document.getElementById('noResults').classList.remove('d-none');
+                        document.getElementById('totalEventsCount').innerText = '0';
+                    }
+                }
+                const pw = document.getElementById('paginationWrapper');
+                if (pw) pw.innerHTML = renderPagination(data.currentPage, data.totalPages, data.totalEvents, search, type);
+                const urlParams = new URLSearchParams();
+                if (page > 1)                              urlParams.set('page', page);
+                if (type && type !== 'all' && type !== 'null') urlParams.set('type', type);
+                if (search && search.trim() !== '')        urlParams.set('search', search);
+                const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+                window.history.pushState({ page, type, search }, '', newUrl);
+                currentPage = data.currentPage; currentType = type || ''; currentSearch = search || '';
+            } catch (error) {
+                console.error('Search error:', error);
+            } finally {
+                isAjaxLoading = false;
+                if (spinner)   spinner.classList.add('d-none');
+                if (container) container.style.opacity = '1';
+            }
+        }
+
+        function renderEvents(events) {
+            const typeEmojis = {'Atelier':'🎨','Conférence':'🎤','Sortie':'🚀','Training':'🏋️'};
+            return events.map((event, index) => {
+                const colorIndex = (index % 6) + 1;
+                const emoji      = typeEmojis[event.typeEvent] || '🎉';
+                const date       = new Date(event.dateDebut);
+                const day        = date.getDate().toString().padStart(2, '0');
+                const month      = date.toLocaleString('fr', { month: 'short' });
+                const year       = date.getFullYear();
+                const heureDebut = event.heureDebut || '--:--';
+                let statusClass = '', statusText = '', buttonHtml = '';
+                if (event.status === 'planifie') {
+                    statusClass = 'planifie'; statusText = '📅 Planifié';
+                    buttonHtml = `<a href="/event/${event.id}" class="btn-start"><span>Voir détails</span><span class="btn-icon">👀</span></a>`;
+                } else if (event.status === 'ouvert') {
+                    statusClass = 'ouvert'; statusText = '🟢 Ouvert';
+                    buttonHtml = `<a href="/event/${event.id}" class="btn-start"><span>Participer</span><span class="btn-icon">🎉</span></a>`;
+                } else if (event.status === 'complet') {
+                    statusClass = 'complet'; statusText = '🔴 Complet';
+                    buttonHtml = `<span class="btn-start" style="background:#94a3b8;box-shadow:none;cursor:not-allowed;"><span>🔒 Complet</span></span>`;
+                } else {
+                    statusClass = 'annule'; statusText = '❌ Annulé';
+                    buttonHtml = `<span class="btn-start" style="background:#94a3b8;box-shadow:none;cursor:not-allowed;"><span>❌ Annulé</span></span>`;
+                }
+                return `
+                <div class="col-sm-6 col-lg-4 event-item" data-category="${event.typeEvent}">
+                    <div class="event-card-wrapper" style="height:100%;">
+                        <div class="event-card" data-color="${colorIndex}">
+                            <div class="date-badge-top">
+                                <span class="date-day">${day}</span>
+                                <span class="date-sep">·</span>
+                                <span class="date-month">${month}</span>
+                                <span class="date-year">${year}</span>
+                            </div>
+                            <div class="card-img-zone" data-bg="${colorIndex}">
+                                <div class="img-blob img-blob-1"></div>
+                                <div class="img-blob img-blob-2"></div>
+                                ${event.image
+                                    ? `<img src="${event.image}" alt="${escapeHtml(event.titre)}">`
+                                    : `<span class="card-emoji">${emoji}</span>`}
+                                <span class="status-badge ${statusClass}">${statusText}</span>
+                            </div>
+                            <div class="card-body-inner">
+                                <span class="card-type-tag tag-${event.typeEvent}">${emoji} ${event.typeEvent}</span>
+                                <h3 class="card-title">${escapeHtml(event.titre)}</h3>
+                                <p class="card-desc">${escapeHtml(event.description).substring(0,100)}${event.description.length > 100 ? '...' : ''}</p>
+                                <div class="card-badges">
+                                    <span class="badge-calm">🔇 Calme</span>
+                                    <span class="badge-low">🧘 Faible</span>
+                                    <span class="badge-age">👥 5-10 ans</span>
+                                </div>
+                                <div class="card-stats">
+                                    <span class="stat-chip chip-lieu">📍 ${escapeHtml(event.lieu)}</span>
+                                    <span class="stat-chip chip-places">🪑 ${event.participantsCount}/${event.maxParticipant}</span>
+                                    <span class="stat-chip chip-time">🕐 ${heureDebut}</span>
+                                </div>
+                                ${buttonHtml}
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderPagination(currentPage, totalPages, totalEvents, search, type) {
+            if (totalPages <= 1) return '';
+            let html = `<ul class="pagination">`;
+            if (currentPage > 1) {
+                html += `<li class="page-item"><a class="page-link" href="#" onclick="loadEvents(${currentPage-1},'${type||''}','${search||''}');return false;"><i class="fas fa-chevron-left"></i> Précédent</a></li>`;
+            } else {
+                html += `<li class="page-item disabled"><span class="page-link"><i class="fas fa-chevron-left"></i> Précédent</span></li>`;
+            }
+            for (let p = 1; p <= totalPages; p++) {
+                if (p === 1 || p === totalPages || (p >= currentPage-2 && p <= currentPage+2)) {
+                    if (p === currentPage) {
+                        html += `<li class="page-item active"><span class="page-link">${p}</span></li>`;
+                    } else {
+                        html += `<li class="page-item"><a class="page-link" href="#" onclick="loadEvents(${p},'${type||''}','${search||''}');return false;">${p}</a></li>`;
+                    }
+                } else if (p === currentPage-3 || p === currentPage+3) {
+                    html += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+                }
+            }
+            if (currentPage < totalPages) {
+                html += `<li class="page-item"><a class="page-link" href="#" onclick="loadEvents(${currentPage+1},'${type||''}','${search||''}');return false;">Suivant <i class="fas fa-chevron-right"></i></a></li>`;
+            } else {
+                html += `<li class="page-item disabled"><span class="page-link">Suivant <i class="fas fa-chevron-right"></i></span></li>`;
+            }
+            html += `</ul><div class="pagination-info"><i class="fas fa-calendar-alt"></i> Affichage de <strong>${totalEvents}</strong> événement(s) total <i class="fas fa-chart-line ms-2 me-1"></i> Page <strong>${currentPage}</strong> / <strong>${totalPages}</strong></div>`;
+            return html;
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function resetSearch() {
+            document.getElementById('searchInput').value = '';
+            currentSearch = '';
+            loadEvents(1, currentType, '');
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.f-pill').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    document.querySelectorAll('.f-pill').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentType = this.dataset.filter === 'all' ? '' : this.dataset.filter;
+                    currentPage = 1;
+                    loadEvents(1, currentType, currentSearch);
+                });
+            });
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.value = currentSearch;
+                searchInput.addEventListener('input', function () {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        currentSearch = this.value;
+                        currentPage = 1;
+                        loadEvents(1, currentType, currentSearch);
+                    }, 500);
+                });
+            }
+            window.addEventListener('popstate', function (event) {
+                if (event.state) {
+                    currentPage   = event.state.page   || 1;
+                    currentType   = event.state.type   || '';
+                    currentSearch = event.state.search || '';
+                    loadEvents(currentPage, currentType, currentSearch);
+                }
+            });
+        });
+    </script>
+{% endblock %}
