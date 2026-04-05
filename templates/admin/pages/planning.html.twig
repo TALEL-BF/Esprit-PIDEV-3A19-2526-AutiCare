@@ -1,0 +1,29 @@
+#[Route('/admin/evenements/{id}/update-hours', name: 'admin_evenements_update_hours', methods: ['POST'])]
+public function updateHours(int $id, Request $request, EntityManagerInterface $em): JsonResponse
+{
+    $event = $em->getRepository(Event::class)->find($id);
+    
+    if (!$event) {
+        return $this->json(['error' => 'Événement non trouvé'], 404);
+    }
+    
+    $data = json_decode($request->getContent(), true);
+    
+    if (isset($data['heureDebut'])) {
+        $heureDebut = \DateTime::createFromFormat('H:i', $data['heureDebut']);
+        if ($heureDebut) {
+            $event->setHeureDebut($heureDebut);
+        }
+    }
+    
+    if (isset($data['heureFin'])) {
+        $heureFin = \DateTime::createFromFormat('H:i', $data['heureFin']);
+        if ($heureFin) {
+            $event->setHeureFin($heureFin);
+        }
+    }
+    
+    $em->flush();
+    
+    return $this->json(['success' => true]);
+}

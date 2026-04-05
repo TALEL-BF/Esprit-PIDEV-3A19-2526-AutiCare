@@ -1,0 +1,288 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Auticare — Liste des Cours{% endblock %}
+
+{% block page_title %}Liste des Cours{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .filter-input {
+        width: 200px;
+        font-size: .8rem;
+        padding: 6px 12px;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div class="page-header">
+    <h2><i class="fas fa-book-open me-2" style="color:var(--purple-500)"></i>Liste des Cours</h2>
+    <p>Créer et organiser les cours pédagogiques</p>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Total cours</div>
+                    <div class="stat-value">{{ totalCourses|default(84) }}</div>
+                </div>
+                <div class="stat-icon purple"><i class="fas fa-book"></i></div>
+            </div>
+            <div class="stat-change up"><i class="fas fa-arrow-up"></i> +8 ce trimestre</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Publiés</div>
+                    <div class="stat-value">{{ publishedCourses|default(61) }}</div>
+                </div>
+                <div class="stat-icon violet"><i class="fas fa-check-circle"></i></div>
+            </div>
+            <div class="stat-change up"><i class="fas fa-arrow-up"></i> 73%</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Brouillons</div>
+                    <div class="stat-value">{{ draftCourses|default(23) }}</div>
+                </div>
+                <div class="stat-icon pink"><i class="fas fa-edit"></i></div>
+            </div>
+            <div class="stat-change down"><i class="fas fa-arrow-down"></i> en cours</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Inscrits total</div>
+                    <div class="stat-value">{{ totalEnrolled|default(3800) }}</div>
+                </div>
+                <div class="stat-icon indigo"><i class="fas fa-user-graduate"></i></div>
+            </div>
+            <div class="stat-change up"><i class="fas fa-arrow-up"></i> +120</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-8">
+        <div class="card-box">
+            <div class="card-box-header">
+                <span class="card-box-title"><i class="fas fa-plus-circle"></i> Ajouter / Modifier un Cours</span>
+                <span class="form-mode-badge" id="formMode">Mode : Ajout</span>
+            </div>
+            <div class="card-box-body">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">Titre du cours</label>
+                        <input type="text" class="form-control" id="courseTitle" placeholder="Ex: Communication par pictogrammes">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Catégorie</label>
+                        <select class="form-select" id="courseCategory">
+                            <option>Communication</option>
+                            <option>Motricité</option>
+                            <option>Langage</option>
+                            <option>Socialisation</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Niveau</label>
+                        <select class="form-select" id="courseLevel">
+                            <option>Débutant</option>
+                            <option>Intermédiaire</option>
+                            <option>Avancé</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Durée (minutes)</label>
+                        <input type="number" class="form-control" id="courseDuration" placeholder="45">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Statut</label>
+                        <select class="form-select" id="courseStatus">
+                            <option>Publié</option>
+                            <option>Brouillon</option>
+                            <option>Archivé</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" id="courseDescription" rows="2" placeholder="Décrivez le cours..."></textarea>
+                    </div>
+                    <div class="col-12 d-flex gap-2">
+                        <button class="btn-purple" id="saveCourseBtn"><i class="fas fa-save"></i> Enregistrer</button>
+                        <button class="btn-outline-purple" id="cancelCourseBtn"><i class="fas fa-times"></i> Annuler</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card-box h-100">
+            <div class="card-box-header">
+                <span class="card-box-title"><i class="fas fa-chart-pie"></i> Par catégorie</span>
+            </div>
+            <div class="card-box-body">
+                <canvas id="coursChart" height="240"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card-box">
+    <div class="card-box-header">
+        <span class="card-box-title"><i class="fas fa-list"></i> Liste des Cours</span>
+        <input type="text" class="form-control filter-input" id="courseFilterInput" placeholder="Filtrer...">
+    </div>
+    <div class="card-box-body p-0">
+        <div class="table-wrapper">
+            <table class="custom-table" id="coursTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Titre</th>
+                        <th>Catégorie</th>
+                        <th>Niveau</th>
+                        <th>Durée</th>
+                        <th>Inscrits</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for course in courses|default([
+                        {id:1, title:'Communication par pictogrammes', category:'Communication', level:'Débutant', duration:'30 min', enrolled:245, status:'Publié'},
+                        {id:2, title:'Motricité fine — Niveau 1', category:'Motricité', level:'Débutant', duration:'45 min', enrolled:189, status:'Publié'},
+                        {id:3, title:'Reconnaître les émotions', category:'Socialisation', level:'Intermédiaire', duration:'60 min', enrolled:312, status:'Brouillon'},
+                        {id:4, title:'Lecture des symboles', category:'Langage', level:'Avancé', duration:'50 min', enrolled:98, status:'Publié'}
+                    ]) %}
+                        <tr>
+                            <td>{{ course.id }}</td>
+                            <td>{{ course.title }}</td>
+                            <td>{{ course.category }}</td>
+                            <td>{{ course.level }}</td>
+                            <td>{{ course.duration }}</td>
+                            <td>{{ course.enrolled }}</td>
+                            <td>
+                                {% if course.status == 'Publié' %}
+                                    <span class="badge-status badge-active">{{ course.status }}</span>
+                                {% elseif course.status == 'Brouillon' %}
+                                    <span class="badge-status badge-pending">{{ course.status }}</span>
+                                {% else %}
+                                    <span class="badge-status badge-inactive">{{ course.status }}</span>
+                                {% endif %}
+                            </span>
+                            </td>
+                            <td>
+                                <button class="btn-edit-soft me-1 edit-course-btn" data-id="{{ course.id }}">Modifier</button>
+                                <button class="btn-danger-soft delete-course-btn" data-id="{{ course.id }}">Supprimer</button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const P = { p400: '#a855f7', pink: '#f472b6', indigo: '#818cf8', accent: '#e040fb' };
+
+    // Doughnut Chart - Par catégorie
+    new Chart(document.getElementById('coursChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Communication', 'Motricité', 'Langage', 'Socialisation'],
+            datasets: [{
+                data: [28, 22, 18, 16],
+                backgroundColor: [P.p400, P.pink, P.indigo, P.accent],
+                borderWidth: 0,
+                hoverOffset: 8
+            }]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        usePointStyle: true,
+                        font: { family: 'DM Sans', size: 11 }
+                    }
+                }
+            },
+            cutout: '60%',
+            responsive: true
+        }
+    });
+
+    // Filter table
+    document.getElementById('courseFilterInput')?.addEventListener('input', function(e) {
+        const val = e.target.value.toLowerCase();
+        document.querySelectorAll('#coursTable tbody tr').forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(val) ? '' : 'none';
+        });
+    });
+
+    // Edit button
+    document.querySelectorAll('.edit-course-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.getElementById('formMode').textContent = 'Mode : Modification';
+            const id = this.getAttribute('data-id');
+            console.log('Edit course:', id);
+        });
+    });
+
+    // Delete button
+    document.querySelectorAll('.delete-course-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (confirm('Supprimer ce cours ?')) {
+                this.closest('tr').remove();
+            }
+        });
+    });
+
+    // Cancel button
+    document.getElementById('cancelCourseBtn')?.addEventListener('click', function() {
+        document.getElementById('formMode').textContent = 'Mode : Ajout';
+        document.getElementById('courseTitle').value = '';
+        document.getElementById('courseDuration').value = '';
+        document.getElementById('courseDescription').value = '';
+    });
+
+    // Save button
+    document.getElementById('saveCourseBtn')?.addEventListener('click', function() {
+        const title = document.getElementById('courseTitle')?.value;
+        if (!title) {
+            alert('Veuillez saisir un titre de cours');
+            return;
+        }
+        console.log('Save course:', {
+            title: title,
+            category: document.getElementById('courseCategory')?.value,
+            level: document.getElementById('courseLevel')?.value,
+            duration: document.getElementById('courseDuration')?.value,
+            status: document.getElementById('courseStatus')?.value,
+            description: document.getElementById('courseDescription')?.value
+        });
+        alert('Cours enregistré (démo)');
+        document.getElementById('formMode').textContent = 'Mode : Ajout';
+    });
+});
+</script>
+{% endblock %}
