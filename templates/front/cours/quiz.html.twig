@@ -30,6 +30,25 @@
             overflow-x: hidden;
         }
 
+        /* Wrong flash overlay */
+        #wrong-flash {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 998;
+            background: rgba(239,68,68,0);
+            transition: background 0.05s;
+        }
+        #wrong-flash.active {
+            animation: wrong-flash-anim 0.65s ease forwards;
+        }
+        @keyframes wrong-flash-anim {
+            0%   { background: rgba(239,68,68,0); }
+            15%  { background: rgba(239,68,68,0.22); }
+            45%  { background: rgba(239,68,68,0.18); }
+            100% { background: rgba(239,68,68,0); }
+        }
+
         /* ═══════════════════════════════════
            ANIMATED BACKGROUND
         ═══════════════════════════════════ */
@@ -86,7 +105,7 @@
         }
 
         /* ═══════════════════════════════════
-           HERO — identique à show.html.twig
+           HERO
         ═══════════════════════════════════ */
         .quiz-hero {
             background: linear-gradient(150deg, #5a288c 0%, #9b6bff 50%, #c77dff 100%);
@@ -109,13 +128,13 @@
             padding-bottom: 2.5rem;
         }
 
-        /* Breadcrumb — copié de show.html.twig */
+        /* Breadcrumb */
         .bc-link { color: rgba(255,255,255,0.70); font-size: 0.85rem; font-weight: 700; text-decoration: none; transition: color 0.2s; }
         .bc-link:hover { color: #fff; }
         .bc-sep { margin: 0 8px; color: rgba(255,255,255,0.40); }
         .bc-current { color: rgba(255,255,255,0.95); font-size: 0.85rem; font-weight: 700; }
 
-        /* Pill de type — copié de show.html.twig */
+        /* Pill de type */
         .course-type-pill {
             display: inline-flex; align-items: center; gap: 6px;
             font-family: 'Baloo 2', cursive; font-size: 0.78rem; font-weight: 800;
@@ -129,7 +148,7 @@
         .type-Langage    { background: #F5EBFF; color: #C77DFF; }
         .type-default    { background: #F5F5F5; color: #777; }
 
-        /* Grand titre — copié de show.html.twig */
+        /* Grand titre */
         .quiz-main-title {
             font-family: 'Baloo 2', cursive;
             font-size: clamp(1.8rem, 4vw, 2.8rem);
@@ -147,7 +166,7 @@
             margin-bottom: 1.4rem;
         }
 
-        /* Info chips — copié de show.html.twig */
+        /* Info chips */
         .info-chips { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 1.6rem; }
         .info-chip {
             display: inline-flex; align-items: center; gap: 7px;
@@ -162,7 +181,7 @@
         .chip-level  { border-color: rgba(107,203,119,0.6); }
         .chip-time   { border-color: rgba(255,158,207,0.6); }
 
-        /* Bouton retour — copié de show.html.twig */
+        /* Bouton retour */
         .btn-back-quiz {
             display: inline-flex; align-items: center; gap: 7px;
             background: rgba(255,255,255,0.18);
@@ -176,7 +195,7 @@
         }
         .btn-back-quiz:hover { transform: translateX(-4px) scale(1.04); background: rgba(255,255,255,0.28); color: #fff; }
 
-        /* Image/emoji hero — copié de show.html.twig */
+        /* Image/emoji hero */
         .quiz-hero-img-wrap {
             border-radius: 28px;
             overflow: hidden;
@@ -184,7 +203,9 @@
             border: 4px solid white;
             aspect-ratio: 4/3;
             background: linear-gradient(135deg, #E8F4FF, #F5EBFF);
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .quiz-hero-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
         .hero-img-emoji {
@@ -430,7 +451,9 @@
             color: #6d28d9;
             font-family: 'Baloo 2', cursive;
             font-size: 0.95rem; font-weight: 800;
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             flex-shrink: 0;
             transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
         }
@@ -538,12 +561,60 @@
         }
 
         /* ═══════════════════════════════════
+           NAVIGATION BUTTONS
+        ═══════════════════════════════════ */
+        .btn-nav-wrap {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Précédent */
+        .btn-prev {
+            display: inline-flex;
+            align-items: center; gap: 8px;
+            background: transparent;
+            color: var(--mauve);
+            font-family: 'Baloo 2', cursive;
+            font-size: 1rem; font-weight: 800;
+            padding: 13px 26px; border-radius: 50px;
+            border: 2.5px solid var(--mauve);
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        .btn-prev.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .btn-prev.active:hover {
+            transform: translateX(-4px) scale(1.03);
+            background: rgba(155,107,255,0.07);
+            color: var(--violet);
+            border-color: var(--violet);
+        }
+        .btn-prev-arrow {
+            font-size: 1.1rem;
+            transition: transform 0.2s;
+        }
+        .btn-prev:hover .btn-prev-arrow { transform: translateX(-4px); }
+
+        /* Wrong card shake animation */
+        @keyframes wrong-card-shake {
+            0%,100% { transform: translateX(0); }
+            15%     { transform: translateX(-8px); }
+            30%     { transform: translateX(8px); }
+            45%     { transform: translateX(-6px); }
+            60%     { transform: translateX(6px); }
+            75%     { transform: translateX(-3px); }
+            90%     { transform: translateX(3px); }
+        }
+
+        /* ═══════════════════════════════════
            NEXT BUTTON
         ═══════════════════════════════════ */
-        .btn-next-wrap {
-            display: flex;
-            justify-content: flex-end;
-        }
         .btn-next {
             display: none;
             align-items: center; gap: 10px;
@@ -578,7 +649,7 @@
         .btn-next:hover .btn-next-arrow { transform: translateX(4px); }
 
         /* ═══════════════════════════════════
-           CONFETTI BURST (canvas overlay)
+           CONFETTI BURST
         ═══════════════════════════════════ */
         #confetti-canvas {
             position: fixed;
@@ -812,9 +883,10 @@
     <span class="star" style="width:7px;height:7px;top:5%;left:55%;--d:2.5s"></span>
 </div>
 
+<div id="wrong-flash" aria-hidden="true"></div>
 <canvas id="confetti-canvas"></canvas>
 
-{# ─── Hero — même structure que show.html.twig ─── #}
+{# ─── Hero ─── #}
 {% set emojis = {'Académique': '📚', 'Social': '🤝', 'Motricité': '🏃', 'Langage': '💬'} %}
 {% set emoji = emojis[cours.typeCours] ?? '🎯' %}
 {% set typeClass = 'type-' ~ cours.typeCours %}
@@ -907,7 +979,10 @@
             </div>
         </div>
 
-        <div class="btn-next-wrap">
+        <div class="btn-nav-wrap">
+            <button class="btn-prev" id="btnPrev">
+                <span class="btn-prev-arrow">←</span> Précédent
+            </button>
             <button class="btn-next" id="btnNext">
                 Suivant <span class="btn-next-arrow">→</span>
             </button>
@@ -978,6 +1053,22 @@
         return;
     }
 
+    /* ─── Helper : retourne le texte de la bonne réponse ─── */
+    function getCorrectAnswerText(q) {
+        // Cas 1 : bonneReponse est une clé ('choix1', 'choix2', 'choix3')
+        if (q.bonneReponse === 'choix1') return q.choix1;
+        if (q.bonneReponse === 'choix2') return q.choix2;
+        if (q.bonneReponse === 'choix3') return q.choix3;
+        // Cas 2 : bonneReponse est directement le texte de la réponse
+        // On retrouve quel choix correspond pour confirmer
+        const br = q.bonneReponse.trim().toLowerCase();
+        if (q.choix1 && q.choix1.trim().toLowerCase() === br) return q.choix1;
+        if (q.choix2 && q.choix2.trim().toLowerCase() === br) return q.choix2;
+        if (q.choix3 && q.choix3.trim().toLowerCase() === br) return q.choix3;
+        // Fallback : retourner tel quel
+        return q.bonneReponse;
+    }
+
     /* ─── State ─── */
     const letters   = ['A', 'B', 'C'];
     const choixKeys = ['choix1', 'choix2', 'choix3'];
@@ -999,10 +1090,20 @@
     const feedbackTitle=document.getElementById('feedbackTitle');
     const feedbackDetail=document.getElementById('feedbackDetail');
     const btnNext     = document.getElementById('btnNext');
+    const btnPrev     = document.getElementById('btnPrev');
     const progressLbl = document.getElementById('progressLabel');
     const scoreDsp    = document.getElementById('scoreDisplay');
     const resultsCard = document.getElementById('resultsCard');
     const stepPills   = document.querySelectorAll('.step-pill');
+    const wrongFlash  = document.getElementById('wrong-flash');
+
+    /* ─── Wrong flash ─── */
+    function launchWrongFlash() {
+        wrongFlash.classList.remove('active');
+        wrongFlash.offsetHeight;
+        wrongFlash.classList.add('active');
+        setTimeout(() => wrongFlash.classList.remove('active'), 700);
+    }
 
     /* ─── Confetti ─── */
     const canvas = document.getElementById('confetti-canvas');
@@ -1066,6 +1167,13 @@
         qText.textContent = q.question;
         qScoreVal.textContent = q.score || 1;
 
+        /* Précédent button visibility */
+        if (current > 0) {
+            btnPrev.classList.add('active');
+        } else {
+            btnPrev.classList.remove('active');
+        }
+
         /* Card entrance animation */
         qCard.style.animation = 'none';
         qCard.offsetHeight;
@@ -1073,7 +1181,7 @@
 
         /* Reset feedback */
         feedbackBox.className = 'feedback-box';
-        feedbackBox.style.display = '';
+        feedbackBox.style.display = 'none';
         btnNext.classList.remove('visible');
 
         /* Build choices */
@@ -1084,14 +1192,15 @@
             const btn = document.createElement('button');
             btn.className = 'choice-btn';
             btn.dataset.value = val;
+            btn.dataset.choiceKey = key;
             btn.innerHTML = `<span class="choice-letter">${letters[i]}</span><span class="choice-text">${val}</span>`;
-            btn.addEventListener('click', () => selectAnswer(btn, val, q));
+            btn.addEventListener('click', () => selectAnswer(btn, val, key, q));
             choicesGrid.appendChild(btn);
         });
     }
 
     /* ─── Select answer ─── */
-    function selectAnswer(btn, chosenValue, q) {
+    function selectAnswer(btn, chosenValue, chosenKey, q) {
         if (answered) return;
         answered = true;
 
@@ -1099,21 +1208,33 @@
         allBtns.forEach(b => b.disabled = true);
         btn.classList.add('selected');
 
-        const isCorrect = chosenValue.trim().toLowerCase() === q.bonneReponse.trim().toLowerCase();
+        // Déterminer si bonneReponse est une clé (choix1/2/3) ou du texte direct
+        const isKeyFormat = ['choix1','choix2','choix3'].includes(q.bonneReponse);
+        
+        // isCorrect : match sur la clé OU sur la valeur texte
+        const isCorrect = isKeyFormat
+            ? (chosenKey === q.bonneReponse)
+            : (chosenValue.trim().toLowerCase() === q.bonneReponse.trim().toLowerCase());
 
-        /* Highlight */
+        // Obtenir le texte de la bonne réponse pour l'affichage
+        const correctAnswerText = getCorrectAnswerText(q);
+
+        /* Highlight the correct answer */
         allBtns.forEach(b => {
-            if (b.dataset.value.trim().toLowerCase() === q.bonneReponse.trim().toLowerCase()) {
+            const matchByKey  = isKeyFormat && b.dataset.choiceKey === q.bonneReponse;
+            const matchByText = !isKeyFormat && b.dataset.value.trim().toLowerCase() === q.bonneReponse.trim().toLowerCase();
+            if (matchByKey || matchByText) {
                 b.classList.add('correct');
             }
         });
+        
         if (!isCorrect) btn.classList.add('wrong');
 
         /* Feedback */
-        feedbackBox.style.display = '';
         if (isCorrect) {
             const pts = q.score || 1;
-            score += pts; correct++;
+            score += pts;
+            correct++;
             feedbackBox.className = 'feedback-box visible correct-fb';
             feedbackIcon.textContent = '🎉';
             feedbackTitle.textContent = `Bravo ! Bonne réponse !`;
@@ -1124,10 +1245,13 @@
             feedbackBox.className = 'feedback-box visible wrong-fb';
             feedbackIcon.textContent = '💔';
             feedbackTitle.textContent = `Pas tout à fait…`;
-            feedbackDetail.textContent = `La bonne réponse était : « ${q.bonneReponse} »`;
-            launchShatter();
+            feedbackDetail.textContent = `La bonne réponse était : « ${correctAnswerText} »`;
+            /* shake the card */
+            qCard.style.animation = 'none';
+            qCard.offsetHeight;
+            qCard.style.animation = 'wrong-card-shake 0.45s ease';
+            launchWrongFlash();
         }
-
 
         scoreDsp.textContent = score;
         const isLast = (current + 1 >= questions.length);
@@ -1137,8 +1261,17 @@
         btnNext.classList.add('visible');
     }
 
-    /* ─── Next ─── */
+    /* ─── Précédent ─── */
+    btnPrev.addEventListener('click', () => {
+        if (current > 0) {
+            current--;
+            renderQuestion();
+        }
+    });
+
+    /* ─── Suivant / Résultats ─── */
     btnNext.addEventListener('click', () => {
+        if (!answered) return;
         current++;
         if (current >= questions.length) showResults();
         else renderQuestion();
@@ -1148,7 +1281,7 @@
     function showResults() {
         qCard.style.display = 'none';
         resultsCard.style.display = 'block';
-        updatePills(questions.length); // all done
+        updatePills(questions.length);
         progressLbl.textContent = 'Terminé ! 🎊';
 
         const pct = totalScore > 0 ? Math.round((score / totalScore) * 100) : 0;
@@ -1171,7 +1304,7 @@
         document.getElementById('resultsSubtitle').textContent = subtitle;
 
         /* Animated SVG ring */
-        const circumference = 2 * Math.PI * 55; // 345.5
+        const circumference = 2 * Math.PI * 55;
         const ringEl = document.getElementById('ringCircle');
         const color  = pct >= 80 ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444';
         ringEl.style.stroke = color;
@@ -1200,14 +1333,18 @@
 
     /* ─── Retry ─── */
     document.getElementById('btnRetry').addEventListener('click', () => {
-        current = 0; score = 0; correct = 0; wrong = 0; answered = false;
+        current = 0;
+        score = 0;
+        correct = 0;
+        wrong = 0;
+        answered = false;
         scoreDsp.textContent = 0;
+        btnPrev.classList.remove('active');
         resultsCard.style.display = 'none';
         qCard.style.display = 'block';
         renderQuestion();
     });
 
-    /* ─── Init ─── */
     renderQuestion();
 
 })();

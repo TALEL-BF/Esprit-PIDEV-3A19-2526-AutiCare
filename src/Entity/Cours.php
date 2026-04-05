@@ -124,11 +124,11 @@ class Cours
         return $this->image;
     }
 
-    public function setImage(string $image): static
-    {
-        $this->image = $image;
-        return $this;
-    }
+   public function setImage(?string $image): static
+{
+    $this->image = $image;
+    return $this;
+}
 
     public function getMots(): ?string
     {

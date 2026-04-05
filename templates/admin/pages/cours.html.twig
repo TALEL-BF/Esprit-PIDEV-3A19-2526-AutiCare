@@ -92,7 +92,7 @@
 .form-mode-badge {
     font-size:.72rem; font-weight:600; padding:4px 12px;
     border-radius:20px; background:var(--pastel-lavender);
-    color:#5b21b6; border:1px solid var(--pastel-lavender-b);
+    color:#5b21b6; border:1.5px solid var(--pastel-lavender-b);
 }
 
 /* ── Carte mot ── */
@@ -252,6 +252,28 @@
     transition:all 0.2s; display:inline-flex; align-items:center; gap:4px;
 }
 .btn-edit-table:hover { background:#bfdbfe; }
+
+/* Style pour l'aperçu de l'image du cours */
+.course-image-preview {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 2px solid var(--pastel-rose-b);
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+
+.course-image-cell {
+    text-align: center;
+}
+
+.course-image-thumb {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1.5px solid var(--pastel-lavender-b);
+}
 </style>
 {% endblock %}
 
@@ -381,7 +403,7 @@
                                        accept="image/*"
                                        style="background:var(--pastel-rose); border-color:var(--pastel-rose-b);">
                                 <small style="color:#9d174d; font-size:.75rem; margin-top:4px; display:block;">
-                                    Format recommandé : JPG ou PNG
+                                    Format recommandé : JPG ou PNG. Laissez vide pour conserver l'image actuelle.
                                 </small>
                             </div>
                             <div class="col-md-4 text-center">
@@ -391,7 +413,13 @@
                                                 border:2px solid var(--pastel-rose-b);
                                                 box-shadow:0 2px 8px rgba(0,0,0,.08);">
                                     <div style="font-size:.7rem; color:#9d174d; margin-top:4px;">Image actuelle</div>
+                                    <button type="button" id="removeCourseImageBtn" 
+                                            style="background:none; border:none; color:#be185d; 
+                                                   font-size:.7rem; margin-top:4px; cursor:pointer;">
+                                        <i class="fas fa-trash-alt"></i> Supprimer l'image
+                                    </button>
                                 </div>
+                                <input type="hidden" name="remove_image" id="removeImageField" value="0">
                             </div>
                         </div>
                     </div>
@@ -503,6 +531,7 @@
             <table class="custom-table" id="coursTable">
                 <thead>
                     <tr>
+                        <th>Image</th>
                         <th>Titre</th>
                         <th>Type</th>
                         <th>Niveau</th>
@@ -517,6 +546,20 @@
                     {% set niveauMap = {'Débutant':'debutant','Intermédiaire':'intermediaire','Avancé':'avance'} %}
                     {% for item in cours_list|default([]) %}
                     <tr>
+                        <td class="course-image-cell">
+                            {% if item.image %}
+                                <img src="/uploads/images/{{ item.image }}" 
+                                     alt="{{ item.titre }}"
+                                     class="course-image-thumb"
+                                     onerror="this.src='https://placehold.co/50x50?text=No+Image'">
+                            {% else %}
+                                <div style="width:50px; height:50px; background:var(--pastel-lavender); 
+                                            border-radius:10px; display:flex; align-items:center; 
+                                            justify-content:center; margin:0 auto;">
+                                    <i class="fas fa-image" style="color:#c4b5fd;"></i>
+                                </div>
+                            {% endif %}
+                        </td>
                         <td><strong style="color:#334155;">{{ item.titre }}</strong></td>
                         <td>
                             <span class="badge-type {{ typeMap[item.typeCours]|default('') }}">
@@ -552,7 +595,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="7" style="text-align:center; padding:2.5rem; color:#94a3b8;">
+                        <td colspan="8" style="text-align:center; padding:2.5rem; color:#94a3b8;">
                             <i class="fas fa-book-open" style="font-size:2rem; margin-bottom:.5rem; display:block; opacity:.25;"></i>
                             Aucun cours trouvé
                         </td>
@@ -663,6 +706,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     /* ── Helpers images ── */
     function attachImagePreview(fileInput, container) {
+        if (!fileInput) return;
         fileInput.addEventListener('change', function () {
             container.innerHTML = '';
             Array.from(this.files).forEach(file => {
@@ -779,12 +823,22 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('formMode').textContent = 'Mode : Ajout';
             document.getElementById('courseId').value = '';
             document.getElementById('currentImagePreview').style.display = 'none';
+            document.getElementById('removeImageField').value = '0';
             const c = document.getElementById('motsImagesContainer');
             c.innerHTML = '';
             c.appendChild(makeMotCard(0, '', []));
             motIndex = 1;
             updateMotNumbers();
             setupRemoveButtons();
+        }
+    });
+
+    /* ── Supprimer l'image du cours ── */
+    document.getElementById('removeCourseImageBtn')?.addEventListener('click', function () {
+        if (confirm('Voulez-vous supprimer l\'image de ce cours ?')) {
+            document.getElementById('removeImageField').value = '1';
+            document.getElementById('currentImagePreview').style.display = 'none';
+            document.getElementById('courseImage').value = '';
         }
     });
 
@@ -803,44 +857,60 @@ document.addEventListener('DOMContentLoaded', function () {
             const id = this.getAttribute('data-id');
             document.getElementById('formMode').textContent = 'Mode : Modification';
             document.getElementById('courseId').value = id;
+            document.getElementById('removeImageField').value = '0';
             try {
-                const data = await fetch(`/admin/cours/${id}/edit`).then(r => r.json());
+                const response = await fetch(`/admin/cours/${id}/edit`);
+                if (!response.ok) throw new Error('Erreur réseau');
+                const data = await response.json();
+                
                 document.getElementById('courseTitle').value       = data.titre || '';
                 document.getElementById('courseType').value        = data.typeCours || '';
                 document.getElementById('courseLevel').value       = data.niveau || '';
                 document.getElementById('courseDuration').value    = data.duree || '';
                 document.getElementById('courseDescription').value = data.description || '';
-                if (data.image) {
+                
+                // Gestion de l'image du cours
+                if (data.image && data.image !== '') {
                     document.getElementById('currentImage').src = `/uploads/images/${data.image}`;
                     document.getElementById('currentImagePreview').style.display = 'block';
                 } else {
                     document.getElementById('currentImagePreview').style.display = 'none';
                 }
+                
+                // Réinitialiser le champ fichier
+                document.getElementById('courseImage').value = '';
+                
+                // Traitement des mots et images
                 const mots = (data.mots && data.mots !== '') ? data.mots.split(';') : [''];
                 const motImagesMap = {};
-                if (data.imagesMots) {
-                    data.imagesMots.split(';').forEach(item => {
+                if (data.imagesMots && data.imagesMots !== '') {
+                    const items = data.imagesMots.split(';');
+                    for (const item of items) {
                         if (item.indexOf(':') !== -1) {
                             const colonnePos = item.indexOf(':');
                             const k = item.substring(0, colonnePos).trim();
                             const v = item.substring(colonnePos + 1);
-                            if (k && v) motImagesMap[k] = v.split(',');
+                            if (k && v) {
+                                motImagesMap[k] = v.split(',');
+                            }
                         }
-                    });
+                    }
                 }
+                
                 const container = document.getElementById('motsImagesContainer');
                 container.innerHTML = '';
                 mots.forEach((mot, idx) => {
                     const motTrim = mot.trim();
-                    container.appendChild(makeMotCard(idx, motTrim, motImagesMap[motTrim] || []));
+                    const motUpper = motTrim.toUpperCase();
+                    container.appendChild(makeMotCard(idx, motTrim, motImagesMap[motUpper] || []));
                 });
                 motIndex = mots.length;
                 updateMotNumbers();
                 setupRemoveButtons();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } catch (err) {
-                console.error(err);
-                alert('Erreur lors du chargement du cours');
+                console.error('Erreur:', err);
+                alert('Erreur lors du chargement du cours. Vérifiez que le cours existe.');
             }
         });
     });
@@ -853,8 +923,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 try {
                     const r = await fetch(`/admin/cours/${id}/delete`, { method: 'DELETE' });
                     if (r.ok) { window.location.reload(); }
-                    else { alert('Erreur lors de la suppression'); }
-                } catch { alert('Erreur lors de la suppression'); }
+                    else { 
+                        const error = await r.json();
+                        alert('Erreur lors de la suppression: ' + (error.error || 'Erreur inconnue'));
+                    }
+                } catch { 
+                    alert('Erreur lors de la suppression'); 
+                }
             }
         });
     });

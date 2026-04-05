@@ -147,8 +147,9 @@ class CoursController extends AbstractController
         }
         $motsString = implode(';', $motsArray);
 
+        // Gestion de l'image du cours
         $imageFile = $request->files->get('image_file');
-        if ($imageFile) {
+        if ($imageFile && $imageFile instanceof UploadedFile && $imageFile->isValid()) {
             $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
             $safeFilename     = $slugger->slug($originalFilename);
             $newFilename      = 'cours_' . $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
@@ -158,6 +159,9 @@ class CoursController extends AbstractController
             } catch (FileException $e) {
                 $this->addFlash('error', 'Erreur lors de l\'upload de l\'image du cours');
             }
+        } elseif (!$cours->getImage()) {
+            // Si aucune image n'est fournie et que le cours n'a pas d'image existante, mettre une image par défaut
+            $cours->setImage('default-course.jpg');
         }
 
         $existingImagesByMot = $cours->getImagesByMot();
@@ -184,7 +188,7 @@ class CoursController extends AbstractController
             $files = $request->files->get('images_files_' . $index);
             if ($files && is_array($files)) {
                 foreach ($files as $file) {
-                    if ($file instanceof UploadedFile) {
+                    if ($file instanceof UploadedFile && $file->isValid()) {
                         $filename    = $slugger->slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
                         $newFilename = 'mot_' . $slugger->slug($mot) . '_' . $filename . '-' . uniqid() . '.' . $file->guessExtension();
                         try {
@@ -239,7 +243,7 @@ class CoursController extends AbstractController
         try {
             $uploadDir = $this->getParameter('kernel.project_dir') . self::UPLOAD_DIR;
 
-            if ($cours->getImage()) {
+            if ($cours->getImage() && $cours->getImage() !== 'default-course.jpg') {
                 $imagePath = $uploadDir . '/' . $cours->getImage();
                 if (file_exists($imagePath)) unlink($imagePath);
             }
