@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Cours;
 use App\Entity\Evaluation;
+use App\Form\EvaluationType;
 use App\Repository\CoursRepository;
 use App\Repository\EvaluationRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -23,7 +24,6 @@ class EvaluationController extends AbstractController
     ): Response {
         $filterCourseId = $request->query->get('cours_id');
         
-       
         if ($filterCourseId && $filterCourseId !== 'all') {
             $evaluations = $evaluationRepository->findByCoursId($filterCourseId);
         } else {
@@ -32,7 +32,6 @@ class EvaluationController extends AbstractController
         
         $allCourses = $coursRepository->findAll();
         
-       
         $totalQuestions = count($evaluations);
         $totalScore = 0;
         foreach ($evaluations as $eval) {
@@ -40,12 +39,17 @@ class EvaluationController extends AbstractController
         }
         $averageScore = $totalQuestions > 0 ? round($totalScore / $totalQuestions, 1) : 0;
         
+        // Créer un nouveau formulaire vide
+        $evaluation = new Evaluation();
+        $form = $this->createForm(EvaluationType::class, $evaluation);
+        
         return $this->render('admin/pages/evaluation.html.twig', [
             'evaluations' => $evaluations,
             'allCourses' => $allCourses,
             'filterCourseId' => $filterCourseId,
             'totalQuestions' => $totalQuestions,
             'averageScore' => $averageScore,
+            'form' => $form->createView(),
         ]);
     }
     
@@ -53,8 +57,7 @@ class EvaluationController extends AbstractController
     public function save(
         Request $request,
         EntityManagerInterface $em,
-        EvaluationRepository $evaluationRepository,
-        CoursRepository $coursRepository
+        EvaluationRepository $evaluationRepository
     ): Response {
         $idEval = $request->request->get('id_eval');
         
@@ -64,44 +67,45 @@ class EvaluationController extends AbstractController
                 $this->addFlash('error', 'Question non trouvée');
                 return $this->redirectToRoute('admin_evaluation');
             }
+            $form = $this->createForm(EvaluationType::class, $evaluation);
         } else {
             $evaluation = new Evaluation();
+            $form = $this->createForm(EvaluationType::class, $evaluation);
         }
         
+        $form->handleRequest($request);
         
-        $coursId = $request->request->get('cours_id');
-        $question = $request->request->get('question');
-        $choix1 = $request->request->get('choix1');
-        $choix2 = $request->request->get('choix2');
-        $choix3 = $request->request->get('choix3');
-        $bonneReponse = $request->request->get('bonne_reponse');
-        $score = $request->request->get('score');
+        // Validation spécifique : vérifier que les choix sont différents
+        if ($form->isSubmitted()) {
+            $choix1 = $form->get('choix1')->getData();
+            $choix2 = $form->get('choix2')->getData();
+            $choix3 = $form->get('choix3')->getData();
+            
+            if ($choix1 === $choix2 || $choix1 === $choix3 || $choix2 === $choix3) {
+                $this->addFlash('error', 'Les trois choix doivent être différents');
+                return $this->redirectToRoute('admin_evaluation');
+            }
+        }
         
-      
-        if (empty($coursId) || empty($question) || empty($choix1) || empty($choix2) || empty($choix3) || empty($bonneReponse)) {
-            $this->addFlash('error', 'Veuillez remplir tous les champs obligatoires');
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Récupérer l'ID du cours depuis l'entité Cours
+            $cours = $evaluation->getCours();
+            if ($cours) {
+                $evaluation->setIdCours($cours->getIdCours());
+            }
+            
+            $em->persist($evaluation);
+            $em->flush();
+            
+            $this->addFlash('success', 'Question enregistrée avec succès');
             return $this->redirectToRoute('admin_evaluation');
         }
         
-        $cours = $coursRepository->find($coursId);
-        if (!$cours) {
-            $this->addFlash('error', 'Cours non trouvé');
-            return $this->redirectToRoute('admin_evaluation');
+        // Si le formulaire n'est pas valide, afficher les erreurs
+        foreach ($form->getErrors(true) as $error) {
+            $this->addFlash('error', $error->getMessage());
         }
         
-        $evaluation->setCours($cours);
-        $evaluation->setIdCours($coursId);
-        $evaluation->setQuestion($question);
-        $evaluation->setChoix1($choix1);
-        $evaluation->setChoix2($choix2);
-        $evaluation->setChoix3($choix3);
-        $evaluation->setBonneReponse($bonneReponse);
-        $evaluation->setScore($score ? (int)$score : 1);
-        
-        $em->persist($evaluation);
-        $em->flush();
-        
-        $this->addFlash('success', 'Question enregistrée avec succès');
         return $this->redirectToRoute('admin_evaluation');
     }
     
@@ -134,6 +138,4 @@ class EvaluationController extends AbstractController
             return $this->redirectToRoute('admin_evaluation');
         }
     }
-    
-
 }
