@@ -1,5 +1,4 @@
 <?php
-// src/Entity/Sponsor.php
 
 namespace App\Entity;
 
