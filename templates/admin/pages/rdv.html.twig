@@ -518,4 +518,23 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-   
+    [rdvSearchInput, rdvStatusFilter, rdvDurationFilter, rdvSortSelect].forEach((el) => {
+        el?.addEventListener('input', applyAdvancedRdvFilters);
+        el?.addEventListener('change', applyAdvancedRdvFilters);
+    });
+
+    resetRdvFilters?.addEventListener('click', function() {
+        if (rdvSearchInput) rdvSearchInput.value = '';
+        if (rdvStatusFilter) rdvStatusFilter.value = '';
+        if (rdvDurationFilter) rdvDurationFilter.value = '';
+        if (rdvSortSelect) rdvSortSelect.value = rdvDefaultSort;
+        applyAdvancedRdvFilters();
+    });
+
+    if (rdvSortSelect && !rdvSortSelect.value) {
+        rdvSortSelect.value = rdvDefaultSort;
+    }
+    applyAdvancedRdvFilters();
+});
+</script>
+{% endblock %}
