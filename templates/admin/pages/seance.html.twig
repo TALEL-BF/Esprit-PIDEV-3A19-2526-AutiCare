@@ -549,4 +549,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-   
+    [seanceSearchInput, seanceDayFilter, seanceStatusFilter, seanceDurationFilter, seanceSortSelect].forEach((el) => {
+        el?.addEventListener('input', applyAdvancedSeanceFilters);
+        el?.addEventListener('change', applyAdvancedSeanceFilters);
+    });
+
+    resetSeanceFilters?.addEventListener('click', function() {
+        if (seanceSearchInput) seanceSearchInput.value = '';
+        if (seanceDayFilter) seanceDayFilter.value = '';
+        if (seanceStatusFilter) seanceStatusFilter.value = '';
+        if (seanceDurationFilter) seanceDurationFilter.value = '';
+        if (seanceSortSelect) seanceSortSelect.value = seanceDefaultSort;
+        applyAdvancedSeanceFilters();
+    });
+
+    if (seanceSortSelect && !seanceSortSelect.value) {
+        seanceSortSelect.value = seanceDefaultSort;
+    }
+    applyAdvancedSeanceFilters();
+});
+</script>
+{% endblock %}
