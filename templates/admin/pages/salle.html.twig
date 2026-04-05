@@ -1,0 +1,285 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Auticare — Gestion des Salles{% endblock %}
+
+{% block page_title %}Gestion des Salles{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .filter-input {
+        width: 200px;
+        font-size: .8rem;
+        padding: 6px 12px;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div class="page-header">
+    <h2><i class="fas fa-door-open me-2" style="color:var(--purple-500)"></i>Gestion des Salles</h2>
+    <p>Gérer les salles et espaces thérapeutiques</p>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Salles totales</div>
+                    <div class="stat-value">{{ totalRooms|default(8) }}</div>
+                </div>
+                <div class="stat-icon purple"><i class="fas fa-door-open"></i></div>
+            </div>
+            <div class="stat-change up"><i class="fas fa-arrow-up"></i> disponibles</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Occupées</div>
+                    <div class="stat-value">{{ occupiedRooms|default(5) }}</div>
+                </div>
+                <div class="stat-icon violet"><i class="fas fa-door-closed"></i></div>
+            </div>
+            <div class="stat-change up"><i class="fas fa-arrow-up"></i> actuellement</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Capacité totale</div>
+                    <div class="stat-value">{{ totalCapacity|default(64) }}</div>
+                </div>
+                <div class="stat-icon pink"><i class="fas fa-users"></i></div>
+            </div>
+            <div class="stat-change up"><i class="fas fa-arrow-up"></i> personnes</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Taux utilisation</div>
+                    <div class="stat-value">{{ usageRate|default(72) }}%</div>
+                </div>
+                <div class="stat-icon indigo"><i class="fas fa-chart-bar"></i></div>
+            </div>
+            <div class="stat-change up"><i class="fas fa-arrow-up"></i> cette semaine</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-7">
+        <div class="card-box">
+            <div class="card-box-header">
+                <span class="card-box-title"><i class="fas fa-plus-circle"></i> Ajouter / Modifier une Salle</span>
+                <span class="form-mode-badge" id="formMode">Mode : Ajout</span>
+            </div>
+            <div class="card-box-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Nom de la salle</label>
+                        <input type="text" class="form-control" id="roomName" placeholder="Ex: Salle A">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Capacité (personnes)</label>
+                        <input type="number" class="form-control" id="roomCapacity" placeholder="8">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Type</label>
+                        <select class="form-select" id="roomType">
+                            <option>Thérapie individuelle</option>
+                            <option>Salle de groupe</option>
+                            <option>Salle d'évaluation</option>
+                            <option>Salle sensorielle</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Équipements</label>
+                        <input type="text" class="form-control" id="roomEquipment" placeholder="Ex: Tableau, miroir, tapis...">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Étage</label>
+                        <select class="form-select" id="roomFloor">
+                            <option>RDC</option>
+                            <option>1er étage</option>
+                            <option>2ème étage</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Statut</label>
+                        <select class="form-select" id="roomStatus">
+                            <option>Disponible</option>
+                            <option>Occupée</option>
+                            <option>En maintenance</option>
+                        </select>
+                    </div>
+                    <div class="col-12 d-flex gap-2">
+                        <button class="btn-purple" id="saveRoomBtn"><i class="fas fa-save"></i> Enregistrer</button>
+                        <button class="btn-outline-purple" id="cancelRoomBtn"><i class="fas fa-times"></i> Annuler</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card-box h-100">
+            <div class="card-box-header">
+                <span class="card-box-title"><i class="fas fa-chart-bar"></i> Utilisation par salle</span>
+            </div>
+            <div class="card-box-body">
+                <canvas id="sallesChart" height="240"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card-box">
+    <div class="card-box-header">
+        <span class="card-box-title"><i class="fas fa-list"></i> Liste des Salles</span>
+        <input type="text" class="form-control filter-input" id="roomFilterInput" placeholder="Filtrer...">
+    </div>
+    <div class="card-box-body p-0">
+        <div class="table-wrapper">
+            <table class="custom-table" id="sallesTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Salle</th>
+                        <th>Type</th>
+                        <th>Capacité</th>
+                        <th>Étage</th>
+                        <th>Équipements</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for room in rooms|default([
+                        {id:1, name:'Salle A', type:'Thérapie individuelle', capacity:4, floor:'RDC', equipment:'Miroir, tapis', status:'Disponible'},
+                        {id:2, name:'Salle B', type:'Groupe', capacity:12, floor:'RDC', equipment:'Tableau, chaises', status:'Occupée'},
+                        {id:3, name:'Salle C', type:'Sensorielle', capacity:6, floor:'1er étage', equipment:'Ballons, éclairage', status:'Disponible'},
+                        {id:4, name:'Salle D', type:'Évaluation', capacity:3, floor:'2ème étage', equipment:'Bureau, caméra', status:'Maintenance'}
+                    ]) %}
+                        <tr>
+                            <td>{{ room.id }}</td>
+                            <td>{{ room.name }}</td>
+                            <td>{{ room.type }}</td>
+                            <td>{{ room.capacity }}</td>
+                            <td>{{ room.floor }}</td>
+                            <td>{{ room.equipment }}</td>
+                            <td>
+                                {% if room.status == 'Disponible' %}
+                                    <span class="badge-status badge-active">{{ room.status }}</span>
+                                {% elseif room.status == 'Occupée' %}
+                                    <span class="badge-status badge-inactive">{{ room.status }}</span>
+                                {% elseif room.status == 'Maintenance' %}
+                                    <span class="badge-status badge-pending">{{ room.status }}</span>
+                                {% else %}
+                                    <span class="badge-status">{{ room.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button class="btn-edit-soft me-1 edit-room-btn" data-id="{{ room.id }}">Modifier</button>
+                                <button class="btn-danger-soft delete-room-btn" data-id="{{ room.id }}">Supprimer</button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const P = { p400:'#a855f7', pink:'#f472b6', indigo:'#818cf8', accent:'#e040fb', p300:'#c084fc' };
+
+    // Bar Chart - Utilisation par salle
+    new Chart(document.getElementById('sallesChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: ['Salle A', 'Salle B', 'Salle C', 'Salle D', 'Salle E'],
+            datasets: [{
+                label: 'Utilisation %',
+                data: [85, 92, 70, 0, 65],
+                backgroundColor: [P.p400, P.pink, P.indigo, P.accent, P.p300],
+                borderRadius: 6,
+                borderWidth: 0
+            }]
+        },
+        options: {
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false } },
+                y: { grid: { color: '#f3e8ff' }, max: 100 }
+            },
+            responsive: true
+        }
+    });
+
+    // Filter table
+    document.getElementById('roomFilterInput')?.addEventListener('input', function(e) {
+        const val = e.target.value.toLowerCase();
+        document.querySelectorAll('#sallesTable tbody tr').forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(val) ? '' : 'none';
+        });
+    });
+
+    // Edit button
+    document.querySelectorAll('.edit-room-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.getElementById('formMode').textContent = 'Mode : Modification';
+            const id = this.getAttribute('data-id');
+            console.log('Edit room:', id);
+        });
+    });
+
+    // Delete button
+    document.querySelectorAll('.delete-room-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (confirm('Supprimer cette salle ?')) {
+                this.closest('tr').remove();
+            }
+        });
+    });
+
+    // Cancel button
+    document.getElementById('cancelRoomBtn')?.addEventListener('click', function() {
+        document.getElementById('formMode').textContent = 'Mode : Ajout';
+        document.getElementById('roomName').value = '';
+        document.getElementById('roomCapacity').value = '';
+        document.getElementById('roomEquipment').value = '';
+    });
+
+    // Save button
+    document.getElementById('saveRoomBtn')?.addEventListener('click', function() {
+        const roomName = document.getElementById('roomName')?.value;
+        if (!roomName) {
+            alert('Veuillez saisir un nom de salle');
+            return;
+        }
+        console.log('Save room:', {
+            name: roomName,
+            capacity: document.getElementById('roomCapacity')?.value,
+            type: document.getElementById('roomType')?.value,
+            equipment: document.getElementById('roomEquipment')?.value,
+            floor: document.getElementById('roomFloor')?.value,
+            status: document.getElementById('roomStatus')?.value
+        });
+        alert('Salle enregistrée (démo)');
+        document.getElementById('formMode').textContent = 'Mode : Ajout';
+    });
+});
+</script>
+{% endblock %}

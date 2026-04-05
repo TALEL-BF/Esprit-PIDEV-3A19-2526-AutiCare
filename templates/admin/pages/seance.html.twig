@@ -1,0 +1,291 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Auticare — Séances{% endblock %}
+
+{% block page_title %}Gestion des Séances{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .filter-input {
+        width: 200px;
+        font-size: .8rem;
+        padding: 6px 12px;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div class="page-header">
+    <h2><i class="fas fa-calendar-check me-2" style="color:var(--purple-500)"></i>Gestion des Séances</h2>
+    <p>Planifier et suivre les séances individuelles</p>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Total séances</div>
+                    <div class="stat-value">{{ totalSessions|default(326) }}</div>
+                </div>
+                <div class="stat-icon purple"><i class="fas fa-calendar-check"></i></div>
+            </div>
+            <div class="stat-change up"><i class="fas fa-arrow-up"></i> +18 ce mois</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Ce mois</div>
+                    <div class="stat-value">{{ thisMonthSessions|default(48) }}</div>
+                </div>
+                <div class="stat-icon violet"><i class="fas fa-clock"></i></div>
+            </div>
+            <div class="stat-change up"><i class="fas fa-arrow-up"></i> planifiées</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">En attente</div>
+                    <div class="stat-value">{{ pendingSessions|default(12) }}</div>
+                </div>
+                <div class="stat-icon pink"><i class="fas fa-hourglass-half"></i></div>
+            </div>
+            <div class="stat-change down"><i class="fas fa-arrow-down"></i> à confirmer</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Annulées</div>
+                    <div class="stat-value">{{ cancelledSessions|default(7) }}</div>
+                </div>
+                <div class="stat-icon indigo"><i class="fas fa-times-circle"></i></div>
+            </div>
+            <div class="stat-change down"><i class="fas fa-arrow-down"></i> ce mois</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-8">
+        <div class="card-box">
+            <div class="card-box-header">
+                <span class="card-box-title"><i class="fas fa-plus-circle"></i> Planifier une Séance</span>
+                <span class="form-mode-badge" id="formMode">Mode : Ajout</span>
+            </div>
+            <div class="card-box-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Patient</label>
+                        <input type="text" class="form-control" id="patientName" placeholder="Nom du patient">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Thérapeute</label>
+                        <select class="form-select" id="therapistName">
+                            <option>Dr. Fatma Trabelsi</option>
+                            <option>Dr. Sana Mejri</option>
+                            <option>Dr. Amine Karray</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Date</label>
+                        <input type="date" class="form-control" id="sessionDate">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Heure</label>
+                        <input type="time" class="form-control" id="sessionTime">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Type de séance</label>
+                        <select class="form-select" id="sessionType">
+                            <option>Individuelle</option>
+                            <option>Groupe</option>
+                            <option>Évaluation</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Statut</label>
+                        <select class="form-select" id="sessionStatus">
+                            <option>Planifiée</option>
+                            <option>Confirmée</option>
+                            <option>Annulée</option>
+                            <option>Terminée</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Notes</label>
+                        <textarea class="form-control" id="sessionNotes" rows="2" placeholder="Observations sur la séance..."></textarea>
+                    </div>
+                    <div class="col-12 d-flex gap-2">
+                        <button class="btn-purple" id="saveSessionBtn"><i class="fas fa-save"></i> Enregistrer</button>
+                        <button class="btn-outline-purple" id="cancelSessionBtn"><i class="fas fa-times"></i> Annuler</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card-box h-100">
+            <div class="card-box-header">
+                <span class="card-box-title"><i class="fas fa-chart-line"></i> Séances par semaine</span>
+            </div>
+            <div class="card-box-body">
+                <canvas id="seancesChart" height="240"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card-box">
+    <div class="card-box-header">
+        <span class="card-box-title"><i class="fas fa-list"></i> Liste des Séances</span>
+        <input type="text" class="form-control filter-input" id="sessionFilterInput" placeholder="Filtrer...">
+    </div>
+    <div class="card-box-body p-0">
+        <div class="table-wrapper">
+            <table class="custom-table" id="seancesTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Patient</th>
+                        <th>Thérapeute</th>
+                        <th>Date</th>
+                        <th>Heure</th>
+                        <th>Type</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for session in sessions|default([
+                        {id:1, patient:'Adam Mejri', therapist:'Dr. Fatma', date:'15/04/2024', time:'09:00', type:'Individuelle', status:'Confirmée'},
+                        {id:2, patient:'Sara Hamdi', therapist:'Dr. Amine', date:'16/04/2024', time:'10:30', type:'Groupe', status:'Planifiée'},
+                        {id:3, patient:'Youssef Ben Amor', therapist:'Dr. Sana', date:'17/04/2024', time:'14:00', type:'Évaluation', status:'Annulée'},
+                        {id:4, patient:'Nour Gharbi', therapist:'Dr. Fatma', date:'18/04/2024', time:'11:00', type:'Individuelle', status:'Confirmée'}
+                    ]) %}
+                        <tr>
+                            <td>{{ session.id }}</td>
+                            <td>{{ session.patient }}</td>
+                            <td>{{ session.therapist }}</td>
+                            <td>{{ session.date }}</td>
+                            <td>{{ session.time }}</td>
+                            <td>{{ session.type }}</td>
+                            <td>
+                                {% if session.status == 'Confirmée' %}
+                                    <span class="badge-status badge-active">{{ session.status }}</span>
+                                {% elseif session.status == 'Planifiée' %}
+                                    <span class="badge-status badge-pending">{{ session.status }}</span>
+                                {% elseif session.status == 'Annulée' %}
+                                    <span class="badge-status badge-inactive">{{ session.status }}</span>
+                                {% else %}
+                                    <span class="badge-status">{{ session.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button class="btn-edit-soft me-1 edit-session-btn" data-id="{{ session.id }}">Modifier</button>
+                                <button class="btn-danger-soft delete-session-btn" data-id="{{ session.id }}">Supprimer</button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const P = { p400: '#a855f7', pink: '#f472b6', indigo: '#818cf8', accent: '#e040fb' };
+
+    // Line Chart - Séances par semaine
+    new Chart(document.getElementById('seancesChart').getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: ['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8'],
+            datasets: [{
+                label: 'Séances',
+                data: [28, 32, 25, 40, 38, 45, 42, 50],
+                borderColor: P.pink,
+                backgroundColor: 'rgba(244,114,182,.1)',
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: P.pink,
+                pointRadius: 4
+            }]
+        },
+        options: {
+            plugins: { legend: { display: false } },
+            scales: { x: { grid: { display: false } }, y: { grid: { color: '#f3e8ff' } } },
+            responsive: true
+        }
+    });
+
+    // Filter table
+    document.getElementById('sessionFilterInput')?.addEventListener('input', function(e) {
+        const val = e.target.value.toLowerCase();
+        document.querySelectorAll('#seancesTable tbody tr').forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(val) ? '' : 'none';
+        });
+    });
+
+    // Edit button
+    document.querySelectorAll('.edit-session-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.getElementById('formMode').textContent = 'Mode : Modification';
+            const id = this.getAttribute('data-id');
+            console.log('Edit session:', id);
+        });
+    });
+
+    // Delete button
+    document.querySelectorAll('.delete-session-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (confirm('Supprimer cette séance ?')) {
+                this.closest('tr').remove();
+            }
+        });
+    });
+
+    // Cancel button
+    document.getElementById('cancelSessionBtn')?.addEventListener('click', function() {
+        document.getElementById('formMode').textContent = 'Mode : Ajout';
+        document.getElementById('patientName').value = '';
+        document.getElementById('sessionDate').value = '';
+        document.getElementById('sessionTime').value = '';
+        document.getElementById('sessionNotes').value = '';
+    });
+
+    // Save button
+    document.getElementById('saveSessionBtn')?.addEventListener('click', function() {
+        const patient = document.getElementById('patientName')?.value;
+        if (!patient) {
+            alert('Veuillez saisir un nom de patient');
+            return;
+        }
+        console.log('Save session:', {
+            patient: patient,
+            therapist: document.getElementById('therapistName')?.value,
+            date: document.getElementById('sessionDate')?.value,
+            time: document.getElementById('sessionTime')?.value,
+            type: document.getElementById('sessionType')?.value,
+            status: document.getElementById('sessionStatus')?.value,
+            notes: document.getElementById('sessionNotes')?.value
+        });
+        alert('Séance enregistrée (démo)');
+        document.getElementById('formMode').textContent = 'Mode : Ajout';
+    });
+});
+</script>
+{% endblock %}

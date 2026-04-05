@@ -1,0 +1,51 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+parameters:
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+
+    # Service pour AI Planning (Groq)
+    App\Service\AiPlanningService:
+        arguments:
+            $apiKey: '%env(GROQ_API_KEY)%'
+            $apiUrl: '%env(GROQ_API_URL)%'
+            $model: '%env(GROQ_MODEL)%'
+
+    # Service pour AssemblyAI (transcription vocale)
+    App\Service\AssemblyAiService:
+        arguments:
+            $apiKey: '%env(ASSEMBLYAI_API_KEY)%'
+            $apiUrl: '%env(ASSEMBLYAI_API_URL)%'
+    
+    # Service pour Groq (recommandations vocales)
+    App\Service\GroqService:
+        arguments:
+            $groqApiKey: '%env(GROQ_API_KEY)%'
+            $groqApiUrl: '%env(GROQ_API_URL)%'
+            $groqModel: '%env(GROQ_MODEL)%'
+            
+    # Service pour recommandation vocale (combine AssemblyAI + Groq)
+    App\Service\VoiceRecommendationService:
+        arguments:
+            $assemblyAi: '@App\Service\AssemblyAiService'
+            $groq: '@App\Service\GroqService'
+            $eventRepository: '@App\Repository\EventRepository'
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
