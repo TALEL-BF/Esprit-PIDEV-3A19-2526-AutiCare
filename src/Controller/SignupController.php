@@ -15,44 +15,95 @@ use Symfony\Component\Routing\Attribute\Route;
 class SignupController extends AbstractController
 {
     #[Route('/signup', name: 'app_signup', methods: ['GET', 'POST'])]
-    public function index(
-        Request $request,
-        EntityManagerInterface $entityManager,
-        UserPasswordHasherInterface $passwordHasher,
-        UserRepository $userRepository
-    ): Response {
-        if ($request->isMethod('POST')) {
-            $firstname = trim((string) $request->request->get('firstname'));
-            $lastname = trim((string) $request->request->get('lastname'));
-            $email = trim((string) $request->request->get('email'));
-            $password = (string) $request->request->get('password');
-            $confirmPassword = (string) $request->request->get('confirm_password');
-            $profileType = (string) $request->request->get('profile_type', 'enfant');
+public function index(
+    Request $request,
+    EntityManagerInterface $entityManager,
+    UserPasswordHasherInterface $passwordHasher,
+    UserRepository $userRepository
+): Response {
+    if ($request->isMethod('POST')) {
+        $firstname = trim($request->request->get('firstname'));
+        $lastname = trim($request->request->get('lastname'));
+        $email = trim($request->request->get('email'));
+        $password = $request->request->get('password');
+        $confirmPassword = $request->request->get('confirm_password');
+        $profileType = $request->request->get('profile_type', 'enfant');
 
-            if ($firstname === '' || $lastname === '' || $email === '' || $password === '') {
-                $this->addFlash('error', 'Veuillez remplir tous les champs obligatoires.');
-            } elseif ($password !== $confirmPassword) {
-                $this->addFlash('error', 'Les mots de passe ne correspondent pas.');
-            } elseif ($userRepository->findOneBy(['email' => $email])) {
-                $this->addFlash('error', 'Cet email existe déjà.');
-            } else {
-                $user = new User();
-                $user->setPrenom($firstname);
-                $user->setNom($lastname);
-                $user->setEmail($email);
-                $user->setPassword($passwordHasher->hashPassword($user, $password));
-                $user->setRole($profileType);
-                $user->setStatus('active');
-                $user->setCreatedAt(new \DateTime());  // ✅ CORRECTION ICI
-                
-                $entityManager->persist($user);
-                $entityManager->flush();
-
-                $this->addFlash('success', 'Compte créé avec succès. Veuillez vous connecter.');
-                return $this->redirectToRoute('app_signin');
-            }
+        // Validation du prénom
+        if (strlen($firstname) < 2) {
+            $this->addFlash('error', 'Le prénom doit contenir au moins 2 caractères.');
+            return $this->redirectToRoute('app_signup');
+        }
+        if (strlen($firstname) > 50) {
+            $this->addFlash('error', 'Le prénom ne peut pas dépasser 50 caractères.');
+            return $this->redirectToRoute('app_signup');
+        }
+        if (!preg_match('/^[a-zA-ZÀ-ÿ\s]+$/', $firstname)) {
+            $this->addFlash('error', 'Le prénom ne doit contenir que des lettres.');
+            return $this->redirectToRoute('app_signup');
         }
 
-        return $this->render('front/signup/index.html.twig');
+        // Validation du nom
+        if (strlen($lastname) < 2) {
+            $this->addFlash('error', 'Le nom doit contenir au moins 2 caractères.');
+            return $this->redirectToRoute('app_signup');
+        }
+        if (strlen($lastname) > 50) {
+            $this->addFlash('error', 'Le nom ne peut pas dépasser 50 caractères.');
+            return $this->redirectToRoute('app_signup');
+        }
+        if (!preg_match('/^[a-zA-ZÀ-ÿ\s]+$/', $lastname)) {
+            $this->addFlash('error', 'Le nom ne doit contenir que des lettres.');
+            return $this->redirectToRoute('app_signup');
+        }
+
+        // Validation de l'email
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $this->addFlash('error', 'L\'adresse email n\'est pas valide.');
+            return $this->redirectToRoute('app_signup');
+        }
+
+        // Vérifier si l'email existe déjà
+        if ($userRepository->findOneBy(['email' => $email])) {
+            $this->addFlash('error', 'Cet email existe déjà.');
+            return $this->redirectToRoute('app_signup');
+        }
+
+        // Validation du mot de passe
+        if (strlen($password) < 6) {
+            $this->addFlash('error', 'Le mot de passe doit contenir au moins 6 caractères.');
+            return $this->redirectToRoute('app_signup');
+        }
+        if (!preg_match('/[A-Z]/', $password)) {
+            $this->addFlash('error', 'Le mot de passe doit contenir au moins une majuscule.');
+            return $this->redirectToRoute('app_signup');
+        }
+        if (!preg_match('/[0-9]/', $password)) {
+            $this->addFlash('error', 'Le mot de passe doit contenir au moins un chiffre.');
+            return $this->redirectToRoute('app_signup');
+        }
+        if ($password !== $confirmPassword) {
+            $this->addFlash('error', 'Les mots de passe ne correspondent pas.');
+            return $this->redirectToRoute('app_signup');
+        }
+
+        // Création de l'utilisateur
+        $user = new User();
+        $user->setPrenom($firstname);
+        $user->setNom($lastname);
+        $user->setEmail($email);
+        $user->setPassword($passwordHasher->hashPassword($user, $password));
+        $user->setRole($profileType);
+        $user->setStatus('active');
+        $user->setCreatedAt(new \DateTime());
+        
+        $entityManager->persist($user);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Compte créé avec succès. Veuillez vous connecter.');
+        return $this->redirectToRoute('app_signin');
     }
+
+    return $this->render('front/signup/index.html.twig');
+}
 }

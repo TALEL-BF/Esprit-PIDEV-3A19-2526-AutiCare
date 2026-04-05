@@ -1,23 +1,48 @@
-{% extends "base.html.twig" %}
+{% extends 'base.html.twig' %}
 
-{% block title %}Professeur Dashboard - AutiCare{% endblock %}
+{% block title %}Espace Professeur - AutiCare{% endblock %}
 
 {% block page_title %}Dashboard Professeur{% endblock %}
 
 {% block body %}
 <div class="container-fluid">
-    <div class="welcome-card" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">
-        <h2>Bienvenue, {{ app.user.prenom }} {{ app.user.nom }} !</h2>
-        <p>Espace Professeur - Gérez vos cours et élèves</p>
+    <div class="welcome-card">
+        <div class="row align-items-center">
+            <div class="col-md-8"><h2>Bienvenue, {{ app.user.prenom }} {{ app.user.nom }} !</h2><p>Espace Professeur - Gérez vos cours et élèves</p></div>
+            <div class="col-md-4 text-end"><a href="{{ path('app_profile') }}" class="btn-light-custom"><i class="fas fa-user-circle me-2"></i> Mon Profil</a></div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-3"><div class="stat-card"><div class="stat-icon purple"><i class="fas fa-users"></i></div><div class="stat-info"><h3>24</h3><p>Élèves</p></div></div></div>
+        <div class="col-md-3"><div class="stat-card"><div class="stat-icon green"><i class="fas fa-book"></i></div><div class="stat-info"><h3>8</h3><p>Cours</p></div></div></div>
+        <div class="col-md-3"><div class="stat-card"><div class="stat-icon orange"><i class="fas fa-clock"></i></div><div class="stat-info"><h3>15h</h3><p>Cette semaine</p></div></div></div>
+        <div class="col-md-3"><div class="stat-card"><div class="stat-icon pink"><i class="fas fa-star"></i></div><div class="stat-info"><h3>4.8</h3><p>Évaluation</p></div></div></div>
     </div>
 
     <div class="row g-4">
-        <div class="col-md-4"><div class="dashboard-card"><i class="fas fa-book-open"></i><h4>Gestion des cours</h4><p>Créer des cours</p></div></div>
-        <div class="col-md-4"><div class="dashboard-card"><i class="fas fa-tasks"></i><h4>Évaluations</h4><p>Suivre les résultats</p></div></div>
-        <div class="col-md-4"><div class="dashboard-card"><i class="fas fa-gamepad"></i><h4>Jeux pédagogiques</h4><p>Activités ludiques</p></div></div>
-        <div class="col-md-4"><div class="dashboard-card"><i class="fas fa-calendar-week"></i><h4>Emploi du temps</h4><p>Planning</p></div></div>
-        <div class="col-md-4"><div class="dashboard-card"><i class="fas fa-clock"></i><h4>Séances</h4><p>Gérer les séances</p></div></div>
-        <div class="col-md-4"><div class="dashboard-card"><i class="fas fa-calendar-alt"></i><h4>Événements</h4><p>Conférences</p></div></div>
+        <div class="col-md-4"><div class="menu-card" onclick="location.href='#'"><i class="fas fa-book-open"></i><h4>Gestion des cours</h4><p>Créer des cours</p></div></div>
+        <div class="col-md-4"><div class="menu-card" onclick="location.href='#'"><i class="fas fa-tasks"></i><h4>Évaluations</h4><p>Suivre les résultats</p></div></div>
+        <div class="col-md-4"><div class="menu-card" onclick="location.href='#'"><i class="fas fa-gamepad"></i><h4>Jeux pédagogiques</h4><p>Activités ludiques</p></div></div>
+        <div class="col-md-4"><div class="menu-card" onclick="location.href='#'"><i class="fas fa-calendar-week"></i><h4>Emploi du temps</h4><p>Planning</p></div></div>
+        <div class="col-md-4"><div class="menu-card" onclick="location.href='#'"><i class="fas fa-clock"></i><h4>Séances</h4><p>Gérer les séances</p></div></div>
+        <div class="col-md-4"><div class="menu-card" onclick="location.href='#'"><i class="fas fa-calendar-alt"></i><h4>Événements</h4><p>Conférences</p></div></div>
     </div>
 </div>
+<style>
+.welcome-card { background: linear-gradient(135deg, #9b59b6, #8e44ad); border-radius: 20px; padding: 25px 30px; color: white; margin-bottom: 30px; }
+.btn-light-custom { background: rgba(255,255,255,0.2); border: none; color: white; border-radius: 12px; padding: 10px 20px; text-decoration: none; display: inline-block; }
+.stat-card { background: white; border-radius: 20px; padding: 20px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+.stat-icon { width: 50px; height: 50px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
+.stat-icon.purple { background: rgba(147, 51, 234, 0.1); color: #9333ea; }
+.stat-icon.green { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+.stat-icon.orange { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+.stat-icon.pink { background: rgba(236, 72, 153, 0.1); color: #ec4899; }
+.stat-info h3 { font-size: 1.5rem; margin: 0; font-weight: 700; }
+.stat-info p { margin: 0; color: #666; font-size: 0.75rem; }
+.menu-card { background: white; border-radius: 20px; padding: 25px; text-align: center; cursor: pointer; transition: all 0.3s; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+.menu-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(155,89,182,0.15); }
+.menu-card i { font-size: 2rem; color: #9b59b6; margin-bottom: 15px; }
+.menu-card h4 { font-size: 1rem; margin-bottom: 10px; color: #333; }
+</style>
 {% endblock %}

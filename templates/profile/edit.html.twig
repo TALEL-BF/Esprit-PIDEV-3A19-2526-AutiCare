@@ -11,22 +11,42 @@
             <h4><i class="fas fa-edit"></i> Modifier mes informations</h4>
         </div>
         <div class="card-body">
-            {% for message in app.flashes('error') %}
-                <div class="alert alert-danger">{{ message }}</div>
-            {% endfor %}
+            {# Affichage des messages flash #}
             {% for message in app.flashes('success') %}
-                <div class="alert alert-success">{{ message }}</div>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
             {% endfor %}
 
-            <form method="post">
+            {% for message in app.flashes('error') %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+
+            <form method="post" id="profileForm">
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Prénom</label>
-                        <input type="text" name="prenom" class="form-control" value="{{ user.prenom }}" required>
+                        <label class="form-label">Prénom <span class="text-danger">*</span></label>
+                        <input type="text" name="prenom" id="prenom" class="form-control" 
+                               value="{{ user.prenom }}" required
+                               minlength="2" maxlength="50"
+                               pattern="[a-zA-ZÀ-ÿ\s]+"
+                               title="Le prénom ne doit contenir que des lettres">
+                        <small class="text-muted">2 à 50 caractères, lettres uniquement</small>
+                        <div class="invalid-feedback">Le prénom doit contenir 2 à 50 caractères (lettres uniquement)</div>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Nom</label>
-                        <input type="text" name="nom" class="form-control" value="{{ user.nom }}" required>
+                        <label class="form-label">Nom <span class="text-danger">*</span></label>
+                        <input type="text" name="nom" id="nom" class="form-control" 
+                               value="{{ user.nom }}" required
+                               minlength="2" maxlength="50"
+                               pattern="[a-zA-ZÀ-ÿ\s]+"
+                               title="Le nom ne doit contenir que des lettres">
+                        <small class="text-muted">2 à 50 caractères, lettres uniquement</small>
+                        <div class="invalid-feedback">Le nom doit contenir 2 à 50 caractères (lettres uniquement)</div>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Email</label>
@@ -35,7 +55,12 @@
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Téléphone</label>
-                        <input type="tel" name="phone" class="form-control" value="{{ user.phone }}">
+                        <input type="tel" name="phone" id="phone" class="form-control" 
+                               value="{{ user.phone }}"
+                               pattern="[0-9+\-\s]{8,20}"
+                               title="Format: +216 12 345 678 ou 12345678">
+                        <small class="text-muted">8 à 20 chiffres, peut contenir +, - et espaces</small>
+                        <div class="invalid-feedback">Format de téléphone invalide</div>
                     </div>
                 </div>
 
@@ -44,11 +69,29 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Mot de passe actuel</label>
-                            <input type="password" name="current_password" class="form-control" placeholder="Entrez votre mot de passe actuel">
+                            <input type="password" name="current_password" id="current_password" class="form-control" 
+                                   placeholder="Entrez votre mot de passe actuel">
+                            <small class="text-muted">Requis uniquement si vous changez le mot de passe</small>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Nouveau mot de passe</label>
-                            <input type="password" name="new_password" class="form-control" placeholder="Laissez vide pour ne pas changer">
+                            <input type="password" name="new_password" id="new_password" class="form-control" 
+                                   placeholder="Laissez vide pour ne pas changer"
+                                   minlength="6"
+                                   pattern="(?=.*[A-Z])(?=.*[0-9]).{6,}"
+                                   title="Au moins 6 caractères, 1 majuscule et 1 chiffre">
+                            <small class="text-muted">Au moins 6 caractères, 1 majuscule et 1 chiffre</small>
+                            <div class="invalid-feedback">Le mot de passe doit contenir au moins 6 caractères, une majuscule et un chiffre</div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="password-strength mt-2">
+                                <div class="progress" style="height: 5px;">
+                                    <div class="progress-bar" id="passwordStrengthBar" style="width: 0%;"></div>
+                                </div>
+                                <small id="passwordStrengthText" class="text-muted"></small>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -78,27 +121,227 @@
         border-bottom: 1px solid #eee;
         padding: 20px 25px;
     }
+    .card-header h4 {
+        margin: 0;
+        color: #333;
+    }
     .card-body {
         padding: 25px;
     }
     .form-label {
         font-weight: 600;
         margin-bottom: 8px;
+        color: #333;
     }
     .form-control {
         border-radius: 12px;
         padding: 10px 15px;
         border: 1px solid #ddd;
+        transition: all 0.2s;
     }
     .form-control:focus {
-        border-color: #9333ea;
-        box-shadow: 0 0 0 3px rgba(147,51,234,0.1);
+        border-color: #9b59b6;
+        box-shadow: 0 0 0 3px rgba(155,89,182,0.1);
+        outline: none;
+    }
+    .form-control:invalid {
+        border-color: #dc3545;
+    }
+    .form-control:valid:not(:placeholder-shown) {
+        border-color: #28a745;
     }
     .btn-primary {
-        background: linear-gradient(135deg, #9333ea, #7e22ce);
+        background: linear-gradient(135deg, #9b59b6, #8e44ad);
         border: none;
         border-radius: 12px;
         padding: 10px 25px;
+        color: white;
+        font-weight: 600;
+        transition: all 0.2s;
     }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(155,89,182,0.3);
+    }
+    .btn-secondary {
+        background: #6c757d;
+        border: none;
+        border-radius: 12px;
+        padding: 10px 25px;
+        color: white;
+        font-weight: 600;
+    }
+    .alert {
+        border-radius: 12px;
+        border: none;
+    }
+    .text-danger {
+        color: #dc3545 !important;
+    }
+    .border-top {
+        border-top: 1px solid #eee !important;
+    }
+    .password-strength {
+        margin-top: 5px;
+    }
+    .progress {
+        border-radius: 10px;
+        background-color: #e9ecef;
+    }
+    .progress-bar {
+        border-radius: 10px;
+        transition: width 0.3s ease;
+    }
+    .progress-bar.weak { background-color: #dc3545; width: 33%; }
+    .progress-bar.medium { background-color: #ffc107; width: 66%; }
+    .progress-bar.strong { background-color: #28a745; width: 100%; }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validation en temps réel du formulaire
+    const form = document.getElementById('profileForm');
+    const prenomInput = document.getElementById('prenom');
+    const nomInput = document.getElementById('nom');
+    const phoneInput = document.getElementById('phone');
+    const newPasswordInput = document.getElementById('new_password');
+    const currentPasswordInput = document.getElementById('current_password');
+
+    // Validation du prénom
+    prenomInput.addEventListener('input', function() {
+        const value = this.value;
+        const isValid = /^[a-zA-ZÀ-ÿ\s]{2,50}$/.test(value);
+        if (value && !isValid) {
+            this.classList.add('is-invalid');
+            this.classList.remove('is-valid');
+        } else if (value && isValid) {
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+        } else {
+            this.classList.remove('is-invalid', 'is-valid');
+        }
+    });
+
+    // Validation du nom
+    nomInput.addEventListener('input', function() {
+        const value = this.value;
+        const isValid = /^[a-zA-ZÀ-ÿ\s]{2,50}$/.test(value);
+        if (value && !isValid) {
+            this.classList.add('is-invalid');
+            this.classList.remove('is-valid');
+        } else if (value && isValid) {
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+        } else {
+            this.classList.remove('is-invalid', 'is-valid');
+        }
+    });
+
+    // Validation du téléphone
+    phoneInput.addEventListener('input', function() {
+        const value = this.value;
+        if (value) {
+            const isValid = /^[0-9+\-\s]{8,20}$/.test(value);
+            if (!isValid) {
+                this.classList.add('is-invalid');
+                this.classList.remove('is-valid');
+            } else {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            }
+        } else {
+            this.classList.remove('is-invalid', 'is-valid');
+        }
+    });
+
+    // Force du mot de passe
+    newPasswordInput.addEventListener('input', function() {
+        const password = this.value;
+        const bar = document.getElementById('passwordStrengthBar');
+        const text = document.getElementById('passwordStrengthText');
+        
+        if (!password) {
+            bar.style.width = '0%';
+            bar.className = 'progress-bar';
+            text.innerHTML = '';
+            return;
+        }
+        
+        let strength = 0;
+        if (password.length >= 6) strength++;
+        if (password.match(/[A-Z]/)) strength++;
+        if (password.match(/[0-9]/)) strength++;
+        
+        if (strength === 1) {
+            bar.style.width = '33%';
+            bar.className = 'progress-bar weak';
+            text.innerHTML = '⚠️ Mot de passe faible';
+            text.style.color = '#dc3545';
+        } else if (strength === 2) {
+            bar.style.width = '66%';
+            bar.className = 'progress-bar medium';
+            text.innerHTML = '⚠️ Mot de passe moyen';
+            text.style.color = '#ffc107';
+        } else if (strength === 3) {
+            bar.style.width = '100%';
+            bar.className = 'progress-bar strong';
+            text.innerHTML = '✅ Mot de passe fort';
+            text.style.color = '#28a745';
+        }
+        
+        // Validation en temps réel
+        const isValid = /^(?=.*[A-Z])(?=.*[0-9]).{6,}$/.test(password);
+        if (password && !isValid) {
+            this.classList.add('is-invalid');
+            this.classList.remove('is-valid');
+        } else if (password && isValid) {
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+        } else {
+            this.classList.remove('is-invalid', 'is-valid');
+        }
+    });
+
+    // Validation avant soumission
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        
+        // Vérifier prénom
+        if (!/^[a-zA-ZÀ-ÿ\s]{2,50}$/.test(prenomInput.value)) {
+            prenomInput.classList.add('is-invalid');
+            isValid = false;
+        }
+        
+        // Vérifier nom
+        if (!/^[a-zA-ZÀ-ÿ\s]{2,50}$/.test(nomInput.value)) {
+            nomInput.classList.add('is-invalid');
+            isValid = false;
+        }
+        
+        // Vérifier téléphone si renseigné
+        if (phoneInput.value && !/^[0-9+\-\s]{8,20}$/.test(phoneInput.value)) {
+            phoneInput.classList.add('is-invalid');
+            isValid = false;
+        }
+        
+        // Vérifier mot de passe si changement demandé
+        if (newPasswordInput.value && !/^(?=.*[A-Z])(?=.*[0-9]).{6,}$/.test(newPasswordInput.value)) {
+            newPasswordInput.classList.add('is-invalid');
+            isValid = false;
+        }
+        
+        // Vérifier mot de passe actuel si nouveau mot de passe
+        if (newPasswordInput.value && !currentPasswordInput.value) {
+            alert('Veuillez entrer votre mot de passe actuel');
+            currentPasswordInput.focus();
+            isValid = false;
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+            alert('Veuillez corriger les erreurs dans le formulaire');
+        }
+    });
+});
+</script>
 {% endblock %}

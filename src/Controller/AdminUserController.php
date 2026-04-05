@@ -48,47 +48,95 @@ class AdminUserController extends AbstractController
     }
 
     #[Route('/new', name: 'admin_users_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
-    {
-        $user = new User();
-        $user->setStatus('active');
-        $user->setCreatedAt(new \DateTime());
+public function new(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
+{
+    $user = new User();
+    $user->setStatus('active');
+    $user->setCreatedAt(new \DateTime());
 
-        $form = $this->createForm(UserType::class, $user);
-        $form->handleRequest($request);
+    $form = $this->createForm(UserType::class, $user);
+    $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $email = $user->getEmail();
-            
-            // Vérifier si l'email existe déjà
-            $existingUser = $entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
-            
-            if ($existingUser) {
-                $this->addFlash('error', 'Cet email existe déjà. Veuillez utiliser un autre email.');
-                return $this->redirectToRoute('admin_users_new');
-            }
-            
-            $plainPassword = $form->get('plainPassword')->getData();
-            
-            if ($plainPassword) {
-                $user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
-            } else {
-                $user->setPassword($passwordHasher->hashPassword($user, 'password123'));
-            }
+    if ($form->isSubmitted() && $form->isValid()) {
+        $email = $user->getEmail();
+        $prenom = $user->getPrenom();
+        $nom = $user->getNom();
+        $phone = $user->getPhone();
 
-            $entityManager->persist($user);
-            $entityManager->flush();
-
-            $this->addFlash('success', 'Utilisateur ajouté avec succès.');
-            return $this->redirectToRoute('admin_users_index');
+        // Validation du prénom
+        if (strlen($prenom) < 2) {
+            $this->addFlash('error', 'Le prénom doit contenir au moins 2 caractères.');
+            return $this->redirectToRoute('admin_users_new');
+        }
+        if (strlen($prenom) > 50) {
+            $this->addFlash('error', 'Le prénom ne peut pas dépasser 50 caractères.');
+            return $this->redirectToRoute('admin_users_new');
+        }
+        if (!preg_match('/^[a-zA-ZÀ-ÿ\s]+$/', $prenom)) {
+            $this->addFlash('error', 'Le prénom ne doit contenir que des lettres.');
+            return $this->redirectToRoute('admin_users_new');
         }
 
-        return $this->render('admin/user/form.html.twig', [
-            'form' => $form->createView(),
-            'page_title' => 'Ajouter un utilisateur',
-        ]);
+        // Validation du nom
+        if (strlen($nom) < 2) {
+            $this->addFlash('error', 'Le nom doit contenir au moins 2 caractères.');
+            return $this->redirectToRoute('admin_users_new');
+        }
+        if (strlen($nom) > 50) {
+            $this->addFlash('error', 'Le nom ne peut pas dépasser 50 caractères.');
+            return $this->redirectToRoute('admin_users_new');
+        }
+        if (!preg_match('/^[a-zA-ZÀ-ÿ\s]+$/', $nom)) {
+            $this->addFlash('error', 'Le nom ne doit contenir que des lettres.');
+            return $this->redirectToRoute('admin_users_new');
+        }
+
+        // Validation de l'email
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $this->addFlash('error', 'L\'adresse email n\'est pas valide.');
+            return $this->redirectToRoute('admin_users_new');
+        }
+
+        // Vérifier si l'email existe déjà
+        $existingUser = $entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+        if ($existingUser) {
+            $this->addFlash('error', 'Cet email existe déjà. Veuillez utiliser un autre email.');
+            return $this->redirectToRoute('admin_users_new');
+        }
+
+        // Validation du téléphone
+        if (!empty($phone)) {
+            if (!preg_match('/^[0-9+\-\s]{8,20}$/', $phone)) {
+                $this->addFlash('error', 'Le numéro de téléphone n\'est pas valide.');
+                return $this->redirectToRoute('admin_users_new');
+            }
+        }
+
+        $plainPassword = $form->get('plainPassword')->getData();
+        
+        if ($plainPassword) {
+            // Validation du mot de passe
+            if (strlen($plainPassword) < 6) {
+                $this->addFlash('error', 'Le mot de passe doit contenir au moins 6 caractères.');
+                return $this->redirectToRoute('admin_users_new');
+            }
+            $user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
+        } else {
+            $user->setPassword($passwordHasher->hashPassword($user, 'password123'));
+        }
+
+        $entityManager->persist($user);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Utilisateur ajouté avec succès.');
+        return $this->redirectToRoute('admin_users_index');
     }
 
+    return $this->render('admin/user/form.html.twig', [
+        'form' => $form->createView(),
+        'page_title' => 'Ajouter un utilisateur',
+    ]);
+}
     #[Route('/{id}/edit', name: 'admin_users_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, User $user, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
     {
