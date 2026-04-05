@@ -147,4 +147,30 @@ class AdminPlanningController extends AbstractController
         ];
     }
 
-   
+  private function applyEmploiSelection($form, EmploiDuTemps $emploi): void
+    {
+        $rdvId = $form->get('rdvSelection')->getData();
+        $seanceId = $form->get('seanceSelection')->getData();
+
+        $emploi->setIdRdv($rdvId ? (int) $rdvId : null);
+        $emploi->setIdSeance($seanceId ? (int) $seanceId : null);
+    }
+
+    private function isEmploiSelectionValid(EmploiDuTemps $emploi): bool
+    {
+        $hasRdv = null !== $emploi->getIdRdv();
+        $hasSeance = null !== $emploi->getIdSeance();
+
+        return $hasRdv xor $hasSeance;
+    }
+
+    private function getCurrentSchoolYear(): string
+    {
+        $year = (int) date('Y');
+        $month = (int) date('n');
+
+        $startYear = $month >= 9 ? $year : $year - 1;
+
+        return sprintf('%d-%d', $startYear, $startYear + 1);
+    }
+} 
