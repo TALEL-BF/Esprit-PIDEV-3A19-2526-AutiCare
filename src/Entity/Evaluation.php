@@ -39,7 +39,7 @@ class Evaluation
     #[ORM\JoinColumn(name: 'id_cours', referencedColumnName: 'id_cours')]
     private ?Cours $cours = null;
 
-    // Getters et Setters
+   
 
     public function getIdEval(): ?int
     {

@@ -23,7 +23,7 @@ class EvaluationController extends AbstractController
     ): Response {
         $filterCourseId = $request->query->get('cours_id');
         
-        // Récupérer les évaluations (filtrées ou non)
+       
         if ($filterCourseId && $filterCourseId !== 'all') {
             $evaluations = $evaluationRepository->findByCoursId($filterCourseId);
         } else {
@@ -32,7 +32,7 @@ class EvaluationController extends AbstractController
         
         $allCourses = $coursRepository->findAll();
         
-        // Statistiques
+       
         $totalQuestions = count($evaluations);
         $totalScore = 0;
         foreach ($evaluations as $eval) {
@@ -68,7 +68,7 @@ class EvaluationController extends AbstractController
             $evaluation = new Evaluation();
         }
         
-        // Récupération des données
+        
         $coursId = $request->request->get('cours_id');
         $question = $request->request->get('question');
         $choix1 = $request->request->get('choix1');
@@ -77,7 +77,7 @@ class EvaluationController extends AbstractController
         $bonneReponse = $request->request->get('bonne_reponse');
         $score = $request->request->get('score');
         
-        // Validation
+      
         if (empty($coursId) || empty($question) || empty($choix1) || empty($choix2) || empty($choix3) || empty($bonneReponse)) {
             $this->addFlash('error', 'Veuillez remplir tous les champs obligatoires');
             return $this->redirectToRoute('admin_evaluation');

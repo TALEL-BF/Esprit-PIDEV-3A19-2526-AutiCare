@@ -40,9 +40,7 @@ class Cours
     #[ORM\Column(name: 'images_mots', type: 'text', nullable: true)]
     private ?string $imagesMots = null;
 
-    /**
-     * @var Collection<int, Evaluation>
-     */
+    
     #[ORM\OneToMany(targetEntity: Evaluation::class, mappedBy: 'cours', cascade: ['remove'])]
     private Collection $evaluations;
 
@@ -51,7 +49,7 @@ class Cours
         $this->evaluations = new ArrayCollection();
     }
 
-    // ========== GETTERS ET SETTERS ==========
+    
 
     public function getIdCours(): ?int
     {
@@ -152,9 +150,7 @@ class Cours
         return $this;
     }
 
-    /**
-     * @return Collection<int, Evaluation>
-     */
+   
     public function getEvaluations(): Collection
     {
         return $this->evaluations;

@@ -48,7 +48,7 @@ class CoursController extends AbstractController
             ];
         }
 
-        // Récupérer les évaluations liées à ce cours
+       
         $evaluations = $evaluationRepository->findByCoursId($cours->getIdCours());
 
         return $this->render('front/cours/show.html.twig', [
@@ -77,9 +77,7 @@ class CoursController extends AbstractController
         ]);
     }
 
-    // ─────────────────────────────────────────────────────────────────
-    // ROUTES ADMIN
-    // ─────────────────────────────────────────────────────────────────
+    
 
     #[Route('/admin/cours', name: 'admin_cours_list')]
     public function adminIndex(CoursRepository $coursRepository): Response
@@ -147,7 +145,7 @@ class CoursController extends AbstractController
         }
         $motsString = implode(';', $motsArray);
 
-        // Gestion de l'image du cours
+       
         $imageFile = $request->files->get('image_file');
         if ($imageFile && $imageFile instanceof UploadedFile && $imageFile->isValid()) {
             $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
@@ -160,7 +158,7 @@ class CoursController extends AbstractController
                 $this->addFlash('error', 'Erreur lors de l\'upload de l\'image du cours');
             }
         } elseif (!$cours->getImage()) {
-            // Si aucune image n'est fournie et que le cours n'a pas d'image existante, mettre une image par défaut
+           
             $cours->setImage('default-course.jpg');
         }
 
