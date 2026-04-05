@@ -1,101 +1,23 @@
-{% extends 'admin/base_admin.html.twig' %}
+{% extends 'base.html.twig' %}
 
-{% block title %}Dashboard Admin - AutiCare{% endblock %}
+{% block title %}Admin Dashboard - AutiCare{% endblock %}
 
 {% block page_title %}Dashboard Administrateur{% endblock %}
 
 {% block body %}
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card bg-primary text-white mb-4">
-                <div class="card-body">
-                    <h1 class="mb-3">
-                        <i class="fas fa-chart-line"></i> 
-                        Bienvenue {{ app.user.prenom }} {{ app.user.nom }} !
-                    </h1>
-                    <p class="mb-0">Vous êtes connecté en tant qu'administrateur</p>
-                </div>
-            </div>
-        </div>
+    <div class="welcome-card" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">
+        <h2>Bienvenue, {{ app.user.prenom }} {{ app.user.nom }} !</h2>
+        <p>Vous êtes connecté en tant qu'Administrateur</p>
     </div>
 
-    <div class="row">
-        <div class="col-md-4 mb-3">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body text-center">
-                    <i class="fas fa-users fa-3x text-primary mb-3"></i>
-                    <h5 class="card-title">Utilisateurs</h5>
-                    <p class="card-text text-muted">Gérer tous les utilisateurs de la plateforme</p>
-                    <a href="{{ path('admin_users_index') }}" class="btn btn-primary">
-                        <i class="fas fa-arrow-right"></i> Accéder
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body text-center">
-                    <i class="fas fa-shield-alt fa-3x text-success mb-3"></i>
-                    <h5 class="card-title">Rôles</h5>
-                    <p class="card-text text-muted">Gérer les rôles et permissions</p>
-                    <a href="{{ path('admin_users_roles') }}" class="btn btn-success">
-                        <i class="fas fa-arrow-right"></i> Accéder
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body text-center">
-                    <i class="fas fa-book-open fa-3x text-info mb-3"></i>
-                    <h5 class="card-title">Cours</h5>
-                    <p class="card-text text-muted">Gérer les cours éducatifs</p>
-                    <a href="{{ path('admin_cours') }}" class="btn btn-info text-white">
-                        <i class="fas fa-arrow-right"></i> Accéder
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-4 mb-3">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body text-center">
-                    <i class="fas fa-calendar-alt fa-3x text-warning mb-3"></i>
-                    <h5 class="card-title">Événements</h5>
-                    <p class="card-text text-muted">Gérer les événements</p>
-                    <a href="{{ path('admin_evenements') }}" class="btn btn-warning">
-                        <i class="fas fa-arrow-right"></i> Accéder
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body text-center">
-                    <i class="fas fa-stethoscope fa-3x text-danger mb-3"></i>
-                    <h5 class="card-title">Consultations</h5>
-                    <p class="card-text text-muted">Gérer les consultations</p>
-                    <a href="{{ path('admin_therapie') }}" class="btn btn-danger">
-                        <i class="fas fa-arrow-right"></i> Accéder
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body text-center">
-                    <i class="fas fa-briefcase fa-3x text-secondary mb-3"></i>
-                    <h5 class="card-title">Emplois</h5>
-                    <p class="card-text text-muted">Gérer les offres d'emploi</p>
-                    <a href="{{ path('admin_planning') }}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-right"></i> Accéder
-                    </a>
-                </div>
-            </div>
-        </div>
+    <div class="row g-4">
+        <div class="col-md-4"><div class="dashboard-card"><i class="fas fa-users"></i><h4>Utilisateurs</h4><p>Gérer les comptes</p></div></div>
+        <div class="col-md-4"><div class="dashboard-card"><i class="fas fa-book-open"></i><h4>Cours</h4><p>Gérer les cours</p></div></div>
+        <div class="col-md-4"><div class="dashboard-card"><i class="fas fa-gamepad"></i><h4>Jeux</h4><p>Gérer les jeux</p></div></div>
+        <div class="col-md-4"><div class="dashboard-card"><i class="fas fa-calendar-alt"></i><h4>Événements</h4><p>Gérer les événements</p></div></div>
+        <div class="col-md-4"><div class="dashboard-card"><i class="fas fa-chart-line"></i><h4>Statistiques</h4><p>Voir les stats</p></div></div>
+        <div class="col-md-4"><div class="dashboard-card"><i class="fas fa-cog"></i><h4>Paramètres</h4><p>Configurer</p></div></div>
     </div>
 </div>
 {% endblock %}

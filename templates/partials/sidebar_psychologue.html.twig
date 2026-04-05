@@ -1,0 +1,66 @@
+<div id="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-icon"><i class="fas fa-brain"></i></div>
+        <div class="brand-text">
+            <h1>AutiCare</h1>
+            <span>Espace Psychologue</span>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">NAVIGATION</div>
+        <a class="nav-link-item {% if app.request.get('_route') == 'psychologue_dashboard' %}active{% endif %}" 
+           href="{{ path('psychologue_dashboard') }}">
+            <i class="fas fa-chart-pie"></i> <span>Dashboard</span>
+        </a>
+        
+        <div class="nav-section-label">GESTION</div>
+        
+        <a href="#" class="nav-link-item">
+            <i class="fas fa-calendar-week"></i> <span>Emploi du temps</span>
+        </a>
+        <a href="#" class="nav-link-item">
+            <i class="fas fa-calendar-check"></i> <span>Rendez-vous</span>
+        </a>
+        <a href="#" class="nav-link-item">
+            <i class="fas fa-notes-medical"></i> <span>Suivi thérapeutique</span>
+        </a>
+        <a href="#" class="nav-link-item">
+            <i class="fas fa-brain"></i> <span>Thérapies</span>
+        </a>
+        <a href="#" class="nav-link-item">
+            <i class="fas fa-newspaper"></i> <span>Articles & Conseils</span>
+        </a>
+        <a href="#" class="nav-link-item">
+            <i class="fas fa-calendar-alt"></i> <span>Événements</span>
+        </a>
+        
+        <!-- Mon Profil -->
+        <a href="{{ path('app_profile') }}" class="nav-link-item">
+            <i class="fas fa-user-circle"></i> <span>Mon Profil</span>
+        </a>
+        
+        <div class="nav-section-label">COMPTE</div>
+        <a href="{{ path('app_logout') }}" class="nav-link-item">
+            <i class="fas fa-sign-out-alt"></i> <span>Déconnexion</span>
+        </a>
+    </nav>
+
+    <div class="sidebar-footer">
+        <div class="admin-info">
+            <div class="admin-avatar">{{ app.user.prenom|first|upper }}</div>
+            <div>
+                <div class="admin-name">{{ app.user.prenom }} {{ app.user.nom }}</div>
+                <div class="admin-role">Psychologue</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleSection(event) {
+    if (event) event.stopPropagation();
+    const parent = event.target.closest('.nav-item-wrap');
+    if (parent) parent.classList.toggle('open');
+}
+</script>

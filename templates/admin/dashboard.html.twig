@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin Dashboard - AutiCare{% endblock %}
+
+{% block page_title %}Dashboard Administrateur{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="welcome-card" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">
+        <h2>Bienvenue, {{ app.user.prenom }} {{ app.user.nom }} !</h2>
+        <p>Vous êtes connecté en tant qu'Administrateur</p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="dashboard-card">
+                <i class="fas fa-users"></i>
+                <h4>Utilisateurs</h4>
+                <p>Gérer les comptes</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dashboard-card">
+                <i class="fas fa-book-open"></i>
+                <h4>Cours</h4>
+                <p>Gérer les cours</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dashboard-card">
+                <i class="fas fa-gamepad"></i>
+                <h4>Jeux</h4>
+                <p>Gérer les jeux</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dashboard-card">
+                <i class="fas fa-calendar-alt"></i>
+                <h4>Événements</h4>
+                <p>Gérer les événements</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dashboard-card">
+                <i class="fas fa-chart-line"></i>
+                <h4>Statistiques</h4>
+                <p>Voir les stats</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dashboard-card">
+                <i class="fas fa-cog"></i>
+                <h4>Paramètres</h4>
+                <p>Configurer</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -8,9 +8,8 @@
     </div>
 
     <nav class="sidebar-nav">
-        <div class="nav-section-label">NAVIGATION</div>
-        <a class="nav-link-item {% if app.request.get('_route') == 'admin_dashboard' %}active{% endif %}" 
-           href="{{ path('admin_dashboard') }}">
+        <div class="nav-section-label">Navigation</div>
+        <a class="nav-link-item" href="{{ path('admin_dashboard') }}">
             <i class="fas fa-chart-pie"></i> <span>Dashboard</span>
         </a>
         
@@ -74,7 +73,7 @@
         </a>
         
         <div class="nav-section-label">COMPTE</div>
-        <a href="{{ path('app_logout') }}" class="nav-link-item" onclick="return confirm('Voulez-vous vraiment vous déconnecter ?')">
+        <a href="{{ path('app_logout') }}" class="nav-link-item">
             <i class="fas fa-sign-out-alt"></i> <span>Déconnexion</span>
         </a>
     </nav>

@@ -1,0 +1,74 @@
+<div id="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-icon"><i class="fas fa-brain"></i></div>
+        <div class="brand-text">
+            <h1>AutiCare</h1>
+            <span>Espace Professeur</span>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">NAVIGATION</div>
+        <a class="nav-link-item {% if app.request.get('_route') == 'professeur_dashboard' %}active{% endif %}" 
+           href="{{ path('professeur_dashboard') }}">
+            <i class="fas fa-chart-pie"></i> <span>Dashboard</span>
+        </a>
+        
+        <div class="nav-section-label">GESTION</div>
+        
+        <div class="nav-item-wrap">
+            <div class="nav-link-item" onclick="toggleSection(event)">
+                <i class="fas fa-book-open"></i> <span>Gestion des cours</span>
+                <i class="fas fa-chevron-down nav-chevron"></i>
+            </div>
+            <div class="nav-sub">
+                <a href="#" class="nav-sub-link">Mes cours</a>
+                <a href="#" class="nav-sub-link">Ajouter un cours</a>
+            </div>
+        </div>
+        
+        <a href="#" class="nav-link-item">
+            <i class="fas fa-tasks"></i> <span>Évaluations</span>
+        </a>
+        <a href="#" class="nav-link-item">
+            <i class="fas fa-gamepad"></i> <span>Jeux pédagogiques</span>
+        </a>
+        <a href="#" class="nav-link-item">
+            <i class="fas fa-calendar-week"></i> <span>Emploi du temps</span>
+        </a>
+        <a href="#" class="nav-link-item">
+            <i class="fas fa-clock"></i> <span>Séances</span>
+        </a>
+        <a href="#" class="nav-link-item">
+            <i class="fas fa-calendar-alt"></i> <span>Événements</span>
+        </a>
+        
+        <!-- Mon Profil -->
+        <a href="{{ path('app_profile') }}" class="nav-link-item">
+            <i class="fas fa-user-circle"></i> <span>Mon Profil</span>
+        </a>
+        
+        <div class="nav-section-label">COMPTE</div>
+        <a href="{{ path('app_logout') }}" class="nav-link-item">
+            <i class="fas fa-sign-out-alt"></i> <span>Déconnexion</span>
+        </a>
+    </nav>
+
+    <div class="sidebar-footer">
+        <div class="admin-info">
+            <div class="admin-avatar">{{ app.user.prenom|first|upper }}</div>
+            <div>
+                <div class="admin-name">{{ app.user.prenom }} {{ app.user.nom }}</div>
+                <div class="admin-role">Professeur</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleSection(event) {
+    if (event) event.stopPropagation();
+    const parent = event.target.closest('.nav-item-wrap');
+    if (parent) parent.classList.toggle('open');
+}
+</script>

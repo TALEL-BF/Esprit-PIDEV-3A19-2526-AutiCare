@@ -1,60 +1,50 @@
-{% extends 'base.html.twig' %}
+{% extends "base.html.twig" %}
 
-{% block title %}Mon Espace - AutiCare{% endblock %}
+{% block title %}Espace Enfant - AutiCare{% endblock %}
+
+{% block page_title %}Mon Espace{% endblock %}
 
 {% block body %}
-<div class="container mt-5">
-    <div class="row">
-        <div class="col-12">
-            <div class="card bg-info text-white p-4 mb-4 rounded-4 shadow">
-                <div class="d-flex align-items-center">
-                    <div>
-                        <i class="fas fa-smile-wink fa-3x me-3"></i>
-                    </div>
-                    <div>
-                        <h1 class="mb-0">Bonjour {{ app.user.prenom }} !</h1>
-                        <p class="mb-0 mt-2">Prêt(e) à apprendre et t'amuser aujourd'hui ? 🌟</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="container-fluid">
+    <div class="welcome-card" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">
+        <h2>Bonjour, {{ app.user.prenom }} !</h2>
+        <p>Prêt à apprendre et t'amuser ? 🌟</p>
     </div>
 
-    <div class="row">
-        <div class="col-md-4 mb-3">
-            <div class="card h-100 shadow-sm text-center">
-                <div class="card-body">
-                    <i class="fas fa-book-open fa-3x text-primary mb-3"></i>
-                    <h5 class="card-title">Mes Cours 📚</h5>
-                    <p class="card-text text-muted">Apprendre de nouvelles choses</p>
-                    <a href="{{ path('app_cours') }}" class="btn btn-primary rounded-pill px-4">
-                        Commencer <i class="fas fa-arrow-right ms-1"></i>
-                    </a>
-                </div>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="dashboard-card">
+                <i class="fas fa-book-open"></i>
+                <h4>Mes cours</h4>
+                <p>Apprendre</p>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
-            <div class="card h-100 shadow-sm text-center">
-                <div class="card-body">
-                    <i class="fas fa-gamepad fa-3x text-success mb-3"></i>
-                    <h5 class="card-title">Jeux Éducatifs 🎮</h5>
-                    <p class="card-text text-muted">Jouer et apprendre en s'amusant</p>
-                    <a href="{{ path('app_jeux') }}" class="btn btn-success rounded-pill px-4">
-                        Jouer <i class="fas fa-play ms-1"></i>
-                    </a>
-                </div>
+        <div class="col-md-4">
+            <div class="dashboard-card">
+                <i class="fas fa-gamepad"></i>
+                <h4>Mes jeux</h4>
+                <p>Jouer</p>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
-            <div class="card h-100 shadow-sm text-center">
-                <div class="card-body">
-                    <i class="fas fa-trophy fa-3x text-warning mb-3"></i>
-                    <h5 class="card-title">Mes Progrès 🏆</h5>
-                    <p class="card-text text-muted">Voir mes points et récompenses</p>
-                    <a href="#" class="btn btn-warning rounded-pill px-4">
-                        Voir <i class="fas fa-chart-line ms-1"></i>
-                    </a>
-                </div>
+        <div class="col-md-4">
+            <div class="dashboard-card">
+                <i class="fas fa-calendar-week"></i>
+                <h4>Emploi du temps</h4>
+                <p>Mon planning</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dashboard-card">
+                <i class="fas fa-calendar-alt"></i>
+                <h4>Événements</h4>
+                <p>À venir</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dashboard-card">
+                <i class="fas fa-trophy"></i>
+                <h4>Récompenses</h4>
+                <p>Mes trophées</p>
             </div>
         </div>
     </div>

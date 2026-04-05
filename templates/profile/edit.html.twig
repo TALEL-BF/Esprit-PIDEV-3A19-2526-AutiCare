@@ -1,0 +1,104 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier mon profil - AutiCare{% endblock %}
+
+{% block page_title %}Modifier mon profil{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">
+            <h4><i class="fas fa-edit"></i> Modifier mes informations</h4>
+        </div>
+        <div class="card-body">
+            {% for message in app.flashes('error') %}
+                <div class="alert alert-danger">{{ message }}</div>
+            {% endfor %}
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success">{{ message }}</div>
+            {% endfor %}
+
+            <form method="post">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Prénom</label>
+                        <input type="text" name="prenom" class="form-control" value="{{ user.prenom }}" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Nom</label>
+                        <input type="text" name="nom" class="form-control" value="{{ user.nom }}" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" value="{{ user.email }}" disabled>
+                        <small class="text-muted">L'email ne peut pas être modifié</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Téléphone</label>
+                        <input type="tel" name="phone" class="form-control" value="{{ user.phone }}">
+                    </div>
+                </div>
+
+                <div class="border-top pt-4 mt-3">
+                    <h5><i class="fas fa-lock"></i> Changer de mot de passe</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Mot de passe actuel</label>
+                            <input type="password" name="current_password" class="form-control" placeholder="Entrez votre mot de passe actuel">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nouveau mot de passe</label>
+                            <input type="password" name="new_password" class="form-control" placeholder="Laissez vide pour ne pas changer">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Enregistrer
+                    </button>
+                    <a href="{{ path('app_profile') }}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Annuler
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        border: none;
+    }
+    .card-header {
+        background: transparent;
+        border-bottom: 1px solid #eee;
+        padding: 20px 25px;
+    }
+    .card-body {
+        padding: 25px;
+    }
+    .form-label {
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+    .form-control {
+        border-radius: 12px;
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+    }
+    .form-control:focus {
+        border-color: #9333ea;
+        box-shadow: 0 0 0 3px rgba(147,51,234,0.1);
+    }
+    .btn-primary {
+        background: linear-gradient(135deg, #9333ea, #7e22ce);
+        border: none;
+        border-radius: 12px;
+        padding: 10px 25px;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,149 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon Profil - AutiCare{% endblock %}
+
+{% block page_title %}Mon Profil{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="profile-header">
+        <div class="profile-avatar">
+            <i class="fas fa-user-circle"></i>
+        </div>
+        <div class="profile-info">
+            <h2>{{ app.user.prenom }} {{ app.user.nom }}</h2>
+            <p class="role-badge">{{ app.user.role|capitalize }}</p>
+            <p>{{ app.user.email }}</p>
+        </div>
+        <div class="profile-actions">
+            <a href="{{ path('app_profile_edit') }}" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Modifier mon profil
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-4">
+        <div class="col-md-6">
+            <div class="info-card">
+                <h4><i class="fas fa-user"></i> Informations personnelles</h4>
+                <table class="info-table">
+                    <tr>
+                        <th>Prénom :</th>
+                        <td>{{ app.user.prenom }}</td>
+                    </tr>
+                    <tr>
+                        <th>Nom :</th>
+                        <td>{{ app.user.nom }}</td>
+                    </tr>
+                    <tr>
+                        <th>Email :</th>
+                        <td>{{ app.user.email }}</td>
+                    </tr>
+                    <tr>
+                        <th>Téléphone :</th>
+                        <td>{{ app.user.phone|default('Non renseigné') }}</td>
+                    </tr>
+                    <tr>
+                        <th>Rôle :</th>
+                        <td>{{ app.user.role|capitalize }}</td>
+                    </tr>
+                    <tr>
+                        <th>Membre depuis :</th>
+                        <td>{{ app.user.createdAt|date('d/m/Y') }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="info-card">
+                <h4><i class="fas fa-chart-line"></i> Statistiques</h4>
+                <div class="stats-mini">
+                    <div class="stat-mini">
+                        <span class="stat-value">0</span>
+                        <span class="stat-label">Cours suivis</span>
+                    </div>
+                    <div class="stat-mini">
+                        <span class="stat-value">0</span>
+                        <span class="stat-label">Jeux joués</span>
+                    </div>
+                    <div class="stat-mini">
+                        <span class="stat-value">0</span>
+                        <span class="stat-label">Heures</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .profile-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 20px;
+        padding: 30px;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 25px;
+        flex-wrap: wrap;
+    }
+    .profile-avatar i {
+        font-size: 5rem;
+    }
+    .profile-info h2 {
+        margin: 0 0 5px 0;
+    }
+    .role-badge {
+        background: rgba(255,255,255,0.2);
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        margin-bottom: 10px;
+    }
+    .info-card {
+        background: white;
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .info-card h4 {
+        margin-bottom: 20px;
+        color: #333;
+    }
+    .info-table {
+        width: 100%;
+    }
+    .info-table tr {
+        border-bottom: 1px solid #eee;
+    }
+    .info-table th {
+        padding: 12px 0;
+        text-align: left;
+        font-weight: 600;
+        width: 40%;
+    }
+    .info-table td {
+        padding: 12px 0;
+        color: #666;
+    }
+    .stats-mini {
+        display: flex;
+        gap: 20px;
+        justify-content: space-around;
+    }
+    .stat-mini {
+        text-align: center;
+    }
+    .stat-mini .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #9333ea;
+        display: block;
+    }
+    .stat-mini .stat-label {
+        font-size: 0.8rem;
+        color: #666;
+    }
+</style>
+{% endblock %}
