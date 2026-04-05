@@ -113,11 +113,11 @@ class Event
         $this->sponsors = new ArrayCollection();
     }
 
-    // ============ VALIDATION PERSONNALISÉE 1: Heures ============
+    
     #[Assert\Callback]
     public function validateHeures(ExecutionContextInterface $context): void
     {
-        // Vérifier que l'heure de fin est après l'heure de début
+      
         if ($this->heureFin !== null && $this->heureDebut !== null) {
             $heureDebutTimestamp = $this->heureDebut->getTimestamp();
             $heureFinTimestamp = $this->heureFin->getTimestamp();
@@ -130,28 +130,28 @@ class Event
         }
     }
 
-    // ============ VALIDATION PERSONNALISÉE 2: Dates (PASSÉ + ORDER) ============
+    
     #[Assert\Callback]
     public function validateDates(ExecutionContextInterface $context): void
     {
         $today = new \DateTime();
         $today->setTime(0, 0, 0);
         
-        // CHECK 1: Start date cannot be in the past
+       
         if ($this->dateDebut !== null && $this->dateDebut < $today) {
             $context->buildViolation('La date de début ne peut pas être dans le passé')
                 ->atPath('dateDebut')
                 ->addViolation();
         }
         
-        // CHECK 2: End date cannot be in the past (if provided)
+        
         if ($this->dateFin !== null && $this->dateFin < $today) {
             $context->buildViolation('La date de fin ne peut pas être dans le passé')
                 ->atPath('dateFin')
                 ->addViolation();
         }
         
-        // CHECK 3: End date must be after start date
+       
         if ($this->dateFin !== null && $this->dateDebut !== null) {
             if ($this->dateFin < $this->dateDebut) {
                 $context->buildViolation('La date de fin doit être après la date de début')
@@ -161,13 +161,13 @@ class Event
         }
     }
 
-    // ============ VALIDATION PERSONNALISÉE 3: Même jour heures ============
+   
     #[Assert\Callback]
     public function validateDateTimeConsistency(ExecutionContextInterface $context): void
     {
-        // Si la date de début et date de fin sont identiques
+      
         if ($this->dateDebut !== null && $this->dateFin !== null && $this->dateDebut == $this->dateFin) {
-            // Alors l'heure de fin doit être après l'heure de début
+          
             if ($this->heureFin !== null && $this->heureDebut !== null) {
                 $heureDebutTimestamp = $this->heureDebut->getTimestamp();
                 $heureFinTimestamp = $this->heureFin->getTimestamp();
@@ -181,7 +181,7 @@ class Event
         }
     }
 
-    // ============ GETTERS ET SETTERS ============
+   
 
     public function getIdEvent(): ?int
     {

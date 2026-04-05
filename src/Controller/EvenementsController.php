@@ -73,21 +73,21 @@ public function addEvent(
     ValidatorInterface $validator
 ): JsonResponse
 {
-    // 🔥 DÉBOGAGE - Voir ce qui est reçu
+   
     error_log('=== ADD EVENT ===');
     error_log('POST: ' . print_r($request->request->all(), true));
     error_log('FILES: ' . print_r($request->files->all(), true));
     
     $event = new Event();
     
-    // Set basic info
+    
     $event->setTitre(trim($request->request->get('eventTitle', '')));
     $event->setDescription(trim($request->request->get('eventDescription', '')));
     $event->setTypeEvent($request->request->get('eventType', ''));
     $event->setLieu(trim($request->request->get('eventLocation', '')));
     $event->setMaxParticipant((int)$request->request->get('eventCapacity', 0));
     
-    // Handle dates
+    
     $startDate = $request->request->get('eventStartDate');
     $startTime = $request->request->get('eventStartTime');
     
@@ -116,14 +116,14 @@ public function addEvent(
         }
     }
     
-    // Handle status
+   
     $status = $request->request->get('eventStatus', 'planifie');
     $event->setStatus($status);
     
-    // Handle image
+ 
     $imageFile = $request->files->get('eventImage');
     
-    // 🔥 DÉBOGAGE - Vérifier l'image
+  
     error_log('Image file: ' . ($imageFile ? $imageFile->getClientOriginalName() : 'NULL'));
     
     if (!$imageFile) {
@@ -134,7 +134,7 @@ public function addEvent(
     $safeFilename = $slugger->slug($originalFilename);
     $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->getClientOriginalExtension();
     
-    // 🔥 DÉBOGAGE - Vérifier le dossier
+    
     $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/events';
     error_log('Upload directory: ' . $uploadDir);
     error_log('Directory exists? ' . (file_exists($uploadDir) ? 'YES' : 'NO'));
@@ -148,7 +148,7 @@ public function addEvent(
         $imageFile->move($uploadDir, $newFilename);
         error_log('File moved successfully: ' . $newFilename);
         
-        // 🔥 Stocker avec le bon chemin
+      
         $event->setImage('uploads/events/' . $newFilename);
         error_log('Image path stored: ' . $event->getImage());
         
@@ -157,7 +157,7 @@ public function addEvent(
         return $this->json(['success' => false, 'errors' => ['Erreur lors de l\'upload: ' . $e->getMessage()]]);
     }
     
-    // Validate entity
+   
     $errors = $validator->validate($event);
     
     if (count($errors) > 0) {
@@ -222,14 +222,14 @@ public function addEvent(
             return $this->json(['success' => false, 'errors' => ['Événement non trouvé']]);
         }
         
-        // Update basic info
+        
         $event->setTitre(trim($request->request->get('eventTitle', '')));
         $event->setDescription(trim($request->request->get('eventDescription', '')));
         $event->setTypeEvent($request->request->get('eventType', ''));
         $event->setLieu(trim($request->request->get('eventLocation', '')));
         $event->setMaxParticipant((int)$request->request->get('eventCapacity', 0));
         
-        // Handle dates
+     
         $startDate = $request->request->get('eventStartDate');
         $startTime = $request->request->get('eventStartTime');
         
@@ -262,14 +262,14 @@ public function addEvent(
             $event->setHeureFin(null);
         }
         
-        // Handle status
+        
         $status = $request->request->get('eventStatus', 'planifie');
         $event->setStatus($status);
         
-        // Handle image (optional for update)
+      
         $imageFile = $request->files->get('eventImage');
         if ($imageFile && $imageFile->getSize() > 0) {
-            // Delete old image
+           
             if ($event->getImage()) {
                 $oldImagePath = $this->getParameter('kernel.project_dir') . '/public/uploads/events/' . $event->getImage();
                 if (file_exists($oldImagePath)) {
@@ -293,7 +293,7 @@ public function addEvent(
             }
         }
         
-        // Validate entity
+      
         $errors = $validator->validate($event);
         
         if (count($errors) > 0) {
@@ -424,10 +424,9 @@ public function addEvent(
     'dateFin' => $event->getDateFin()?->format('Y-m-d'),
     'heureFin' => $event->getHeureFin()?->format('H:i'),
     'status' => $event->getStatus(),
-    // 🔥 CORRECTION ICI - Utilisez getImage(), pas getTitre()
-    'image' => $event->getImage(),  // ← Ceci doit retourner le nom du fichier, pas le titre
+    'image' => $event->getImage(),   
     'imagePath' => $event->getImage() ? '/' . $event->getImage() : null,
-    'sponsorCount' => $event->getSponsors()->count(),  // ✅ COMPTE LES VRAIS SPONSORS
+    'sponsorCount' => $event->getSponsors()->count(),  
     'inscrits' => 0
 ];
            
