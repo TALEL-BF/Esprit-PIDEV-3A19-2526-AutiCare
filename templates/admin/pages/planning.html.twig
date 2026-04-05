@@ -486,4 +486,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    
+    [planningSearchInput, planningDayFilter, planningTrancheFilter, planningAffectationFilter, planningSortSelect].forEach((el) => {
+        el?.addEventListener('input', applyAdvancedPlanningFilters);
+        el?.addEventListener('change', applyAdvancedPlanningFilters);
+    });
+
+    resetPlanningFilters?.addEventListener('click', function() {
+        if (planningSearchInput) planningSearchInput.value = '';
+        if (planningDayFilter) planningDayFilter.value = '';
+        if (planningTrancheFilter) planningTrancheFilter.value = '';
+        if (planningAffectationFilter) planningAffectationFilter.value = '';
+        if (planningSortSelect) planningSortSelect.value = planningDefaultSort;
+        applyAdvancedPlanningFilters();
+    });
+
+    if (planningSortSelect && !planningSortSelect.value) {
+        planningSortSelect.value = planningDefaultSort;
+    }
+    applyAdvancedPlanningFilters();
+});
+</script>
+{% endblock %}
