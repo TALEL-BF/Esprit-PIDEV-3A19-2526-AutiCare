@@ -48,7 +48,6 @@ class CoursController extends AbstractController
             ];
         }
 
-       
         $evaluations = $evaluationRepository->findByCoursId($cours->getIdCours());
 
         return $this->render('front/cours/show.html.twig', [
@@ -76,8 +75,6 @@ class CoursController extends AbstractController
             'evaluations' => $evaluations,
         ]);
     }
-
-    
 
     #[Route('/admin/cours', name: 'admin_cours_list')]
     public function adminIndex(CoursRepository $coursRepository): Response
@@ -107,8 +104,9 @@ class CoursController extends AbstractController
         SluggerInterface $slugger,
         CoursRepository $coursRepository
     ): Response {
-        $idCours = $request->request->get('id_cours');
 
+        // Récupérer ou créer l'entité
+        $idCours = $request->request->get('id_cours');
         if ($idCours && !empty($idCours)) {
             $cours = $coursRepository->find($idCours);
             if (!$cours) {
@@ -119,38 +117,89 @@ class CoursController extends AbstractController
             $cours = new Cours();
         }
 
+        // ── Lecture des champs depuis la requête HTML ──
+        $data        = $request->request->all('cours') ?: [];
+        $titre       = trim($data['titre'] ?? '');
+        $typeCours   = trim($data['typeCours'] ?? '');
+        $niveau      = trim($data['niveau'] ?? '');
+        $duree       = (int) ($data['duree'] ?? 0);
+        $description = trim($data['description'] ?? '');
+
+        // ── Validation manuelle ──
+        $errors = [];
+        if (strlen($titre) < 3) {
+            $errors[] = 'Le titre est requis (minimum 3 caractères)';
+        }
+        if (!in_array($typeCours, ['Académique', 'Social', 'Motricité', 'Langage'], true)) {
+            $errors[] = 'Veuillez sélectionner un type de cours valide';
+        }
+        if (!in_array($niveau, ['Débutant', 'Intermédiaire', 'Avancé'], true)) {
+            $errors[] = 'Veuillez sélectionner un niveau valide';
+        }
+        if ($duree < 1 || $duree > 300) {
+            $errors[] = 'La durée doit être comprise entre 1 et 300 minutes';
+        }
+        if (strlen($description) < 10) {
+            $errors[] = 'La description est requise (minimum 10 caractères)';
+        }
+
+        // ── Validation des mots ──
+        $mots      = $request->request->all('mots');
+        $motsArray = [];
+        if (is_array($mots)) {
+            foreach ($mots as $mot) {
+                $mot = strtoupper(trim($mot));
+                if (!empty($mot)) {
+                    $motsArray[] = $mot;
+                }
+            }
+        }
+        if (empty($motsArray)) {
+            $errors[] = 'Ajoutez au moins un mot';
+        }
+
+        // ── Si erreurs : recharger la page avec les messages flash ──
+        if (!empty($errors)) {
+            foreach ($errors as $error) {
+                $this->addFlash('error', $error);
+            }
+            return $this->redirectToRoute('admin_cours_list');
+        }
+
+        // ── Appliquer les valeurs sur l'entité ──
+        $cours->setTitre($titre);
+        $cours->setTypeCours($typeCours);
+        $cours->setNiveau($niveau);
+        $cours->setDuree($duree);
+        $cours->setDescription($description);
+
         $uploadDir = $this->getParameter('kernel.project_dir') . self::UPLOAD_DIR;
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
 
-        $titre       = $request->request->get('titre');
-        $typeCours   = $request->request->get('type_cours');
-        $niveau      = $request->request->get('niveau');
-        $duree       = $request->request->get('duree');
-        $description = $request->request->get('description');
-
-        if (empty($titre) || empty($typeCours) || empty($niveau) || empty($duree) || empty($description)) {
-            $this->addFlash('error', 'Veuillez remplir tous les champs obligatoires');
-            return $this->redirectToRoute('admin_cours_list');
-        }
-
-        $mots = $request->request->all('mots');
-        $motsArray = [];
-        if ($mots && is_array($mots)) {
-            foreach ($mots as $mot) {
-                $mot = strtoupper(trim($mot));
-                if (!empty($mot)) $motsArray[] = $mot;
+        // ── Gestion de l'image du cours ──
+        $removeImage = $request->request->get('remove_image') === '1';
+        if ($removeImage && $cours->getImage() && $cours->getImage() !== 'default-course.jpg') {
+            $oldImagePath = $uploadDir . '/' . $cours->getImage();
+            if (file_exists($oldImagePath)) {
+                unlink($oldImagePath);
             }
+            $cours->setImage(null);
         }
-        $motsString = implode(';', $motsArray);
 
-       
-        $imageFile = $request->files->get('image_file');
-        if ($imageFile && $imageFile instanceof UploadedFile && $imageFile->isValid()) {
-            $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
-            $safeFilename     = $slugger->slug($originalFilename);
-            $newFilename      = 'cours_' . $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
+        $filesData = $request->files->all('cours') ?: [];
+        $imageFile = $filesData['image'] ?? null;
+
+        if ($imageFile instanceof UploadedFile && $imageFile->isValid()) {
+            if ($cours->getImage() && $cours->getImage() !== 'default-course.jpg') {
+                $oldImagePath = $uploadDir . '/' . $cours->getImage();
+                if (file_exists($oldImagePath)) {
+                    unlink($oldImagePath);
+                }
+            }
+            $safeFilename = $slugger->slug(pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME));
+            $newFilename  = 'cours_' . $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
             try {
                 $imageFile->move($uploadDir, $newFilename);
                 $cours->setImage($newFilename);
@@ -158,12 +207,12 @@ class CoursController extends AbstractController
                 $this->addFlash('error', 'Erreur lors de l\'upload de l\'image du cours');
             }
         } elseif (!$cours->getImage()) {
-           
             $cours->setImage('default-course.jpg');
         }
 
+        // ── Gestion des images par mot ──
         $existingImagesByMot = $cours->getImagesByMot();
-        $imagesMots = [];
+        $imagesMots          = [];
 
         foreach ($motsArray as $index => $mot) {
             $mot = strtoupper(trim($mot));
@@ -171,11 +220,14 @@ class CoursController extends AbstractController
 
             $motImages = [];
 
+            // Images existantes conservées
             $keptExisting = $request->request->all('existing_images_' . $index);
             if ($keptExisting && is_array($keptExisting)) {
                 foreach ($keptExisting as $img) {
                     $img = trim($img);
-                    if (!empty($img)) $motImages[] = $img;
+                    if (!empty($img)) {
+                        $motImages[] = $img;
+                    }
                 }
             } else {
                 if (isset($existingImagesByMot[$mot])) {
@@ -183,6 +235,7 @@ class CoursController extends AbstractController
                 }
             }
 
+            // Nouvelles images uploadées
             $files = $request->files->get('images_files_' . $index);
             if ($files && is_array($files)) {
                 foreach ($files as $file) {
@@ -204,12 +257,7 @@ class CoursController extends AbstractController
             }
         }
 
-        $cours->setTitre($titre);
-        $cours->setTypeCours($typeCours);
-        $cours->setNiveau($niveau);
-        $cours->setDuree((int) $duree);
-        $cours->setDescription($description);
-        $cours->setMots($motsString);
+        $cours->setMots(implode(';', $motsArray));
         $cours->setImagesMots(implode(';', $imagesMots));
 
         $em->persist($cours);
@@ -223,15 +271,15 @@ class CoursController extends AbstractController
     public function editJson(Cours $cours): JsonResponse
     {
         return $this->json([
-            'idCours'    => $cours->getIdCours(),
-            'titre'      => $cours->getTitre(),
-            'typeCours'  => $cours->getTypeCours(),
-            'niveau'     => $cours->getNiveau(),
-            'duree'      => $cours->getDuree(),
-            'description'=> $cours->getDescription(),
-            'image'      => $cours->getImage(),
-            'mots'       => $cours->getMots(),
-            'imagesMots' => $cours->getImagesMots(),
+            'idCours'     => $cours->getIdCours(),
+            'titre'       => $cours->getTitre(),
+            'typeCours'   => $cours->getTypeCours(),
+            'niveau'      => $cours->getNiveau(),
+            'duree'       => $cours->getDuree(),
+            'description' => $cours->getDescription(),
+            'image'       => $cours->getImage(),
+            'mots'        => $cours->getMots(),
+            'imagesMots'  => $cours->getImagesMots(),
         ]);
     }
 
@@ -243,7 +291,9 @@ class CoursController extends AbstractController
 
             if ($cours->getImage() && $cours->getImage() !== 'default-course.jpg') {
                 $imagePath = $uploadDir . '/' . $cours->getImage();
-                if (file_exists($imagePath)) unlink($imagePath);
+                if (file_exists($imagePath)) {
+                    unlink($imagePath);
+                }
             }
 
             if ($cours->getImagesMots()) {
@@ -252,7 +302,9 @@ class CoursController extends AbstractController
                     if (isset($parts[1])) {
                         foreach (explode(',', $parts[1]) as $image) {
                             $imagePath = $uploadDir . '/' . trim($image);
-                            if (file_exists($imagePath)) unlink($imagePath);
+                            if (file_exists($imagePath)) {
+                                unlink($imagePath);
+                            }
                         }
                     }
                 }

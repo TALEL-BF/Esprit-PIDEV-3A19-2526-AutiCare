@@ -21,6 +21,58 @@
     --txt-label:          #334155;
 }
 
+/* Styles pour les erreurs de validation Symfony */
+.invalid-feedback {
+    color: #ef4444;
+    font-size: 0.75rem;
+    margin-top: 4px;
+    display: block;
+}
+
+/* ── Messages de validation temps réel ── */
+.field-msg {
+    display: block;
+    font-size: 0.73rem;
+    font-weight: 600;
+    margin-top: 5px;
+    min-height: 1em;
+}
+.field-msg.msg-error { color: #dc2626; }
+.field-msg.msg-ok    { color: #059669; }
+
+.form-control.is-invalid, 
+.form-select.is-invalid,
+textarea.form-control.is-invalid {
+    border-color: #ef4444 !important;
+    background-color: #fee2e2 !important;
+}
+
+.form-control.is-valid,
+.form-select.is-valid,
+textarea.form-control.is-valid {
+    border-color: #10b981 !important;
+    background-color: #d1fae5 !important;
+}
+
+/* Alertes flash */
+.alert-error {
+    background-color: #fee2e2;
+    border: 1px solid #ef4444;
+    color: #991b1b;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+}
+
+.alert-success {
+    background-color: #d1fae5;
+    border: 1px solid #10b981;
+    color: #065f46;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+}
+
 /* ── filtre ── */
 .filter-input {
     width: 200px; font-size:.8rem; padding:6px 14px;
@@ -184,7 +236,7 @@
     border-radius:12px; border:2px solid var(--pastel-lavender-b);
 }
 
-/* Info-box pastel - Changé de jaune à lavande */
+/* Info-box pastel */
 .info-box-pastel {
     background:var(--pastel-lavender); border:1.5px solid var(--pastel-lavender-b);
     border-radius:12px; padding:.65rem 1rem;
@@ -284,6 +336,18 @@
     <p>Créer et organiser les cours pédagogiques avec leurs mots et images</p>
 </div>
 
+{# ── AFFICHAGE DES FLASH MESSAGES ── #}
+{% for flash in app.flashes('success') %}
+    <div class="alert-success">
+        <i class="fas fa-check-circle"></i> {{ flash }}
+    </div>
+{% endfor %}
+{% for flash in app.flashes('error') %}
+    <div class="alert-error">
+        <i class="fas fa-exclamation-triangle"></i> {{ flash }}
+    </div>
+{% endfor %}
+
 {# ── STAT CARDS ── #}
 <div class="row g-3 mb-4">
     <div class="col-4">
@@ -337,8 +401,10 @@
                 <span class="form-mode-badge" id="formMode">Mode : Ajout</span>
             </div>
             <div class="card-box-body" style="background:#fdfcff; border-radius:0 0 18px 18px;">
-                <form id="courseForm" method="post" enctype="multipart/form-data"
-                      action="{{ path('admin_cours_save') }}">
+                {# novalidate pour désactiver la validation HTML5 #}
+                <form method="post" action="{{ path('admin_cours_save') }}"
+                      id="courseForm" enctype="multipart/form-data" novalidate>
+                    
                     <input type="hidden" name="id_cours" id="courseId" value="">
 
                     {# ── Section 1 : Infos générales ── #}
@@ -349,19 +415,24 @@
                         </div>
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label">📝 Titre du cours *</label>
-                                <input type="text" class="form-control" name="titre" id="courseTitle"
-                                       required placeholder="Ex: Les animaux de la ferme">
+                                <label class="form-label" for="cours_titre">📝 Titre du cours *</label>
+                                <input type="text" id="cours_titre" name="cours[titre]"
+                                       class="form-control" placeholder="Ex: Les animaux de la ferme">
+                                {% for message in app.flashes('error_titre') %}
+                                    <span class="invalid-feedback" style="display:block;">{{ message }}</span>
+                                {% endfor %}
+                                <span class="field-msg" id="msg_titre"></span>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">🏷️ Type de cours *</label>
-                                <select class="form-select" name="type_cours" id="courseType" required>
-                                    <option value="">Sélectionnez un type</option>
-                                    <option value="Académique">🎓 Académique</option>
-                                    <option value="Social">🤝 Social</option>
-                                    <option value="Motricité">🏃 Motricité</option>
-                                    <option value="Langage">💬 Langage</option>
+                                <label class="form-label" for="cours_typeCours">🏷️ Type de cours *</label>
+                                <select id="cours_typeCours" name="cours[typeCours]" class="form-select">
+                                    <option value="">-- Choisir un type --</option>
+                                    <option value="Académique">Académique</option>
+                                    <option value="Social">Social</option>
+                                    <option value="Motricité">Motricité</option>
+                                    <option value="Langage">Langage</option>
                                 </select>
+                                <span class="field-msg" id="msg_typeCours"></span>
                             </div>
                         </div>
                     </div>
@@ -374,18 +445,20 @@
                         </div>
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label">🌱 Niveau *</label>
-                                <select class="form-select" name="niveau" id="courseLevel" required>
-                                    <option value="">Sélectionnez un niveau</option>
-                                    <option value="Débutant">🌱 Débutant</option>
-                                    <option value="Intermédiaire">📈 Intermédiaire</option>
-                                    <option value="Avancé">🔥 Avancé</option>
+                                <label class="form-label" for="cours_niveau">🌱 Niveau *</label>
+                                <select id="cours_niveau" name="cours[niveau]" class="form-select">
+                                    <option value="">-- Choisir un niveau --</option>
+                                    <option value="Débutant">Débutant</option>
+                                    <option value="Intermédiaire">Intermédiaire</option>
+                                    <option value="Avancé">Avancé</option>
                                 </select>
+                                <span class="field-msg" id="msg_niveau"></span>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">⏱️ Durée (minutes) *</label>
-                                <input type="number" class="form-control" name="duree" id="courseDuration"
-                                       required placeholder="Ex: 30" min="1">
+                                <label class="form-label" for="cours_duree">⏱️ Durée (minutes) *</label>
+                                <input type="number" id="cours_duree" name="cours[duree]"
+                                       class="form-control" placeholder="Ex: 30" min="1">
+                                <span class="field-msg" id="msg_duree"></span>
                             </div>
                         </div>
                     </div>
@@ -398,13 +471,12 @@
                         </div>
                         <div class="row g-3 align-items-center">
                             <div class="col-md-8">
-                                <label class="form-label">🖼️ Choisir une image</label>
-                                <input type="file" class="form-control" name="image_file" id="courseImage"
-                                       accept="image/*"
+                                <label class="form-label" for="cours_image_file">🖼️ Choisir une image</label>
+                                <input type="file" id="cours_image_file" name="cours[image]"
+                                       class="form-control" accept="image/*"
                                        style="background:var(--pastel-rose); border-color:var(--pastel-rose-b);">
-                                <small style="color:#9d174d; font-size:.75rem; margin-top:4px; display:block;">
-                                    Format recommandé : JPG ou PNG. Laissez vide pour conserver l'image actuelle.
-                                </small>
+                                <span class="field-msg" id="msg_image"></span>
+                               
                             </div>
                             <div class="col-md-4 text-center">
                                 <div id="currentImagePreview" style="display:none;">
@@ -430,13 +502,15 @@
                             <span class="section-icon"><i class="fas fa-align-left"></i></span>
                             Description
                         </div>
-                        <label class="form-label">📄 Description du cours *</label>
-                        <textarea class="form-control" name="description" id="courseDescription" rows="3"
-                                  required placeholder="Décrivez le cours de façon claire et simple..."
+                        <label class="form-label" for="cours_description">📄 Description du cours *</label>
+                        <textarea id="cours_description" name="cours[description]"
+                                  class="form-control" rows="3"
+                                  placeholder="Décrivez le cours de façon claire et simple..."
                                   style="background:var(--pastel-lavender); border-color:var(--pastel-lavender-b); resize:vertical;"></textarea>
+                        <span class="field-msg" id="msg_description"></span>
                     </div>
 
-                    {# ── Section 5 : Mots & Images ── #}
+                    {# ── Section 5 : Mots & Images (personnalisé) ── #}
                     <div class="form-section fs-rose">
                         <div class="form-section-title">
                             <span class="section-icon"><i class="fas fa-images"></i></span>
@@ -457,12 +531,14 @@
                                         <input type="text" class="form-control word-input" name="mots[]"
                                                placeholder="Ex: CHEVAL" required
                                                style="background:#fff8fb; border-color:#f9a8d4;">
+                                        <span class="validation-message word-validation" style="font-size:0.75rem; color:#ef4444;"></span>
                                     </div>
                                     <div class="col-md-5">
-                                        <label class="form-label">📷 Images du mot</label>
+                                        <label class="form-label">📷 Images du mot *</label>
                                         <input type="file" class="form-control images-file" name="images_files_0[]"
                                                accept="image/*" multiple
                                                style="background:#fff8fb; border-color:#f9a8d4;">
+                                        <span class="images-validation-message" style="font-size:0.75rem; color:#ef4444; display:block; margin-top:4px;"></span>
                                     </div>
                                     <div class="col-md-2">
                                         <button type="button" class="btn-danger-soft remove-mot"
@@ -482,6 +558,12 @@
                         <button type="button" class="btn-add-word mt-2" id="addMotBtn">
                             <i class="fas fa-plus-circle"></i> Ajouter un mot avec ses images
                         </button>
+                        <div id="wordsValidationError" style="color:#ef4444; font-size:0.75rem; margin-top:8px; display:none;">
+                            ✗ Ajoutez au moins un mot valide
+                        </div>
+                        <div id="imagesValidationError" style="color:#ef4444; font-size:0.75rem; margin-top:8px; display:none;">
+                            ✗ Chaque mot doit avoir au moins une image
+                        </div>
                     </div>
 
                     {# ── Boutons ── #}
@@ -493,6 +575,7 @@
                             <i class="fas fa-times me-1"></i> Annuler
                         </button>
                     </div>
+
                 </form>
             </div>
         </div>
@@ -704,7 +787,208 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let motIndex = 1;
 
-    /* ── Helpers images ── */
+    /* ── Vérifier si un mot a au moins une image (existante ou nouvelle) ── */
+    function checkWordHasImages(card) {
+        const existingImages = card.querySelectorAll('.existing-image').length;
+        const newFiles = card.querySelector('.images-file').files.length;
+        return existingImages > 0 || newFiles > 0;
+    }
+
+    /* ── Valider les images pour chaque mot ── */
+    function validateWordImages() {
+        const cards = document.querySelectorAll('.mot-image-card');
+        let allValid = true;
+        
+        cards.forEach((card, idx) => {
+            const hasImages = checkWordHasImages(card);
+            const imagesMsgSpan = card.querySelector('.images-validation-message');
+            const imagesInput = card.querySelector('.images-file');
+            
+            if (!hasImages) {
+                allValid = false;
+                if (imagesMsgSpan) {
+                    imagesMsgSpan.textContent = '✗ Ce mot doit avoir au moins une image';
+                    imagesMsgSpan.style.color = '#ef4444';
+                }
+                if (imagesInput) {
+                    imagesInput.classList.add('is-invalid');
+                    imagesInput.classList.remove('is-valid');
+                }
+            } else {
+                if (imagesMsgSpan) {
+                    imagesMsgSpan.textContent = '✓ Au moins une image';
+                    imagesMsgSpan.style.color = '#059669';
+                }
+                if (imagesInput) {
+                    imagesInput.classList.remove('is-invalid');
+                    imagesInput.classList.add('is-valid');
+                }
+            }
+        });
+        
+        const globalErrorDiv = document.getElementById('imagesValidationError');
+        if (globalErrorDiv) {
+            if (!allValid && cards.length > 0) {
+                globalErrorDiv.style.display = 'block';
+            } else {
+                globalErrorDiv.style.display = 'none';
+            }
+        }
+        
+        return allValid;
+    }
+
+    /* ── Valider les mots (non vides) ── */
+    function validateWords() {
+        const wordInputs = document.querySelectorAll('.word-input');
+        let hasValidWord = false;
+        
+        wordInputs.forEach(input => {
+            const value = input.value.trim();
+            const msgSpan = input.parentElement.parentElement.querySelector('.word-validation');
+            if (value === '') {
+                if (msgSpan) {
+                    msgSpan.textContent = '✗ Ce champ est requis';
+                    msgSpan.style.color = '#ef4444';
+                }
+                input.classList.add('is-invalid');
+                input.classList.remove('is-valid');
+            } else {
+                hasValidWord = true;
+                if (msgSpan) {
+                    msgSpan.textContent = '✓ Correct';
+                    msgSpan.style.color = '#059669';
+                }
+                input.classList.add('is-valid');
+                input.classList.remove('is-invalid');
+            }
+        });
+        
+        const errorDiv = document.getElementById('wordsValidationError');
+        if (errorDiv) {
+            if (!hasValidWord && wordInputs.length > 0) {
+                errorDiv.style.display = 'block';
+            } else {
+                errorDiv.style.display = 'none';
+            }
+        }
+        
+        return hasValidWord;
+    }
+
+    /* ── Validation globale avant soumission ── */
+    function validateAll() {
+        const titreValid = validateTitre();
+        const typeValid = validateTypeCours();
+        const niveauValid = validateNiveau();
+        const dureeValid = validateDuree();
+        const imageValid = validateImage();
+        const descriptionValid = validateDescription();
+        const wordsValid = validateWords();
+        const imagesValid = validateWordImages();
+        
+        return titreValid && typeValid && niveauValid && dureeValid && 
+               imageValid && descriptionValid && wordsValid && imagesValid;
+    }
+
+    function setFieldState(el, errMsg, msgId) {
+        const span = document.getElementById(msgId);
+        if (errMsg) {
+            el.classList.add('is-invalid');
+            el.classList.remove('is-valid');
+            if (span) { span.textContent = '✗ ' + errMsg; span.className = 'field-msg msg-error'; }
+        } else {
+            el.classList.remove('is-invalid');
+            el.classList.add('is-valid');
+            if (span) { span.textContent = '✓ Correct'; span.className = 'field-msg msg-ok'; }
+        }
+    }
+
+    /* Titre : min 3, max 255, sans caractères spéciaux */
+    function validateTitre() {
+        const el        = document.getElementById('cours_titre');
+        const val       = el.value.trim();
+        const reSpecial = /[^a-zA-ZÀ-ÿ0-9\s\-']/;
+        if (val === '')               setFieldState(el, 'Le titre est requis', 'msg_titre');
+        else if (val.length < 3)      setFieldState(el, 'Minimum 3 caractères', 'msg_titre');
+        else if (val.length > 255)    setFieldState(el, 'Maximum 255 caractères', 'msg_titre');
+        else if (reSpecial.test(val)) setFieldState(el, 'Caractères spéciaux non autorisés (@, #, !, $…)', 'msg_titre');
+        else                          setFieldState(el, null, 'msg_titre');
+        return val.length >= 3 && val.length <= 255 && !reSpecial.test(val);
+    }
+
+    /* Type de cours */
+    function validateTypeCours() {
+        const el  = document.getElementById('cours_typeCours');
+        const ok  = ['Académique', 'Social', 'Motricité', 'Langage'].includes(el.value);
+        setFieldState(el, ok ? null : 'Veuillez sélectionner un type de cours', 'msg_typeCours');
+        return ok;
+    }
+
+    /* Niveau */
+    function validateNiveau() {
+        const el  = document.getElementById('cours_niveau');
+        const ok  = ['Débutant', 'Intermédiaire', 'Avancé'].includes(el.value);
+        setFieldState(el, ok ? null : 'Veuillez sélectionner un niveau', 'msg_niveau');
+        return ok;
+    }
+
+    /* Durée : 1–300 */
+    function validateDuree() {
+        const el  = document.getElementById('cours_duree');
+        const val = parseInt(el.value, 10);
+        if (!el.value.trim())          setFieldState(el, 'La durée est requise', 'msg_duree');
+        else if (isNaN(val) || val < 1) setFieldState(el, 'Durée minimum : 1 minute', 'msg_duree');
+        else if (val > 300)             setFieldState(el, 'Durée maximum : 300 minutes', 'msg_duree');
+        else                            setFieldState(el, null, 'msg_duree');
+        return !isNaN(val) && val >= 1 && val <= 300;
+    }
+
+    /* Image : obligatoire en mode ajout (pas d'image existante) */
+    function validateImage() {
+        const el          = document.getElementById('cours_image_file');
+        const hasExisting = document.getElementById('currentImagePreview')?.style.display !== 'none';
+        const removed     = document.getElementById('removeImageField')?.value === '1';
+        const hasFile     = el.files && el.files.length > 0;
+        // Valide si : nouveau fichier sélectionné, OU image existante non supprimée
+        if (!hasFile && (!hasExisting || removed)) {
+            setFieldState(el, 'Une image est requise pour ce cours', 'msg_image');
+            return false;
+        }
+        setFieldState(el, null, 'msg_image');
+        return true;
+    }
+
+    /* Description : min 30 car., min 5 mots, pas uniquement chiffres/symboles */
+    function validateDescription() {
+        const el    = document.getElementById('cours_description');
+        const val   = el.value.trim();
+        const words = val.split(/\s+/).filter(w => w.length > 0);
+        if (val === '')         setFieldState(el, 'La description est requise', 'msg_description');
+        else if (val.length < 30)    setFieldState(el, 'Minimum 30 caractères pour une description utile', 'msg_description');
+        else if (words.length < 5)   setFieldState(el, 'Minimum 5 mots requis', 'msg_description');
+        else if (/^[\d\s\W]+$/.test(val)) setFieldState(el, 'La description doit contenir du texte significatif', 'msg_description');
+        else                         setFieldState(el, null, 'msg_description');
+        return val.length >= 30 && words.length >= 5 && !/^[\d\s\W]+$/.test(val);
+    }
+
+    /* Attacher les événements sur chaque champ */
+    document.getElementById('cours_titre')       ?.addEventListener('input',  validateTitre);
+    document.getElementById('cours_typeCours')   ?.addEventListener('change', validateTypeCours);
+    document.getElementById('cours_niveau')      ?.addEventListener('change', validateNiveau);
+    document.getElementById('cours_duree')       ?.addEventListener('input',  validateDuree);
+    document.getElementById('cours_image_file')  ?.addEventListener('change', validateImage);
+    document.getElementById('cours_description') ?.addEventListener('input',  validateDescription);
+
+    /* Bloquer le submit si un champ est invalide */
+    document.getElementById('courseForm')?.addEventListener('submit', function (e) {
+        if (!validateAll()) {
+            e.preventDefault();
+            const first = this.querySelector('.is-invalid');
+            if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    });
+
     function attachImagePreview(fileInput, container) {
         if (!fileInput) return;
         fileInput.addEventListener('change', function () {
@@ -720,6 +1004,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 };
                 reader.readAsDataURL(file);
             });
+            // Valider les images après changement et mettre à jour l'apparence du champ
+            validateWordImages();
         });
     }
 
@@ -732,9 +1018,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 <input type="hidden" name="existing_images_${idx}[]" value="${image}">
                 <img src="/uploads/images/${image}" alt="Image du mot">
                 <span class="remove-existing">×</span>`;
-            div.querySelector('.remove-existing').onclick = () => div.remove();
+            div.querySelector('.remove-existing').onclick = () => {
+                div.remove();
+                validateWordImages();
+            };
             container.appendChild(div);
         });
+        // Après avoir affiché les images existantes, valider
+        setTimeout(() => validateWordImages(), 10);
     }
 
     function initPreviews() {
@@ -765,6 +1056,8 @@ document.addEventListener('DOMContentLoaded', function () {
             btn.onclick = function () {
                 this.closest('.mot-image-card').remove();
                 updateMotNumbers();
+                validateWords();
+                validateWordImages();
             };
         });
     }
@@ -784,12 +1077,14 @@ document.addEventListener('DOMContentLoaded', function () {
                            value="${(motVal || '').replace(/"/g,'&quot;')}"
                            placeholder="Ex: CHEVAL" required
                            style="background:#fff8fb; border-color:#f9a8d4;">
+                    <span class="validation-message word-validation" style="font-size:0.75rem; color:#ef4444;"></span>
                 </div>
                 <div class="col-md-5">
-                    <label class="form-label">📷 Images du mot</label>
+                    <label class="form-label">📷 Images du mot *</label>
                     <input type="file" class="form-control images-file" name="images_files_${idx}[]"
                            accept="image/*" multiple
                            style="background:#fff8fb; border-color:#f9a8d4;">
+                    <span class="images-validation-message" style="font-size:0.75rem; color:#ef4444; display:block; margin-top:4px;"></span>
                 </div>
                 <div class="col-md-2">
                     <button type="button" class="btn-danger-soft remove-mot" style="width:100%;">
@@ -803,17 +1098,32 @@ document.addEventListener('DOMContentLoaded', function () {
                     <div class="new-images-list"></div>
                 </div>
             </div>`;
-        if (imgs && imgs.length) displayExistingImages(card.querySelector('.existing-images-list'), imgs, idx);
+        
+        // Afficher les images existantes si présentes
+        if (imgs && imgs.length) {
+            displayExistingImages(card.querySelector('.existing-images-list'), imgs, idx);
+        }
+        
+        // Attacher l'aperçu des nouvelles images
         attachImagePreview(card.querySelector('.images-file'), card.querySelector('.new-images-list'));
+        
+        // Ajouter les événements de validation
+        const wordInput = card.querySelector('.word-input');
+        wordInput.addEventListener('input', validateWords);
+        
         return card;
     }
 
     /* ── Ajouter un mot ── */
     document.getElementById('addMotBtn')?.addEventListener('click', function () {
-        document.getElementById('motsImagesContainer').appendChild(makeMotCard(motIndex, '', []));
+        const container = document.getElementById('motsImagesContainer');
+        const newCard = makeMotCard(motIndex, '', []);
+        container.appendChild(newCard);
         motIndex++;
         updateMotNumbers();
         setupRemoveButtons();
+        validateWords();
+        validateWordImages();
     });
 
     /* ── Annuler ── */
@@ -830,6 +1140,8 @@ document.addEventListener('DOMContentLoaded', function () {
             motIndex = 1;
             updateMotNumbers();
             setupRemoveButtons();
+            validateWords();
+            validateWordImages();
         }
     });
 
@@ -838,7 +1150,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (confirm('Voulez-vous supprimer l\'image de ce cours ?')) {
             document.getElementById('removeImageField').value = '1';
             document.getElementById('currentImagePreview').style.display = 'none';
-            document.getElementById('courseImage').value = '';
+            document.getElementById('course_image_file').value = '';
+            validateImage();
         }
     });
 
@@ -863,11 +1176,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (!response.ok) throw new Error('Erreur réseau');
                 const data = await response.json();
                 
-                document.getElementById('courseTitle').value       = data.titre || '';
-                document.getElementById('courseType').value        = data.typeCours || '';
-                document.getElementById('courseLevel').value       = data.niveau || '';
-                document.getElementById('courseDuration').value    = data.duree || '';
-                document.getElementById('courseDescription').value = data.description || '';
+                document.getElementById('cours_titre').value       = data.titre || '';
+                document.getElementById('cours_typeCours').value   = data.typeCours || '';
+                document.getElementById('cours_niveau').value      = data.niveau || '';
+                document.getElementById('cours_duree').value       = data.duree || '';
+                document.getElementById('cours_description').value = data.description || '';
                 
                 // Gestion de l'image du cours
                 if (data.image && data.image !== '') {
@@ -876,9 +1189,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     document.getElementById('currentImagePreview').style.display = 'none';
                 }
-                
-                // Réinitialiser le champ fichier
-                document.getElementById('courseImage').value = '';
                 
                 // Traitement des mots et images
                 const mots = (data.mots && data.mots !== '') ? data.mots.split(';') : [''];
@@ -907,6 +1217,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 motIndex = mots.length;
                 updateMotNumbers();
                 setupRemoveButtons();
+                validateWords();
+                validateWordImages();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } catch (err) {
                 console.error('Erreur:', err);
@@ -934,9 +1246,16 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    // Attacher la validation des mots
+    document.querySelectorAll('.word-input').forEach(input => {
+        input.addEventListener('input', validateWords);
+    });
+    
     initPreviews();
     updateMotNumbers();
     setupRemoveButtons();
+    validateWords();
+    validateWordImages();
 });
 </script>
 {% endblock %}

@@ -1,4 +1,5 @@
 <?php
+// src/Entity/Cours.php
 
 namespace App\Entity;
 
@@ -6,6 +7,7 @@ use App\Repository\CoursRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CoursRepository::class)]
 #[ORM\Table(name: 'cours')]
@@ -17,24 +19,55 @@ class Cours
     private ?int $idCours = null;
 
     #[ORM\Column(name: 'titre', type: 'string', length: 255)]
+    #[Assert\NotBlank(message: "Le titre est requis")]
+    #[Assert\Length(
+        min: 3,
+        max: 255,
+        minMessage: "Le titre doit contenir au moins {{ limit }} caractères",
+        maxMessage: "Le titre ne peut pas dépasser {{ limit }} caractères"
+    )]
     private ?string $titre = null;
 
     #[ORM\Column(name: 'description', type: 'text')]
+    #[Assert\NotBlank(message: "La description est requise")]
+    #[Assert\Length(
+        min: 10,
+        minMessage: "La description doit contenir au moins {{ limit }} caractères"
+    )]
     private ?string $description = null;
 
     #[ORM\Column(name: 'type_cours', type: 'text')]
+    #[Assert\NotBlank(message: "Veuillez sélectionner un type de cours")]
+    #[Assert\Choice(
+        choices: ['Académique', 'Social', 'Motricité', 'Langage'],
+        message: "Type de cours invalide. Choisissez parmi : Académique, Social, Motricité, Langage"
+    )]
     private ?string $typeCours = null;
 
     #[ORM\Column(name: 'niveau', type: 'string', length: 100)]
+    #[Assert\NotBlank(message: "Veuillez sélectionner un niveau")]
+    #[Assert\Choice(
+        choices: ['Débutant', 'Intermédiaire', 'Avancé'],
+        message: "Niveau invalide. Choisissez parmi : Débutant, Intermédiaire, Avancé"
+    )]
     private ?string $niveau = null;
 
     #[ORM\Column(name: 'duree', type: 'integer')]
+    #[Assert\NotBlank(message: "La durée est requise")]
+    #[Assert\Type(type: 'integer', message: "La durée doit être un nombre")]
+    #[Assert\Range(
+        min: 1,
+        max: 300,
+        minMessage: "La durée doit être au moins {{ limit }} minute",
+        maxMessage: "La durée ne peut pas dépasser {{ limit }} minutes"
+    )]
     private ?int $duree = null;
 
     #[ORM\Column(name: 'image', type: 'string', length: 225)]
     private ?string $image = null;
 
     #[ORM\Column(name: 'mots', type: 'text', nullable: true)]
+    #[Assert\NotBlank(message: "Ajoutez au moins un mot")]
     private ?string $mots = null;
 
     #[ORM\Column(name: 'images_mots', type: 'text', nullable: true)]
@@ -122,11 +155,11 @@ class Cours
         return $this->image;
     }
 
-   public function setImage(?string $image): static
-{
-    $this->image = $image;
-    return $this;
-}
+    public function setImage(?string $image): static
+    {
+        $this->image = $image;
+        return $this;
+    }
 
     public function getMots(): ?string
     {
