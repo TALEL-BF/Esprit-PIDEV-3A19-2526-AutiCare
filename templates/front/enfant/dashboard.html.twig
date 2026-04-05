@@ -1,73 +1,56 @@
-{# 
-    DASHBOARD ENFANT
-    Ce template est affiché quand un enfant se connecte
-    Route: enfant_dashboard
-    Contrôleur: EnfantController.php
-    Accessible uniquement aux utilisateurs avec ROLE_ENFANT
-    Interface simplifiée et colorée pour les enfants autistes
-#}
-
 {% extends 'base.html.twig' %}
 
 {% block title %}Mon Espace - AutiCare{% endblock %}
 
 {% block body %}
-<div class="container mt-4">
-    <!-- Bannière joyeuse pour l'enfant -->
-    <div class="card bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4 mb-4 rounded-4 shadow">
-        <div class="d-flex align-items-center">
-            <div>
-                <i class="fas fa-smile-wink fa-3x me-3"></i>
-            </div>
-            <div>
-                <h1 class="mb-0">Bonjour {{ user.prenom }} !</h1>
-                <p class="mb-0 mt-2">Prêt(e) à apprendre et t'amuser aujourd'hui ? 🌟</p>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-info text-white p-4 mb-4 rounded-4 shadow">
+                <div class="d-flex align-items-center">
+                    <div>
+                        <i class="fas fa-smile-wink fa-3x me-3"></i>
+                    </div>
+                    <div>
+                        <h1 class="mb-0">Bonjour {{ app.user.prenom }} !</h1>
+                        <p class="mb-0 mt-2">Prêt(e) à apprendre et t'amuser aujourd'hui ? 🌟</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="row">
-        <!-- Carte 1: Cours -->
-        <div class="col-md-6 col-lg-4 mb-3">
-            <div class="card h-100 shadow-sm border-0 rounded-4 text-center">
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 shadow-sm text-center">
                 <div class="card-body">
-                    <div class="bg-primary bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
-                        <i class="fas fa-book-open fa-3x text-primary"></i>
-                    </div>
+                    <i class="fas fa-book-open fa-3x text-primary mb-3"></i>
                     <h5 class="card-title">Mes Cours 📚</h5>
-                    <p class="card-text text-muted small">Apprendre de nouvelles choses</p>
+                    <p class="card-text text-muted">Apprendre de nouvelles choses</p>
                     <a href="{{ path('app_cours') }}" class="btn btn-primary rounded-pill px-4">
                         Commencer <i class="fas fa-arrow-right ms-1"></i>
                     </a>
                 </div>
             </div>
         </div>
-
-        <!-- Carte 2: Jeux -->
-        <div class="col-md-6 col-lg-4 mb-3">
-            <div class="card h-100 shadow-sm border-0 rounded-4 text-center">
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 shadow-sm text-center">
                 <div class="card-body">
-                    <div class="bg-success bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
-                        <i class="fas fa-gamepad fa-3x text-success"></i>
-                    </div>
+                    <i class="fas fa-gamepad fa-3x text-success mb-3"></i>
                     <h5 class="card-title">Jeux Éducatifs 🎮</h5>
-                    <p class="card-text text-muted small">Jouer et apprendre en s'amusant</p>
+                    <p class="card-text text-muted">Jouer et apprendre en s'amusant</p>
                     <a href="{{ path('app_jeux') }}" class="btn btn-success rounded-pill px-4">
                         Jouer <i class="fas fa-play ms-1"></i>
                     </a>
                 </div>
             </div>
         </div>
-
-        <!-- Carte 3: Progression -->
-        <div class="col-md-6 col-lg-4 mb-3">
-            <div class="card h-100 shadow-sm border-0 rounded-4 text-center">
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 shadow-sm text-center">
                 <div class="card-body">
-                    <div class="bg-warning bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
-                        <i class="fas fa-trophy fa-3x text-warning"></i>
-                    </div>
+                    <i class="fas fa-trophy fa-3x text-warning mb-3"></i>
                     <h5 class="card-title">Mes Progrès 🏆</h5>
-                    <p class="card-text text-muted small">Voir mes points et récompenses</p>
+                    <p class="card-text text-muted">Voir mes points et récompenses</p>
                     <a href="#" class="btn btn-warning rounded-pill px-4">
                         Voir <i class="fas fa-chart-line ms-1"></i>
                     </a>
@@ -75,72 +58,5 @@
             </div>
         </div>
     </div>
-
-    <div class="row mt-2">
-        <!-- Carte 4: Récompenses -->
-        <div class="col-md-6 col-lg-4 mb-3">
-            <div class="card h-100 shadow-sm border-0 rounded-4 text-center">
-                <div class="card-body">
-                    <div class="bg-danger bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
-                        <i class="fas fa-star fa-3x text-danger"></i>
-                    </div>
-                    <h5 class="card-title">Mes Étoiles ⭐</h5>
-                    <p class="card-text text-muted small">Collectionner des étoiles en réussissant</p>
-                    <div class="mt-2">
-                        <span class="badge bg-warning text-dark fs-6 p-2">
-                            <i class="fas fa-star"></i> 42 étoiles
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Carte 5: Thérapie -->
-        <div class="col-md-6 col-lg-4 mb-3">
-            <div class="card h-100 shadow-sm border-0 rounded-4 text-center">
-                <div class="card-body">
-                    <div class="bg-info bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
-                        <i class="fas fa-heart fa-3x text-info"></i>
-                    </div>
-                    <h5 class="card-title">Mes Séances 💜</h5>
-                    <p class="card-text text-muted small">Voir mes prochains rendez-vous</p>
-                    <a href="#" class="btn btn-info text-white rounded-pill px-4">
-                        Voir <i class="fas fa-calendar ms-1"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Carte 6: HUMEUR / Check-in quotidien -->
-        <div class="col-md-6 col-lg-4 mb-3">
-            <div class="card h-100 shadow-sm border-0 rounded-4 text-center">
-                <div class="card-body">
-                    <div class="bg-secondary bg-opacity-10 rounded-circle p-3 d-inline-block mb-3">
-                        <i class="fas fa-face-smile fa-3x text-secondary"></i>
-                    </div>
-                    <h5 class="card-title">Comment je me sens ? 😊</h5>
-                    <p class="card-text text-muted small">Partager mon humeur aujourd'hui</p>
-                    <div class="d-flex justify-content-center gap-2 mt-2">
-                        <button class="btn btn-outline-success btn-sm rounded-circle">😊</button>
-                        <button class="btn btn-outline-warning btn-sm rounded-circle">😐</button>
-                        <button class="btn btn-outline-danger btn-sm rounded-circle">😔</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
-
-<!-- Style personnalisé pour les gradients -->
-<style>
-    .bg-gradient-to-r {
-        background: linear-gradient(135deg, #9b59b6 0%, #e84393 100%);
-    }
-    .bg-opacity-10 {
-        opacity: 0.1;
-    }
-    .rounded-4 {
-        border-radius: 1rem !important;
-    }
-</style>
 {% endblock %}

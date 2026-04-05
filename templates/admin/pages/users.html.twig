@@ -1,32 +1,22 @@
+{# templates/admin/pages/users.html.twig #}
 {% extends 'admin/base_admin.html.twig' %}
 
 {% block title %}Auticare — Liste des Utilisateurs{% endblock %}
+
 {% block page_title %}Liste des Utilisateurs{% endblock %}
 
-{% block stylesheets %}
-{{ parent() }}
-<style>
-    .filter-input {
-        width: 200px;
-        font-size: .8rem;
-        padding: 6px 12px;
-    }
-</style>
-{% endblock %}
-
 {% block body %}
-
-<div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+<div class="page-header d-flex justify-content-between align-items-center">
     <div>
         <h2><i class="fas fa-list-ul me-2" style="color:var(--purple-500)"></i>Liste des Utilisateurs</h2>
         <p>Gérer tous les comptes de la plateforme</p>
     </div>
-
-    <a href="{{ path('admin_users_new') }}" class="btn-purple">
+    <a href="{{ path('admin_users_new') }}" class="btn btn-primary">
         <i class="fas fa-user-plus"></i> Ajouter un utilisateur
     </a>
 </div>
 
+{# Dashboard mini stats #}
 <div class="row g-3 mb-4">
     <div class="col-6 col-xl-3">
         <div class="stat-card">
@@ -37,10 +27,8 @@
                 </div>
                 <div class="stat-icon purple"><i class="fas fa-users"></i></div>
             </div>
-            <div class="stat-change up"><i class="fas fa-arrow-up"></i> Utilisateurs enregistrés</div>
         </div>
     </div>
-
     <div class="col-6 col-xl-3">
         <div class="stat-card">
             <div class="stat-top">
@@ -50,10 +38,8 @@
                 </div>
                 <div class="stat-icon violet"><i class="fas fa-user-check"></i></div>
             </div>
-            <div class="stat-change up"><i class="fas fa-arrow-up"></i> Comptes actifs</div>
         </div>
     </div>
-
     <div class="col-6 col-xl-3">
         <div class="stat-card">
             <div class="stat-top">
@@ -63,10 +49,8 @@
                 </div>
                 <div class="stat-icon pink"><i class="fas fa-user-plus"></i></div>
             </div>
-            <div class="stat-change up"><i class="fas fa-arrow-up"></i> Ce mois</div>
         </div>
     </div>
-
     <div class="col-6 col-xl-3">
         <div class="stat-card">
             <div class="stat-top">
@@ -76,24 +60,38 @@
                 </div>
                 <div class="stat-icon indigo"><i class="fas fa-user-times"></i></div>
             </div>
-            <div class="stat-change down"><i class="fas fa-arrow-down"></i> Comptes inactifs</div>
         </div>
     </div>
 </div>
 
+{# Messages flash #}
+{% for message in app.flashes('success') %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+{% endfor %}
+
+{% for message in app.flashes('error') %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+{% endfor %}
+
+{# Tableau des utilisateurs #}
 <div class="card-box">
     <div class="card-box-header">
         <span class="card-box-title"><i class="fas fa-list"></i> Liste des Utilisateurs</span>
         <input type="text" class="form-control filter-input" id="userFilterInput" placeholder="Filtrer...">
     </div>
-
     <div class="card-box-body p-0">
         <div class="table-wrapper">
             <table class="custom-table" id="usersTable">
                 <thead>
                     <tr>
-                        <th>#</th>
-                        <th>Nom</th>
+                        <th>ID</th>
+                        <th>Nom complet</th>
                         <th>Email</th>
                         <th>Rôle</th>
                         <th>Statut</th>
@@ -102,39 +100,49 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for user in users|default([]) %}
+                    {% for user in users %}
                         <tr>
                             <td>{{ user.id }}</td>
-                            <td>{{ user.firstname }} {{ user.lastname }}</td>
+                            <td>{{ user.prenom }} {{ user.nom }}</td>
                             <td>{{ user.email }}</td>
-                            <td>{{ user.role }}</td>
                             <td>
-                                {% if user.status == 'Actif' %}
-                                    <span class="badge-status badge-active"><span class="pulse-dot"></span> {{ user.status }}</span>
-                                {% elseif user.status == 'En attente' %}
-                                    <span class="badge-status badge-pending">{{ user.status }}</span>
+                                {% if user.role == 'admin' %}
+                                    <span class="badge bg-danger">Admin</span>
+                                {% elseif user.role == 'parent' %}
+                                    <span class="badge bg-primary">Parent</span>
+                                {% elseif user.role == 'enfant' %}
+                                    <span class="badge bg-success">Enfant</span>
+                                {% elseif user.role == 'professeur' %}
+                                    <span class="badge bg-info">Professeur</span>
+                                {% elseif user.role == 'psychologue' %}
+                                    <span class="badge bg-warning">Psychologue</span>
                                 {% else %}
-                                    <span class="badge-status badge-inactive">{{ user.status }}</span>
+                                    <span class="badge bg-secondary">{{ user.role }}</span>
                                 {% endif %}
                             </td>
-                            <td>{{ user.registeredAt }}</td>
                             <td>
-                                <a href="{{ path('admin_users_edit', {'id': user.id}) }}" class="btn-edit-soft me-1">
-                                    Modifier
+                                {% if user.status == 'active' %}
+                                    <span class="badge bg-success">Actif</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Inactif</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ user.createdAt ? user.createdAt|date('d/m/Y') : '-' }}</td>
+                            <td>
+                                <a href="{{ path('admin_users_edit', {'id': user.id}) }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-edit"></i> Modifier
                                 </a>
-
-                                <form method="post"
-                                      action="{{ path('admin_users_delete', {'id': user.id}) }}"
-                                      style="display:inline-block"
-                                      onsubmit="return confirm('Supprimer cet utilisateur ?');">
+                                <form method="post" action="{{ path('admin_users_delete', {'id': user.id}) }}" style="display: inline-block;" onsubmit="return confirm('Supprimer cet utilisateur ?')">
                                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
-                                    <button type="submit" class="btn-danger-soft">Supprimer</button>
+                                    <button class="btn btn-sm btn-danger">
+                                        <i class="fas fa-trash"></i> Supprimer
+                                    </button>
                                 </form>
                             </td>
                         </tr>
                     {% else %}
                         <tr>
-                            <td colspan="7" class="text-center py-4">Aucun utilisateur trouvé.</td>
+                            <td colspan="7" class="text-center">Aucun utilisateur trouvé.</td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -142,7 +150,6 @@
         </div>
     </div>
 </div>
-
 {% endblock %}
 
 {% block javascripts %}
@@ -153,8 +160,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (filterInput) {
         filterInput.addEventListener('input', function(e) {
             const val = e.target.value.toLowerCase();
-            document.querySelectorAll('#usersTable tbody tr').forEach(row => {
-                row.style.display = row.textContent.toLowerCase().includes(val) ? '' : 'none';
+            const rows = document.querySelectorAll('#usersTable tbody tr');
+            rows.forEach(row => {
+                if (row.cells) {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(val) ? '' : 'none';
+                }
             });
         });
     }

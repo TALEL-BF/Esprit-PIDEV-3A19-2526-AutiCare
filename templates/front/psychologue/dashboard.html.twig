@@ -1,229 +1,46 @@
-{# 
-    DASHBOARD PSYCHOLOGUE
-    Ce template est affiché quand un psychologue/thérapeute se connecte
-    Route: psychologue_dashboard
-    Contrôleur: PsychologueController.php
-    Accessible uniquement aux utilisateurs avec ROLE_PSYCHOLOGUE
-    Interface pour gérer les patients, les séances, et les suivis thérapeutiques
-#}
-
 {% extends 'base.html.twig' %}
 
 {% block title %}Espace Psychologue - AutiCare{% endblock %}
 
 {% block body %}
-<div class="container-fluid mt-4">
-    <!-- En-tête -->
-    <div class="row mb-4">
+<div class="container mt-5">
+    <div class="row">
         <div class="col-12">
-            <div class="card" style="background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); color: white; padding: 1.5rem;">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h1><i class="fas fa-brain"></i> Espace Psychologue</h1>
-                        <p class="mb-0">Bienvenue Dr. <strong>{{ user.prenom }} {{ user.nom }}</strong>, gérez vos consultations</p>
-                    </div>
-                    <div>
-                        <span class="badge bg-white text-primary p-2">
-                            <i class="fas fa-certificate"></i> Thérapeute certifié
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Statistiques -->
-    <div class="row mb-4">
-        <div class="col-md-3 col-6 mb-2">
-            <div class="card text-center border-0 shadow-sm">
-                <div class="card-body">
-                    <i class="fas fa-user-friends fa-2x text-primary mb-2"></i>
-                    <h3 class="mb-0">32</h3>
-                    <small class="text-muted">Patients actifs</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 col-6 mb-2">
-            <div class="card text-center border-0 shadow-sm">
-                <div class="card-body">
-                    <i class="fas fa-calendar-week fa-2x text-success mb-2"></i>
-                    <h3 class="mb-0">18</h3>
-                    <small class="text-muted">Séances/semaine</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 col-6 mb-2">
-            <div class="card text-center border-0 shadow-sm">
-                <div class="card-body">
-                    <i class="fas fa-clock fa-2x text-warning mb-2"></i>
-                    <h3 class="mb-0">4</h3>
-                    <small class="text-muted">En attente</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 col-6 mb-2">
-            <div class="card text-center border-0 shadow-sm">
-                <div class="card-body">
-                    <i class="fas fa-chart-line fa-2x text-info mb-2"></i>
-                    <h3 class="mb-0">89%</h3>
-                    <small class="text-muted">Taux de progression</small>
-                </div>
+            <div class="card bg-info text-white p-4 mb-4 shadow">
+                <h1><i class="fas fa-brain"></i> Espace Psychologue</h1>
+                <p class="mb-0">Bienvenue Dr. <strong>{{ app.user.prenom }} {{ app.user.nom }}</strong></p>
             </div>
         </div>
     </div>
 
     <div class="row">
-        <!-- Agenda des séances -->
-        <div class="col-lg-6 mb-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-calendar-alt me-2 text-primary"></i> Séances du jour</h5>
-                </div>
-                <div class="card-body p-0">
-                    <div class="list-group list-group-flush">
-                        <div class="list-group-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <i class="fas fa-child me-2 text-primary"></i>
-                                    <strong>Ahmed B.</strong>
-                                    <span class="badge bg-info ms-2">Enfant</span>
-                                </div>
-                                <div>
-                                    <span class="badge bg-success me-2">10:00 - 10:45</span>
-                                    <a href="#" class="btn btn-sm btn-outline-primary">Démarrer</a>
-                                </div>
-                            </div>
-                            <small class="text-muted">Objectif: Communication verbale</small>
-                        </div>
-                        <div class="list-group-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <i class="fas fa-user me-2 text-primary"></i>
-                                    <strong>Leila M.</strong>
-                                    <span class="badge bg-info ms-2">Parent</span>
-                                </div>
-                                <div>
-                                    <span class="badge bg-success me-2">11:00 - 11:45</span>
-                                    <a href="#" class="btn btn-sm btn-outline-primary">Démarrer</a>
-                                </div>
-                            </div>
-                            <small class="text-muted">Objectif: Accompagnement parental</small>
-                        </div>
-                        <div class="list-group-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <i class="fas fa-child me-2 text-primary"></i>
-                                    <strong>Youssef K.</strong>
-                                    <span class="badge bg-info ms-2">Enfant</span>
-                                </div>
-                                <div>
-                                    <span class="badge bg-warning me-2">14:00 - 14:45</span>
-                                    <a href="#" class="btn btn-sm btn-outline-primary">Démarrer</a>
-                                </div>
-                            </div>
-                            <small class="text-muted">Objectif: Gestion des émotions</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-footer bg-white">
-                    <a href="#" class="btn btn-primary w-100">
-                        <i class="fas fa-plus"></i> Ajouter une séance
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Derniers messages -->
-        <div class="col-lg-6 mb-4">
-            <div class="card shadow-sm h-100">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-envelope me-2 text-primary"></i> Messages récents</h5>
-                    <a href="#" class="btn btn-sm btn-link">Tous les messages</a>
-                </div>
-                <div class="card-body p-0">
-                    <div class="list-group list-group-flush">
-                        <div class="list-group-item">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <strong>Sophie Martin</strong> (Parent)
-                                    <p class="small text-muted mb-0">Mon fils a fait des progrès cette semaine...</p>
-                                </div>
-                                <small class="text-muted">Il y a 2h</small>
-                            </div>
-                        </div>
-                        <div class="list-group-item">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <strong>Karim Ben Ali</strong> (Enfant)
-                                    <p class="small text-muted mb-0">Merci docteur pour la séance d'aujourd'hui...</p>
-                                </div>
-                                <small class="text-muted">Hier</small>
-                            </div>
-                        </div>
-                        <div class="list-group-item">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <strong>Nadia Trabelsi</strong> (Parent)
-                                    <p class="small text-muted mb-0">Pouvez-vous me recommander des exercices...</p>
-                                </div>
-                                <small class="text-muted">Hier</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-footer bg-white">
-                    <a href="#" class="btn btn-outline-primary w-100">
-                        <i class="fas fa-paper-plane"></i> Nouveau message
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <!-- Évaluations à faire -->
-        <div class="col-md-6 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-clipboard-list me-2 text-warning"></i> Évaluations en attente</h5>
-                </div>
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 shadow-sm text-center">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div>
-                            <i class="fas fa-child me-2"></i> <strong>Adam H.</strong>
-                            <div class="small text-muted">Évaluation TDA/H</div>
-                        </div>
-                        <a href="#" class="btn btn-sm btn-warning">Évaluer</a>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div>
-                            <i class="fas fa-child me-2"></i> <strong>Chaima R.</strong>
-                            <div class="small text-muted">Évaluation sociale</div>
-                        </div>
-                        <a href="#" class="btn btn-sm btn-warning">Évaluer</a>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <i class="fas fa-user me-2"></i> <strong>Monia D.</strong> (Parent)
-                            <div class="small text-muted">Questionnaire de suivi</div>
-                        </div>
-                        <a href="#" class="btn btn-sm btn-warning">Voir</a>
-                    </div>
+                    <i class="fas fa-user-friends fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Mes Patients</h5>
+                    <p class="card-text text-muted">Liste des patients</p>
+                    <a href="#" class="btn btn-primary">Accéder</a>
                 </div>
             </div>
         </div>
-
-        <!-- Notes et observations rapides -->
-        <div class="col-md-6 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fas fa-notes-medical me-2 text-success"></i> Notes rapides</h5>
-                </div>
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 shadow-sm text-center">
                 <div class="card-body">
-                    <textarea class="form-control mb-3" rows="3" placeholder="Prendre des notes sur la séance..."></textarea>
-                    <button class="btn btn-success w-100">
-                        <i class="fas fa-save"></i> Sauvegarder la note
-                    </button>
+                    <i class="fas fa-calendar-week fa-3x text-success mb-3"></i>
+                    <h5 class="card-title">Séances</h5>
+                    <p class="card-text text-muted">Gérer les séances</p>
+                    <a href="#" class="btn btn-success">Voir</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 shadow-sm text-center">
+                <div class="card-body">
+                    <i class="fas fa-chart-line fa-3x text-warning mb-3"></i>
+                    <h5 class="card-title">Évaluations</h5>
+                    <p class="card-text text-muted">Suivi des progrès</p>
+                    <a href="#" class="btn btn-warning">Analyser</a>
                 </div>
             </div>
         </div>

@@ -1,5 +1,4 @@
 <?php
-// src/Controller/AdminController.php
 
 namespace App\Controller;
 
@@ -16,22 +15,6 @@ class AdminController extends AbstractController
     public function dashboard(): Response
     {
         return $this->render('admin/pages/dashboard.html.twig', [
-            'user' => $this->getUser(),
-        ]);
-    }
-
-    #[Route('/users', name: 'admin_users')]
-    public function users(): Response
-    {
-        return $this->render('admin/pages/users.html.twig', [
-            'user' => $this->getUser(),
-        ]);
-    }
-
-    #[Route('/users/roles', name: 'admin_users_roles')]
-    public function usersRoles(): Response
-    {
-        return $this->render('admin/pages/users_roles.html.twig', [
             'user' => $this->getUser(),
         ]);
     }
@@ -100,4 +83,11 @@ class AdminController extends AbstractController
     {
         return $this->render('admin/pages/jeu_score.html.twig');
     }
+    #[Route('/users/roles', name: 'admin_users_roles')]
+public function usersRoles(): Response
+{
+    return $this->render('admin/pages/users_roles.html.twig', [
+        'user' => $this->getUser(),
+    ]);
+}
 }

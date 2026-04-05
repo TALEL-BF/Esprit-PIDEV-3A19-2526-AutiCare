@@ -21,7 +21,7 @@ class SecurityController extends AbstractController
             $user = $this->getUser();
             $role = $user->getRole();
             
-            // Redirection selon le rôle
+            // Redirection selon le rôle (avec les bons noms de routes)
             return match($role) {
                 'admin' => $this->redirectToRoute('admin_dashboard'),
                 'parent' => $this->redirectToRoute('parent_dashboard'),
@@ -46,7 +46,6 @@ class SecurityController extends AbstractController
     #[Route('/logout', name: 'app_logout')]
     public function logout(): void
     {
-        // Cette méthode peut être vide - Symfony l'intercepte automatiquement
         throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
     }
 }

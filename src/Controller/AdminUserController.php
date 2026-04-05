@@ -1,5 +1,4 @@
 <?php
-// src/Controller/AdminUserController.php
 
 namespace App\Controller;
 
@@ -11,7 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/admin/users')]
 class AdminUserController extends AbstractController
@@ -19,61 +18,76 @@ class AdminUserController extends AbstractController
     #[Route('/', name: 'admin_users_index', methods: ['GET'])]
     public function index(UserRepository $userRepository): Response
     {
-        // Votre code existant
-        $entities = $userRepository->findBy([], ['id' => 'DESC']);
-        
-        $users = array_map(function (User $user) {
-            return [
-                'id' => $user->getId(),
-                'firstname' => $user->getPrenom(),
-                'lastname' => $user->getNom(),
-                'email' => $user->getEmail(),
-                'role' => ucfirst($user->getRole()),
-                'status' => $user->getStatus() === 'active' ? 'Actif' : 'Inactif',
-                'registeredAt' => $user->getCreatedAt()?->format('d/m/Y') ?? '-',
-            ];
-        }, $entities);
+        $users = $userRepository->findAll();
+
+        $totalUsers = count($users);
+        $activeUsers = 0;
+        $inactiveUsers = 0;
+        $newUsers = 0;
+        $thirtyDaysAgo = new \DateTime('-30 days');
+
+        foreach ($users as $user) {
+            if ($user->getStatus() === 'active') {
+                $activeUsers++;
+            } else {
+                $inactiveUsers++;
+            }
+
+            if ($user->getCreatedAt() && $user->getCreatedAt() > $thirtyDaysAgo) {
+                $newUsers++;
+            }
+        }
 
         return $this->render('admin/pages/users.html.twig', [
             'users' => $users,
-            'totalUsers' => count($entities),
-            'activeUsers' => count(array_filter($entities, fn($u) => $u->getStatus() === 'active')),
-            'inactiveUsers' => count(array_filter($entities, fn($u) => $u->getStatus() !== 'active')),
-            'newUsers' => 0,
+            'totalUsers' => $totalUsers,
+            'activeUsers' => $activeUsers,
+            'inactiveUsers' => $inactiveUsers,
+            'newUsers' => $newUsers,
         ]);
     }
 
-#[Route('/new', name: 'admin_users_new', methods: ['GET', 'POST'])]
-public function new(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
-{
-    $user = new User();
-    $user->setStatus('active');
-    $user->setCreatedAt(new \DateTime());
+    #[Route('/new', name: 'admin_users_new', methods: ['GET', 'POST'])]
+    public function new(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
+    {
+        $user = new User();
+        $user->setStatus('active');
+        $user->setCreatedAt(new \DateTime());
 
-    $form = $this->createForm(UserType::class, $user);
-    $form->handleRequest($request);
+        $form = $this->createForm(UserType::class, $user);
+        $form->handleRequest($request);
 
-    if ($form->isSubmitted() && $form->isValid()) {
-        $plainPassword = $form->get('plainPassword')->getData();
-        
-        if ($plainPassword) {
-            $user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
-        } else {
-            $user->setPassword($passwordHasher->hashPassword($user, 'password123'));
+        if ($form->isSubmitted() && $form->isValid()) {
+            $email = $user->getEmail();
+            
+            // Vérifier si l'email existe déjà
+            $existingUser = $entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+            
+            if ($existingUser) {
+                $this->addFlash('error', 'Cet email existe déjà. Veuillez utiliser un autre email.');
+                return $this->redirectToRoute('admin_users_new');
+            }
+            
+            $plainPassword = $form->get('plainPassword')->getData();
+            
+            if ($plainPassword) {
+                $user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
+            } else {
+                $user->setPassword($passwordHasher->hashPassword($user, 'password123'));
+            }
+
+            $entityManager->persist($user);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Utilisateur ajouté avec succès.');
+            return $this->redirectToRoute('admin_users_index');
         }
 
-        $entityManager->persist($user);
-        $entityManager->flush();
-
-        $this->addFlash('success', 'Utilisateur ajouté avec succès.');
-        return $this->redirectToRoute('admin_users_index');
+        return $this->render('admin/user/form.html.twig', [
+            'form' => $form->createView(),
+            'page_title' => 'Ajouter un utilisateur',
+        ]);
     }
-
-    return $this->render('admin/user/form.html.twig', [
-        'form' => $form->createView(),
-        'page_title' => 'Ajouter un utilisateur',
-    ]);
-}
 
     #[Route('/{id}/edit', name: 'admin_users_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, User $user, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
@@ -104,7 +118,9 @@ public function new(Request $request, EntityManagerInterface $entityManager, Use
     #[Route('/{id}', name: 'admin_users_delete', methods: ['POST'])]
     public function delete(Request $request, User $user, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->request->get('_token'))) {
+        $token = $request->request->get('_token');
+        
+        if ($this->isCsrfTokenValid('delete' . $user->getId(), $token)) {
             $entityManager->remove($user);
             $entityManager->flush();
             $this->addFlash('success', 'Utilisateur supprimé avec succès.');
