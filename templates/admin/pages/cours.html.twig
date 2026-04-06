@@ -1,288 +1,671 @@
+{# templates/admin/pages/cours.html.twig #}
 {% extends 'admin/base_admin.html.twig' %}
 
-{% block title %}Auticare — Liste des Cours{% endblock %}
-
-{% block page_title %}Liste des Cours{% endblock %}
+{% block title %}Auticare — Gestion des Cours{% endblock %}
+{% block page_title %}Gestion des Cours{% endblock %}
 
 {% block stylesheets %}
 {{ parent() }}
 <style>
-    .filter-input {
-        width: 200px;
-        font-size: .8rem;
-        padding: 6px 12px;
-    }
+
+:root {
+    --pastel-sky:         #dbeafe;
+    --pastel-sky-b:       #9fc8f7;
+    --pastel-lavender:    #ede9fe;
+    --pastel-lavender-b:  #c4b5fd;
+    --pastel-rose:        #fce7f3;
+    --pastel-rose-b:      #f9a8d4;
+    --pastel-yellow:      #fef9c3;
+    --pastel-yellow-b:    #fde68a;
+    --txt-soft:           #475569;
+    --txt-label:          #334155;
+}
+
+/* Styles pour les erreurs de validation Symfony */
+.invalid-feedback {
+    color: #ef4444;
+    font-size: 0.75rem;
+    margin-top: 4px;
+    display: block;
+}
+
+/* ── Messages de validation temps réel ── */
+.field-msg {
+    display: block;
+    font-size: 0.73rem;
+    font-weight: 600;
+    margin-top: 5px;
+    min-height: 1em;
+}
+.field-msg.msg-error { color: #dc2626; }
+.field-msg.msg-ok    { color: #059669; }
+
+.form-control.is-invalid, 
+.form-select.is-invalid,
+textarea.form-control.is-invalid {
+    border-color: #ef4444 !important;
+    background-color: #fee2e2 !important;
+}
+
+.form-control.is-valid,
+.form-select.is-valid,
+textarea.form-control.is-valid {
+    border-color: #10b981 !important;
+    background-color: #d1fae5 !important;
+}
+
+/* Alertes flash */
+.alert-error {
+    background-color: #fee2e2;
+    border: 1px solid #ef4444;
+    color: #991b1b;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+}
+
+.alert-success {
+    background-color: #d1fae5;
+    border: 1px solid #10b981;
+    color: #065f46;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+}
+
+/* ── filtre ── */
+.filter-input {
+    width: 200px; font-size:.8rem; padding:6px 14px;
+    border-radius:20px; border:1.5px solid var(--pastel-lavender-b);
+    background:var(--pastel-lavender);
+}
+.filter-input:focus { outline:none; border-color:#a78bfa; box-shadow:0 0 0 3px rgba(167,139,250,.15); }
+
+/* ══════════════════════════
+   SECTIONS COLORÉES DU FORM
+   ══════════════════════════ */
+.form-section {
+    border-radius:18px;
+    padding:1.1rem 1.4rem 1.2rem;
+    margin-bottom:1rem;
+    border:1.5px solid transparent;
+}
+.form-section-title {
+    font-size:0.78rem; font-weight:700; letter-spacing:.05em;
+    text-transform:uppercase; margin-bottom:.9rem;
+    display:flex; align-items:center; gap:.5rem;
+}
+.section-icon {
+    width:26px; height:26px; border-radius:8px;
+    display:flex; align-items:center; justify-content:center; font-size:.85rem;
+}
+
+/* Bleu – Infos générales */
+.fs-blue  { background:var(--pastel-sky);      border-color:var(--pastel-sky-b);      }
+.fs-blue  .form-section-title { color:#1d4ed8; }
+.fs-blue  .section-icon       { background:#bfdbfe; color:#1d4ed8; }
+
+/* Lavande – Niveau & Durée */
+.fs-lavender-niveau { background:var(--pastel-lavender); border-color:var(--pastel-lavender-b); }
+.fs-lavender-niveau .form-section-title { color:#5b21b6; }
+.fs-lavender-niveau .section-icon { background:#ddd6fe; color:#6d28d9; }
+
+/* Rose – Image */
+.fs-rose-image { background:var(--pastel-rose); border-color:var(--pastel-rose-b); }
+.fs-rose-image .form-section-title { color:#9d174d; }
+.fs-rose-image .section-icon { background:var(--pastel-rose); color:#be185d; }
+
+/* Lavande – Description */
+.fs-lavender { background:var(--pastel-lavender); border-color:var(--pastel-lavender-b); }
+.fs-lavender .form-section-title { color:#5b21b6; }
+.fs-lavender .section-icon { background:#ddd6fe; color:#6d28d9; }
+
+/* Rose – Mots & Images */
+.fs-rose  { background:var(--pastel-rose);     border-color:var(--pastel-rose-b);     }
+.fs-rose  .form-section-title { color:#9d174d; }
+.fs-rose  .section-icon       { background:var(--pastel-rose); color:#be185d; }
+
+/* ── Champs formulaire ── */
+.form-control, .form-select {
+    border-radius:12px; border:1.5px solid #cbd5e1;
+    font-size:.88rem; padding:.5rem .85rem;
+    transition:all 0.2s; background:#fff; color:var(--txt-soft);
+}
+.form-control:focus, .form-select:focus {
+    outline:none; border-color:#a78bfa;
+    box-shadow:0 0 0 3px rgba(167,139,250,.18); background:#fefefe;
+}
+.form-label {
+    font-size:.8rem; font-weight:600; color:var(--txt-label);
+    margin-bottom:4px; display:flex; align-items:center; gap:5px;
+}
+
+/* Badge mode */
+.form-mode-badge {
+    font-size:.72rem; font-weight:600; padding:4px 12px;
+    border-radius:20px; background:var(--pastel-lavender);
+    color:#5b21b6; border:1.5px solid var(--pastel-lavender-b);
+}
+
+/* ── Carte mot ── */
+.mot-image-card {
+    background:#fff; border-radius:16px; padding:1rem 1.2rem;
+    margin-bottom:.85rem; border:1.5px solid var(--pastel-rose-b);
+    transition:all 0.2s;
+}
+.mot-image-card:hover {
+    border-color:#f472b6;
+    box-shadow:0 4px 14px rgba(244,114,182,.12);
+}
+.mot-image-card:nth-child(odd)  { border-color:#f9a8d4; background:#fff9fb; }
+.mot-image-card:nth-child(even) { border-color:#c4b5fd; background:#fdfbff; }
+
+.mot-number {
+    width:34px; height:34px;
+    background:linear-gradient(135deg,#f9a8d4,#c4b5fd);
+    color:#fff; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:800; font-size:.9rem;
+    box-shadow:0 2px 6px rgba(196,181,253,.4);
+}
+
+/* ── Bouton ajouter mot ── */
+.btn-add-word {
+    background:linear-gradient(135deg,var(--pastel-lavender),var(--pastel-sky));
+    color:#5b21b6; border:1.5px dashed var(--pastel-lavender-b);
+    border-radius:14px; padding:.75rem; text-align:center;
+    cursor:pointer; transition:all 0.2s; width:100%;
+    font-weight:600; font-size:.85rem;
+}
+.btn-add-word:hover {
+    background:linear-gradient(135deg,#c4b5fd,#bfdbfe);
+    border-color:#a78bfa; transform:translateY(-1px);
+    box-shadow:0 4px 12px rgba(167,139,250,.2);
+}
+
+/* ── Bouton sauvegarder ── */
+.btn-save-cours {
+    background:linear-gradient(135deg,#818cf8,#a78bfa);
+    color:#fff; border:none; border-radius:14px;
+    padding:.65rem 1.8rem; font-weight:700; font-size:.9rem;
+    cursor:pointer; transition:all 0.2s;
+    box-shadow:0 4px 12px rgba(129,140,248,.3);
+}
+.btn-save-cours:hover {
+    background:linear-gradient(135deg,#6366f1,#8b5cf6);
+    transform:translateY(-1px); box-shadow:0 6px 18px rgba(99,102,241,.35);
+}
+
+/* ── Bouton annuler ── */
+.btn-cancel-cours {
+    background:var(--pastel-rose); color:#9d174d;
+    border:1.5px solid var(--pastel-rose-b); border-radius:14px;
+    padding:.65rem 1.4rem; font-weight:600; font-size:.9rem;
+    cursor:pointer; transition:all 0.2s;
+}
+.btn-cancel-cours:hover { background:#fce7f3; transform:translateY(-1px); }
+
+/* ── Bouton danger ── */
+.btn-danger-soft {
+    background:var(--pastel-rose); color:#be185d;
+    border:1.5px solid var(--pastel-rose-b); border-radius:10px;
+    padding:5px 11px; font-size:.78rem; font-weight:600;
+    cursor:pointer; transition:all 0.2s;
+    display:inline-flex; align-items:center; gap:4px;
+}
+.btn-danger-soft:hover { background:#fce7f3; border-color:#f472b6; }
+
+/* ── Images ── */
+.image-preview {
+    width:80px; height:80px; object-fit:cover;
+    border-radius:12px; border:2px solid var(--pastel-lavender-b);
+}
+.image-list, .existing-images-list, .new-images-list {
+    display:flex; flex-wrap:wrap; gap:10px; margin-top:10px;
+}
+.image-item, .existing-image { position:relative; display:inline-block; }
+.remove-image, .remove-existing {
+    position:absolute; top:-8px; right:-8px;
+    width:20px; height:20px; background:#f472b6; color:#fff;
+    border-radius:50%; display:flex; align-items:center;
+    justify-content:center; font-size:12px; cursor:pointer; transition:all 0.2s;
+}
+.remove-image:hover, .remove-existing:hover { background:#db2777; transform:scale(1.1); }
+.existing-image img {
+    width:80px; height:80px; object-fit:cover;
+    border-radius:12px; border:2px solid var(--pastel-lavender-b);
+}
+
+/* Info-box pastel */
+.info-box-pastel {
+    background:var(--pastel-lavender); border:1.5px solid var(--pastel-lavender-b);
+    border-radius:12px; padding:.65rem 1rem;
+    font-size:.82rem; color:#5b21b6;
+    display:flex; align-items:center; gap:.6rem; margin-bottom:1rem;
+}
+
+/* ── Niveaux ── */
+.niveau-section { display:flex; flex-direction:column; gap:1.25rem; }
+.niveau-card {
+    display:flex; align-items:center; gap:1rem;
+    padding:1rem 1.25rem; border-radius:16px;
+    background:#fff; border:1.5px solid #e2e8f0;
+    transition:box-shadow 0.2s, transform 0.2s;
+}
+.niveau-card:hover { box-shadow:0 4px 16px rgba(167,139,250,.12); transform:translateY(-2px); }
+.niveau-icon {
+    width:46px; height:46px; border-radius:14px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.3rem; flex-shrink:0;
+}
+.niveau-icon.debutant      { background:var(--pastel-sky);    color:#1d4ed8; }
+.niveau-icon.intermediaire { background:var(--pastel-lavender); color:#5b21b6; }
+.niveau-icon.avance        { background:var(--pastel-rose);    color:#be185d; }
+.niveau-info { flex:1; min-width:0; }
+.niveau-label { font-size:.85rem; font-weight:700; color:#334155; margin-bottom:4px; }
+.niveau-bar-wrap { height:10px; background:#f1f5f9; border-radius:99px; overflow:hidden; }
+.niveau-bar-fill { height:100%; border-radius:99px; transition:width .8s cubic-bezier(.4,0,.2,1); }
+.niveau-bar-fill.debutant      { background:linear-gradient(90deg,#93c5fd,#60a5fa); }
+.niveau-bar-fill.intermediaire { background:linear-gradient(90deg,#c4b5fd,#a78bfa); }
+.niveau-bar-fill.avance        { background:linear-gradient(90deg,#f9a8d4,#f472b6); }
+.niveau-count { font-size:1.4rem; font-weight:800; color:#1e293b; min-width:32px; text-align:right; flex-shrink:0; }
+.niveau-pct   { font-size:.7rem; color:#94a3b8; text-align:right; margin-top:2px; }
+.niveau-totals {
+    display:flex; justify-content:space-between; align-items:center;
+    margin-top:.5rem; padding:.6rem 1rem;
+    background:var(--pastel-lavender); border-radius:12px;
+    font-size:.8rem; color:#5b21b6;
+}
+.niveau-totals strong { color:#7c3aed; }
+
+/* ── Badges tableau ── */
+.badge-type {
+    display:inline-block; padding:3px 10px;
+    border-radius:20px; font-size:.72rem; font-weight:600;
+}
+.badge-type.academique { background:var(--pastel-sky);      color:#1d4ed8; }
+.badge-type.social     { background:var(--pastel-lavender); color:#5b21b6; }
+.badge-type.motricite  { background:var(--pastel-rose);    color:#9d174d; }
+.badge-type.langage    { background:var(--pastel-lavender); color:#5b21b6; }
+
+.badge-niveau {
+    display:inline-block; padding:3px 10px;
+    border-radius:20px; font-size:.72rem; font-weight:600;
+}
+.badge-niveau.debutant      { background:var(--pastel-sky);   color:#1d4ed8; }
+.badge-niveau.intermediaire { background:var(--pastel-lavender); color:#5b21b6; }
+.badge-niveau.avance        { background:var(--pastel-rose);  color:#9d174d; }
+
+/* Bouton modifier tableau */
+.btn-edit-table {
+    background:var(--pastel-sky); color:#1d4ed8;
+    border:1.5px solid var(--pastel-sky-b); border-radius:10px;
+    padding:5px 12px; font-size:.78rem; font-weight:600; cursor:pointer;
+    transition:all 0.2s; display:inline-flex; align-items:center; gap:4px;
+}
+.btn-edit-table:hover { background:#bfdbfe; }
+
+/* Style pour l'aperçu de l'image du cours */
+.course-image-preview {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 2px solid var(--pastel-rose-b);
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+
+.course-image-cell {
+    text-align: center;
+}
+
+.course-image-thumb {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1.5px solid var(--pastel-lavender-b);
+}
 </style>
 {% endblock %}
 
 {% block body %}
 
 <div class="page-header">
-    <h2><i class="fas fa-book-open me-2" style="color:var(--purple-500)"></i>Liste des Cours</h2>
-    <p>Créer et organiser les cours pédagogiques</p>
+    <h2><i class="fas fa-book-open me-2" style="color:#a78bfa"></i>Gestion des Cours</h2>
+    <p>Créer et organiser les cours pédagogiques avec leurs mots et images</p>
 </div>
 
+{# ── AFFICHAGE DES FLASH MESSAGES ── #}
+{% for flash in app.flashes('success') %}
+    <div class="alert-success">
+        <i class="fas fa-check-circle"></i> {{ flash }}
+    </div>
+{% endfor %}
+{% for flash in app.flashes('error') %}
+    <div class="alert-error">
+        <i class="fas fa-exclamation-triangle"></i> {{ flash }}
+    </div>
+{% endfor %}
+
+{# ── STAT CARDS ── #}
 <div class="row g-3 mb-4">
-    <div class="col-6 col-xl-3">
-        <div class="stat-card">
+    <div class="col-4">
+        <div class="stat-card" style="background:var(--pastel-lavender); border:1.5px solid var(--pastel-lavender-b);">
             <div class="stat-top">
                 <div>
-                    <div class="stat-label">Total cours</div>
-                    <div class="stat-value">{{ totalCourses|default(84) }}</div>
+                    <div class="stat-label" style="color:#5b21b6;">Total cours</div>
+                    <div class="stat-value" style="color:#4c1d95;">{{ totalCourses|default(cours_list|length) }}</div>
                 </div>
                 <div class="stat-icon purple"><i class="fas fa-book"></i></div>
             </div>
             <div class="stat-change up"><i class="fas fa-arrow-up"></i> +8 ce trimestre</div>
         </div>
     </div>
-    <div class="col-6 col-xl-3">
-        <div class="stat-card">
+    <div class="col-4">
+        <div class="stat-card" style="background:var(--pastel-lavender); border:1.5px solid var(--pastel-lavender-b);">
             <div class="stat-top">
                 <div>
-                    <div class="stat-label">Publiés</div>
-                    <div class="stat-value">{{ publishedCourses|default(61) }}</div>
+                    <div class="stat-label" style="color:#5b21b6;">Publiés</div>
+                    <div class="stat-value" style="color:#4c1d95;">{{ publishedCount|default(cours_list|length) }}</div>
                 </div>
-                <div class="stat-icon violet"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-icon" style="background:#ddd6fe; color:#5b21b6;"><i class="fas fa-check-circle"></i></div>
             </div>
-            <div class="stat-change up"><i class="fas fa-arrow-up"></i> 73%</div>
+            <div class="stat-change up"><i class="fas fa-arrow-up"></i> actifs</div>
         </div>
     </div>
-    <div class="col-6 col-xl-3">
-        <div class="stat-card">
+    <div class="col-4">
+        <div class="stat-card" style="background:var(--pastel-rose); border:1.5px solid var(--pastel-rose-b);">
             <div class="stat-top">
                 <div>
-                    <div class="stat-label">Brouillons</div>
-                    <div class="stat-value">{{ draftCourses|default(23) }}</div>
+                    <div class="stat-label" style="color:#9d174d;">Mots total</div>
+                    <div class="stat-value" style="color:#831843;">{{ totalMots|default(0) }}</div>
                 </div>
-                <div class="stat-icon pink"><i class="fas fa-edit"></i></div>
+                <div class="stat-icon pink"><i class="fas fa-tags"></i></div>
             </div>
-            <div class="stat-change down"><i class="fas fa-arrow-down"></i> en cours</div>
-        </div>
-    </div>
-    <div class="col-6 col-xl-3">
-        <div class="stat-card">
-            <div class="stat-top">
-                <div>
-                    <div class="stat-label">Inscrits total</div>
-                    <div class="stat-value">{{ totalEnrolled|default(3800) }}</div>
-                </div>
-                <div class="stat-icon indigo"><i class="fas fa-user-graduate"></i></div>
-            </div>
-            <div class="stat-change up"><i class="fas fa-arrow-up"></i> +120</div>
+            <div class="stat-change up"><i class="fas fa-arrow-up"></i> indexés</div>
         </div>
     </div>
 </div>
 
+{# ── FORMULAIRE + CHART ── #}
 <div class="row g-3 mb-4">
     <div class="col-lg-8">
-        <div class="card-box">
-            <div class="card-box-header">
-                <span class="card-box-title"><i class="fas fa-plus-circle"></i> Ajouter / Modifier un Cours</span>
+        <div class="card-box" style="border-radius:20px; border:1.5px solid #e9d5ff;">
+            <div class="card-box-header"
+                 style="background:linear-gradient(135deg,var(--pastel-lavender),var(--pastel-sky));
+                        border-radius:18px 18px 0 0; border-bottom:1.5px solid #ddd6fe;">
+                <span class="card-box-title" style="color:#4c1d95; font-weight:700;">
+                    <i class="fas fa-magic" style="color:#a78bfa;"></i> Ajouter / Modifier un Cours
+                </span>
                 <span class="form-mode-badge" id="formMode">Mode : Ajout</span>
             </div>
-            <div class="card-box-body">
-                <div class="row g-3">
-                    <div class="col-12">
-                        <label class="form-label">Titre du cours</label>
-                        <input type="text" class="form-control" id="courseTitle" placeholder="Ex: Communication par pictogrammes">
+            <div class="card-box-body" style="background:#fdfcff; border-radius:0 0 18px 18px;">
+                {# novalidate pour désactiver la validation HTML5 #}
+                <form method="post" action="{{ path('admin_cours_save') }}"
+                      id="courseForm" enctype="multipart/form-data" novalidate>
+                    
+                    <input type="hidden" name="id_cours" id="courseId" value="">
+
+                    {# ── Section 1 : Infos générales ── #}
+                    <div class="form-section fs-blue">
+                        <div class="form-section-title">
+                            <span class="section-icon"><i class="fas fa-info-circle"></i></span>
+                            Informations générales
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label" for="cours_titre">📝 Titre du cours *</label>
+                                <input type="text" id="cours_titre" name="cours[titre]"
+                                       class="form-control" placeholder="Ex: Les animaux de la ferme">
+                                {% for message in app.flashes('error_titre') %}
+                                    <span class="invalid-feedback" style="display:block;">{{ message }}</span>
+                                {% endfor %}
+                                <span class="field-msg" id="msg_titre"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="cours_typeCours">🏷️ Type de cours *</label>
+                                <select id="cours_typeCours" name="cours[typeCours]" class="form-select">
+                                    <option value="">-- Choisir un type --</option>
+                                    <option value="Académique">Académique</option>
+                                    <option value="Social">Social</option>
+                                    <option value="Motricité">Motricité</option>
+                                    <option value="Langage">Langage</option>
+                                </select>
+                                <span class="field-msg" id="msg_typeCours"></span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Catégorie</label>
-                        <select class="form-select" id="courseCategory">
-                            <option>Communication</option>
-                            <option>Motricité</option>
-                            <option>Langage</option>
-                            <option>Socialisation</option>
-                        </select>
+
+                    {# ── Section 2 : Niveau & Durée ── #}
+                    <div class="form-section fs-lavender-niveau">
+                        <div class="form-section-title">
+                            <span class="section-icon"><i class="fas fa-sliders-h"></i></span>
+                            Niveau &amp; Durée
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label" for="cours_niveau">🌱 Niveau *</label>
+                                <select id="cours_niveau" name="cours[niveau]" class="form-select">
+                                    <option value="">-- Choisir un niveau --</option>
+                                    <option value="Débutant">Débutant</option>
+                                    <option value="Intermédiaire">Intermédiaire</option>
+                                    <option value="Avancé">Avancé</option>
+                                </select>
+                                <span class="field-msg" id="msg_niveau"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="cours_duree">⏱️ Durée (minutes) *</label>
+                                <input type="number" id="cours_duree" name="cours[duree]"
+                                       class="form-control" placeholder="Ex: 30" min="1">
+                                <span class="field-msg" id="msg_duree"></span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Niveau</label>
-                        <select class="form-select" id="courseLevel">
-                            <option>Débutant</option>
-                            <option>Intermédiaire</option>
-                            <option>Avancé</option>
-                        </select>
+
+                    {# ── Section 3 : Image ── #}
+                    <div class="form-section fs-rose-image">
+                        <div class="form-section-title">
+                            <span class="section-icon"><i class="fas fa-image"></i></span>
+                            Image du cours
+                        </div>
+                        <div class="row g-3 align-items-center">
+                            <div class="col-md-8">
+                                <label class="form-label" for="cours_image_file">🖼️ Choisir une image</label>
+                                <input type="file" id="cours_image_file" name="cours[image]"
+                                       class="form-control" accept="image/*"
+                                       style="background:var(--pastel-rose); border-color:var(--pastel-rose-b);">
+                                <span class="field-msg" id="msg_image"></span>
+                               
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <div id="currentImagePreview" style="display:none;">
+                                    <img id="currentImage" src=""
+                                         style="max-width:90px; border-radius:14px;
+                                                border:2px solid var(--pastel-rose-b);
+                                                box-shadow:0 2px 8px rgba(0,0,0,.08);">
+                                    <div style="font-size:.7rem; color:#9d174d; margin-top:4px;">Image actuelle</div>
+                                    <button type="button" id="removeCourseImageBtn" 
+                                            style="background:none; border:none; color:#be185d; 
+                                                   font-size:.7rem; margin-top:4px; cursor:pointer;">
+                                        <i class="fas fa-trash-alt"></i> Supprimer l'image
+                                    </button>
+                                </div>
+                                <input type="hidden" name="remove_image" id="removeImageField" value="0">
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Durée (minutes)</label>
-                        <input type="number" class="form-control" id="courseDuration" placeholder="45">
+
+                    {# ── Section 4 : Description ── #}
+                    <div class="form-section fs-lavender">
+                        <div class="form-section-title">
+                            <span class="section-icon"><i class="fas fa-align-left"></i></span>
+                            Description
+                        </div>
+                        <label class="form-label" for="cours_description">📄 Description du cours *</label>
+                        <textarea id="cours_description" name="cours[description]"
+                                  class="form-control" rows="3"
+                                  placeholder="Décrivez le cours de façon claire et simple..."
+                                  style="background:var(--pastel-lavender); border-color:var(--pastel-lavender-b); resize:vertical;"></textarea>
+                        <span class="field-msg" id="msg_description"></span>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Statut</label>
-                        <select class="form-select" id="courseStatus">
-                            <option>Publié</option>
-                            <option>Brouillon</option>
-                            <option>Archivé</option>
-                        </select>
+
+                    {# ── Section 5 : Mots & Images (personnalisé) ── #}
+                    <div class="form-section fs-rose">
+                        <div class="form-section-title">
+                            <span class="section-icon"><i class="fas fa-images"></i></span>
+                            Mots &amp; Images associées
+                        </div>
+                        <div class="info-box-pastel">
+                            <i class="fas fa-lightbulb" style="font-size:1rem; flex-shrink:0;"></i>
+                            Pour chaque mot, associez <strong>une ou plusieurs images claires et expressives</strong>.
+                        </div>
+                        <div id="motsImagesContainer">
+                            <div class="mot-image-card" data-index="0">
+                                <div class="row g-3 align-items-end">
+                                    <div class="col-md-1 d-flex justify-content-center">
+                                        <div class="mot-number">1</div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label">🔤 Mot *</label>
+                                        <input type="text" class="form-control word-input" name="mots[]"
+                                               placeholder="Ex: CHEVAL" required
+                                               style="background:#fff8fb; border-color:#f9a8d4;">
+                                        <span class="validation-message word-validation" style="font-size:0.75rem; color:#ef4444;"></span>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <label class="form-label">📷 Images du mot *</label>
+                                        <input type="file" class="form-control images-file" name="images_files_0[]"
+                                               accept="image/*" multiple
+                                               style="background:#fff8fb; border-color:#f9a8d4;">
+                                        <span class="images-validation-message" style="font-size:0.75rem; color:#ef4444; display:block; margin-top:4px;"></span>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="button" class="btn-danger-soft remove-mot"
+                                                style="display:none; width:100%;">
+                                            <i class="fas fa-trash-alt"></i> Retirer
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-12">
+                                        <div class="existing-images-list"></div>
+                                        <div class="new-images-list"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-add-word mt-2" id="addMotBtn">
+                            <i class="fas fa-plus-circle"></i> Ajouter un mot avec ses images
+                        </button>
+                        <div id="wordsValidationError" style="color:#ef4444; font-size:0.75rem; margin-top:8px; display:none;">
+                            ✗ Ajoutez au moins un mot valide
+                        </div>
+                        <div id="imagesValidationError" style="color:#ef4444; font-size:0.75rem; margin-top:8px; display:none;">
+                            ✗ Chaque mot doit avoir au moins une image
+                        </div>
                     </div>
-                    <div class="col-12">
-                        <label class="form-label">Description</label>
-                        <textarea class="form-control" id="courseDescription" rows="2" placeholder="Décrivez le cours..."></textarea>
+
+                    {# ── Boutons ── #}
+                    <div style="display:flex; gap:.75rem; margin-top:1.5rem; align-items:center;">
+                        <button type="submit" class="btn-save-cours">
+                            <i class="fas fa-save me-1"></i> Enregistrer le cours
+                        </button>
+                        <button type="button" class="btn-cancel-cours" id="cancelCourseBtn">
+                            <i class="fas fa-times me-1"></i> Annuler
+                        </button>
                     </div>
-                    <div class="col-12 d-flex gap-2">
-                        <button class="btn-purple" id="saveCourseBtn"><i class="fas fa-save"></i> Enregistrer</button>
-                        <button class="btn-outline-purple" id="cancelCourseBtn"><i class="fas fa-times"></i> Annuler</button>
-                    </div>
-                </div>
+
+                </form>
             </div>
         </div>
     </div>
+
+    {# ── Chart donut types ── #}
     <div class="col-lg-4">
-        <div class="card-box h-100">
-            <div class="card-box-header">
-                <span class="card-box-title"><i class="fas fa-chart-pie"></i> Par catégorie</span>
+        <div class="card-box h-100"
+             style="border-radius:20px; border:1.5px solid var(--pastel-lavender-b);">
+            <div class="card-box-header"
+                 style="background:var(--pastel-lavender); border-radius:18px 18px 0 0;
+                        border-bottom:1.5px solid var(--pastel-lavender-b);">
+                <span class="card-box-title" style="color:#4c1d95;">
+                    <i class="fas fa-chart-pie" style="color:#a78bfa;"></i> Types de cours
+                </span>
             </div>
             <div class="card-box-body">
-                <canvas id="coursChart" height="240"></canvas>
+                <canvas id="coursTypeChart" height="240"></canvas>
             </div>
         </div>
     </div>
 </div>
 
-<div class="card-box">
-    <div class="card-box-header">
-        <span class="card-box-title"><i class="fas fa-list"></i> Liste des Cours</span>
-        <input type="text" class="form-control filter-input" id="courseFilterInput" placeholder="Filtrer...">
+{# ── TABLEAU ── #}
+<div class="card-box mb-4" style="border-radius:20px; border:1.5px solid var(--pastel-sky-b);">
+    <div class="card-box-header"
+         style="background:var(--pastel-sky); border-radius:18px 18px 0 0;
+                border-bottom:1.5px solid var(--pastel-sky-b);">
+        <span class="card-box-title" style="color:#1d4ed8;">
+            <i class="fas fa-list" style="color:#60a5fa;"></i> Liste des Cours
+        </span>
+        <input type="text" class="form-control filter-input" id="courseFilterInput" placeholder="🔍 Filtrer...">
     </div>
     <div class="card-box-body p-0">
         <div class="table-wrapper">
             <table class="custom-table" id="coursTable">
                 <thead>
                     <tr>
-                        <th>#</th>
+                        <th>Image</th>
                         <th>Titre</th>
-                        <th>Catégorie</th>
+                        <th>Type</th>
                         <th>Niveau</th>
                         <th>Durée</th>
-                        <th>Inscrits</th>
-                        <th>Statut</th>
+                        <th>Mots</th>
+                        <th>Images</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for course in courses|default([
-                        {id:1, title:'Communication par pictogrammes', category:'Communication', level:'Débutant', duration:'30 min', enrolled:245, status:'Publié'},
-                        {id:2, title:'Motricité fine — Niveau 1', category:'Motricité', level:'Débutant', duration:'45 min', enrolled:189, status:'Publié'},
-                        {id:3, title:'Reconnaître les émotions', category:'Socialisation', level:'Intermédiaire', duration:'60 min', enrolled:312, status:'Brouillon'},
-                        {id:4, title:'Lecture des symboles', category:'Langage', level:'Avancé', duration:'50 min', enrolled:98, status:'Publié'}
-                    ]) %}
-                        <tr>
-                            <td>{{ course.id }}</td>
-                            <td>{{ course.title }}</td>
-                            <td>{{ course.category }}</td>
-                            <td>{{ course.level }}</td>
-                            <td>{{ course.duration }}</td>
-                            <td>{{ course.enrolled }}</td>
-                            <td>
-                                {% if course.status == 'Publié' %}
-                                    <span class="badge-status badge-active">{{ course.status }}</span>
-                                {% elseif course.status == 'Brouillon' %}
-                                    <span class="badge-status badge-pending">{{ course.status }}</span>
-                                {% else %}
-                                    <span class="badge-status badge-inactive">{{ course.status }}</span>
-                                {% endif %}
+                    {% set typeMap  = {'Académique':'academique','Social':'social','Motricité':'motricite','Langage':'langage'} %}
+                    {% set niveauMap = {'Débutant':'debutant','Intermédiaire':'intermediaire','Avancé':'avance'} %}
+                    {% for item in cours_list|default([]) %}
+                    <tr>
+                        <td class="course-image-cell">
+                            {% if item.image %}
+                                <img src="/uploads/images/{{ item.image }}" 
+                                     alt="{{ item.titre }}"
+                                     class="course-image-thumb"
+                                     onerror="this.src='https://placehold.co/50x50?text=No+Image'">
+                            {% else %}
+                                <div style="width:50px; height:50px; background:var(--pastel-lavender); 
+                                            border-radius:10px; display:flex; align-items:center; 
+                                            justify-content:center; margin:0 auto;">
+                                    <i class="fas fa-image" style="color:#c4b5fd;"></i>
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td><strong style="color:#334155;">{{ item.titre }}</strong></td>
+                        <td>
+                            <span class="badge-type {{ typeMap[item.typeCours]|default('') }}">
+                                {{ item.typeCours }}
                             </span>
-                            </td>
-                            <td>
-                                <button class="btn-edit-soft me-1 edit-course-btn" data-id="{{ course.id }}">Modifier</button>
-                                <button class="btn-danger-soft delete-course-btn" data-id="{{ course.id }}">Supprimer</button>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-{% endblock %}
-
-{% block javascripts %}
-{{ parent() }}
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const P = { p400: '#a855f7', pink: '#f472b6', indigo: '#818cf8', accent: '#e040fb' };
-
-    // Doughnut Chart - Par catégorie
-    new Chart(document.getElementById('coursChart').getContext('2d'), {
-        type: 'doughnut',
-        data: {
-            labels: ['Communication', 'Motricité', 'Langage', 'Socialisation'],
-            datasets: [{
-                data: [28, 22, 18, 16],
-                backgroundColor: [P.p400, P.pink, P.indigo, P.accent],
-                borderWidth: 0,
-                hoverOffset: 8
-            }]
-        },
-        options: {
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        usePointStyle: true,
-                        font: { family: 'DM Sans', size: 11 }
-                    }
-                }
-            },
-            cutout: '60%',
-            responsive: true
-        }
-    });
-
-    // Filter table
-    document.getElementById('courseFilterInput')?.addEventListener('input', function(e) {
-        const val = e.target.value.toLowerCase();
-        document.querySelectorAll('#coursTable tbody tr').forEach(row => {
-            row.style.display = row.textContent.toLowerCase().includes(val) ? '' : 'none';
-        });
-    });
-
-    // Edit button
-    document.querySelectorAll('.edit-course-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.getElementById('formMode').textContent = 'Mode : Modification';
-            const id = this.getAttribute('data-id');
-            console.log('Edit course:', id);
-        });
-    });
-
-    // Delete button
-    document.querySelectorAll('.delete-course-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            if (confirm('Supprimer ce cours ?')) {
-                this.closest('tr').remove();
-            }
-        });
-    });
-
-    // Cancel button
-    document.getElementById('cancelCourseBtn')?.addEventListener('click', function() {
-        document.getElementById('formMode').textContent = 'Mode : Ajout';
-        document.getElementById('courseTitle').value = '';
-        document.getElementById('courseDuration').value = '';
-        document.getElementById('courseDescription').value = '';
-    });
-
-    // Save button
-    document.getElementById('saveCourseBtn')?.addEventListener('click', function() {
-        const title = document.getElementById('courseTitle')?.value;
-        if (!title) {
-            alert('Veuillez saisir un titre de cours');
-            return;
-        }
-        console.log('Save course:', {
-            title: title,
-            category: document.getElementById('courseCategory')?.value,
-            level: document.getElementById('courseLevel')?.value,
-            duration: document.getElementById('courseDuration')?.value,
-            status: document.getElementById('courseStatus')?.value,
-            description: document.getElementById('courseDescription')?.value
-        });
-        alert('Cours enregistré (démo)');
-        document.getElementById('formMode').textContent = 'Mode : Ajout';
-    });
-});
-</script>
-{% endblock %}
+                        </td>
+                        <td>
+                            <span class="badge-niveau {{ niveauMap[item.niveau]|default('') }}">
+                                {{ item.niveau }}
+                            </span>
+                        </td>
+                        <td style="color:#64748b;">{{ item.duree }} min</td>
+                        <td>
+                            <span style="background:var(--pastel-lavender); color:#5b21b6;
+                                         padding:2px 9px; border-radius:10px; font-size:.75rem; font-weight:600;">
+                                {{ item.mots ? item.mots|split(';')|length : 0 }}
+                            </span>
+                        </td>
+                        <td>
+                            <span style="background:var(--pastel-rose); color:#9d174d;
+                                         padding:2px 9px; border-radius:10px; font-size:.75rem; font-weight:600;">
+                                {{ item.imagesMots ? item.imagesMots|split(';')|length : 0 }}
+                            </span>
+                        </td>
+                        <td style="white-space:nowrap;">
+                           

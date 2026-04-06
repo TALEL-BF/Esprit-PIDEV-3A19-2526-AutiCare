@@ -1,0 +1,944 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Auticare — Gestion des évaluations{% endblock %}
+
+{% block page_title %}Gestion des évaluations{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    /* Vos styles CSS (gardez-les identiques) */
+    :root {
+        --pastel-sky: #dbeafe;
+        --pastel-sky-b: #9fc8f7;
+        --pastel-lavender: #ede9fe;
+        --pastel-lavender-b: #c4b5fd;
+        --pastel-rose: #fce7f3;
+        --pastel-rose-b: #f9a8d4;
+        --pastel-yellow: #fef9c3;
+        --pastel-yellow-b: #fde68a;
+        --txt-soft: #475569;
+        --txt-label: #334155;
+    }
+
+    /* Validation states */
+    .eval-form-control.is-valid {
+        border-color: #22c55e !important;
+        background: #f0fdf4 !important;
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1) !important;
+    }
+    .eval-form-control.is-invalid {
+        border-color: #ef4444 !important;
+        background: #fff5f5 !important;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+    }
+    .choice-group.choice-valid {
+        border-color: #22c55e !important;
+        background: linear-gradient(135deg, #f0fdf4, #dcfce7) !important;
+    }
+    .choice-group.choice-invalid {
+        border-color: #ef4444 !important;
+        background: linear-gradient(135deg, #fff5f5, #fee2e2) !important;
+    }
+    .field-error {
+        color: #ef4444;
+        font-size: 0.76rem;
+        font-weight: 600;
+        margin-top: 5px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .field-success {
+        color: #16a34a;
+        font-size: 0.76rem;
+        font-weight: 600;
+        margin-top: 5px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .field-feedback { min-height: 20px; }
+
+    /* Flash alerts */
+    .alert-error {
+        background-color: #fee2e2;
+        border: 1px solid #ef4444;
+        color: #991b1b;
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    .alert-success {
+        background-color: #d1fae5;
+        border: 1px solid #10b981;
+        color: #065f46;
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    /* Page header */
+    .eval-page-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 32px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid var(--pastel-lavender);
+    }
+    .eval-page-header .header-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #8b6bec, #c4b5fd);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.3rem;
+        flex-shrink: 0;
+        box-shadow: 0 4px 14px rgba(167, 139, 250, 0.25);
+    }
+    .eval-page-header h2 {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #4c1d95;
+        margin: 0 0 3px 0;
+    }
+    .eval-page-header p {
+        color: #8250f6;
+        font-size: 0.85rem;
+        margin: 0;
+    }
+
+    .filter-bar {
+        background: white;
+        border-radius: 16px;
+        padding: 18px 24px;
+        margin-bottom: 24px;
+        border: 1px solid var(--pastel-lavender);
+        box-shadow: 0 2px 8px rgba(167, 139, 250, 0.08);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .filter-bar .filter-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .filter-bar label {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #7c3aed;
+        white-space: nowrap;
+    }
+    .filter-bar select {
+        border: 1.5px solid var(--pastel-lavender);
+        border-radius: 10px;
+        padding: 7px 14px;
+        font-size: 0.82rem;
+        color: #4c1d95;
+        background: #faf9ff;
+        outline: none;
+        min-width: 220px;
+        transition: all .2s;
+    }
+    .filter-bar select:focus {
+        border-color: #a78bfa;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.1);
+    }
+    .questions-count-badge {
+        background: linear-gradient(135deg, var(--pastel-lavender), var(--pastel-lavender-b));
+        color: #6d28d9;
+        font-size: 0.78rem;
+        font-weight: 700;
+        padding: 5px 14px;
+        border-radius: 20px;
+        letter-spacing: .3px;
+    }
+
+    /* Form card */
+    .form-card {
+        background: white;
+        border-radius: 20px;
+        padding: 28px 32px;
+        margin-bottom: 28px;
+        border: 1.5px solid var(--pastel-lavender);
+        box-shadow: 0 4px 20px rgba(167, 139, 250, 0.08);
+        position: relative;
+        overflow: hidden;
+    }
+    .form-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #916ff7, #a793f7, #d2aff7);
+        border-radius: 20px 20px 0 0;
+    }
+    .form-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+    }
+    .form-card-header h5 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #4c1d95;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .form-card-header h5 i { color: #9b7afb; }
+    .mode-pill {
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 4px 14px;
+        border-radius: 20px;
+        background: var(--pastel-lavender);
+        color: #601bd0;
+        letter-spacing: .4px;
+        text-transform: uppercase;
+    }
+    .mode-pill.edit { background: #fef3c7; color: #b45309; }
+
+    /* Form elements */
+    .eval-form-label {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #6f26ec;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        margin-bottom: 8px;
+        display: block;
+    }
+    .eval-form-control {
+        border: 1.5px solid #e9d5ff;
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-size: 0.88rem;
+        color: #1f2937;
+        background: #fefbff;
+        width: 100%;
+        transition: all .2s;
+        outline: none;
+    }
+    .eval-form-control:focus {
+        border-color: #8762f5;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.12);
+    }
+    textarea.eval-form-control {
+        resize: vertical;
+        min-height: 72px;
+        background: #fefbff;
+    }
+    select.eval-form-control { cursor: pointer; }
+
+    /* Choice groups */
+    .choice-group {
+        background: linear-gradient(135deg, #fefbff, #faf7ff);
+        border-radius: 14px;
+        padding: 16px 18px;
+        border: 1.5px solid var(--pastel-lavender);
+        transition: all .25s ease;
+    }
+    .choice-group:hover {
+        border-color: #a28ef2;
+        background: white;
+        box-shadow: 0 4px 12px rgba(167, 139, 250, 0.12);
+        transform: translateY(-2px);
+    }
+    .choice-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #a78bfa, #c4b5fd);
+        color: white;
+        font-size: 0.7rem;
+        font-weight: 700;
+        margin-right: 8px;
+    }
+
+    /* Buttons */
+    .btn-save {
+        background: linear-gradient(135deg, #818cf8, #a78bfa);
+        color: white;
+        border: none;
+        border-radius: 14px;
+        padding: 10px 28px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 12px rgba(129, 140, 248, 0.3);
+    }
+    .btn-save:hover {
+        transform: translateY(-2px);
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        box-shadow: 0 6px 18px rgba(99, 102, 241, 0.35);
+    }
+    .btn-save:active { transform: translateY(0); }
+    .btn-cancel-eval {
+        background: var(--pastel-rose);
+        color: #9d174d;
+        border: 1.5px solid var(--pastel-rose-b);
+        border-radius: 14px;
+        padding: 10px 24px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+    }
+    .btn-cancel-eval:hover {
+        background: #fce7f3;
+        transform: translateY(-1px);
+    }
+
+    /* Table card */
+    .table-card {
+        background: white;
+        border-radius: 20px;
+        border: 1.5px solid var(--pastel-lavender);
+        box-shadow: 0 4px 20px rgba(167, 139, 250, 0.06);
+        overflow: hidden;
+    }
+    .table-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 24px;
+        border-bottom: 1.5px solid var(--pastel-lavender);
+        background: linear-gradient(135deg, #fefbff, #faf7ff);
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .table-card-title {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #4c1d95;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .table-card-title i { color: #a78bfa; }
+    .filter-input {
+        border: 1.5px solid var(--pastel-lavender);
+        border-radius: 12px;
+        padding: 7px 14px 7px 36px;
+        font-size: 0.82rem;
+        color: #4c1d95;
+        background: #fefbff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23a78bfa' stroke-width='2.5'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 12px center;
+        outline: none;
+        width: 200px;
+        transition: all .2s;
+    }
+    .filter-input:focus {
+        border-color: #c4b5fd;
+        background-color: white;
+        box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.1);
+    }
+
+    /* Table */
+    .eval-table { width: 100%; border-collapse: collapse; }
+    .eval-table thead tr { background: linear-gradient(135deg, #fefbff, #faf7ff); }
+    .eval-table th {
+        padding: 12px 16px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #7c3aed;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        border-bottom: 1.5px solid var(--pastel-lavender);
+        white-space: nowrap;
+    }
+    .eval-table td {
+        padding: 14px 16px;
+        font-size: 0.85rem;
+        color: #374151;
+        border-bottom: 1px solid #f3e8ff;
+        vertical-align: middle;
+    }
+    .eval-table tbody tr { transition: all .15s ease; }
+    .eval-table tbody tr:hover { background: linear-gradient(135deg, #fefbff, #faf7ff); }
+    .eval-table tbody tr:last-child td { border-bottom: none; }
+
+    .cours-cell { font-weight: 600; color: #4c1d95; }
+    .cours-cell small { font-weight: 400; color: #a78bfa; font-size: 0.75rem; }
+
+    .score-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--pastel-lavender), var(--pastel-lavender-b));
+        color: #6d28d9;
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+    .correct-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: rgba(167, 139, 250, 0.12);
+        color: #7c3aed;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        border: 1px solid rgba(167, 139, 250, 0.25);
+    }
+    .btn-edit-eval {
+        background: var(--pastel-lavender);
+        color: #601dcb;
+        border: none;
+        border-radius: 10px;
+        padding: 6px 14px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all .15s ease;
+    }
+    .btn-edit-eval:hover {
+        background: #ddd6fe;
+        transform: translateY(-2px);
+        box-shadow: 0 2px 8px rgba(167, 139, 250, 0.2);
+    }
+    .btn-del-eval {
+        background: var(--pastel-rose);
+        color: #be185d;
+        border: none;
+        border-radius: 10px;
+        padding: 6px 14px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all .15s ease;
+    }
+    .btn-del-eval:hover {
+        background: #fce7f3;
+        transform: translateY(-2px);
+        box-shadow: 0 2px 8px rgba(190, 24, 93, 0.15);
+    }
+    .empty-state {
+        padding: 48px 24px;
+        text-align: center;
+        color: #c4b5fd;
+    }
+    .empty-state i {
+        font-size: 2.5rem;
+        color: var(--pastel-lavender);
+        margin-bottom: 12px;
+        display: block;
+    }
+    .empty-state p { font-size: 0.9rem; margin: 0; }
+    .choice-group, .btn-save, .btn-cancel-eval {
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+<!-- Page header -->
+<div class="eval-page-header">
+    <div class="header-icon"><i class="fas fa-question-circle"></i></div>
+    <div>
+        <h2>Gestion des évaluations</h2>
+        <p>Ajoutez, modifiez ou supprimez les questions</p>
+    </div>
+</div>
+
+<!-- Filtre par cours -->
+<div class="filter-bar">
+    <div class="filter-left">
+        <label>Filtrer par cours :</label>
+        <select id="filterCourseSelect">
+            <option value="all">Tous les cours</option>
+            {% for cours in allCourses %}
+                <option value="{{ cours.idCours }}" {% if filterCourseId == cours.idCours %}selected{% endif %}>
+                    {{ cours.titre }} ({{ cours.niveau }})
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+    <span class="questions-count-badge">{{ totalQuestions }} question(s)</span>
+</div>
+
+{# Flash messages #}
+{% for flash in app.flashes('error') %}
+    <div class="alert-error">
+        <i class="fas fa-exclamation-triangle"></i> {{ flash }}
+    </div>
+{% endfor %}
+{% for flash in app.flashes('success') %}
+    <div class="alert-success">
+        <i class="fas fa-check-circle"></i> {{ flash }}
+    </div>
+{% endfor %}
+
+<!-- Formulaire d'ajout / modification -->
+<div class="form-card" id="formCard">
+    <div class="form-card-header">
+        <h5><i class="fas fa-plus-circle"></i> <span id="formTitle">Ajouter une nouvelle question</span></h5>
+        <span class="mode-pill" id="formMode">Mode : Ajout</span>
+    </div>
+
+    <form id="evaluationForm" method="POST" action="{{ path('admin_evaluation_save') }}" novalidate>
+        <input type="hidden" name="id_eval" id="id_eval" value="">
+        
+        {# Token CSRF #}
+        <input type="hidden" name="_token" value="{{ form._token.vars.value }}">
+
+        <div class="row g-4">
+            {# Question #}
+            <div class="col-12">
+                <label class="eval-form-label" for="f_question">
+                    <i class="fas fa-comment-dots me-1"></i> Question :
+                </label>
+                <textarea class="eval-form-control" name="question" id="f_question" rows="2"
+                          placeholder="Entrez votre question (min. 10 caractères)"></textarea>
+                <div class="field-feedback" id="feedback-f_question"></div>
+            </div>
+
+            {# Choix 1 #}
+            <div class="col-md-4">
+                <div class="choice-group" id="group-choix1">
+                    <label class="eval-form-label">
+                        <span class="choice-number">1</span> Choix 1
+                    </label>
+                    <input type="text" class="eval-form-control" name="choix1" id="f_choix1"
+                           placeholder="Première option" maxlength="100">
+                    <div class="field-feedback" id="feedback-f_choix1"></div>
+                </div>
+            </div>
+
+            {# Choix 2 #}
+            <div class="col-md-4">
+                <div class="choice-group" id="group-choix2">
+                    <label class="eval-form-label">
+                        <span class="choice-number">2</span> Choix 2
+                    </label>
+                    <input type="text" class="eval-form-control" name="choix2" id="f_choix2"
+                           placeholder="Deuxième option" maxlength="100">
+                    <div class="field-feedback" id="feedback-f_choix2"></div>
+                </div>
+            </div>
+
+            {# Choix 3 #}
+            <div class="col-md-4">
+                <div class="choice-group" id="group-choix3">
+                    <label class="eval-form-label">
+                        <span class="choice-number">3</span> Choix 3
+                    </label>
+                    <input type="text" class="eval-form-control" name="choix3" id="f_choix3"
+                           placeholder="Troisième option" maxlength="100">
+                    <div class="field-feedback" id="feedback-f_choix3"></div>
+                </div>
+            </div>
+
+            {# Bonne réponse #}
+            <div class="col-md-4">
+                <label class="eval-form-label" for="f_bonne_reponse">
+                    <i class="fas fa-check-circle me-1"></i> Bonne réponse :
+                </label>
+                <select class="eval-form-control" name="bonne_reponse" id="f_bonne_reponse">
+                    <option value="">Sélectionnez la bonne réponse</option>
+                    <option value="choix1">Choix 1</option>
+                    <option value="choix2">Choix 2</option>
+                    <option value="choix3">Choix 3</option>
+                </select>
+                <div class="field-feedback" id="feedback-f_bonne_reponse"></div>
+            </div>
+
+            {# Score #}
+            <div class="col-md-4">
+                <label class="eval-form-label" for="f_score">
+                    <i class="fas fa-star me-1"></i> Score (points) :
+                </label>
+                <input type="number" class="eval-form-control" name="score" id="f_score"
+                       placeholder="Ex: 1, 2, 5..." value="1" min="1" max="100">
+                <div class="field-feedback" id="feedback-f_score"></div>
+            </div>
+
+            {# Cours #}
+            <div class="col-md-4">
+                <label class="eval-form-label" for="f_cours_id">
+                    <i class="fas fa-book me-1"></i> Cours :
+                </label>
+                <select class="eval-form-control" name="cours_id" id="f_cours_id">
+                    <option value="">Sélectionner un cours</option>
+                    {% for cours in allCourses %}
+                        <option value="{{ cours.idCours }}">{{ cours.titre }} ({{ cours.niveau }})</option>
+                    {% endfor %}
+                </select>
+                <div class="field-feedback" id="feedback-f_cours_id"></div>
+            </div>
+
+            <div class="col-12 d-flex gap-2 mt-2">
+                <button type="submit" class="btn-save">
+                    <i class="fas fa-save"></i> Enregistrer
+                </button>
+                <button type="button" class="btn-cancel-eval" id="cancelBtn">
+                    <i class="fas fa-times"></i> Annuler
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Liste des questions -->
+<div class="table-card">
+    <div class="table-card-header">
+        <span class="table-card-title"><i class="fas fa-list"></i> Liste des questions</span>
+        <input type="text" class="filter-input" id="questionFilterInput" placeholder="Filtrer...">
+    </div>
+    <div class="table-responsive">
+        <table class="eval-table" id="questionsTable">
+            <thead>
+                <tr>
+                    <th>Question</th>
+                    <th>Cours</th>
+                    <th>Choix 1</th>
+                    <th>Choix 2</th>
+                    <th>Choix 3</th>
+                    <th>Bonne réponse</th>
+                    <th>Score</th>
+                    <th>Activité</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for eval in evaluations %}
+                <tr data-id="{{ eval.idEval }}">
+                    <td style="max-width: 280px;">
+                        {{ eval.question|slice(0, 60) }}{% if eval.question|length > 60 %}…{% endif %}
+                    </td>
+                    <td>
+                        <span class="cours-cell">
+                            {{ eval.cours ? eval.cours.titre : '-' }}<br>
+                            <small>{{ eval.cours ? eval.cours.niveau : '' }}</small>
+                        </span>
+                    </td>
+                    <td>{{ eval.choix1 }}</td>
+                    <td>{{ eval.choix2 }}</td>
+                    <td>{{ eval.choix3 }}</td>
+                    <td>
+                        {% set bonneReponseText = '' %}
+                        {% if eval.bonneReponse == 'choix1' %}
+                            {% set bonneReponseText = eval.choix1 %}
+                        {% elseif eval.bonneReponse == 'choix2' %}
+                            {% set bonneReponseText = eval.choix2 %}
+                        {% elseif eval.bonneReponse == 'choix3' %}
+                            {% set bonneReponseText = eval.choix3 %}
+                        {% else %}
+                            {% set bonneReponseText = eval.bonneReponse %}
+                        {% endif %}
+                        <span class="correct-badge">
+                            <i class="fas fa-check-circle"></i> {{ bonneReponseText }}
+                        </span>
+                    </td>
+                    <td class="text-center"><span class="score-pill">{{ eval.score }}</span></td>
+                    <td>
+                        <button class="btn-edit-eval me-1 edit-question-btn" data-id="{{ eval.idEval }}">
+                            <i class="fas fa-edit"></i> Modifier
+                        </button>
+                        <form method="POST" action="{{ path('admin_evaluation_delete', {'id': eval.idEval}) }}"
+                              style="display: inline-block;"
+                              onsubmit="return confirm('Supprimer cette question ?')">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="submit" class="btn-del-eval">
+                                <i class="fas fa-trash"></i> Supprimer
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8">
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <p>Aucune question trouvée</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Vos scripts JS identiques (gardez-les)
+    function setValid(fieldId, message, groupId) {
+        const el = document.getElementById(fieldId);
+        const fb = document.getElementById('feedback-' + fieldId);
+        if (!el) return;
+        el.classList.remove('is-invalid');
+        el.classList.add('is-valid');
+        if (fb) fb.innerHTML = `<span class="field-success"><i class="fas fa-check-circle"></i> ${message}</span>`;
+        if (groupId) {
+            const g = document.getElementById(groupId);
+            if (g) { g.classList.remove('choice-invalid'); g.classList.add('choice-valid'); }
+        }
+    }
+
+    function setInvalid(fieldId, message, groupId) {
+        const el = document.getElementById(fieldId);
+        const fb = document.getElementById('feedback-' + fieldId);
+        if (!el) return;
+        el.classList.remove('is-valid');
+        el.classList.add('is-invalid');
+        if (fb) fb.innerHTML = `<span class="field-error"><i class="fas fa-exclamation-circle"></i> ${message}</span>`;
+        if (groupId) {
+            const g = document.getElementById(groupId);
+            if (g) { g.classList.remove('choice-valid'); g.classList.add('choice-invalid'); }
+        }
+    }
+
+    function clearFeedback(fieldId, groupId) {
+        const el = document.getElementById(fieldId);
+        const fb = document.getElementById('feedback-' + fieldId);
+        if (el) el.classList.remove('is-valid', 'is-invalid');
+        if (fb) fb.innerHTML = '';
+        if (groupId) {
+            const g = document.getElementById(groupId);
+            if (g) { g.classList.remove('choice-valid', 'choice-invalid'); }
+        }
+    }
+
+    function checkDoublons() {
+        const c1 = (document.getElementById('f_choix1')?.value || '').trim().toLowerCase();
+        const c2 = (document.getElementById('f_choix2')?.value || '').trim().toLowerCase();
+        const c3 = (document.getElementById('f_choix3')?.value || '').trim().toLowerCase();
+
+        const dup12 = c1 && c2 && c1 === c2;
+        const dup13 = c1 && c3 && c1 === c3;
+        const dup23 = c2 && c3 && c2 === c3;
+
+        if (dup12 || dup13 || dup23) {
+            if (dup12 || dup13) setInvalid('f_choix1', 'Les choix doivent être différents', 'group-choix1');
+            if (dup12 || dup23) setInvalid('f_choix2', 'Les choix doivent être différents', 'group-choix2');
+            if (dup13 || dup23) setInvalid('f_choix3', 'Les choix doivent être différents', 'group-choix3');
+            return false;
+        }
+
+        [['f_choix1','group-choix1','Choix 1 valide'],
+         ['f_choix2','group-choix2','Choix 2 valide'],
+         ['f_choix3','group-choix3','Choix 3 valide']].forEach(([id, gid, msg]) => {
+            const el = document.getElementById(id);
+            const val = el?.value.trim();
+            if (val && el?.classList.contains('is-invalid')) {
+                const fb = document.getElementById('feedback-' + id);
+                if (fb && fb.textContent.includes('différents')) {
+                    setValid(id, msg, gid);
+                }
+            }
+        });
+        return true;
+    }
+
+    function validateSingleChoix(id, groupId, label) {
+        const val = (document.getElementById(id)?.value || '').trim();
+        if (!val)           { setInvalid(id, `Le ${label} ne peut pas être vide`, groupId); return false; }
+        if (val.length > 100) { setInvalid(id, 'Maximum 100 caractères', groupId); return false; }
+        setValid(id, `${label} valide`, groupId);
+        return true;
+    }
+
+    // Question
+    document.getElementById('f_question')?.addEventListener('blur', function () {
+        const v = this.value.trim();
+        if (!v)               setInvalid('f_question', 'La question ne peut pas être vide');
+        else if (v.length < 10)  setInvalid('f_question', 'La question doit contenir au moins 10 caractères');
+        else if (v.length > 500) setInvalid('f_question', 'La question ne peut pas dépasser 500 caractères');
+        else                  setValid('f_question', 'Question valide');
+    });
+    document.getElementById('f_question')?.addEventListener('input', function () {
+        if (this.value.trim().length >= 10) setValid('f_question', 'Question valide');
+    });
+
+    // Choix
+    [['f_choix1','group-choix1','choix 1'],
+     ['f_choix2','group-choix2','choix 2'],
+     ['f_choix3','group-choix3','choix 3']].forEach(([id, gid, label]) => {
+        document.getElementById(id)?.addEventListener('blur', function () {
+            validateSingleChoix(id, gid, label);
+            checkDoublons();
+        });
+        document.getElementById(id)?.addEventListener('input', function () {
+            if (this.value.trim()) clearFeedback(id, gid);
+            checkDoublons();
+        });
+    });
+
+    // Bonne réponse
+    document.getElementById('f_bonne_reponse')?.addEventListener('change', function () {
+        if (!this.value) setInvalid('f_bonne_reponse', 'Veuillez sélectionner la bonne réponse');
+        else             setValid('f_bonne_reponse', 'Bonne réponse sélectionnée');
+    });
+
+    // Score
+    document.getElementById('f_score')?.addEventListener('blur', function () {
+        const v = parseInt(this.value);
+        if (this.value === '' || this.value === null)  setInvalid('f_score', 'Le score est requis');
+        else if (isNaN(v) || v < 1) setInvalid('f_score', 'Le score doit être au moins 1');
+        else if (v > 100)           setInvalid('f_score', 'Le score ne peut pas dépasser 100');
+        else                        setValid('f_score', `Score valide (${v} point${v > 1 ? 's' : ''})`);
+    });
+
+    // Cours
+    document.getElementById('f_cours_id')?.addEventListener('change', function () {
+        if (!this.value) setInvalid('f_cours_id', 'Veuillez sélectionner un cours');
+        else             setValid('f_cours_id', 'Cours sélectionné');
+    });
+
+    // Soumission
+    document.getElementById('evaluationForm')?.addEventListener('submit', function (e) {
+        let valid = true;
+
+        const q = document.getElementById('f_question').value.trim();
+        if (!q)               { setInvalid('f_question', 'La question ne peut pas être vide'); valid = false; }
+        else if (q.length < 10)  { setInvalid('f_question', 'La question doit contenir au moins 10 caractères'); valid = false; }
+        else if (q.length > 500) { setInvalid('f_question', 'La question ne peut pas dépasser 500 caractères'); valid = false; }
+        else                  setValid('f_question', 'Question valide');
+
+        if (!validateSingleChoix('f_choix1', 'group-choix1', 'choix 1')) valid = false;
+        if (!validateSingleChoix('f_choix2', 'group-choix2', 'choix 2')) valid = false;
+        if (!validateSingleChoix('f_choix3', 'group-choix3', 'choix 3')) valid = false;
+        if (!checkDoublons()) valid = false;
+
+        const br = document.getElementById('f_bonne_reponse').value;
+        if (!br) { setInvalid('f_bonne_reponse', 'Veuillez sélectionner la bonne réponse'); valid = false; }
+        else     setValid('f_bonne_reponse', 'Bonne réponse sélectionnée');
+
+        const sv = parseInt(document.getElementById('f_score').value);
+        if (document.getElementById('f_score').value === '') { setInvalid('f_score', 'Le score est requis'); valid = false; }
+        else if (isNaN(sv) || sv < 1) { setInvalid('f_score', 'Le score doit être au moins 1'); valid = false; }
+        else if (sv > 100)            { setInvalid('f_score', 'Le score ne peut pas dépasser 100'); valid = false; }
+        else                          setValid('f_score', `Score valide (${sv} point${sv > 1 ? 's' : ''})`);
+
+        const ci = document.getElementById('f_cours_id').value;
+        if (!ci) { setInvalid('f_cours_id', 'Veuillez sélectionner un cours'); valid = false; }
+        else     setValid('f_cours_id', 'Cours sélectionné');
+
+        if (!valid) {
+            e.preventDefault();
+            const first = document.querySelector('.eval-form-control.is-invalid');
+            if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    });
+
+    // Filtre par cours
+    document.getElementById('filterCourseSelect')?.addEventListener('change', function () {
+        const id = this.value;
+        window.location.href = '{{ path('admin_evaluation') }}' + (id !== 'all' ? '?cours_id=' + id : '');
+    });
+
+    // Filtre texte
+    document.getElementById('questionFilterInput')?.addEventListener('input', function (e) {
+        const val = e.target.value.toLowerCase();
+        document.querySelectorAll('#questionsTable tbody tr').forEach(row => {
+            if (row.querySelector('td') && !row.querySelector('.empty-state')) {
+                row.style.display = row.textContent.toLowerCase().includes(val) ? '' : 'none';
+            }
+        });
+    });
+
+    // Édition
+    document.querySelectorAll('.edit-question-btn').forEach(btn => {
+        btn.addEventListener('click', async function () {
+            const id = this.getAttribute('data-id');
+            document.getElementById('formMode').textContent = 'Mode : Modification';
+            document.getElementById('formMode').classList.add('edit');
+            document.getElementById('formTitle').innerHTML = '<i class="fas fa-edit me-2"></i> Modifier la question';
+
+            try {
+                const response = await fetch(`/admin/evaluation/${id}/edit`);
+                const data = await response.json();
+
+                document.getElementById('id_eval').value         = data.id_eval;
+                document.getElementById('f_question').value      = data.question;
+                document.getElementById('f_choix1').value        = data.choix1;
+                document.getElementById('f_choix2').value        = data.choix2;
+                document.getElementById('f_choix3').value        = data.choix3;
+                document.getElementById('f_bonne_reponse').value = data.bonne_reponse;
+                document.getElementById('f_score').value         = data.score;
+                document.getElementById('f_cours_id').value      = data.cours_id;
+
+                setValid('f_question',      'Question valide');
+                setValid('f_choix1',        'Choix 1 valide',  'group-choix1');
+                setValid('f_choix2',        'Choix 2 valide',  'group-choix2');
+                setValid('f_choix3',        'Choix 3 valide',  'group-choix3');
+                setValid('f_bonne_reponse', 'Bonne réponse sélectionnée');
+                setValid('f_score',         'Score valide');
+                setValid('f_cours_id',      'Cours sélectionné');
+
+                document.getElementById('formCard').scrollIntoView({ behavior: 'smooth' });
+            } catch (err) {
+                console.error('Erreur:', err);
+                alert('Erreur lors du chargement de la question');
+            }
+        });
+    });
+
+    // Annuler
+    document.getElementById('cancelBtn')?.addEventListener('click', function () {
+        document.getElementById('formMode').textContent = 'Mode : Ajout';
+        document.getElementById('formMode').classList.remove('edit');
+        document.getElementById('formTitle').innerHTML = '<i class="fas fa-plus-circle me-2"></i> Ajouter une nouvelle question';
+        document.getElementById('evaluationForm').reset();
+        document.getElementById('id_eval').value = '';
+
+        [['f_question',      null],
+         ['f_choix1',        'group-choix1'],
+         ['f_choix2',        'group-choix2'],
+         ['f_choix3',        'group-choix3'],
+         ['f_bonne_reponse', null],
+         ['f_score',         null],
+         ['f_cours_id',      null]].forEach(([fid, gid]) => clearFeedback(fid, gid));
+
+        const scoreEl = document.getElementById('f_score');
+        if (scoreEl) scoreEl.value = '1';
+    });
+});
+</script>
+{% endblock %}

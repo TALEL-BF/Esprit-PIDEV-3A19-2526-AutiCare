@@ -39,8 +39,6 @@
 <a href="{{ path('app_events') }}" class="nav-item nav-link {{ app.request.get('_route') == 'app_events' or app.request.get('_route') == 'app_evenements' ? 'active' : '' }}">
     <i class="fas fa-calendar-alt me-1 text-secondary"></i> Événements
 </a>
-<a href="{{ path('app_articles') }}" class="nav-item nav-link {{ app.request.get('_route') == 'app_articles' ? 'active' : '' }}">
-<i class="fas fas fa-newspaper me-1 text-secondary"></i> Articless
 
 </a>
                    <a href="{{ path('app_jeux') }}" class="nav-item nav-link {{ app.request.get('_route') == 'app_jeux' ? 'active' : '' }}">

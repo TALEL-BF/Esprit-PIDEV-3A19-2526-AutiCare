@@ -1,0 +1,1522 @@
+{# templates/front/cours/show.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}AutiCare – {{ cours.titre }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sun:      #FFD93D;
+            --sky:      #6BCB77;
+            --ocean:    #4D96FF;
+            --coral:    #FF6B6B;
+            --lavender: #C77DFF;
+            --peach:    #FF9A3C;
+            --mint:     #2EC4B6;
+            --rose:     #FF6FA8;
+            --bg:       #FFFBF4;
+            --dark:     #1E2A3B;
+        }
+
+        * { box-sizing: border-box; }
+        body { background: var(--bg); font-family: 'Nunito', sans-serif; }
+
+        /* ══ TOP HERO ══ */
+        .course-hero {
+            background: linear-gradient(150deg, #5a288c 0%, #9b6bff 50%, #c77dff 100%);
+            padding: 2.5rem 0 0;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 4px dashed rgba(255,158,207,0.35);
+        }
+        .course-hero::before {
+            content: '';
+            position: absolute; inset: 0;
+            background-image:
+                radial-gradient(circle at 5%  30%, rgba(255,105,180,0.18) 0%, transparent 35%),
+                radial-gradient(circle at 95% 10%, rgba(255,255,255,0.10) 0%, transparent 35%),
+                radial-gradient(circle at 50% 90%, rgba(183,148,244,0.20) 0%, transparent 30%);
+            pointer-events: none;
+        }
+
+        .course-hero-inner {
+            position: relative; z-index: 2;
+            padding-bottom: 2.5rem;
+        }
+
+        .bc-link { color: rgba(255,255,255,0.70); font-size: 0.85rem; font-weight: 700; text-decoration: none; transition: color 0.2s; }
+        .bc-link:hover { color: #fff; }
+        .bc-sep { margin: 0 8px; color: rgba(255,255,255,0.40); }
+        .bc-current { color: rgba(255,255,255,0.95); font-size: 0.85rem; font-weight: 700; }
+
+        .course-type-pill {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-family: 'Baloo 2', cursive; font-size: 0.78rem; font-weight: 800;
+            padding: 5px 15px; border-radius: 30px;
+            text-transform: uppercase; letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+        .type-Académique { background: #EBF5FF; color: var(--ocean); }
+        .type-Social     { background: #EBFFEE; color: #2EA043; }
+        .type-Motricité  { background: #FFF0EB; color: var(--coral); }
+        .type-Langage    { background: #F5EBFF; color: var(--lavender); }
+        .type-default    { background: #F5F5F5; color: #777; }
+
+        .course-main-title {
+            font-family: 'Baloo 2', cursive;
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.15;
+            margin-bottom: 0.7rem;
+            text-shadow: 0 3px 18px rgba(0,0,0,0.2);
+        }
+        .course-main-desc {
+            font-size: 1rem;
+            color: rgba(255,255,255,0.85);
+            line-height: 1.65;
+            max-width: 560px;
+            margin-bottom: 1.4rem;
+        }
+
+        .info-chips { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 1.6rem; }
+        .info-chip {
+            display: inline-flex; align-items: center; gap: 7px;
+            background: rgba(255,255,255,0.18);
+            backdrop-filter: blur(8px);
+            padding: 9px 18px; border-radius: 50px;
+            font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 800;
+            color: #fff;
+            border: 2px solid rgba(255,255,255,0.30);
+        }
+        .chip-level  { border-color: rgba(255,217,61,0.6); }
+        .chip-time   { border-color: rgba(107,203,119,0.6); }
+        .chip-words  { border-color: rgba(255,158,207,0.6); }
+
+        .course-hero-img-wrap {
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 16px 50px rgba(0,0,0,0.14);
+            border: 4px solid white;
+            aspect-ratio: 4/3;
+            background: linear-gradient(135deg, #E8F4FF, #F5EBFF);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .course-hero-img-wrap img {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        .hero-img-emoji {
+            font-size: 7rem;
+            animation: float-em 3s ease-in-out infinite;
+            filter: drop-shadow(0 8px 16px rgba(0,0,0,0.12));
+        }
+        @keyframes float-em {
+            0%,100% { transform: translateY(0) rotate(-5deg); }
+            50%      { transform: translateY(-14px) rotate(5deg); }
+        }
+
+        .btn-back {
+            display: inline-flex; align-items: center; gap: 7px;
+            background: rgba(255,255,255,0.18);
+            backdrop-filter: blur(8px);
+            color: #fff;
+            font-family: 'Baloo 2', cursive; font-size: 0.9rem; font-weight: 700;
+            padding: 9px 20px; border-radius: 40px;
+            text-decoration: none;
+            border: 2px solid rgba(255,255,255,0.35);
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .btn-back:hover { transform: translateX(-4px) scale(1.04); background: rgba(255,255,255,0.28); color: #fff; }
+
+        /* ══ CONTENT SECTION ══ */
+        .content-section {
+            background: linear-gradient(180deg, #F4F9FF 0%, var(--bg) 100%);
+            padding: 3.5rem 0 5rem;
+        }
+
+        /* Description du cours */
+        .course-description-card {
+            background: white;
+            border-radius: 28px;
+            padding: 2rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+            border: 2px solid rgba(155,107,255,0.12);
+            text-align: center;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .course-description-card h2 {
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .course-description-card p {
+            font-size: 1rem;
+            line-height: 1.7;
+            color: #555;
+            margin-bottom: 0;
+        }
+
+        /* Section Mots à apprendre */
+        .mots-section-title {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .mots-section-title h2 {
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--dark);
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, #ff69b4, #9b6bff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* Grille des mots style design image */
+        .mots-grid-design {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            max-width: 1000px;
+            margin: 0 auto 3rem auto;
+        }
+
+        .mot-item-design {
+            background: white;
+            border-radius: 24px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+            border: 2px solid rgba(155,107,255,0.12);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .mot-item-design:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(155,107,255,0.15);
+            border-color: rgba(155,107,255,0.25);
+        }
+
+        /* ── Carousel image mot ── */
+        .mot-carousel {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 18px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #f5e8ff, #ffe8f4);
+            margin-bottom: 1rem;
+        }
+        .mot-carousel-track {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+        }
+        .mot-carousel-slide {
+            flex: 0 0 100%;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .mot-carousel-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: zoom-in;
+            border-radius: 18px;
+        }
+        .mot-carousel-emoji {
+            font-size: 4.5rem;
+        }
+        .mot-carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(6px);
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: #7c3aed;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.14);
+            transition: background 0.2s, transform 0.2s;
+            z-index: 3;
+        }
+        .mot-carousel-btn:hover { background: #fff; transform: translateY(-50%) scale(1.1); }
+        .mot-carousel-btn.prev { left: 8px; }
+        .mot-carousel-btn.next { right: 8px; }
+        .mot-carousel-dots {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 5px;
+            z-index: 3;
+        }
+        .mot-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            border: 1.5px solid rgba(255,255,255,0.8);
+            transition: background 0.2s, transform 0.2s;
+            cursor: pointer;
+        }
+        .mot-dot.active {
+            background: #fff;
+            transform: scale(1.3);
+        }
+        .mot-img-count {
+            position: absolute;
+            top: 9px;
+            right: 9px;
+            background: rgba(124,58,237,0.85);
+            color: #fff;
+            font-family: 'Baloo 2', cursive;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 2px 9px;
+            border-radius: 20px;
+            z-index: 3;
+            backdrop-filter: blur(4px);
+        }
+
+        .mot-item-design h3 {
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--dark);
+            margin: 0.5rem 0 0;
+        }
+        .mot-item-design p {
+            font-size: 0.85rem;
+            color: #888;
+            margin-top: 0.25rem;
+            margin-bottom: 0;
+        }
+
+        /* Section évaluation */
+        .evaluation-section {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, #f8f4ff, #fff8f0);
+            border-radius: 32px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .evaluation-section h3 {
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 1rem;
+        }
+        .btn-quiz {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, #4D96FF, #C77DFF);
+            color: white;
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.2rem;
+            font-weight: 800;
+            padding: 14px 40px;
+            border-radius: 60px;
+            text-decoration: none;
+            box-shadow: 0 8px 25px rgba(77,150,255,0.35);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: none;
+            cursor: pointer;
+        }
+        .btn-quiz:hover {
+            transform: scale(1.05) translateY(-3px);
+            box-shadow: 0 12px 35px rgba(77,150,255,0.45);
+        }
+        .btn-quiz-disabled {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, #b0b0b0, #d0d0d0);
+            color: white;
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.2rem;
+            font-weight: 800;
+            padding: 14px 40px;
+            border-radius: 60px;
+            text-decoration: none;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* Empty state */
+        .empty-state {
+            background: white;
+            border-radius: 32px;
+            padding: 3rem;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.07);
+            border: 2px solid #F0F0F0;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .empty-state-icon { font-size: 4rem; margin-bottom: 1rem; }
+        .empty-state-title { font-family: 'Baloo 2', cursive; font-size: 1.4rem; font-weight: 800; color: #555; margin-bottom: 0.5rem; }
+        .empty-state-text { color: #888; font-size: 0.9rem; }
+
+        /* Sidebar */
+        .sidebar-card {
+            background: white;
+            border-radius: 24px;
+            padding: 1.5rem;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+            border: 2px solid #F0F0F0;
+            margin-bottom: 1.2rem;
+        }
+        .sidebar-card-title {
+            font-family: 'Baloo 2', cursive;
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .sidebar-stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 9px 0;
+            border-bottom: 1.5px dashed #F0F0F0;
+        }
+        .sidebar-stat-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .sidebar-stat-label {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #888;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .sidebar-stat-value {
+            font-family: 'Baloo 2', cursive;
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .niveau-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .dot-Débutant      { background: #6BCB77; }
+        .dot-Intermédiaire { background: #FFD93D; }
+        .dot-Avancé        { background: #FF6B6B; }
+
+        /* ══ PDF EXPORT BUTTON ══ */
+        .btn-pdf-export {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #ff6b6b, #ff9a3c, #ffd93d);
+            background-size: 200% 200%;
+            animation: pdf-gradient 3s ease infinite;
+            color: white;
+            font-family: 'Baloo 2', cursive;
+            font-size: 0.95rem;
+            font-weight: 800;
+            padding: 11px 24px;
+            border-radius: 50px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(255,107,107,0.4);
+            transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s;
+            position: relative;
+            overflow: hidden;
+        }
+        @keyframes pdf-gradient {
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .btn-pdf-export::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+        }
+        .btn-pdf-export:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 12px 30px rgba(255,107,107,0.5);
+            color: white;
+        }
+        .btn-pdf-export:active { transform: scale(0.97); }
+        .btn-pdf-export .pdf-icon {
+            font-size: 1.15rem;
+            animation: pdf-bounce 1.5s ease-in-out infinite;
+        }
+        @keyframes pdf-bounce {
+            0%,100% { transform: translateY(0); }
+            50%     { transform: translateY(-4px); }
+        }
+        .btn-pdf-export.loading {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+        .btn-pdf-export.loading .pdf-icon {
+            animation: pdf-spin 0.8s linear infinite;
+        }
+        @keyframes pdf-spin {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .mots-grid-design {
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                gap: 20px;
+            }
+            .mot-item-design h3 {
+                font-size: 1.2rem;
+            }
+            .btn-quiz, .btn-quiz-disabled {
+                font-size: 1rem;
+                padding: 12px 30px;
+            }
+        }
+        @media (max-width: 480px) {
+            .mots-grid-design {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+
+    {% set emojis  = {'Académique': '📚', 'Social': '🤝', 'Motricité': '🏃', 'Langage': '💬'} %}
+    {% set emoji   = emojis[cours.typeCours] ?? '🎓' %}
+    {% set typeClass = 'type-' ~ cours.typeCours %}
+    {% set motsCount = cours.getMotsCount() %}
+
+    <!-- HERO -->
+    <div class="course-hero">
+        <div class="course-hero-inner">
+            <div class="container">
+                <div class="mb-3">
+                    <a href="{{ path('app_home') }}" class="bc-link">🏠 Accueil</a>
+                    <span class="bc-sep">›</span>
+                    <a href="{{ path('app_cours') }}" class="bc-link">Cours</a>
+                    <span class="bc-sep">›</span>
+                    <span class="bc-current">{{ cours.titre }}</span>
+                </div>
+
+                <div class="row align-items-center g-4">
+                    <div class="col-lg-7 col-md-6">
+                        <span class="course-type-pill {{ typeClass }}">{{ emoji }} {{ cours.typeCours }}</span>
+                        <h1 class="course-main-title">{{ cours.titre }}</h1>
+                        <p class="course-main-desc">{{ cours.description|slice(0, 150) ~ (cours.description|length > 150 ? '...' : '') }}</p>
+                        <div class="info-chips">
+                            <span class="info-chip chip-level">📊 <strong>{{ cours.niveau }}</strong></span>
+                            <span class="info-chip chip-time">⏱ <strong>{{ cours.duree }} min</strong></span>
+                            {% if motsCount > 0 %}
+                            <span class="info-chip chip-words">🔤 <strong>{{ motsCount }} mot{{ motsCount > 1 ? 's' : '' }}</strong></span>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 align-items-center">
+                            <a href="{{ path('app_cours') }}" class="btn-back">← Retour aux cours</a>
+                            <button class="btn-pdf-export" id="btnExportPdf">
+                                <span class="pdf-icon">📄</span>
+                                <span class="pdf-label">Exporter en PDF</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-lg-5 col-md-6">
+                        <div class="course-hero-img-wrap">
+                            {% if cours.image %}
+                                <img src="/uploads/images/{{ cours.image }}" alt="{{ cours.titre }}">
+                            {% else %}
+                                <span class="hero-img-emoji">{{ emoji }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content-section">
+        <div class="container">
+
+            <!-- Description complète du cours -->
+            <div class="course-description-card">
+                <h2>
+                    <span>📖</span>
+                    Description du cours
+                    <span>✨</span>
+                </h2>
+                <p>{{ cours.description }}</p>
+            </div>
+
+            {% if motsCount > 0 %}
+
+                <!-- Section Mots à apprendre -->
+                <div class="mots-section-title">
+                    <h2>
+                        <span>🐾</span>
+                        Mots à apprendre
+                        <span>📚</span>
+                    </h2>
+                </div>
+
+                {% set wordEmojis = ['🐶', '🦁', '🦒', '🐘', '🐒', '🦓', '🐪', '🐅', '🐳', '🐋'] %}
+
+                <!-- Grille des mots avec images associées -->
+                <div class="mots-grid-design">
+                    {% for entry in motsWithImages %}
+                        {% set mot = entry.nom|trim %}
+                        {% if mot %}
+                            {% set images = entry.toutes_images %}
+                            {% set imgCount = images|length %}
+
+                            <div class="mot-item-design">
+
+                                {# ── Carousel ── #}
+                                <div class="mot-carousel" data-index="{{ loop.index0 }}">
+
+                                    {% if imgCount > 1 %}
+                                        <span class="mot-img-count">{{ imgCount }} 🖼</span>
+                                    {% endif %}
+
+                                    <div class="mot-carousel-track">
+                                        {% if imgCount > 0 %}
+                                            {% for img in images %}
+                                                <div class="mot-carousel-slide">
+                                                    <img src="/uploads/images/{{ img|trim }}"
+                                                         alt="{{ mot }}"
+                                                         class="lightbox-trigger"
+                                                         data-src="/uploads/images/{{ img|trim }}">
+                                                </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <div class="mot-carousel-slide">
+                                                <span class="mot-carousel-emoji">
+                                                    {{ wordEmojis[loop.index0 % wordEmojis|length] }}
+                                                </span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    {% if imgCount > 1 %}
+                                        <button class="mot-carousel-btn prev" aria-label="Précédent">‹</button>
+                                        <button class="mot-carousel-btn next" aria-label="Suivant">›</button>
+                                        <div class="mot-carousel-dots">
+                                            {% for i in 0..(imgCount - 1) %}
+                                                <span class="mot-dot {{ i == 0 ? 'active' : '' }}" data-slide="{{ i }}"></span>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+
+                                </div>
+
+                                <h3>{{ mot|upper }}</h3>
+                                {% if imgCount > 0 %}
+                                    <p>{{ imgCount }} image{{ imgCount > 1 ? 's' : '' }}</p>
+                                {% else %}
+                                    <p>Aucune image</p>
+                                {% endif %}
+
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">📭</div>
+                    <div class="empty-state-title">Aucun mot dans ce cours</div>
+                    <div class="empty-state-text">Le contenu sera bientôt ajouté.</div>
+                </div>
+            {% endif %}
+
+            <!-- Section Évaluation du cours -->
+            <div class="evaluation-section">
+                <h3>
+                    <span>📝</span>
+                    Évaluation du cours
+                    <span>⭐</span>
+                </h3>
+                {% if hasQuiz %}
+                    <p style="color:#666; font-size:0.95rem; margin-bottom:1.2rem;">
+                        {{ evaluations|length }} question{{ evaluations|length > 1 ? 's' : '' }} t'attend{{ evaluations|length > 1 ? 'ent' : '' }} !
+                    </p>
+                    <a href="{{ path('app_cours_quiz', {'id': cours.idCours}) }}" class="btn-quiz">
+                        <span>🎯</span>
+                        Passer le quiz
+                        <span>🚀</span>
+                    </a>
+                {% else %}
+                    <div class="btn-quiz-disabled">
+                        <span>🎯</span>
+                        Passer le quiz (bientôt disponible)
+                        <span>⏳</span>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar Section - Informations supplémentaires -->
+            <div class="row justify-content-center g-4 mt-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="sidebar-card">
+                        <div class="sidebar-card-title">📋 Informations</div>
+                        <div class="sidebar-stat-row">
+                            <span class="sidebar-stat-label">📊 Niveau</span>
+                            <span class="sidebar-stat-value"><span class="niveau-dot dot-{{ cours.niveau }}"></span> {{ cours.niveau }}</span>
+                        </div>
+                        <div class="sidebar-stat-row">
+                            <span class="sidebar-stat-label">⏱ Durée</span>
+                            <span class="sidebar-stat-value">{{ cours.duree }} min</span>
+                        </div>
+                        <div class="sidebar-stat-row">
+                            <span class="sidebar-stat-label">🏷️ Type</span>
+                            <span class="sidebar-stat-value">{{ cours.typeCours }}</span>
+                        </div>
+                        {% if motsCount > 0 %}
+                        <div class="sidebar-stat-row">
+                            <span class="sidebar-stat-label">🔤 Mots</span>
+                            <span class="sidebar-stat-value">{{ motsCount }} mots</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if motsCount > 0 %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="sidebar-card">
+                        <div class="sidebar-card-title">🗂️ Liste des mots</div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            {% for entry in motsWithImages %}
+                                {% set mot = entry.nom|trim %}
+                                {% if mot %}
+                                <span style="
+                                    background: linear-gradient(135deg,#fce7f3,#ede9fe);
+                                    color: #7c3aed;
+                                    font-family: 'Baloo 2', cursive;
+                                    font-weight: 800;
+                                    font-size: 0.82rem;
+                                    padding: 6px 14px;
+                                    border-radius: 20px;
+                                    border: 1.5px solid rgba(155,107,255,0.3);
+                                    transition: all 0.2s;
+                                    cursor: default;
+                                ">{{ mot|upper }}</span>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="sidebar-card">
+                        <div class="sidebar-card-title">🚀 Prêt à apprendre ?</div>
+                        <p style="font-size: 0.85rem; color: #666; margin-bottom: 1rem;">Explore ce cours et découvre tous ses mots et images !</p>
+                        <a href="{{ path('app_cours') }}" style="
+                            display: inline-flex;
+                            align-items: center;
+                            gap: 8px;
+                            background: linear-gradient(135deg, #4D96FF, #C77DFF);
+                            color: white;
+                            font-family: 'Baloo 2', cursive;
+                            font-size: 0.9rem;
+                            font-weight: 800;
+                            padding: 10px 20px;
+                            border-radius: 50px;
+                            text-decoration: none;
+                            width: 100%;
+                            justify-content: center;
+                        ">🌈 Voir tous les cours</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div class="lightbox-overlay" id="lightbox">
+        <div class="lightbox-img-wrap">
+            <div class="lb-close" id="lbClose">✕</div>
+            <img src="" id="lbImg" alt="Image agrandie">
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <style>
+        .lightbox-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(10,10,25,0.88); backdrop-filter: blur(8px);
+            z-index: 9999; align-items: center; justify-content: center;
+        }
+        .lightbox-overlay.open { display: flex; }
+        .lightbox-img-wrap {
+            max-width: 90vw; max-height: 85vh;
+            border-radius: 20px; overflow: hidden;
+            position: relative;
+        }
+        .lightbox-img-wrap img {
+            max-width: 100%; max-height: 85vh; object-fit: contain;
+            border-radius: 20px;
+        }
+        .lb-close {
+            position: absolute; top: -14px; right: -14px;
+            background: white; color: #FF6B6B;
+            width: 36px; height: 36px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; font-weight: 800; cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+        .lb-close:hover { transform: scale(1.15); }
+    </style>
+    <script>
+    (function() {
+        /* ══ LIGHTBOX ══ */
+        const overlay = document.getElementById('lightbox');
+        const lbImg   = document.getElementById('lbImg');
+        const lbClose = document.getElementById('lbClose');
+
+        function initLightbox() {
+            document.querySelectorAll('.lightbox-trigger').forEach(img => {
+                img.style.cursor = 'zoom-in';
+                img.removeEventListener('click', lightboxHandler);
+                img.addEventListener('click', lightboxHandler);
+            });
+        }
+        function lightboxHandler(e) {
+            e.stopPropagation();
+            lbImg.src = this.dataset.src || this.src;
+            overlay.classList.add('open');
+        }
+        if (lbClose) lbClose.addEventListener('click', () => overlay.classList.remove('open'));
+        if (overlay) overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape' && overlay) overlay.classList.remove('open'); });
+
+        /* ══ CAROUSEL ══ */
+        document.querySelectorAll('.mot-carousel').forEach(carousel => {
+            const track  = carousel.querySelector('.mot-carousel-track');
+            const slides = carousel.querySelectorAll('.mot-carousel-slide');
+            const dots   = carousel.querySelectorAll('.mot-dot');
+            const prevBtn = carousel.querySelector('.mot-carousel-btn.prev');
+            const nextBtn = carousel.querySelector('.mot-carousel-btn.next');
+
+            if (slides.length <= 1) return;
+
+            let current = 0;
+
+            function goTo(idx) {
+                current = (idx + slides.length) % slides.length;
+                track.style.transform = `translateX(-${current * 100}%)`;
+                if (dots.length) dots.forEach((d, i) => d.classList.toggle('active', i === current));
+            }
+
+            if (prevBtn) prevBtn.addEventListener('click', e => { e.stopPropagation(); goTo(current - 1); });
+            if (nextBtn) nextBtn.addEventListener('click', e => { e.stopPropagation(); goTo(current + 1); });
+
+            dots.forEach(dot => {
+                dot.addEventListener('click', e => {
+                    e.stopPropagation();
+                    goTo(parseInt(dot.dataset.slide));
+                });
+            });
+
+            // Swipe tactile
+            let startX = 0;
+            carousel.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
+            carousel.addEventListener('touchend', e => {
+                const diff = startX - e.changedTouches[0].clientX;
+                if (Math.abs(diff) > 40) goTo(diff > 0 ? current + 1 : current - 1);
+            });
+        });
+
+        initLightbox();
+    })();
+    </script>
+    <script>
+    /* ══════════════════════════════════════════════════
+       PDF EXPORT - VERSION AMÉLIORÉE AVEC IMAGES
+    ══════════════════════════════════════════════════ */
+    function getJsPDF() {
+        if (window.jspdf && window.jspdf.jsPDF) return window.jspdf.jsPDF;
+        if (window.jsPDF) return window.jsPDF;
+        return null;
+    }
+
+    function loadJsPDF(callback) {
+        if (getJsPDF()) { callback(); return; }
+        var s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+        s.onload = function() { 
+            // Attendre aussi que html2canvas soit chargé pour les images
+            if (typeof html2canvas !== 'undefined') {
+                setTimeout(callback, 100);
+            } else {
+                var h2c = document.createElement('script');
+                h2c.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+                h2c.onload = function() { setTimeout(callback, 100); };
+                document.head.appendChild(h2c);
+            }
+        };
+        s.onerror = function() { alert('Impossible de charger la librairie PDF. Verifiez votre connexion.'); };
+        document.head.appendChild(s);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var btn = document.getElementById('btnExportPdf');
+        if (!btn) return;
+        btn.addEventListener('click', function () {
+            loadJsPDF(runExport);
+        });
+    });
+
+    async function loadImageAsDataURL(src) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = () => {
+                try {
+                    const c = document.createElement('canvas');
+                    c.width  = img.naturalWidth  || img.width;
+                    c.height = img.naturalHeight || img.height;
+                    c.getContext('2d').drawImage(img, 0, 0);
+                    resolve(c.toDataURL('image/jpeg', 0.88));
+                } catch(e) { resolve(null); }
+            };
+            img.onerror = () => resolve(null);
+            img.src = src + (src.includes('?') ? '&' : '?') + '_t=' + Date.now();
+        });
+    }
+
+    async function runExport() {
+        const btn   = document.getElementById('btnExportPdf');
+        const jsPDF = getJsPDF();
+        if (!jsPDF) { alert("Librairie PDF non disponible, reessayez."); return; }
+
+        btn.classList.add('loading');
+        btn.querySelector('.pdf-label').textContent = 'Preparation...';
+        await new Promise(r => setTimeout(r, 80));
+
+        try {
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+            const W = doc.internal.pageSize.getWidth();
+            const H = doc.internal.pageSize.getHeight();
+            const M = 12;
+            let y = 0;
+
+            /* ════════════════════════════════════════════
+               PALETTE ENFANT
+            ════════════════════════════════════════════ */
+            const PINK   = [255,105,180];
+            const PURP   = [162, 89,255];
+            const BLUE   = [ 77,166,255];
+            const GREEN  = [ 72,210,130];
+            const ORANGE = [255,165, 50];
+            const YELLOW = [255,220, 50];
+            const RED    = [255, 90, 90];
+            const WHITE  = [255,255,255];
+            const DARK   = [ 45, 30, 70];
+
+            const RAINBOW = [RED, ORANGE, YELLOW, GREEN, BLUE, PURP, PINK];
+
+            /* ── helpers ── */
+            function gradH(x,yy,w,h,c1,c2,steps){
+                steps=steps||60;
+                for(let i=0;i<steps;i++){
+                    const t=i/steps;
+                    doc.setFillColor(
+                        Math.round(c1[0]+t*(c2[0]-c1[0])),
+                        Math.round(c1[1]+t*(c2[1]-c1[1])),
+                        Math.round(c1[2]+t*(c2[2]-c1[2])));
+                    doc.rect(x+w*i/steps,yy,w/steps+.5,h,'F');
+                }
+            }
+            function gradV(x,yy,w,h,c1,c2,steps){
+                steps=steps||60;
+                for(let i=0;i<steps;i++){
+                    const t=i/steps;
+                    doc.setFillColor(
+                        Math.round(c1[0]+t*(c2[0]-c1[0])),
+                        Math.round(c1[1]+t*(c2[1]-c1[1])),
+                        Math.round(c1[2]+t*(c2[2]-c1[2])));
+                    doc.rect(x,yy+h*i/steps,w,h/steps+.5,'F');
+                }
+            }
+            function star(cx,cy,r,col){
+                doc.setFillColor(...col);
+                const pts=[];
+                for(let i=0;i<10;i++){
+                    const angle=Math.PI/5*i - Math.PI/2;
+                    const radius=(i%2===0)?r:r*0.42;
+                    pts.push([cx+radius*Math.cos(angle), cy+radius*Math.sin(angle)]);
+                }
+                // approximate star with tiny rects around center
+                doc.setFillColor(...col);
+                for(let i=0;i<10;i++){
+                    const a0=Math.PI/5*i-Math.PI/2;
+                    const a1=Math.PI/5*(i+1)-Math.PI/2;
+                    const rm=(i%2===0)?r:r*0.42;
+                    const rm1=(i%2===0)?r*0.42:r;
+                    doc.triangle(cx,cy,
+                        cx+rm*Math.cos(a0),cy+rm*Math.sin(a0),
+                        cx+rm1*Math.cos(a1),cy+rm1*Math.sin(a1),'F');
+                }
+            }
+            function bubble(cx,cy,r,col,alpha){
+                // semi-transparent bubble via fill
+                doc.setFillColor(...col);
+                doc.circle(cx,cy,r,'F');
+                // white shine
+                doc.setFillColor(255,255,255);
+                doc.circle(cx-r*0.3,cy-r*0.3,r*0.22,'F');
+            }
+            function rainbowBar(x,yy,w,h){
+                const seg=w/RAINBOW.length;
+                RAINBOW.forEach((c,i)=>{
+                    doc.setFillColor(...c);
+                    doc.rect(x+i*seg,yy,seg+0.5,h,'F');
+                });
+            }
+            function wavy(yy,col,amp,freq,thick){
+                doc.setDrawColor(...col);
+                doc.setLineWidth(thick||1);
+                let px=0,py=yy;
+                for(let x2=1;x2<=W;x2+=2){
+                    const ny=yy+Math.sin(x2*freq)*amp;
+                    doc.line(px,py,x2,ny);
+                    px=x2;py=ny;
+                }
+            }
+            function confetti(){
+                const shapes=[[10,15],[30,25],[55,18],[80,30],[105,12],[130,28],[155,20],[175,35],[195,10],[210,22]];
+                const colors=[RED,ORANGE,YELLOW,GREEN,BLUE,PURP,PINK];
+                shapes.forEach(([cx,cy],i)=>{
+                    const c=colors[i%colors.length];
+                    doc.setFillColor(...c);
+                    if(i%3===0) doc.rect(cx,cy,3,5,'F');
+                    else if(i%3===1) doc.circle(cx,cy,2,'F');
+                    else doc.triangle(cx,cy,cx+4,cy,cx+2,cy-4,'F');
+                });
+            }
+            function checkPage(need){
+                if(y+need>H-18){ doc.addPage(); drawContentBg(); y=22; }
+            }
+            function drawContentBg(){
+                // fond blanc doux
+                doc.setFillColor(255,252,245);
+                doc.rect(0,0,W,H,'F');
+                // bande arc-en-ciel top
+                rainbowBar(0,0,W,4);
+                // bande arc-en-ciel bottom
+                rainbowBar(0,H-4,W,4);
+                // bulles décoratives coins
+                bubble(0,0,18,[255,220,240]);
+                bubble(W,0,14,[220,240,255]);
+                bubble(0,H,16,[240,255,220]);
+                bubble(W,H,20,[255,240,220]);
+                // petites étoiles décoratives
+                star(W-10,12,3,YELLOW);
+                star(8,H-10,2.5,PINK);
+                star(W-6,H-8,2,ORANGE);
+            }
+            function kidsSection(label, col1, col2){
+                checkPage(22);
+                // Bandeau ondulé simulé avec rectangle arrondi + décoration
+                gradH(M, y, W-M*2, 13, col1, col2);
+                // Petits cercles déco à gauche
+                doc.setFillColor(...WHITE);
+                doc.circle(M+6.5, y+6.5, 5.5, 'F');
+                doc.setFillColor(...col1);
+                doc.setFont('helvetica','bold'); doc.setFontSize(9);
+                doc.text('★', M+4, y+8.8);
+                // Texte section
+                doc.setFont('helvetica','bold'); doc.setFontSize(12);
+                doc.setTextColor(255,255,255);
+                doc.text(label, M+15, y+9);
+                // Étoile à droite
+                doc.setTextColor(255,255,200);
+                doc.setFontSize(10);
+                doc.text('★', W-M-8, y+9);
+                y += 17;
+            }
+
+            /* ════════════════════════════════════════════
+               PAGE 1 — COUVERTURE FESTIVE
+            ════════════════════════════════════════════ */
+            // Fond dégradé violet→rose chaud
+            gradV(0,0,W,H,[80,20,160],[255,80,160]);
+
+            // Confettis tombants
+            const confColors=[RED,ORANGE,YELLOW,GREEN,BLUE,PURP,PINK,WHITE];
+            const confPos=[
+                [18,12],[40,8],[65,20],[88,6],[112,16],[135,10],[158,22],[180,8],[205,18],
+                [25,45],[50,38],[75,50],[100,42],[125,52],[150,40],[175,48],[200,36],
+                [15,H-40],[42,H-28],[70,H-45],[98,H-33],[126,H-50],[154,H-38],[182,H-44],[208,H-30],
+                [8,H-15],[35,H-8],[62,H-18],[90,H-12],[118,H-20],[146,H-6],[174,H-16],[202,H-10],
+            ];
+            confPos.forEach(([cx,cy],i)=>{
+                const c=confColors[i%confColors.length];
+                doc.setFillColor(...c);
+                if(i%4===0) doc.rect(cx-1.5,cy-2.5,3,5,'F');
+                else if(i%4===1) doc.circle(cx,cy,2,'F');
+                else if(i%4===2) doc.triangle(cx,cy,cx+4,cy,cx+2,cy-5,'F');
+                else { doc.setLineWidth(0.8); doc.setDrawColor(...c); doc.line(cx,cy,cx+3,cy+4); }
+            });
+
+            // Grande bulle de fond décorative
+            doc.setFillColor(255,255,255);
+            doc.circle(W+10, -10, 60, 'F');
+            doc.setFillColor(255,180,230);
+            doc.circle(W+10, -10, 45, 'F');
+            doc.setFillColor(255,140,210);
+            doc.circle(W+10, -10, 30, 'F');
+
+            // Étoiles décoratives grandes
+            star(20, 30, 8, YELLOW);
+            star(W-22, 35, 6, [255,240,100]);
+            star(15, H-30, 7, [255,220,80]);
+            star(W-18, H-25, 5, YELLOW);
+            star(W/2+50, 20, 4, WHITE);
+            star(W/2-55, 22, 3.5, [255,240,200]);
+
+            // Bandeau arc-en-ciel central décoratif
+            rainbowBar(M, H/2-78, W-M*2, 5);
+            doc.setFillColor(255,255,255);
+            doc.setDrawColor(255,255,255); doc.setLineWidth(0.5);
+            doc.roundedRect(M, H/2-78, W-M*2, 5, 2, 2, 'S');
+
+            // Logo AutiCare
+            doc.setFont('helvetica','bold'); doc.setFontSize(14);
+            doc.setTextColor(255,255,255);
+            doc.text('AutiCare', W/2, H/2-65, {align:'center'});
+            doc.setFontSize(8);
+            doc.setFont('helvetica','normal');
+            doc.setTextColor(255,220,240);
+            doc.text('Apprendre en s\'amusant !', W/2, H/2-58, {align:'center'});
+
+            // Bulle titre principale
+            doc.setFillColor(255,255,255);
+            doc.roundedRect(M, H/2-50, W-M*2, 60, 12, 12, 'F');
+            doc.setDrawColor(255,180,230); doc.setLineWidth(2);
+            doc.roundedRect(M, H/2-50, W-M*2, 60, 12, 12, 'S');
+
+            // Pill type de cours
+            const typeMap={
+                'Acad\u00e9mique':BLUE,'Academique':BLUE,
+                'Social':GREEN,
+                'Motricit\u00e9':ORANGE,'Motricite':ORANGE,
+                'Langage':PURP
+            };
+            const typeTxt={{ cours.typeCours|json_encode|raw }};
+            const tc=typeMap[typeTxt]||PURP;
+            const pillTxt=typeTxt.toUpperCase();
+            doc.setFontSize(8);
+            const pillW=doc.getTextWidth(pillTxt)+12;
+            doc.setFillColor(...tc);
+            doc.roundedRect(W/2-pillW/2, H/2-47, pillW, 8, 3, 3, 'F');
+            doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+            doc.text(pillTxt, W/2, H/2-41.2, {align:'center'});
+
+            // Titre en grand
+            doc.setFont('helvetica','bold'); doc.setFontSize(22);
+            doc.setTextColor(...DARK);
+            const titre={{ cours.titre|json_encode|raw }};
+            const titreLines=doc.splitTextToSize(titre, W-M*2-16);
+            let ty=H/2-30;
+            titreLines.forEach(l=>{ doc.text(l, W/2, ty, {align:'center'}); ty+=10; });
+
+            // Chips colorées infos
+            const chips=[
+                {t: {{ cours.niveau|json_encode|raw }},  c:PURP},
+                {t: {{ cours.duree|json_encode|raw }}+' min', c:GREEN},
+                {t: {{ motsCount|default(0) }}+' mot(s)', c:PINK},
+            ];
+            doc.setFontSize(8);
+            let totalChipW=0;
+            chips.forEach(ch=>{ totalChipW+=doc.getTextWidth(ch.t)+14+4; });
+            let cx=W/2-totalChipW/2+2;
+            const chipY=H/2+4;
+            chips.forEach(ch=>{
+                const cw=doc.getTextWidth(ch.t)+14;
+                doc.setFillColor(...ch.c);
+                doc.roundedRect(cx, chipY, cw, 8, 3, 3, 'F');
+                doc.setFont('helvetica','bold');
+                doc.setTextColor(255,255,255);
+                doc.text(ch.t, cx+cw/2, chipY+5.5, {align:'center'});
+                cx+=cw+4;
+            });
+
+            // Message d'encouragement
+            doc.setFillColor(255,240,250);
+            doc.roundedRect(M, H/2+22, W-M*2, 16, 6, 6, 'F');
+            doc.setFont('helvetica','normal'); doc.setFontSize(9);
+            doc.setTextColor(...PURP);
+            const shortDesc={{ cours.description|slice(0,90)|json_encode|raw }}+'...';
+            const sdLines=doc.splitTextToSize(shortDesc, W-M*2-10);
+            let sdy=H/2+30;
+            sdLines.slice(0,2).forEach(l=>{ doc.text(l, W/2, sdy, {align:'center'}); sdy+=5.5; });
+
+            // Étoiles autour de la bulle titre
+            star(M+2, H/2-52, 4, YELLOW);
+            star(W-M-2, H/2-52, 3.5, ORANGE);
+            star(M+2, H/2+12, 3, PINK);
+            star(W-M-2, H/2+14, 4, YELLOW);
+
+            // Bandeau bas
+            rainbowBar(0, H-14, W, 14);
+            doc.setFont('helvetica','bold'); doc.setFontSize(8);
+            doc.setTextColor(255,255,255);
+            doc.text('Genere le '+new Date().toLocaleDateString('fr-FR'), M, H-4.5);
+
+            /* ════════════════════════════════════════════
+               PAGE 2 — INFOS + DESCRIPTION
+            ════════════════════════════════════════════ */
+            doc.addPage();
+            drawContentBg();
+            y = 12;
+
+            /* ── Titre de page ── */
+            gradH(M, y, W-M*2, 16, PURP, PINK);
+            doc.setFillColor(255,255,255);
+            doc.circle(M+9, y+8, 7, 'F');
+            doc.setFillColor(...PURP);
+            doc.setFont('helvetica','bold'); doc.setFontSize(10);
+            doc.text('i', M+9, y+10.5, {align:'center'});
+            doc.setFont('helvetica','bold'); doc.setFontSize(14);
+            doc.setTextColor(255,255,255);
+            doc.text('Informations du cours', M+20, y+10.5);
+            star(W-M-8, y+8, 4, YELLOW);
+            y += 22;
+
+            /* ── 4 cartes infos colorées ── */
+            const infoCards=[
+                { label:'Niveau',       val:{{ cours.niveau|json_encode|raw }},                          c1:PURP,   c2:[210,180,255] },
+                { label:'Type',         val:{{ cours.typeCours|json_encode|raw }},                       c1:BLUE,   c2:[180,220,255] },
+                { label:'Duree',        val:{{ cours.duree|json_encode|raw }}+' min',                    c1:GREEN,  c2:[180,255,220] },
+                { label:'Mots',         val:{{ motsCount|default(0) }}+' mot(s)',                        c1:PINK,   c2:[255,200,230] },
+            ];
+            const icW=(W-M*2-9)/4;
+            infoCards.forEach((card,i)=>{
+                const ix=M+i*(icW+3);
+                // Fond dégradé
+                gradV(ix, y, icW, 28, card.c1, card.c2);
+                doc.roundedRect(ix, y, icW, 28, 5, 5, 'S');
+                // Petite étoile coin
+                star(ix+icW-5, y+4, 2.5, WHITE);
+                // Label
+                doc.setFont('helvetica','bold'); doc.setFontSize(7.5);
+                doc.setTextColor(255,255,255);
+                doc.text(card.label.toUpperCase(), ix+icW/2, y+9, {align:'center'});
+                // Valeur
+                doc.setFont('helvetica','bold'); doc.setFontSize(9.5);
+                doc.setTextColor(255,255,255);
+                const vLines=doc.splitTextToSize(String(card.val), icW-4);
+                vLines.slice(0,2).forEach((l,li)=> doc.text(l, ix+icW/2, y+17+li*5.5, {align:'center'}));
+            });
+            y += 36;
+
+            /* ── Description ── */
+            kidsSection('Description du cours', BLUE, [130,210,255]);
+
+            const fullDesc={{ cours.description|json_encode|raw }};
+            const dLines=doc.splitTextToSize(fullDesc, W-M*2-14);
+            const dH=Math.min(dLines.length,10)*5.4+14;
+            doc.setFillColor(240,248,255);
+            doc.setDrawColor(150,200,255); doc.setLineWidth(0.5);
+            doc.roundedRect(M, y, W-M*2, dH, 7, 7, 'FD');
+            // Guillemets déco
+            doc.setFont('helvetica','bold'); doc.setFontSize(28);
+            doc.setTextColor(200,225,255);
+            doc.text('"', M+4, y+12);
+            doc.setFont('helvetica','normal'); doc.setFontSize(9);
+            doc.setTextColor(50,80,130);
+            let dy2=y+8;
+            for(let i=0;i<Math.min(dLines.length,10);i++){
+                doc.text(dLines[i], M+10, dy2); dy2+=5.4;
+            }
+            if(dLines.length>10){ doc.setTextColor(150,170,200); doc.text('...', M+10, dy2); }
+            y += dH+10;
+
+            /* ════════════════════════════════════════════
+               PAGES MOTS — 1 mot par ligne, grande image
+            ════════════════════════════════════════════ */
+            {% if motsCount > 0 %}
+            function drawImgPlaceholder(ix,iy,sz,pal){
+                doc.setFillColor(245,240,255);
+                doc.roundedRect(ix,iy,sz,sz,5,5,'F');
+                doc.setDrawColor(...pal.border); doc.setLineWidth(0.4);
+                doc.roundedRect(ix,iy,sz,sz,5,5,'S');
+                const cx=ix+sz/2, cy=iy+sz/2;
+                doc.setFillColor(...pal.border);
+                doc.roundedRect(cx-8,cy-5,16,11,2,2,'F');
+                doc.setFillColor(245,240,255);
+                doc.circle(cx,cy,3.5,'F');
+                doc.setFillColor(...pal.border);
+                doc.circle(cx,cy,2.5,'F');
+                doc.setFillColor(245,240,255);
+                doc.circle(cx,cy,1.2,'F');
+                doc.setFont('helvetica','normal'); doc.setFontSize(5.5);
+                doc.setTextColor(...pal.txt);
+                doc.text("Pas d'image", cx, cy+9, {align:'center'});
+            }
+            const motsData={{ motsWithImages|json_encode|raw }};
+            const origin=window.location.origin;
+
+            // Pré-charger toutes les images
+            const imgCache={};
+            btn.querySelector('.pdf-label').textContent='Images...';
+            await Promise.all(motsData.map(async(m)=>{
+                const imgs=m.toutes_images||[];
+                if(imgs.length>0){
+                    const url=origin+'/uploads/images/'+imgs[0].trim();
+                    const data=await loadImageAsDataURL(url);
+                    if(data) imgCache[imgs[0].trim()]=data;
+                }
+            }));
+            btn.querySelector('.pdf-label').textContent='Generation PDF...';
+
+            checkPage(20);
+            kidsSection('Mots a apprendre  ('+motsData.length+' mots)', PINK, ORANGE);
+
+            /* Palette cartes mots */
+            const motPal=[
+                {bg:[255,240,248],border:PINK,   txt:[180,30,100], dot:PINK   },
+                {bg:[240,235,255],border:PURP,   txt:[90, 30,190], dot:PURP   },
+                {bg:[235,248,255],border:BLUE,   txt:[20, 80,180], dot:BLUE   },
+                {bg:[235,255,240],border:GREEN,  txt:[20,130, 60], dot:GREEN  },
+                {bg:[255,250,230],border:ORANGE, txt:[150, 80,  0],dot:ORANGE },
+                {bg:[255,235,235],border:RED,    txt:[160, 30, 30],dot:RED    },
+            ];
+
+            // Layout: 2 cartes par ligne, carrées, image grande au centre-haut
+            const COLS=2;
+            const GAP=8;
+            const CW=(W-M*2-GAP)/COLS;
+            const CH=68; // hauteur carte
+            const ISIZ=42; // taille image
+
+            let col=0, rowY=y;
+
+            for(let i=0;i<motsData.length;i++){
+                const m=motsData[i];
+                const nom=(m.nom||'').toUpperCase();
+                const imgs=m.toutes_images||[];
+                const pal=motPal[i%motPal.length];
+                const cardX=M+col*(CW+GAP);
+
+                if(rowY+CH>H-20){
+                    doc.addPage(); drawContentBg(); y=22; rowY=y;
+                    col=0;
+                    // re-dessiner l'entête section si nouvelle page
+                    kidsSection('Mots a apprendre (suite)', PINK, ORANGE);
+                    rowY=y;
+                }
+
+                const cardY=rowY;
+
+                /* ── Carte fond + ombre simulée ── */
+                doc.setFillColor(180,180,180);
+                doc.roundedRect(cardX+1.5, cardY+1.5, CW, CH, 7, 7, 'F');
+                doc.setFillColor(...pal.bg);
+                doc.setDrawColor(...pal.border); doc.setLineWidth(1.2);
+                doc.roundedRect(cardX, cardY, CW, CH, 7, 7, 'FD');
+
+                /* ── Bandeau numéro en haut ── */
+                gradH(cardX, cardY, CW, 10, pal.border, pal.dot.map?pal.dot:[...pal.dot]);
+                // simuler coins arrondis haut
+                doc.setFillColor(...pal.bg);
+                doc.rect(cardX, cardY, 7, 7, 'F');
+                doc.rect(cardX+CW-7, cardY, 7, 7, 'F');
+                doc.setFillColor(...pal.border);
+                doc.roundedRect(cardX, cardY, CW, 10, 7, 7, 'F');
+                doc.setFont('helvetica','bold'); doc.setFontSize(7.5);
+                doc.setTextColor(255,255,255);
+                doc.text('MOT '+(i+1)+' / '+motsData.length, cardX+CW/2, cardY+7, {align:'center'});
+
+                /* ── Zone image centrée ── */
+                const imgX=cardX+CW/2-ISIZ/2;
+                const imgY=cardY+13;
+                // Ombre image
+                doc.setFillColor(200,200,210);
+                doc.roundedRect(imgX+2, imgY+2, ISIZ, ISIZ, 5, 5, 'F');
+                // Cadre image
+                doc.setFillColor(255,255,255);
+                doc.setDrawColor(...pal.border); doc.setLineWidth(1);
+                doc.roundedRect(imgX, imgY, ISIZ, ISIZ, 5, 5, 'FD');
+
+                const imgKey=imgs.length>0?imgs[0].trim():null;
+                const imgData=imgKey?(imgCache[imgKey]||null):null;
+                if(imgData){
+                    try{
+                        doc.addImage(imgData,'JPEG',imgX+1,imgY+1,ISIZ-2,ISIZ-2);
+                        // Re-dessiner le cadre par-dessus
+                        doc.setDrawColor(...pal.border); doc.setLineWidth(1);
+                        doc.roundedRect(imgX, imgY, ISIZ, ISIZ, 5, 5, 'S');
+                    }catch(e){
+                        drawImgPlaceholder(imgX,imgY,ISIZ,pal);
+                    }
+                } else {
+                    drawImgPlaceholder(imgX,imgY,ISIZ,pal);
+                }
+
+                /* ── Nom du mot (centré bas) ── */
+                const nomY=cardY+CH-14;
+                // Pill nom
+                doc.setFillColor(255,255,255);
+                doc.setDrawColor(...pal.border); doc.setLineWidth(0.6);
+                doc.roundedRect(cardX+8, nomY-4, CW-16, 12, 4, 4, 'FD');
+                doc.setFont('helvetica','bold');
+                const fs=nom.length>12?10:nom.length>8?12:14;
+                doc.setFontSize(fs);
+                doc.setTextColor(...pal.txt);
+                doc.text(nom, cardX+CW/2, nomY+4.5, {align:'center'});
+
+                /* ── Petites étoiles décoratives ── */
+                star(cardX+4, cardY+CH-4, 2, pal.border);
+                star(cardX+CW-4, cardY+CH-4, 1.8, pal.border);
+
+                /* ── Compteur images ── */
+                if(imgs.length>1){
+                    doc.setFillColor(...pal.border);
+                    doc.roundedRect(cardX+CW-18, imgY-1, 16, 6, 2, 2, 'F');
+                    doc.setFont('helvetica','bold'); doc.setFontSize(6);
+                    doc.setTextColor(255,255,255);
+                    doc.text(imgs.length+' img', cardX+CW-10, imgY+3.8, {align:'center'});
+                }
+
+                col++;
+                if(col>=COLS){ col=0; rowY+=CH+8; y=rowY; }
+            }
+            if(col>0){ y=rowY+CH+8; }
+            y+=6;
+            {% endif %}
+
+            /* ════════════════════════════════════════════
+               SECTION QUIZ
+            ════════════════════════════════════════════ */
+            checkPage(40);
+            kidsSection('Evaluation du cours', [50,140,255], [130,220,255]);
+
+            const hasQuiz={{ hasQuiz ? 'true' : 'false' }};
+            const nbQ={{ evaluations|length }};
+
+            if(hasQuiz){
+                // Bulle quiz festive
+                doc.setFillColor(235,250,235);
+                doc.setDrawColor(...GREEN); doc.setLineWidth(1);
+                doc.roundedRect(M, y, W-M*2, 32, 9, 9, 'FD');
+
+                // Badge disponible
+                doc.setFillColor(...GREEN);
+                doc.roundedRect(M+5, y+7, 30, 9, 3, 3, 'F');
+                doc.setFont('helvetica','bold'); doc.setFontSize(7.5);
+                doc.setTextColor(255,255,255);
+                doc.text('DISPONIBLE', M+20, y+12.8, {align:'center'});
+
+                // Texte
+                doc.setFont('helvetica','bold'); doc.setFontSize(12);
+                doc.setTextColor(20,120,60);
+                doc.text(nbQ+' question'+(nbQ>1?'s':'')+' t\'attendent !', M+40, y+12);
+                doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
+                doc.setTextColor(60,120,80);
+                doc.text('Connecte-toi sur AutiCare pour jouer !', M+40, y+21);
+
+                // Étoiles décoratives
+                star(W-M-6, y+8, 4, YELLOW);
+                star(W-M-16, y+5, 2.5, ORANGE);
+                star(W-M-6, y+24, 2.5, GREEN);
+            } else {
+                doc.setFillColor(250,245,255);
+                doc.setDrawColor(...PURP); doc.setLineWidth(0.8);
+                doc.roundedRect(M, y, W-M*2, 22, 9, 9, 'FD');
+                doc.setFont('helvetica','bold'); doc.setFontSize(11);
+                doc.setTextColor(...PURP);
+                doc.text('Quiz bientot disponible... Reste connecte !', W/2, y+13, {align:'center'});
+                star(M+10, y+11, 3.5, YELLOW);
+                star(W-M-10, y+11, 3.5, ORANGE);
+            }
+            y+=40;
+
+            /* ════════════════════════════════════════════
+               FOOTER TOUTES PAGES
+            ════════════════════════════════════════════ */
+            const totalP=doc.internal.getNumberOfPages();
+            for(let p=1;p<=totalP;p++){
+                doc.setPage(p);
+                if(p>1){
+                    rainbowBar(0, H-4, W, 4);
+                    doc.setFont('helvetica','bold'); doc.setFontSize(7);
+                    doc.setTextColor(140,100,200);
+                    doc.text('AutiCare  —  '+titre, M, H-6);
+                    doc.text('Page '+p+' / '+totalP, W-M, H-6, {align:'right'});
+                }
+            }
+
+            /* ── Sauvegarde ── */
+            const safe=titre.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/gi,'_').toLowerCase();
+            doc.save('cours-'+safe+'.pdf');
+
+        } catch(err){
+            console.error('[PDF] Erreur:', err);
+            alert('Erreur PDF :\n'+err.message);
+        } finally {
+            btn.classList.remove('loading');
+            btn.querySelector('.pdf-label').textContent='Exporter en PDF';
+        }
+    }
+
+
+
+    </script>
+{% endblock %}
+
