@@ -5,7 +5,7 @@ namespace App\Form;
 use App\Entity\NiveauJeu;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -28,24 +28,28 @@ class NiveauJeuType extends AbstractType
                     'class' => 'form-select',
                 ],
             ])
-            ->add('minMoyenne', IntegerType::class, [
+            ->add('minMoyenne', NumberType::class, [
                 'label' => 'Min moyenne',
                 'required' => true,
+                'scale' => 2,
                 'attr' => [
                     'class' => 'form-control',
                     'min' => 0,
                     'max' => 20,
-                    'placeholder' => 'Ex: 0',
+                    'step' => '0.01',
+                    'placeholder' => 'Ex: 0.00',
                 ],
             ])
-            ->add('maxMoyenne', IntegerType::class, [
+            ->add('maxMoyenne', NumberType::class, [
                 'label' => 'Max moyenne',
                 'required' => true,
+                'scale' => 2,
                 'attr' => [
                     'class' => 'form-control',
                     'min' => 0,
                     'max' => 20,
-                    'placeholder' => 'Ex: 10',
+                    'step' => '0.01',
+                    'placeholder' => 'Ex: 10.00',
                 ],
             ])
             ->add('description', TextareaType::class, [

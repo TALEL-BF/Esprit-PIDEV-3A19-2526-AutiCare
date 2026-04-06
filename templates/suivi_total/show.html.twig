@@ -19,15 +19,23 @@
                 <tbody>
                     <tr>
                         <th style="width: 260px;">ID</th>
-                        <td>{{ suivi_total.id }}</td>
+                        <td>{{ suivi_total.getId() }}</td>
                     </tr>
                     <tr>
                         <th>Id enfant</th>
-                        <td>{{ suivi_total.enfantId }}</td>
+                        <td>{{ suivi_total.getEnfantId() }}</td>
                     </tr>
                     <tr>
-                        <th>Moyenne</th>
-                        <td>{{ suivi_total.moyenne }}</td>
+                        <th>Note de cours</th>
+                        <td>{{ suivi_total.getNoteCours() }}</td>
+                    </tr>
+                    <tr>
+                        <th>Note de consultation</th>
+                        <td>{{ suivi_total.getNoteConsultation() }}</td>
+                    </tr>
+                    <tr>
+                        <th>Moyenne générale</th>
+                        <td>{{ suivi_total.getMoyenneGenerale() }}</td>
                     </tr>
                     <tr>
                         <th>Niveau</th>
@@ -36,6 +44,14 @@
                     <tr>
                         <th>Remarque</th>
                         <td>{{ suivi_total.remarque ?: '-' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Créé le</th>
+                        <td>{{ suivi_total.dateCalcul ? suivi_total.dateCalcul|date('d/m/Y H:i') : '-' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Modifié le</th>
+                        <td>{{ suivi_total.updatedAt ? suivi_total.updatedAt|date('d/m/Y H:i') : '-' }}</td>
                     </tr>
                 </tbody>
             </table>

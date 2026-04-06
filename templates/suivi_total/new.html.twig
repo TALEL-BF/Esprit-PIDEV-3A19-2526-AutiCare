@@ -9,13 +9,30 @@
     <p>Créer un nouveau suivi pour un enfant</p>
 </div>
 
-<div class="card-box">
-    <div class="card-box-header">
-        <span class="card-box-title"><i class="fas fa-chart-line"></i> Nouveau suivi</span>
-        <span class="form-mode-badge">Mode : Ajout</span>
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card-box">
+            <div class="card-box-header">
+                <span class="card-box-title"><i class="fas fa-chart-line"></i> Nouveau suivi</span>
+                <span class="form-mode-badge">Mode : Ajout</span>
+            </div>
+            <div class="card-box-body">
+                {% include 'suivi_total/_form.html.twig' with {form: form, button_label: 'Enregistrer'} %}
+            </div>
+        </div>
     </div>
-    <div class="card-box-body">
-        {% include 'suivi_total/_form.html.twig' with {form: form, button_label: 'Enregistrer'} %}
+
+    <div class="col-lg-4">
+        <div class="card-box h-100">
+            <div class="card-box-header">
+                <span class="card-box-title"><i class="fas fa-info-circle"></i> Aide</span>
+            </div>
+            <div class="card-box-body">
+                <p class="mb-2"><strong>Moyenne 0 à 20</strong></p>
+                <p class="text-muted mb-2">Le niveau est attribué automatiquement selon les intervalles définis dans la table des niveaux.</p>
+                <p class="text-muted mb-0">Exemple : 8 = Facile, 12 = Moyen, 17 = Difficile.</p>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

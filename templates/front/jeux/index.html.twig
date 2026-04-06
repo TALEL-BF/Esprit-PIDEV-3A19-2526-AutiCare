@@ -58,6 +58,17 @@
             background: linear-gradient(135deg, #4d65f9 0%, #ff4880 100%);
             padding: 60px 0;
         }
+        .difficulty-dots .difficulty-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #eee;
+            display: inline-block;
+            margin-right: 4px;
+        }
+        .difficulty-dots .difficulty-dot.active {
+            background: var(--bs-primary);
+        }
     </style>
 {% endblock %}
 
@@ -142,12 +153,20 @@
                             <h5 class="fw-bold mb-2">{{ game.title }}</h5>
                             <p class="text-muted small mb-3">{{ game.description }}</p>
                             <div class="d-flex gap-2">
-                                <a href="#" class="btn btn-primary btn-border-radius text-white flex-fill">
-                                    <i class="fas fa-play me-1"></i> Jouer
-                                </a>
-                                <a href="#" class="btn btn-outline-primary btn-border-radius">
+                                <button class="btn btn-secondary btn-border-radius text-white flex-fill" disabled>
+                                    <i class="fas fa-play me-1"></i> Bientôt disponible
+                                </button>
+                                <button class="btn btn-outline-primary btn-border-radius game-info-btn"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#gameModal"
+                                        data-title="{{ game.title }}"
+                                        data-description="{{ game.description }}"
+                                        data-category="{{ game.category }}"
+                                        data-age="{{ game.age }}"
+                                        data-difficulty="{{ game.difficulty }}"
+                                        data-icon="{{ game.icon }}">
                                     <i class="fas fa-info-circle"></i>
-                                </a>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -168,6 +187,46 @@
             </div>
         </div>
     </div>
+
+    <!-- Game Info Modal -->
+    <div class="modal fade" id="gameModal" tabindex="-1" aria-labelledby="gameModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="gameModalLabel">
+                        <span id="gameIcon" class="me-2"></span>
+                        <span id="gameTitle"></span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <span class="badge bg-primary me-2" id="gameCategory"></span>
+                        <span class="badge bg-info" id="gameAge"></span>
+                    </div>
+                    <p class="mb-3" id="gameDescription"></p>
+                    <div class="mb-3">
+                        <strong>Difficulté :</strong>
+                        <div class="difficulty-dots d-inline-block ms-2">
+                            <span class="difficulty-dot"></span>
+                            <span class="difficulty-dot"></span>
+                            <span class="difficulty-dot"></span>
+                        </div>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Ce jeu est en cours de développement. Il sera bientôt disponible dans notre plateforme !
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button type="button" class="btn btn-primary" disabled>
+                        <i class="fas fa-star me-1"></i> Ajouter aux favoris
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block javascripts %}
@@ -176,11 +235,11 @@
         // Filtrage par catégorie
         const categoryBtns = document.querySelectorAll('.category-btn');
         const gameItems = document.querySelectorAll('.game-item');
-        
+
         categoryBtns.forEach(btn => {
             btn.addEventListener('click', function() {
                 const category = this.dataset.category;
-                
+
                 // Mise à jour des styles des boutons
                 categoryBtns.forEach(b => {
                     if (b.dataset.category === category && category !== 'tous') {
@@ -194,7 +253,7 @@
                         b.classList.add('btn-outline-primary');
                     }
                 });
-                
+
                 // Filtrage des jeux
                 gameItems.forEach(item => {
                     const itemCategory = item.dataset.category;
@@ -202,6 +261,38 @@
                         item.style.display = 'block';
                     } else {
                         item.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // Gestion de la modale d'information des jeux
+        const gameInfoBtns = document.querySelectorAll('.game-info-btn');
+        const gameModal = document.getElementById('gameModal');
+
+        gameInfoBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const title = this.dataset.title;
+                const description = this.dataset.description;
+                const category = this.dataset.category;
+                const age = this.dataset.age;
+                const difficulty = parseInt(this.dataset.difficulty);
+                const icon = this.dataset.icon;
+
+                // Remplir la modale
+                document.getElementById('gameTitle').textContent = title;
+                document.getElementById('gameDescription').textContent = description;
+                document.getElementById('gameCategory').textContent = category;
+                document.getElementById('gameAge').textContent = age;
+                document.getElementById('gameIcon').textContent = icon;
+
+                // Gérer les points de difficulté
+                const difficultyDots = gameModal.querySelectorAll('.difficulty-dot');
+                difficultyDots.forEach((dot, index) => {
+                    if (index < difficulty) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
                     }
                 });
             });

@@ -3,18 +3,654 @@
 
 {% block title %}AutiCare - Accueil{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        /* === ANIMATIONS SPECTACULAIRES === */
+
+        /* Hero Section avec effets 3D */
+        .hero-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            position: relative;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .hero-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+            animation: blob 20s ease-in-out infinite;
+        }
+
+        @keyframes blob {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.1) rotate(90deg); }
+            50% { transform: scale(0.9) rotate(180deg); }
+            75% { transform: scale(1.05) rotate(270deg); }
+        }
+
+        .hero-header h1 {
+            background: linear-gradient(45deg, #ffffff, #e0e7ff, #ffffff);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: textShimmer 3s ease-in-out infinite;
+            text-shadow: 0 0 30px rgba(255,255,255,0.5);
+            transform-style: preserve-3d;
+        }
+
+        @keyframes textShimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .hero-header .btn {
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+        }
+
+        .hero-header .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .hero-header .btn:hover::before {
+            left: 100%;
+        }
+
+        /* Services avec effets 3D */
+        .service-item {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transform-style: preserve-3d;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+
+        .service-item:hover {
+            transform: translateY(-20px) rotateX(10deg) rotateY(10deg) scale(1.05);
+            box-shadow:
+                0 25px 50px rgba(0,0,0,0.1),
+                0 0 100px rgba(102, 126, 234, 0.3);
+        }
+
+        .service-item:hover::before {
+            opacity: 1;
+        }
+
+        .service-item .service-content {
+            transform-style: preserve-3d;
+            transition: transform 0.3s ease;
+        }
+
+        .service-item:hover .service-content {
+            transform: translateZ(30px);
+        }
+
+        /* Mini jeux dashboard avec effets spéciaux */
+        .mini-game-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+        }
+
+        .mini-game-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            animation: rotate 4s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .mini-game-card:hover {
+            transform: translateY(-15px) rotateX(15deg) rotateY(15deg) scale(1.08);
+            box-shadow:
+                0 30px 60px rgba(0,0,0,0.2),
+                0 0 100px rgba(102, 126, 234, 0.4),
+                inset 0 0 100px rgba(102, 126, 234, 0.1);
+        }
+
+        .mini-game-icon {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .mini-game-card:hover .mini-game-icon {
+            transform: scale(1.2) rotate(360deg);
+            filter: drop-shadow(0 0 20px rgba(102, 126, 234, 0.6));
+        }
+
+        /* Animations d'entrée spectaculaires */
+        .wow {
+            opacity: 0;
+            transform: translateY(50px) scale(0.9);
+            transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .wow.fadeInUp {
+            animation: fadeInUpWow 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeInUpWow {
+            0% {
+                opacity: 0;
+                transform: translateY(50px) scale(0.9) rotateX(20deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1) rotateX(0deg);
+            }
+        }
+
+        .wow.fadeInLeft {
+            animation: fadeInLeftWow 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeInLeftWow {
+            0% {
+                opacity: 0;
+                transform: translateX(-50px) scale(0.9) rotateY(-20deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0) scale(1) rotateY(0deg);
+            }
+        }
+
+        .wow.fadeInRight {
+            animation: fadeInRightWow 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeInRightWow {
+            0% {
+                opacity: 0;
+                transform: translateX(50px) scale(0.9) rotateY(20deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0) scale(1) rotateY(0deg);
+            }
+        }
+
+        /* Particules flottantes avancées */
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: floatParticle 15s linear infinite;
+        }
+
+        .particle:nth-child(1) { background: rgba(102, 126, 234, 0.6); width: 4px; height: 4px; }
+        .particle:nth-child(2) { background: rgba(255, 119, 198, 0.6); width: 6px; height: 6px; }
+        .particle:nth-child(3) { background: rgba(120, 219, 255, 0.6); width: 3px; height: 3px; }
+        .particle:nth-child(4) { background: rgba(255, 193, 7, 0.6); width: 5px; height: 5px; }
+        .particle:nth-child(5) { background: rgba(76, 175, 80, 0.6); width: 4px; height: 4px; }
+
+        @keyframes floatParticle {
+            0% {
+                transform: translateY(100vh) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% {
+                transform: translateY(-100px) translateX(100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Effets de glassmorphism */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Animations de texte avancées */
+        .text-reveal {
+            overflow: hidden;
+        }
+
+        .text-reveal::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+            animation: textReveal 2s ease-in-out infinite;
+        }
+
+        @keyframes textReveal {
+            0% { left: -100%; }
+            50% { left: 100%; }
+            100% { left: -100%; }
+        }
+
+        /* Pulsations et glows */
+        .pulse-glow {
+            animation: pulseGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 40px rgba(102, 126, 234, 0.6), 0 0 60px rgba(102, 126, 234, 0.3);
+            }
+        }
+
+        /* Morphing shapes */
+        .morphing-shape {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(45deg, rgba(102, 126, 234, 0.3), rgba(255, 119, 198, 0.3));
+            animation: morph 8s ease-in-out infinite;
+        }
+
+        @keyframes morph {
+            0%, 100% { border-radius: 50%; transform: scale(1); }
+            25% { border-radius: 20% 80% 80% 20%; transform: scale(1.1); }
+            50% { border-radius: 80% 20% 20% 80%; transform: scale(0.9); }
+            75% { border-radius: 20% 80% 20% 80%; transform: scale(1.05); }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .hero-header h1 {
+                font-size: 2.5rem;
+            }
+            .service-item:hover {
+                transform: translateY(-10px) scale(1.02);
+            }
+            .mini-game-card:hover {
+                transform: translateY(-10px) scale(1.05);
+            }
+        }
+
+        /* === SERVICES AVEC EFFETS 3D SPECTACULAIRES === */
+
+        /* Formes géométriques morphing */
+        .morphing-shape {
+            position: absolute;
+            background: linear-gradient(45deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+            animation: morphing 8s ease-in-out infinite;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .morphing-shape:nth-child(2) {
+            animation-direction: reverse;
+            animation-duration: 10s;
+        }
+
+        @keyframes morphing {
+            0%, 100% {
+                border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+                transform: rotate(0deg) scale(1);
+            }
+            25% {
+                border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+                transform: rotate(90deg) scale(1.1);
+            }
+            50% {
+                border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
+                transform: rotate(180deg) scale(0.9);
+            }
+            75% {
+                border-radius: 70% 30% 40% 60% / 40% 70% 60% 30%;
+                transform: rotate(270deg) scale(1.05);
+            }
+        }
+
+        /* Cartes de services avec effets 3D */
+        .service-item {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.1),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+        }
+
+        .service-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+
+        .service-item:hover {
+            transform: translateY(-20px) rotateX(10deg) rotateY(10deg) scale(1.05);
+            box-shadow:
+                0 25px 50px rgba(0, 0, 0, 0.15),
+                0 0 100px rgba(102, 126, 234, 0.3),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+        }
+
+        .service-item:hover::before {
+            opacity: 1;
+        }
+
+        .service-content {
+            position: relative;
+            z-index: 2;
+            transform-style: preserve-3d;
+        }
+
+        .service-content-inner {
+            transform: translateZ(20px);
+        }
+
+        /* Icônes avec effets pulse et glow */
+        .pulse-glow {
+            animation: pulseGlow 3s ease-in-out infinite;
+            box-shadow: 0 0 30px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .pulse-glow:hover {
+            animation-duration: 1s;
+            transform: scale(1.1) rotate(360deg);
+            box-shadow: 0 0 50px rgba(102, 126, 234, 0.8);
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% {
+                box-shadow: 0 0 30px rgba(102, 126, 234, 0.4);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 50px rgba(102, 126, 234, 0.8);
+                transform: scale(1.05);
+            }
+        }
+
+        /* Boutons avec effets 3D */
+        .btn-border-radius {
+            border-radius: 25px;
+            border: 2px solid transparent;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            background-clip: padding-box;
+            position: relative;
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+
+        .btn-border-radius::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 25px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .btn-border-radius:hover {
+            transform: translateY(-3px) translateZ(10px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-border-radius:hover::before {
+            opacity: 1;
+        }
+
+        /* Responsive pour mobile */
+        @media (max-width: 768px) {
+            .service-item:hover {
+                transform: translateY(-10px) scale(1.02);
+            }
+
+            .morphing-shape {
+                display: none;
+            }
+        }
+
+        /* === STATISTIQUES ANIMÉES SPECTACULAIRES === */
+
+        /* Particules flottantes */
+        .floating-particle {
+            position: absolute;
+            background: linear-gradient(45deg, rgba(102, 126, 234, 0.3), rgba(240, 147, 251, 0.3));
+            border-radius: 50%;
+            animation: floatParticle 8s ease-in-out infinite;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        @keyframes floatParticle {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+                opacity: 0.3;
+            }
+            25% {
+                transform: translateY(-20px) rotate(90deg);
+                opacity: 0.7;
+            }
+            50% {
+                transform: translateY(-40px) rotate(180deg);
+                opacity: 1;
+            }
+            75% {
+                transform: translateY(-20px) rotate(270deg);
+                opacity: 0.7;
+            }
+        }
+
+        /* Cartes de statistiques */
+        .stats-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.1),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+        }
+
+        .stats-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-15px) rotateX(5deg) scale(1.05);
+            box-shadow:
+                0 20px 40px rgba(0, 0, 0, 0.15),
+                0 0 80px rgba(102, 126, 234, 0.2),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+        }
+
+        .stats-card:hover::before {
+            opacity: 1;
+        }
+
+        .stats-icon {
+            position: relative;
+            z-index: 2;
+        }
+
+        .stats-number {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .stats-plus, .stats-percent {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .stats-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.25rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .stats-description {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Animation des compteurs */
+        .counter {
+            display: inline-block;
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            transition: all 0.3s ease;
+        }
+
+        /* Responsive pour statistiques */
+        @media (max-width: 768px) {
+            .stats-number {
+                font-size: 2.5rem;
+            }
+
+            .stats-card:hover {
+                transform: translateY(-10px) scale(1.02);
+            }
+
+            .floating-particle {
+                display: none;
+            }
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
+    <!-- Particules flottantes -->
+    <div class="particle" style="left: 10%; animation-delay: 0s;"></div>
+    <div class="particle" style="left: 20%; animation-delay: 2s;"></div>
+    <div class="particle" style="left: 30%; animation-delay: 4s;"></div>
+    <div class="particle" style="left: 40%; animation-delay: 6s;"></div>
+    <div class="particle" style="left: 50%; animation-delay: 8s;"></div>
+    <div class="particle" style="left: 60%; animation-delay: 10s;"></div>
+    <div class="particle" style="left: 70%; animation-delay: 12s;"></div>
+    <div class="particle" style="left: 80%; animation-delay: 14s;"></div>
+    <div class="particle" style="left: 90%; animation-delay: 16s;"></div>
+
+    <!-- Formes morphing -->
+    <div class="morphing-shape" style="width: 200px; height: 200px; top: 10%; left: 5%; animation-delay: 0s;"></div>
+    <div class="morphing-shape" style="width: 150px; height: 150px; top: 60%; right: 5%; animation-delay: 3s;"></div>
+    <div class="morphing-shape" style="width: 100px; height: 100px; top: 30%; right: 20%; animation-delay: 6s;"></div>
+
     <!-- Hero Header Start -->
     <div class="container-fluid hero-header">
         <div class="container py-5">
             <div class="row g-5 py-5">
                 <div class="col-lg-6 my-auto">
-                    <div class="wow fadeInUp" data-wow-delay="0.1s">
-                        <div class="bg-primary text-white rounded d-inline-block px-3 mb-3" style="border-radius:25% 10% !important">
+                    <div class="wow fadeInLeft" data-wow-delay="0.1s">
+                        <div class="bg-primary text-white rounded d-inline-block px-3 mb-3 pulse-glow" style="border-radius:25% 10% !important">
                             <small><i class="fas fa-heart me-1"></i> Bienvenue sur AutiCare</small>
                         </div>
-                        <h1 class="display-3 text-white mt-4 mb-4">Apprendre & Grandir à Votre Rythme</h1>
-                        <p class="text-white mb-4 pb-2">Une plateforme éducative et psychologique bienveillante, conçue spécialement pour les personnes autistes et leurs familles. Découvrez cours, thérapies, jeux et bien plus.</p>
+                        <h1 class="display-3 text-white mt-4 mb-4 text-reveal">
+                            Apprendre & Grandir à Votre Rythme
+                        </h1>
+                        <p class="text-white mb-4 pb-2">
+                            Une plateforme éducative et psychologique bienveillante, conçue spécialement pour les personnes autistes et leurs familles.
+                            Découvrez cours, thérapies, jeux et bien plus.
+                        </p>
                         <a href="{{ path('app_cours') }}" class="btn btn-secondary btn-border-radius py-sm-3 px-sm-5 me-3 wow tada" data-wow-delay="1.2s">
                             Découvrir les cours
                         </a>
@@ -25,11 +661,19 @@
                 </div>
                 <div class="col-lg-6">
                     <div class="row g-4 pt-lg-5 align-items-center">
-                        <div class="col-6 text-end">   
-                            <!-- Espace pour une image si besoin -->
+                        <div class="col-6 text-end wow fadeInRight" data-wow-delay="0.5s">
+                            <div class="glass-card p-4 rounded-4">
+                                <i class="fas fa-brain fa-3x text-primary mb-3"></i>
+                                <h5 class="text-white">Intelligence Adaptative</h5>
+                                <p class="text-white-50 small">Apprentissage personnalisé selon vos besoins</p>
+                            </div>
                         </div>
-                        <div class="col-6">
-                            <!-- Espace pour une image si besoin -->
+                        <div class="col-6 wow fadeInRight" data-wow-delay="0.7s">
+                            <div class="glass-card p-4 rounded-4">
+                                <i class="fas fa-users fa-3x text-success mb-3"></i>
+                                <h5 class="text-white">Communauté Bienveillante</h5>
+                                <p class="text-white-50 small">Soutien et partage d'expériences</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -101,24 +745,33 @@
     <!-- About End -->
 
     <!-- Services Start -->
-    <div class="container-fluid service py-5">
+    <div class="container-fluid py-5 position-relative">
+        <!-- Formes géométriques flottantes -->
+        <div class="morphing-shape" style="width: 300px; height: 300px; top: 20%; left: -5%; animation-delay: 1s;"></div>
+        <div class="morphing-shape" style="width: 200px; height: 200px; bottom: 20%; right: -5%; animation-delay: 5s;"></div>
+
         <div class="container py-5">
-            <div class="text-center mx-auto mb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width: 700px;">
-                <div class="bg-secondary text-primary rounded d-inline-block px-3 mb-3" style="border-radius:25% 10% !important">
+            <div class="text-center mx-auto mb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width:700px">
+                <div class="bg-secondary text-primary rounded d-inline-block px-3 mb-3 pulse-glow" style="border-radius:25% 10% !important">
                     <small>Nos Services</small>
                 </div>
-                <h1 class="display-5">Ce que nous offrons</h1>
+                <h1 class="display-5 mb-0">Une Accompagnement Complet</h1>
             </div>
+
             <div class="row g-4">
                 <!-- Cours Éducatifs -->
                 <div class="col-md-6 col-lg-4 wow fadeInUp" data-wow-delay="0.1s">
-                    <div class="service-item text-center p-5 bg-white">
+                    <div class="service-item text-center p-5">
                         <div class="service-content">
                             <div class="service-content-inner">
-                                <i class="fas fa-book-open fa-3x text-primary mb-4"></i>
-                                <a href="{{ path('app_cours') }}" class="h4 d-block mb-3">Cours Éducatifs</a>
+                                <div class="pulse-glow d-inline-block p-3 rounded-circle mb-4" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                                    <i class="fas fa-book-open fa-3x text-white"></i>
+                                </div>
+                                <a href="{{ path('app_cours') }}" class="h4 d-block mb-3 text-decoration-none text-dark">Cours Éducatifs</a>
                                 <p class="mb-4">Des cours structurés et adaptés aux différents profils TSA, avec des supports visuels et auditifs.</p>
-                                <a href="{{ path('app_cours') }}" class="btn btn-primary btn-border-radius py-2 px-4 text-white">Voir les cours</a>
+                                <a href="{{ path('app_cours') }}" class="btn btn-primary btn-border-radius py-2 px-4 text-white">
+                                    Voir les cours
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -126,13 +779,17 @@
 
                 <!-- Séances de Thérapie -->
                 <div class="col-md-6 col-lg-4 wow fadeInUp" data-wow-delay="0.3s">
-                    <div class="service-item text-center p-5 bg-white">
+                    <div class="service-item text-center p-5">
                         <div class="service-content">
                             <div class="service-content-inner">
-                                <i class="fas fa-heart fa-3x text-primary mb-4"></i>
-                                <a href="{{ path('app_therapie') }}" class="h4 d-block mb-3">Séances de Thérapie</a>
+                                <div class="pulse-glow d-inline-block p-3 rounded-circle mb-4" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                                    <i class="fas fa-heart fa-3x text-white"></i>
+                                </div>
+                                <a href="{{ path('app_therapie') }}" class="h4 d-block mb-3 text-decoration-none text-dark">Séances de Thérapie</a>
                                 <p class="mb-4">ABA, orthophonie, ergothérapie — des thérapeutes spécialisés à votre service.</p>
-                                <a href="{{ path('app_therapie') }}" class="btn btn-primary btn-border-radius py-2 px-4 text-white">Réserver</a>
+                                <a href="{{ path('app_therapie') }}" class="btn btn-primary btn-border-radius py-2 px-4 text-white">
+                                    Réserver
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -140,13 +797,17 @@
 
                 <!-- Jeux Éducatifs -->
                 <div class="col-md-6 col-lg-4 wow fadeInUp" data-wow-delay="0.5s">
-                    <div class="service-item text-center p-5 bg-white">
+                    <div class="service-item text-center p-5">
                         <div class="service-content">
                             <div class="service-content-inner">
-                                <i class="fas fa-gamepad fa-3x text-primary mb-4"></i>
-                                <a href="{{ path('app_jeux') }}" class="h4 d-block mb-3">Jeux Éducatifs</a>
+                                <div class="pulse-glow d-inline-block p-3 rounded-circle mb-4" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                                    <i class="fas fa-gamepad fa-3x text-white"></i>
+                                </div>
+                                <a href="{{ path('app_jeux') }}" class="h4 d-block mb-3 text-decoration-none text-dark">Jeux Éducatifs</a>
                                 <p class="mb-4">Des jeux interactifs qui développent la communication, la motricité et les compétences sociales.</p>
-                                <a href="{{ path('app_jeux') }}" class="btn btn-primary btn-border-radius py-2 px-4 text-white">Jouer</a>
+                                <a href="{{ path('app_jeux') }}" class="btn btn-primary btn-border-radius py-2 px-4 text-white">
+                                    Jouer
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -154,13 +815,17 @@
 
                 <!-- Événements -->
                 <div class="col-md-6 col-lg-4 wow fadeInUp" data-wow-delay="0.1s">
-                    <div class="service-item text-center p-5 bg-white">
+                    <div class="service-item text-center p-5">
                         <div class="service-content">
                             <div class="service-content-inner">
-                                <i class="fas fa-calendar-alt fa-3x text-primary mb-4"></i>
-                                <a href="{{ path('app_events') }}" class="h4 d-block mb-3">Événements</a>
+                                <div class="pulse-glow d-inline-block p-3 rounded-circle mb-4" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
+                                    <i class="fas fa-calendar-alt fa-3x text-white"></i>
+                                </div>
+                                <a href="{{ path('app_events') }}" class="h4 d-block mb-3 text-decoration-none text-dark">Événements</a>
                                 <p class="mb-4">Ateliers, conférences et activités de groupe pour favoriser l'inclusion et l'épanouissement.</p>
-                                <a href="{{ path('app_events') }}" class="btn btn-primary btn-border-radius py-2 px-4 text-white">Voir les événements</a>
+                                <a href="{{ path('app_events') }}" class="btn btn-primary btn-border-radius py-2 px-4 text-white">
+                                    Voir les événements
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -168,13 +833,17 @@
 
                 <!-- Offres d'Emploi -->
                 <div class="col-md-6 col-lg-4 wow fadeInUp" data-wow-delay="0.3s">
-                    <div class="service-item text-center p-5 bg-white">
+                    <div class="service-item text-center p-5">
                         <div class="service-content">
                             <div class="service-content-inner">
-                                <i class="fas fa-briefcase fa-3x text-primary mb-4"></i>
-                                <a href="{{ path('app_planning') }}" class="h4 d-block mb-3">Offres d'Emploi</a>
+                                <div class="pulse-glow d-inline-block p-3 rounded-circle mb-4" style="background: linear-gradient(135deg, #fa709a, #fee140);">
+                                    <i class="fas fa-briefcase fa-3x text-white"></i>
+                                </div>
+                                <a href="{{ path('app_planning') }}" class="h4 d-block mb-3 text-decoration-none text-dark">Offres d'Emploi</a>
                                 <p class="mb-4">Des opportunités professionnelles inclusives pour les personnes autistes.</p>
-                                <a href="{{ path('app_planning') }}" class="btn btn-primary btn-border-radius py-2 px-4 text-white">Chercher un emploi</a>
+                                <a href="{{ path('app_planning') }}" class="btn btn-primary btn-border-radius py-2 px-4 text-white">
+                                    Chercher un emploi
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -182,13 +851,17 @@
 
                 <!-- Communauté -->
                 <div class="col-md-6 col-lg-4 wow fadeInUp" data-wow-delay="0.5s">
-                    <div class="service-item text-center p-5 bg-white">
+                    <div class="service-item text-center p-5">
                         <div class="service-content">
                             <div class="service-content-inner">
-                                <i class="fas fa-users fa-3x text-primary mb-4"></i>
-                                <a href="{{ path('app_contact') }}" class="h4 d-block mb-3">Communauté</a>
+                                <div class="pulse-glow d-inline-block p-3 rounded-circle mb-4" style="background: linear-gradient(135deg, #a8edea, #fed6e3);">
+                                    <i class="fas fa-users fa-3x text-white"></i>
+                                </div>
+                                <a href="{{ path('app_contact') }}" class="h4 d-block mb-3 text-decoration-none text-dark">Communauté</a>
                                 <p class="mb-4">Un espace d'échange bienveillant pour les familles, les thérapeutes et les personnes autistes.</p>
-                                <a href="{{ path('app_contact') }}" class="btn btn-primary btn-border-radius py-2 px-4 text-white">Rejoindre</a>
+                                <a href="{{ path('app_contact') }}" class="btn btn-primary btn-border-radius py-2 px-4 text-white">
+                                    Rejoindre
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -197,6 +870,173 @@
         </div>
     </div>
     <!-- Services End -->
+
+    <!-- Pourquoi nous choisir Start -->
+    <div class="container-fluid py-5 position-relative overflow-hidden">
+        <!-- Particules animées -->
+        <div class="floating-particle" style="width: 20px; height: 20px; top: 20%; left: 10%; animation-delay: 0s;"></div>
+        <div class="floating-particle" style="width: 15px; height: 15px; top: 60%; right: 15%; animation-delay: 2s;"></div>
+        <div class="floating-particle" style="width: 25px; height: 25px; bottom: 30%; left: 20%; animation-delay: 4s;"></div>
+        <div class="floating-particle" style="width: 18px; height: 18px; top: 40%; right: 25%; animation-delay: 6s;"></div>
+
+        <div class="container py-5">
+            <div class="text-center mx-auto mb-5 wow fadeInUp" data-wow-delay="0.1s" style="max-width:700px">
+                <div class="bg-secondary text-primary rounded d-inline-block px-3 mb-3 pulse-glow" style="border-radius:25% 10% !important">
+                    <small>Pourquoi nous choisir</small>
+                </div>
+                <h1 class="display-5 mb-0">Des chiffres qui parlent</h1>
+            </div>
+
+            <div class="row g-4">
+                <!-- Statistique 1 -->
+                <div class="col-md-6 col-lg-3 wow fadeInUp" data-wow-delay="0.1s">
+                    <div class="stats-card text-center p-4">
+                        <div class="stats-icon mb-3">
+                            <div class="pulse-glow d-inline-block p-3 rounded-circle" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                                <i class="fas fa-users fa-2x text-white"></i>
+                            </div>
+                        </div>
+                        <div class="stats-number">
+                            <span class="counter" data-target="1500">0</span><span class="stats-plus">+</span>
+                        </div>
+                        <h5 class="stats-title">Enfants accompagnés</h5>
+                        <p class="stats-description">Depuis notre création</p>
+                    </div>
+                </div>
+
+                <!-- Statistique 2 -->
+                <div class="col-md-6 col-lg-3 wow fadeInUp" data-wow-delay="0.3s">
+                    <div class="stats-card text-center p-4">
+                        <div class="stats-icon mb-3">
+                            <div class="pulse-glow d-inline-block p-3 rounded-circle" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                                <i class="fas fa-star fa-2x text-white"></i>
+                            </div>
+                        </div>
+                        <div class="stats-number">
+                            <span class="counter" data-target="98">0</span><span class="stats-percent">%</span>
+                        </div>
+                        <h5 class="stats-title">Taux de satisfaction</h5>
+                        <p class="stats-description">Des familles</p>
+                    </div>
+                </div>
+
+                <!-- Statistique 3 -->
+                <div class="col-md-6 col-lg-3 wow fadeInUp" data-wow-delay="0.5s">
+                    <div class="stats-card text-center p-4">
+                        <div class="stats-icon mb-3">
+                            <div class="pulse-glow d-inline-block p-3 rounded-circle" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                                <i class="fas fa-user-md fa-2x text-white"></i>
+                            </div>
+                        </div>
+                        <div class="stats-number">
+                            <span class="counter" data-target="50">0</span><span class="stats-plus">+</span>
+                        </div>
+                        <h5 class="stats-title">Thérapeutes experts</h5>
+                        <p class="stats-description">Certifiés et spécialisés</p>
+                    </div>
+                </div>
+
+                <!-- Statistique 4 -->
+                <div class="col-md-6 col-lg-3 wow fadeInUp" data-wow-delay="0.7s">
+                    <div class="stats-card text-center p-4">
+                        <div class="stats-icon mb-3">
+                            <div class="pulse-glow d-inline-block p-3 rounded-circle" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
+                                <i class="fas fa-award fa-2x text-white"></i>
+                            </div>
+                        </div>
+                        <div class="stats-number">
+                            <span class="counter" data-target="25">0</span><span class="stats-plus">+</span>
+                        </div>
+                        <h5 class="stats-title">Années d'expérience</h5>
+                        <p class="stats-description">Dans l'accompagnement TSA</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Pourquoi nous choisir End -->
+
+    <!-- Mini-Jeux Dashboard Start -->
+    <div class="container-fluid py-5">
+        <div class="container py-5">
+            <div class="text-center mx-auto mb-5" style="max-width:760px;">
+                <div class="bg-secondary text-primary rounded d-inline-block px-3 mb-3" style="border-radius:25% 10% !important">
+                    <small>Petit Dashboard</small>
+                </div>
+                <h1 class="display-5">5 mini-jeux pour les enfants autistes</h1>
+                <p class="text-muted mb-0">Des activités ludiques et adaptées pour renforcer l'attention, la communication et la motricité.</p>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4">
+                    <div class="card mini-game-card p-4">
+                        <div class="d-flex align-items-center justify-content-between mb-4">
+                            <span class="mini-game-icon">😊</span>
+                            <span class="badge bg-primary bg-opacity-10 text-primary">Émotions</span>
+                        </div>
+                        <h5 class="fw-bold mb-2">Jeu des Émotions</h5>
+                        <p class="text-muted mb-4">Aidez l'enfant à reconnaître et nommer les émotions à partir d'illustrations simples.</p>
+                        <div class="card-footer p-0">
+                            <a href="{{ path('app_jeux') }}" class="btn btn-primary btn-border-radius w-100 text-white">Découvrir</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card mini-game-card p-4">
+                        <div class="d-flex align-items-center justify-content-between mb-4">
+                            <span class="mini-game-icon">🧩</span>
+                            <span class="badge bg-info bg-opacity-10 text-info">Logique</span>
+                        </div>
+                        <h5 class="fw-bold mb-2">Puzzle des Formes</h5>
+                        <p class="text-muted mb-4">Un jeu de puzzle doux qui développe le raisonnement visuel et la persévérance.</p>
+                        <div class="card-footer p-0">
+                            <a href="{{ path('app_jeux') }}" class="btn btn-primary btn-border-radius w-100 text-white">Découvrir</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card mini-game-card p-4">
+                        <div class="d-flex align-items-center justify-content-between mb-4">
+                            <span class="mini-game-icon">🗣️</span>
+                            <span class="badge bg-success bg-opacity-10 text-success">Communication</span>
+                        </div>
+                        <h5 class="fw-bold mb-2">Parole & Images</h5>
+                        <p class="text-muted mb-4">Favorise l'expression et la compréhension à l'aide de pictogrammes visuels.</p>
+                        <div class="card-footer p-0">
+                            <a href="{{ path('app_jeux') }}" class="btn btn-primary btn-border-radius w-100 text-white">Découvrir</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card mini-game-card p-4">
+                        <div class="d-flex align-items-center justify-content-between mb-4">
+                            <span class="mini-game-icon">🧠</span>
+                            <span class="badge bg-warning bg-opacity-10 text-warning">Mémoire</span>
+                        </div>
+                        <h5 class="fw-bold mb-2">Memory Coloré</h5>
+                        <p class="text-muted mb-4">Exerce la mémoire visuelle avec des cartes colorées et des associations faciles.</p>
+                        <div class="card-footer p-0">
+                            <a href="{{ path('app_jeux') }}" class="btn btn-primary btn-border-radius w-100 text-white">Découvrir</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card mini-game-card p-4">
+                        <div class="d-flex align-items-center justify-content-between mb-4">
+                            <span class="mini-game-icon">✋</span>
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary">Motricité</span>
+                        </div>
+                        <h5 class="fw-bold mb-2">Coloriage Sensoriel</h5>
+                        <p class="text-muted mb-4">Activité créative pour travailler la motricité fine dans un environnement calme.</p>
+                        <div class="card-footer p-0">
+                            <a href="{{ path('app_jeux') }}" class="btn btn-primary btn-border-radius w-100 text-white">Découvrir</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Mini-Jeux Dashboard End -->
 
     <!-- Stats Start -->
     <div class="container-fluid bg-primary py-5 wow fadeIn" data-wow-delay="0.1s">
@@ -255,6 +1095,61 @@
             });
             $('#videoModal').on('hidden.bs.modal', function() {
                 $('#video').attr('src', '');
+            });
+        });
+
+        // Animation des compteurs avec Intersection Observer
+        const observerOptions = {
+            threshold: 0.5,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const counters = entry.target.querySelectorAll('.counter');
+                    counters.forEach(counter => {
+                        animateCounter(counter);
+                    });
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        // Observer la section des statistiques
+        const statsSection = document.querySelector('.container-fluid.py-5.position-relative.overflow-hidden');
+        if (statsSection) {
+            observer.observe(statsSection);
+        }
+
+        function animateCounter(counter) {
+            const target = parseInt(counter.getAttribute('data-target'));
+            const duration = 2000; // 2 secondes
+            const step = target / (duration / 16); // 60 FPS
+            let current = 0;
+
+            const timer = setInterval(() => {
+                current += step;
+                if (current >= target) {
+                    counter.textContent = target.toLocaleString();
+                    clearInterval(timer);
+                } else {
+                    counter.textContent = Math.floor(current).toLocaleString();
+                }
+            }, 16);
+        }
+
+        // Animation WOW.js pour les éléments
+        new WOW().init();
+
+        // Particules flottantes interactives
+        document.addEventListener('mousemove', (e) => {
+            const particles = document.querySelectorAll('.floating-particle');
+            particles.forEach((particle, index) => {
+                const speed = (index + 1) * 0.5;
+                const x = (e.clientX * speed) / 100;
+                const y = (e.clientY * speed) / 100;
+                particle.style.transform = `translate(${x}px, ${y}px)`;
             });
         });
     </script>

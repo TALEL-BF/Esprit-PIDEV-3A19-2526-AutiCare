@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Suivi Total PDF</title>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; color: #333; }
+        .header { margin-bottom: 24px; }
+        .header h1 { font-size: 18px; margin: 0; }
+        .meta { margin-top: 8px; color: #666; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th, td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; }
+        th { background: #f3f3f3; }
+        .summary { margin-top: 16px; }
+        .summary span { display: inline-block; margin-right: 20px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Export Suivi Total</h1>
+        <div class="meta">Généré le {{ generatedAt|date('d/m/Y H:i') }}</div>
+    </div>
+
+    <div class="summary">
+        <span><strong>Total :</strong> {{ statistics.total|default(0) }}</span>
+        <span><strong>Moyenne globale :</strong> {{ statistics.average ? statistics.average|number_format(2, '.', '') : '0.00' }}</span>
+        <span><strong>Facile :</strong> {{ statistics.facileCount|default(0) }}</span>
+        <span><strong>Moyen :</strong> {{ statistics.moyenCount|default(0) }}</span>
+        <span><strong>Difficile :</strong> {{ statistics.difficileCount|default(0) }}</span>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Enfant</th>
+                <th>Note Cours</th>
+                <th>Note Consultation</th>
+                <th>Moyenne</th>
+                <th>Remarque</th>
+                <th>Niveau</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+                <tr>
+                    <td>{{ row.getId() }}</td>
+                    <td>{{ row.getEnfantId() }}</td>
+                    <td>{{ row.getNoteCours() }}</td>
+                    <td>{{ row.getNoteConsultation() }}</td>
+                    <td>{{ row.getMoyenneGenerale() }}</td>
+                    <td>{{ row.getRemarque() ?: '-' }}</td>
+                    <td>{{ row.getNiveauJeu() ? row.getNiveauJeu().getLibelle() : '-' }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="7" style="text-align:center;">Aucun enregistrement</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

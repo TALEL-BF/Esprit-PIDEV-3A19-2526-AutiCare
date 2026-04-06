@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Export Niveau Jeu PDF</title>
+    <style>
+        body { font-family: Arial, sans-serif; font-size: 12px; color: #333; }
+        .header { margin-bottom: 24px; }
+        .header h1 { font-size: 18px; margin: 0; }
+        .meta { margin-top: 8px; color: #666; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th, td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; }
+        th { background: #f3f3f3; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Export Niveau de Jeu</h1>
+        <div class="meta">Généré le {{ generatedAt|date('d/m/Y H:i') }}</div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Libellé</th>
+                <th>Min Moyenne</th>
+                <th>Max Moyenne</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for niveau in rows %}
+                <tr>
+                    <td>{{ niveau.getId() }}</td>
+                    <td>{{ niveau.getLibelle() }}</td>
+                    <td>{{ niveau.getMinMoyenne() }}</td>
+                    <td>{{ niveau.getMaxMoyenne() }}</td>
+                    <td>{{ niveau.getDescription() ?: '-' }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="5" style="text-align:center;">Aucun niveau trouvé</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

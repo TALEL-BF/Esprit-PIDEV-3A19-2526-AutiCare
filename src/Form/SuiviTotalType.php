@@ -24,8 +24,8 @@ class SuiviTotalType extends AbstractType
                     'placeholder' => 'Ex: 1',
                 ],
             ])
-            ->add('moyenne', NumberType::class, [
-                'label' => 'Moyenne',
+            ->add('noteCours', NumberType::class, [
+                'label' => 'Note de cours',
                 'required' => true,
                 'scale' => 2,
                 'attr' => [
@@ -36,6 +36,18 @@ class SuiviTotalType extends AbstractType
                     'placeholder' => 'Ex: 12.50',
                 ],
             ])
+            ->add('noteConsultation', NumberType::class, [
+                'label' => 'Note de consultation',
+                'required' => true,
+                'scale' => 2,
+                'attr' => [
+                    'class' => 'form-control',
+                    'min' => 0,
+                    'max' => 20,
+                    'step' => '0.01',
+                    'placeholder' => 'Ex: 14.00',
+                ],
+            ])
             ->add('remarque', TextareaType::class, [
                 'label' => 'Remarque',
                 'required' => false,
@@ -44,6 +56,15 @@ class SuiviTotalType extends AbstractType
                     'rows' => 4,
                     'maxlength' => 255,
                     'placeholder' => 'Remarque facultative...',
+                ],
+            ])
+            ->add('moyenne', NumberType::class, [
+                'property_path' => 'moyenneGenerale',
+                'disabled' => true,
+                'label' => 'Moyenne générale',
+                'scale' => 2,
+                'attr' => [
+                    'class' => 'form-control',
                 ],
             ]);
     }

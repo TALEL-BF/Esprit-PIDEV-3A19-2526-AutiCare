@@ -16,28 +16,55 @@ class NiveauJeuRepository extends ServiceEntityRepository
         parent::__construct($registry, NiveauJeu::class);
     }
 
-    //    /**
-    //     * @return NiveauJeu[] Returns an array of NiveauJeu objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('n')
-    //            ->andWhere('n.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('n.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * @return NiveauJeu[]
+     */
+    public function searchAndFilter(?string $search, ?string $niveau, ?string $tri): array
+    {
+        $qb = $this->createQueryBuilder('n');
 
-    //    public function findOneBySomeField($value): ?NiveauJeu
-    //    {
-    //        return $this->createQueryBuilder('n')
-    //            ->andWhere('n.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        if ($search !== null && trim($search) !== '') {
+            $qb->andWhere('n.libelle LIKE :search OR n.description LIKE :search')
+               ->setParameter('search', '%' . trim($search) . '%');
+        }
+
+        if ($niveau !== null && trim($niveau) !== '') {
+            $qb->andWhere('UPPER(n.libelle) = :niveau')
+               ->setParameter('niveau', strtoupper(trim($niveau)));
+        }
+
+        switch ($tri) {
+            case 'min_asc':
+                $qb->orderBy('n.minMoyenne', 'ASC');
+                break;
+            case 'min_desc':
+                $qb->orderBy('n.minMoyenne', 'DESC');
+                break;
+            case 'max_asc':
+                $qb->orderBy('n.maxMoyenne', 'ASC');
+                break;
+            case 'max_desc':
+                $qb->orderBy('n.maxMoyenne', 'DESC');
+                break;
+            case 'id_asc':
+                $qb->orderBy('n.id', 'ASC');
+                break;
+            case 'id_desc':
+            default:
+                $qb->orderBy('n.id', 'DESC');
+                break;
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function findOneByMoyenneRange(float $moyenne): ?NiveauJeu
+    {
+        return $this->createQueryBuilder('n')
+            ->andWhere('n.minMoyenne <= :moyenne')
+            ->andWhere('n.maxMoyenne >= :moyenne')
+            ->setParameter('moyenne', $moyenne)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }
