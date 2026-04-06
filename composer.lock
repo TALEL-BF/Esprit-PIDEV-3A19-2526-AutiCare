@@ -5,10 +5,14 @@
         "This file is @generated automatically"
     ],
 <<<<<<< HEAD
+<<<<<<< HEAD
     "content-hash": "70aa5e481608b03afe259fce3d3e6a85",
 =======
     "content-hash": "34c7c6db494892f2377a0938a482850a",
 >>>>>>> gestion_evenement
+=======
+    "content-hash": "70aa5e481608b03afe259fce3d3e6a85",
+>>>>>>> Consultation
     "packages": [
         {
             "name": "composer/semver",
@@ -1202,6 +1206,7 @@
         },
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
             "name": "dompdf/dompdf",
             "version": "v3.1.5",
@@ -1359,6 +1364,8 @@
         },
         {
 >>>>>>> gestion_evenement
+=======
+>>>>>>> Consultation
             "name": "egulias/email-validator",
             "version": "4.0.4",
             "source": {
@@ -1597,6 +1604,9 @@
         },
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> Consultation
             "name": "myclabs/deep-copy",
             "version": "1.13.4",
             "source": {
@@ -1833,8 +1843,11 @@
             "time": "2022-02-21T01:04:05+00:00"
         },
         {
+<<<<<<< HEAD
 =======
 >>>>>>> gestion_evenement
+=======
+>>>>>>> Consultation
             "name": "phpdocumentor/reflection-common",
             "version": "2.2.0",
             "source": {
@@ -2058,6 +2071,9 @@
         },
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> Consultation
             "name": "phpunit/php-code-coverage",
             "version": "11.0.12",
             "source": {
@@ -2515,8 +2531,11 @@
             "time": "2026-02-18T12:37:06+00:00"
         },
         {
+<<<<<<< HEAD
 =======
 >>>>>>> gestion_evenement
+=======
+>>>>>>> Consultation
             "name": "psr/cache",
             "version": "3.0.0",
             "source": {
@@ -2824,6 +2843,9 @@
         },
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> Consultation
             "name": "sebastian/cli-parser",
             "version": "3.0.2",
             "source": {
@@ -3019,6 +3041,7 @@
             },
             "suggest": {
                 "ext-bcmath": "For comparing BcMath\\Number objects"
+<<<<<<< HEAD
 =======
             "name": "sabberworm/php-css-parser",
             "version": "v9.3.0",
@@ -3054,11 +3077,16 @@
             "suggest": {
                 "ext-mbstring": "for parsing UTF-8 CSS"
 >>>>>>> gestion_evenement
+=======
+>>>>>>> Consultation
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> Consultation
                     "dev-main": "6.3-dev"
                 }
             },
@@ -3876,6 +3904,7 @@
                 "classmap": [
                     "lib/"
                 ]
+<<<<<<< HEAD
 =======
                     "dev-main": "9.4.x-dev"
                 }
@@ -3889,12 +3918,17 @@
                     "Sabberworm\\CSS\\": "src/"
                 }
 >>>>>>> gestion_evenement
+=======
+>>>>>>> Consultation
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> Consultation
             "description": "A static analysis tool to detect side effects in PHP code",
             "keywords": [
                 "static analysis"
@@ -3910,6 +3944,7 @@
                 }
             ],
             "time": "2024-10-20T05:08:20+00:00"
+<<<<<<< HEAD
 =======
             "authors": [
                 {
@@ -3937,6 +3972,8 @@
             },
             "time": "2026-03-03T17:31:43+00:00"
 >>>>>>> gestion_evenement
+=======
+>>>>>>> Consultation
         },
         {
             "name": "symfony/asset",
@@ -4096,6 +4133,9 @@
         },
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> Consultation
             "name": "symfony/browser-kit",
             "version": "v6.4.32",
             "source": {
@@ -4168,8 +4208,11 @@
             "time": "2026-01-13T10:09:10+00:00"
         },
         {
+<<<<<<< HEAD
 =======
 >>>>>>> gestion_evenement
+=======
+>>>>>>> Consultation
             "name": "symfony/cache",
             "version": "v6.4.36",
             "source": {
@@ -4602,6 +4645,9 @@
         },
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> Consultation
             "name": "symfony/css-selector",
             "version": "v6.4.34",
             "source": {
@@ -4749,8 +4795,11 @@
             "time": "2026-03-02T09:25:10+00:00"
         },
         {
+<<<<<<< HEAD
 =======
 >>>>>>> gestion_evenement
+=======
+>>>>>>> Consultation
             "name": "symfony/dependency-injection",
             "version": "v6.4.36",
             "source": {
@@ -5092,6 +5141,9 @@
         },
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> Consultation
             "name": "symfony/dom-crawler",
             "version": "v6.4.34",
             "source": {
@@ -5163,8 +5215,11 @@
             "time": "2026-02-16T20:44:03+00:00"
         },
         {
+<<<<<<< HEAD
 =======
 >>>>>>> gestion_evenement
+=======
+>>>>>>> Consultation
             "name": "symfony/dotenv",
             "version": "v6.4.36",
             "source": {
@@ -6562,6 +6617,9 @@
         },
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> Consultation
             "name": "symfony/maker-bundle",
             "version": "v1.67.0",
             "source": {
@@ -6661,8 +6719,11 @@
             "time": "2026-03-18T13:39:06+00:00"
         },
         {
+<<<<<<< HEAD
 =======
 >>>>>>> gestion_evenement
+=======
+>>>>>>> Consultation
             "name": "symfony/messenger",
             "version": "v6.4.36",
             "source": {
@@ -9860,6 +9921,9 @@
         },
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> Consultation
             "name": "symfony/web-profiler-bundle",
             "version": "v6.4.36",
             "source": {
@@ -9946,8 +10010,11 @@
             "time": "2026-03-17T09:05:06+00:00"
         },
         {
+<<<<<<< HEAD
 =======
 >>>>>>> gestion_evenement
+=======
+>>>>>>> Consultation
             "name": "symfony/yaml",
             "version": "v6.4.34",
             "source": {
@@ -10025,6 +10092,9 @@
         },
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> Consultation
             "name": "theseer/tokenizer",
             "version": "1.3.1",
             "source": {
@@ -10043,6 +10113,7 @@
                 "ext-tokenizer": "*",
                 "ext-xmlwriter": "*",
                 "php": "^7.2 || ^8.0"
+<<<<<<< HEAD
 =======
             "name": "tecnickcom/tcpdf",
             "version": "6.7.8",
@@ -10060,10 +10131,13 @@
             "require": {
                 "php": ">=5.5.0"
 >>>>>>> gestion_evenement
+=======
+>>>>>>> Consultation
             },
             "type": "library",
             "autoload": {
                 "classmap": [
+<<<<<<< HEAD
 <<<<<<< HEAD
                     "src/"
 =======
@@ -10084,11 +10158,17 @@
                     "include/barcodes/pdf417.php",
                     "include/barcodes/qrcode.php"
 >>>>>>> gestion_evenement
+=======
+                    "src/"
+>>>>>>> Consultation
                 ]
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> Consultation
                 "BSD-3-Clause"
             ],
             "authors": [
@@ -10110,6 +10190,7 @@
                 }
             ],
             "time": "2025-11-17T20:03:58+00:00"
+<<<<<<< HEAD
 =======
                 "LGPL-3.0-or-later"
             ],
@@ -10286,6 +10367,8 @@
             ],
             "time": "2026-02-04T18:08:13+00:00"
 >>>>>>> gestion_evenement
+=======
+>>>>>>> Consultation
         },
         {
             "name": "twig/extra-bundle",
@@ -10505,10 +10588,14 @@
         }
     ],
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> Consultation
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": [],
+<<<<<<< HEAD
 =======
     "packages-dev": [
         {
@@ -12772,6 +12859,8 @@
     "minimum-stability": "stable",
     "stability-flags": {},
 >>>>>>> gestion_evenement
+=======
+>>>>>>> Consultation
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
@@ -12780,9 +12869,13 @@
         "ext-iconv": "*"
     },
 <<<<<<< HEAD
+<<<<<<< HEAD
     "platform-dev": [],
 =======
     "platform-dev": {},
 >>>>>>> gestion_evenement
+=======
+    "platform-dev": [],
+>>>>>>> Consultation
     "plugin-api-version": "2.6.0"
 }

@@ -11,9 +11,12 @@
         "doctrine/doctrine-migrations-bundle": "^3.7",
         "doctrine/orm": "^3.6",
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
         "dompdf/dompdf": "^3.1",
 >>>>>>> gestion_evenement
+=======
+>>>>>>> Consultation
         "phpdocumentor/reflection-docblock": "^5.2",
         "phpstan/phpdoc-parser": "^2.3",
         "symfony/asset": "6.4.*",
@@ -46,9 +49,12 @@
         "symfony/web-link": "6.4.*",
         "symfony/yaml": "6.4.*",
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
         "tecnickcom/tcpdf": "*",
 >>>>>>> gestion_evenement
+=======
+>>>>>>> Consultation
         "twig/extra-bundle": "^2.12|^3.0",
         "twig/twig": "^2.12|^3.0"
     },
@@ -107,10 +113,14 @@
         "symfony/css-selector": "6.4.*",
         "symfony/debug-bundle": "6.4.*",
 <<<<<<< HEAD
+<<<<<<< HEAD
         "symfony/maker-bundle": "^1.0",
 =======
         "symfony/maker-bundle": "^1.67",
 >>>>>>> gestion_evenement
+=======
+        "symfony/maker-bundle": "^1.0",
+>>>>>>> Consultation
         "symfony/stopwatch": "6.4.*",
         "symfony/web-profiler-bundle": "6.4.*"
     }

@@ -1,44 +1,531 @@
 {% extends 'admin/base_admin.html.twig' %}
 
 {% block title %}Auticare — Thérapie{% endblock %}
+<<<<<<< HEAD
 
 {% block page_title %}Gestion de la Thérapie{% endblock %}
+=======
+{% block page_title %}Gestion des Thérapies{% endblock %}
+>>>>>>> Consultation
 
 {% block stylesheets %}
 {{ parent() }}
 <style>
+<<<<<<< HEAD
     .filter-input {
         width: 200px;
         font-size: .8rem;
         padding: 6px 12px;
     }
+=======
+/* ── Filter input ─────────────────────────────────────────────── */
+.filter-input { width: 200px; font-size: .8rem; padding: 6px 12px; }
+
+/* ── Toast notifications ───────────────────────────────── */
+#toast-container {
+    position: fixed; top: 24px; right: 24px;
+    z-index: 9999; display: flex; flex-direction: column; gap: 12px;
+    pointer-events: none;
+}
+.toast {
+    display: flex; align-items: flex-start; gap: 14px;
+    background: #fff; border-radius: 14px;
+    padding: 16px 20px 16px 16px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.14), 0 2px 8px rgba(0,0,0,.08);
+    min-width: 320px; max-width: 420px;
+    border-left: 4px solid transparent;
+    pointer-events: all;
+    animation: toastIn .35s cubic-bezier(.34,1.56,.64,1) forwards;
+    position: relative; overflow: hidden;
+}
+.toast.hiding { animation: toastOut .3s ease forwards; }
+.toast-success { border-left-color: #10b981; }
+.toast-error   { border-left-color: #ef4444; }
+.toast-warning { border-left-color: #f59e0b; }
+.toast-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+}
+.toast-success .toast-icon { background: #d1fae5; color: #059669; }
+.toast-error   .toast-icon { background: #fee2e2; color: #dc2626; }
+.toast-warning .toast-icon { background: #fef3c7; color: #d97706; }
+.toast-body { flex: 1; }
+.toast-title { font-weight: 700; font-size: .88rem; margin-bottom: 2px; color: #1e1b4b; }
+.toast-msg   { font-size: .8rem; color: #6b7280; line-height: 1.4; }
+.toast-close {
+    background: none; border: none; cursor: pointer;
+    color: #9ca3af; font-size: 14px; padding: 0; line-height: 1;
+    flex-shrink: 0; margin-top: 1px;
+}
+.toast-close:hover { color: #374151; }
+.toast-progress {
+    position: absolute; bottom: 0; left: 0; height: 3px;
+    background: currentColor; opacity: .25;
+    animation: toastProgress var(--dur, 4s) linear forwards;
+}
+.toast-success .toast-progress { color: #10b981; }
+.toast-error   .toast-progress { color: #ef4444; }
+.toast-warning .toast-progress { color: #f59e0b; }
+@keyframes toastIn {
+    from { opacity:0; transform: translateX(40px) scale(.94); }
+    to   { opacity:1; transform: translateX(0)    scale(1);   }
+}
+@keyframes toastOut {
+    from { opacity:1; transform: translateX(0)    scale(1);   }
+    to   { opacity:0; transform: translateX(40px) scale(.94); }
+}
+@keyframes toastProgress { from { width:100%; } to { width:0%; } }
+
+/* ── Modals overlay ──────────────────────────────────── */
+.modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(15,10,40,.55); z-index: 9000;
+    align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+}
+.modal-overlay.open { display: flex !important; }
+
+@keyframes modalIn {
+    from { opacity:0; transform: scale(.92) translateY(20px); }
+    to   { opacity:1; transform: scale(1)   translateY(0);    }
+}
+
+/* ── Confirm box ─────────────────────────────────────── */
+.confirm-box {
+    background: #fff; border-radius: 20px;
+    padding: 2rem; width: 100%; max-width: 400px;
+    box-shadow: 0 24px 64px rgba(0,0,0,.22);
+    animation: modalIn .3s cubic-bezier(.34,1.56,.64,1);
+    text-align: center;
+}
+.confirm-icon {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: #fee2e2; color: #dc2626;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; margin: 0 auto 1.2rem;
+}
+.confirm-title { font-size: 1.1rem; font-weight: 700; color: #1e1b4b; margin-bottom: .5rem; }
+.confirm-msg   { font-size: .875rem; color: #6b7280; margin-bottom: 1.5rem; line-height: 1.5; }
+.confirm-actions { display: flex; gap: 10px; justify-content: center; }
+.btn-confirm-cancel {
+    padding: 9px 22px; border-radius: 10px; border: 1.5px solid #e5e7eb;
+    background: #fff; color: #374151; font-weight: 600; font-size: .875rem;
+    cursor: pointer; transition: all .2s;
+}
+.btn-confirm-cancel:hover { background: #f9fafb; border-color: #d1d5db; }
+.btn-confirm-delete {
+    padding: 9px 22px; border-radius: 10px; border: none;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: #fff; font-weight: 600; font-size: .875rem;
+    cursor: pointer; transition: all .2s;
+    box-shadow: 0 4px 12px rgba(239,68,68,.35);
+}
+.btn-confirm-delete:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(239,68,68,.45); }
+
+/* ── Detail modal box ────────────────────────────────── */
+.detail-modal-box {
+    background: #fff; border-radius: 20px;
+    width: 100%; max-width: 780px;
+    max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 24px 64px rgba(0,0,0,.22);
+    animation: modalIn .3s cubic-bezier(.34,1.56,.64,1);
+}
+.detail-header {
+    background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+    padding: 1.6rem 2rem; color: #fff;
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem;
+    border-radius: 20px 20px 0 0;
+}
+.detail-badge {
+    display: inline-block; background: rgba(255,255,255,.2);
+    border: 1px solid rgba(255,255,255,.3);
+    border-radius: 50px; font-size: .75rem; font-weight: 600;
+    padding: 3px 12px; margin-bottom: .5rem;
+}
+.detail-title    { font-size: 1.3rem; font-weight: 800; margin: 0; }
+.detail-subtitle { font-size: .82rem; opacity: .8; margin-top: 4px; }
+.detail-close-btn {
+    background: rgba(255,255,255,.15); border: none; color: #fff;
+    width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
+    font-size: 14px; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: background .2s;
+}
+.detail-close-btn:hover { background: rgba(255,255,255,.3); }
+.detail-body { padding: 1.6rem 2rem; }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.2rem; }
+.detail-card { background: #f8f7ff; border-radius: 12px; padding: 12px 14px; border: 1px solid #ede9fe; }
+.detail-card-label {
+    font-size: .7rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .6px; color: #7c3aed; margin-bottom: 4px;
+    display: flex; align-items: center; gap: 5px;
+}
+.detail-card-value { font-size: .88rem; color: #1e1b4b; font-weight: 500; line-height: 1.4; }
+.detail-full { background: #f8f7ff; border-radius: 12px; padding: 12px 14px; border: 1px solid #ede9fe; margin-bottom: 12px; }
+.detail-full:last-child { margin-bottom: 0; }
+.detail-niveau-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 12px; border-radius: 50px; font-size: .75rem; font-weight: 700;
+}
+.pill-faible  { background: #d1fae5; color: #059669; }
+.pill-moyenne { background: #fef3c7; color: #d97706; }
+.pill-elevee  { background: #fee2e2; color: #dc2626; }
+.pill-unknown { background: #f3f4f6; color: #6b7280; }
+
+/* ── Nom cliquable ───────────────────────────────────── */
+.exercise-name-link {
+    cursor: pointer; color: #6d28d9; font-weight: 700;
+    border-bottom: 1.5px dashed #a78bfa;
+    transition: color .15s, border-color .15s;
+    display: inline-block;
+}
+.exercise-name-link:hover { color: #4c1d95; border-color: #6d28d9; }
+
+/* ── Form validation ─────────────────────────────────── */
+.form-control.is-valid, textarea.is-valid {
+    border-color: #10b981 !important;
+    box-shadow: 0 0 0 3px rgba(16,185,129,.12) !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%2310b981' d='M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center; background-size: 16px;
+    padding-right: 40px !important;
+}
+.form-control.is-invalid, textarea.is-invalid {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 3px rgba(239,68,68,.12) !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23ef4444' d='M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1Zm-.75 3.75a.75.75 0 0 1 1.5 0v3.5a.75.75 0 0 1-1.5 0v-3.5Zm.75 7a.875.875 0 1 1 0-1.75.875.875 0 0 1 0 1.75Z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center; background-size: 16px;
+    padding-right: 40px !important; animation: shake .35s ease;
+}
+textarea.is-valid, textarea.is-invalid { background-position: right 12px top 12px; }
+@keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%      { transform: translateX(-5px); }
+    40%      { transform: translateX(5px); }
+    60%      { transform: translateX(-4px); }
+    80%      { transform: translateX(4px); }
+}
+.field-error {
+    font-size: .75rem; color: #ef4444;
+    margin-top: 4px; display: flex; align-items: center; gap: 4px;
+    animation: fadeInDown .2s ease;
+}
+.field-error i { font-size: .7rem; }
+@keyframes fadeInDown {
+    from { opacity:0; transform: translateY(-4px); }
+    to   { opacity:1; transform: translateY(0); }
+}
+.req::after { content: ' *'; color: #ef4444; font-size: .8rem; }
+
+/* ── Niveau pills ────────────────────────────────────── */
+.niveau-group { display: flex; gap: 8px; flex-wrap: wrap; padding: 6px 0; }
+.niveau-pill {
+    cursor: pointer; user-select: none;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 16px; border-radius: 50px;
+    font-size: .8rem; font-weight: 600;
+    border: 2px solid transparent; transition: all .2s ease;
+}
+.niveau-pill[data-val="faible"]        { background: #f0fdf4; color: #16a34a; border-color: #bbf7d0; }
+.niveau-pill[data-val="faible"]:hover  { background: #dcfce7; border-color: #86efac; }
+.niveau-pill[data-val="faible"].active { background: #16a34a; color: #fff; border-color: #16a34a; box-shadow: 0 4px 12px rgba(22,163,74,.3); transform: translateY(-1px); }
+.niveau-pill[data-val="moyenne"]        { background: #fffbeb; color: #d97706; border-color: #fde68a; }
+.niveau-pill[data-val="moyenne"]:hover  { background: #fef3c7; border-color: #fcd34d; }
+.niveau-pill[data-val="moyenne"].active { background: #d97706; color: #fff; border-color: #d97706; box-shadow: 0 4px 12px rgba(217,119,6,.3); transform: translateY(-1px); }
+.niveau-pill[data-val="elevee"]        { background: #fff1f2; color: #e11d48; border-color: #fecdd3; }
+.niveau-pill[data-val="elevee"]:hover  { background: #ffe4e6; border-color: #fda4af; }
+.niveau-pill[data-val="elevee"].active { background: #e11d48; color: #fff; border-color: #e11d48; box-shadow: 0 4px 12px rgba(225,29,72,.3); transform: translateY(-1px); }
+
+.niveau-wrapper.is-invalid .niveau-group {
+    background: #fff5f5; border-radius: 12px;
+    outline: 2px solid #ef4444; padding: 8px; margin: -2px;
+    animation: shake .35s ease;
+}
+.niveau-wrapper.is-valid .niveau-group {
+    background: #f0fdf4; border-radius: 12px;
+    outline: 2px solid #10b981; padding: 8px; margin: -2px;
+}
+
+/* ── Niveau stat cards ───────────────────────────────── */
+.niveau-stat-card {
+    border-radius: 16px; overflow: hidden;
+    border: 1px solid #ede9fe;
+    box-shadow: 0 4px 16px rgba(0,0,0,.06);
+}
+.niveau-stat-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 18px; color: #fff;
+    font-size: .9rem; font-weight: 700;
+}
+.niveau-stat-header i { font-size: 1.1rem; }
+.niveau-stat-body { padding: 16px 18px; background: #fff; }
+.niveau-bar-row {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 12px;
+}
+.niveau-bar-label {
+    width: 72px; font-size: .75rem; font-weight: 600;
+    color: #374151; display: flex; align-items: center; gap: 6px;
+    flex-shrink: 0;
+}
+.dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.dot-green { background: #16a34a; }
+.dot-amber { background: #d97706; }
+.dot-rose  { background: #e11d48; }
+.niveau-bar-track {
+    flex: 1; height: 10px; background: #f3f4f6;
+    border-radius: 99px; overflow: hidden;
+}
+.niveau-bar-fill {
+    height: 100%; border-radius: 99px;
+    transition: width 1s cubic-bezier(.22,1,.36,1);
+    min-width: 4px;
+}
+.bar-faible  { background: linear-gradient(90deg, #16a34a, #4ade80); }
+.bar-moyenne { background: linear-gradient(90deg, #d97706, #fbbf24); }
+.bar-elevee  { background: linear-gradient(90deg, #e11d48, #fb7185); }
+.niveau-bar-count {
+    width: 24px; font-size: .8rem; font-weight: 700;
+    color: #1e1b4b; text-align: right; flex-shrink: 0;
+}
+
+/* ── Combinaisons ────────────────────────────────────── */
+.combi-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+.combi-table thead th {
+    background: #f5f3ff; color: #5b21b6;
+    font-size: .72rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .5px; padding: 10px 14px; border-bottom: 2px solid #ede9fe;
+}
+.combi-table tbody tr { transition: background .15s; }
+.combi-table tbody tr:hover { background: #faf5ff; }
+.combi-table tbody td {
+    padding: 10px 14px; font-size: .82rem; color: #374151;
+    border-bottom: 1px solid #f3f4f6; vertical-align: middle;
+}
+.combi-rank {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: .75rem; font-weight: 800; color: #fff;
+}
+.rank-1 { background: linear-gradient(135deg,#fbbf24,#d97706); }
+.rank-2 { background: linear-gradient(135deg,#94a3b8,#64748b); }
+.rank-3 { background: linear-gradient(135deg,#fb923c,#c2410c); }
+.rank-n { background: #e5e7eb; color: #6b7280; }
+
+.niveau-tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 50px;
+    font-size: .72rem; font-weight: 700;
+}
+.tag-faible  { background: #d1fae5; color: #059669; }
+.tag-moyenne { background: #fef3c7; color: #d97706; }
+.tag-elevee  { background: #fee2e2; color: #dc2626; }
+.tag-unknown { background: #f3f4f6; color: #9ca3af; }
+
+.combi-arrow { color: #c4b5fd; font-size: .65rem; margin: 0 2px; }
+
+.combi-count-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    background: #ede9fe; color: #5b21b6;
+    border-radius: 50px; font-size: .8rem; font-weight: 700;
+    padding: 2px 12px; min-width: 36px;
+}
+.combi-bar-mini {
+    height: 6px; border-radius: 99px;
+    background: linear-gradient(90deg,#a855f7,#7c3aed);
+    transition: width 1s cubic-bezier(.22,1,.36,1);
+    min-width: 4px;
+}
+.combi-exercices {
+    font-size: .72rem; color: #6b7280; line-height: 1.6;
+    max-height: 52px; overflow: hidden; position: relative;
+}
+.combi-exercices.expanded { max-height: none; }
+.combi-toggle {
+    background: none; border: none; color: #7c3aed;
+    font-size: .7rem; font-weight: 600; cursor: pointer;
+    padding: 0; margin-top: 2px;
+}
+.combi-toggle:hover { text-decoration: underline; }
+
+/* ── Filtres niveau pills ─────────────────────────────── */
+.filter-bar {
+    display: flex; align-items: center; gap: 10px;
+    flex-wrap: wrap; padding: 12px 20px;
+    background: #faf5ff; border-bottom: 1px solid #ede9fe;
+}
+.filter-bar-label {
+    font-size: .72rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .5px; color: #5b21b6; white-space: nowrap;
+    display: flex; align-items: center; gap: 6px;
+}
+.filter-group {
+    display: flex; align-items: center; gap: 5px;
+    background: #fff; border-radius: 50px;
+    padding: 4px 10px 4px 8px; border: 1.5px solid #ede9fe;
+}
+.filter-group-icon { font-size: .8rem; }
+.filter-pill {
+    cursor: pointer; font-size: .72rem; font-weight: 700;
+    padding: 4px 12px; border-radius: 50px;
+    border: 1.5px solid transparent;
+    transition: all .18s ease; white-space: nowrap;
+    background: none; color: #6b7280;
+}
+.filter-pill:hover { background: #f3f4f6; color: #374151; }
+.filter-pill.active-all     { background: #ede9fe; color: #5b21b6; border-color: #c4b5fd; }
+.filter-pill.active-faible  { background: #d1fae5; color: #059669; border-color: #6ee7b7; }
+.filter-pill.active-moyenne { background: #fef3c7; color: #d97706; border-color: #fcd34d; }
+.filter-pill.active-elevee  { background: #fee2e2; color: #dc2626; border-color: #fca5a5; }
+.filter-sep { width: 1px; height: 22px; background: #e5e7eb; flex-shrink: 0; }
+.filter-reset {
+    font-size: .72rem; font-weight: 600; color: #9ca3af;
+    cursor: pointer; background: none; border: none;
+    padding: 4px 10px; border-radius: 8px; transition: all .15s;
+    display: flex; align-items: center; gap: 5px;
+}
+.filter-reset:hover { color: #ef4444; background: #fee2e2; }
+
+/* ── Spinner ─────────────────────────────────────────── */
+.btn-purple .spinner {
+    width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,.4); border-top-color: #fff;
+    border-radius: 50%; animation: spin .6s linear infinite;
+    display: inline-block; vertical-align: middle; margin-right: 6px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+>>>>>>> Consultation
 </style>
 {% endblock %}
 
 {% block body %}
 
+<<<<<<< HEAD
 <div class="page-header">
     <h2><i class="fas fa-heartbeat me-2" style="color:var(--purple-500)"></i>Gestion de la Thérapie</h2>
     <p>Suivre les plans thérapeutiques et les thérapeutes</p>
 </div>
 
+=======
+{# ── Toast container ───────────────────────────────────────────── #}
+<div id="toast-container"></div>
+
+{# ── Confirm delete modal ──────────────────────────────────────── #}
+<div class="modal-overlay" id="confirmModal">
+    <div class="confirm-box">
+        <div class="confirm-icon"><i class="fas fa-trash-alt"></i></div>
+        <div class="confirm-title">Supprimer cet exercice ?</div>
+        <div class="confirm-msg">Cette action est <strong>irréversible</strong>. L'exercice thérapeutique sera définitivement supprimé de la base de données.</div>
+        <div class="confirm-actions">
+            <button class="btn-confirm-cancel" id="confirmCancel"><i class="fas fa-times me-1"></i>Annuler</button>
+            <button class="btn-confirm-delete" id="confirmOk"><i class="fas fa-trash me-1"></i>Supprimer</button>
+        </div>
+    </div>
+</div>
+
+{# ── Detail modal ──────────────────────────────────────────────── #}
+<div class="modal-overlay" id="detailsModal">
+    <div class="detail-modal-box">
+        <div class="detail-header">
+            <div style="flex:1">
+                <div class="detail-badge" id="d-type"></div>
+                <div class="detail-title" id="d-nom"></div>
+                <div class="detail-subtitle" id="d-subtitle"></div>
+            </div>
+            <button class="detail-close-btn" id="closeDetailsModalBtn"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div class="detail-body">
+            <div class="detail-grid">
+                <div class="detail-card">
+                    <div class="detail-card-label"><i class="fas fa-bullseye"></i> Cible</div>
+                    <div class="detail-card-value" id="d-cible"></div>
+                </div>
+                <div class="detail-card">
+                    <div class="detail-card-label"><i class="fas fa-clock"></i> Durée</div>
+                    <div class="detail-card-value" id="d-duree"></div>
+                </div>
+                <div class="detail-card">
+                    <div class="detail-card-label"><i class="fas fa-signal"></i> Niveau</div>
+                    <div class="detail-card-value" id="d-niveau"></div>
+                </div>
+                <div class="detail-card">
+                    <div class="detail-card-label"><i class="fas fa-users"></i> Interaction</div>
+                    <div class="detail-card-value" id="d-interaction"></div>
+                </div>
+                <div class="detail-card">
+                    <div class="detail-card-label"><i class="fas fa-brain"></i> Comportement</div>
+                    <div class="detail-card-value" id="d-comportement"></div>
+                </div>
+                <div class="detail-card">
+                    <div class="detail-card-label"><i class="fas fa-puzzle-piece"></i> Adaptation TSA</div>
+                    <div class="detail-card-value" id="d-adaptation"></div>
+                </div>
+            </div>
+            <div class="detail-full">
+                <div class="detail-card-label"><i class="fas fa-chart-bar"></i> Niveaux indicateurs</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:8px;">
+                    <div>
+                        <div style="font-size:.7rem;color:#6b7280;margin-bottom:4px;font-weight:600;">😊 Humeur</div>
+                        <div id="d-humeur"></div>
+                    </div>
+                    <div>
+                        <div style="font-size:.7rem;color:#6b7280;margin-bottom:4px;font-weight:600;">🎯 Attention</div>
+                        <div id="d-attention"></div>
+                    </div>
+                    <div>
+                        <div style="font-size:.7rem;color:#6b7280;margin-bottom:4px;font-weight:600;">⚡ Stress</div>
+                        <div id="d-stresse"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="detail-full">
+                <div class="detail-card-label"><i class="fas fa-flag"></i> Objectif thérapeutique</div>
+                <div class="detail-card-value mt-1" id="d-objectif"></div>
+            </div>
+            <div class="detail-full">
+                <div class="detail-card-label"><i class="fas fa-align-left"></i> Description</div>
+                <div class="detail-card-value mt-1" id="d-description"></div>
+            </div>
+            <div class="detail-full">
+                <div class="detail-card-label"><i class="fas fa-box-open"></i> Matériel nécessaire</div>
+                <div class="detail-card-value mt-1" id="d-materiel"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ── Stats cards ───────────────────────────────────────────────── #}
+<div class="page-header">
+    <h2><i class="fas fa-heartbeat me-2" style="color:var(--purple-500)"></i>Gestion des Thérapies</h2>
+    <p>Exercices et plans thérapeutiques pour enfants TSA</p>
+</div>
+>>>>>>> Consultation
 <div class="row g-3 mb-4">
     <div class="col-6 col-xl-3">
         <div class="stat-card">
             <div class="stat-top">
                 <div>
+<<<<<<< HEAD
                     <div class="stat-label">Thérapeutes</div>
                     <div class="stat-value">{{ therapists|default(24) }}</div>
                 </div>
                 <div class="stat-icon purple"><i class="fas fa-user-md"></i></div>
             </div>
             <div class="stat-change up"><i class="fas fa-arrow-up"></i> actifs</div>
+=======
+                    <div class="stat-label">Total exercices</div>
+                    <div class="stat-value">{{ totalTherapies|default(0) }}</div>
+                </div>
+                <div class="stat-icon purple"><i class="fas fa-dumbbell"></i></div>
+            </div>
+            <div class="stat-change up"><i class="fas fa-arrow-up"></i> dans la base</div>
+>>>>>>> Consultation
         </div>
     </div>
     <div class="col-6 col-xl-3">
         <div class="stat-card">
             <div class="stat-top">
                 <div>
+<<<<<<< HEAD
                     <div class="stat-label">Plans actifs</div>
                     <div class="stat-value">{{ activePlans|default(186) }}</div>
                 </div>
@@ -55,10 +542,17 @@
                     <div class="stat-value">{{ therapyTypes|default(4) }}</div>
                 </div>
                 <div class="stat-icon pink"><i class="fas fa-heartbeat"></i></div>
+=======
+                    <div class="stat-label">Types distincts</div>
+                    <div class="stat-value">{{ typesCount|default(0) }}</div>
+                </div>
+                <div class="stat-icon pink"><i class="fas fa-tags"></i></div>
+>>>>>>> Consultation
             </div>
             <div class="stat-change up"><i class="fas fa-arrow-up"></i> disponibles</div>
         </div>
     </div>
+<<<<<<< HEAD
     <div class="col-6 col-xl-3">
         <div class="stat-card">
             <div class="stat-top">
@@ -73,10 +567,16 @@
     </div>
 </div>
 
+=======
+</div>
+
+{# ── Formulaire + Chart ────────────────────────────────────────── #}
+>>>>>>> Consultation
 <div class="row g-3 mb-4">
     <div class="col-lg-8">
         <div class="card-box">
             <div class="card-box-header">
+<<<<<<< HEAD
                 <span class="card-box-title"><i class="fas fa-plus-circle"></i> Nouveau Plan Thérapeutique</span>
                 <span class="form-mode-badge" id="formMode">Mode : Ajout</span>
             </div>
@@ -127,6 +627,141 @@
                     <div class="col-12 d-flex gap-2">
                         <button class="btn-purple" id="savePlanBtn"><i class="fas fa-save"></i> Enregistrer</button>
                         <button class="btn-outline-purple" id="cancelPlanBtn"><i class="fas fa-times"></i> Annuler</button>
+=======
+                <span class="card-box-title"><i class="fas fa-plus-circle"></i> Nouvel Exercice Thérapeutique</span>
+                <span class="form-mode-badge" id="formMode">Mode : Ajout</span>
+            </div>
+            <div class="card-box-body">
+                <input type="hidden" id="editId">
+                <div class="row g-3" id="therapieForm">
+
+                    <div class="col-md-6">
+                        <label class="form-label req">Nom de l'exercice</label>
+                        <input type="text" class="form-control" id="nomExercice"
+                               placeholder="Ex: Jeu de rôle" data-rule="required|min:3|max:255">
+                        <div class="field-error d-none" id="err-nomExercice"></div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label req">Type d'exercice</label>
+                        <input type="text" class="form-control" id="typeExercice"
+                               placeholder="Ex: ABA, Orthophonie..." data-rule="required">
+                        <div class="field-error d-none" id="err-typeExercice"></div>
+                    </div>
+
+                    {# ── CIBLE : entier positif obligatoire ── #}
+                    <div class="col-md-6">
+                        <label class="form-label req">
+                            Cible <small style="color:#6b7280;font-weight:400;font-size:.75rem;">(nombre entier)</small>
+                        </label>
+                        <input type="number" class="form-control" id="cible"
+                               placeholder="Ex: 8" min="1" step="1"
+                               data-rule="required|integer|positive"
+                               oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                        <div class="field-error d-none" id="err-cible"></div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label req">Durée (min)</label>
+                        <input type="number" class="form-control" id="dureeMin"
+                               placeholder="30" min="1" data-rule="required|positive">
+                        <div class="field-error d-none" id="err-dureeMin"></div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label req">Niveau (1-5)</label>
+                        <input type="number" class="form-control" id="niveau"
+                               placeholder="1" min="1" max="5" data-rule="required|range:1:5">
+                        <div class="field-error d-none" id="err-niveau"></div>
+                    </div>
+
+                    {# ── Pills niveaux ── #}
+                    <div class="col-md-6">
+                        <label class="form-label req">Niveau Humeur</label>
+                        <input type="hidden" id="niveauxHumeur">
+                        <div class="niveau-wrapper" id="wrap-niveauxHumeur">
+                            <div class="niveau-group" data-target="niveauxHumeur">
+                                <span class="niveau-pill" data-val="faible"><i class="fas fa-arrow-down"></i> Faible</span>
+                                <span class="niveau-pill" data-val="moyenne"><i class="fas fa-minus"></i> Moyenne</span>
+                                <span class="niveau-pill" data-val="elevee"><i class="fas fa-arrow-up"></i> Élevée</span>
+                            </div>
+                        </div>
+                        <div class="field-error d-none" id="err-niveauxHumeur"></div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label req">Niveau Attention</label>
+                        <input type="hidden" id="niveauxAttention">
+                        <div class="niveau-wrapper" id="wrap-niveauxAttention">
+                            <div class="niveau-group" data-target="niveauxAttention">
+                                <span class="niveau-pill" data-val="faible"><i class="fas fa-arrow-down"></i> Faible</span>
+                                <span class="niveau-pill" data-val="moyenne"><i class="fas fa-minus"></i> Moyenne</span>
+                                <span class="niveau-pill" data-val="elevee"><i class="fas fa-arrow-up"></i> Élevée</span>
+                            </div>
+                        </div>
+                        <div class="field-error d-none" id="err-niveauxAttention"></div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label req">Niveau Stress</label>
+                        <input type="hidden" id="niveauxStresse">
+                        <div class="niveau-wrapper" id="wrap-niveauxStresse">
+                            <div class="niveau-group" data-target="niveauxStresse">
+                                <span class="niveau-pill" data-val="faible"><i class="fas fa-arrow-down"></i> Faible</span>
+                                <span class="niveau-pill" data-val="moyenne"><i class="fas fa-minus"></i> Moyenne</span>
+                                <span class="niveau-pill" data-val="elevee"><i class="fas fa-arrow-up"></i> Élevée</span>
+                            </div>
+                        </div>
+                        <div class="field-error d-none" id="err-niveauxStresse"></div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label req">Comportement</label>
+                        <input type="text" class="form-control" id="comportement" data-rule="required">
+                        <div class="field-error d-none" id="err-comportement"></div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label req">Interaction</label>
+                        <input type="text" class="form-control" id="interaction" data-rule="required">
+                        <div class="field-error d-none" id="err-interaction"></div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label req">Adaptation TSA</label>
+                        <input type="text" class="form-control" id="adaptationTsa" data-rule="required">
+                        <div class="field-error d-none" id="err-adaptationTsa"></div>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label req">Objectif</label>
+                        <textarea class="form-control" id="objectif" rows="2"
+                                  placeholder="Objectif thérapeutique..." data-rule="required"></textarea>
+                        <div class="field-error d-none" id="err-objectif"></div>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label req">Description</label>
+                        <textarea class="form-control" id="description" rows="2"
+                                  placeholder="Description détaillée..." data-rule="required"></textarea>
+                        <div class="field-error d-none" id="err-description"></div>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label req">Matériel</label>
+                        <textarea class="form-control" id="materiel" rows="1"
+                                  placeholder="Matériel nécessaire..." data-rule="required"></textarea>
+                        <div class="field-error d-none" id="err-materiel"></div>
+                    </div>
+
+                    <div class="col-12 d-flex gap-2">
+                        <button class="btn-purple" id="savePlanBtn">
+                            <i class="fas fa-save"></i> Enregistrer
+                        </button>
+                        <button class="btn-outline-purple" id="cancelPlanBtn">
+                            <i class="fas fa-times"></i> Annuler
+                        </button>
+>>>>>>> Consultation
                     </div>
                 </div>
             </div>
@@ -135,15 +770,23 @@
     <div class="col-lg-4">
         <div class="card-box h-100">
             <div class="card-box-header">
+<<<<<<< HEAD
                 <span class="card-box-title"><i class="fas fa-chart-pie"></i> Types de thérapie</span>
             </div>
             <div class="card-box-body">
                 <canvas id="therapieChart" height="240"></canvas>
+=======
+                <span class="card-box-title"><i class="fas fa-chart-pie"></i> Répartition par type</span>
+            </div>
+            <div class="card-box-body">
+                <canvas id="therapieChart" height="200"></canvas>
+>>>>>>> Consultation
             </div>
         </div>
     </div>
 </div>
 
+<<<<<<< HEAD
 <div class="card-box">
     <div class="card-box-header">
         <span class="card-box-title"><i class="fas fa-list"></i> Plans Thérapeutiques</span>
@@ -161,10 +804,229 @@
                         <th>Fréquence</th>
                         <th>Début</th>
                         <th>Progrès</th>
+=======
+{# ── Statistiques Niveaux ───────────────────────────────────────── #}
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <div class="card-box">
+            <div class="card-box-header">
+                <span class="card-box-title">
+                    <i class="fas fa-chart-bar"></i> Statistiques des niveaux par exercice
+                </span>
+                <span style="font-size:.75rem;color:#6b7280;">Humeur · Attention · Stress</span>
+            </div>
+            <div class="card-box-body">
+                <div class="row g-4">
+                    {# ── Humeur ── #}
+                    <div class="col-md-4">
+                        <div class="niveau-stat-card">
+                            <div class="niveau-stat-header" style="background:linear-gradient(135deg,#f472b6,#db2777);">
+                                <i class="fas fa-face-smile"></i>
+                                <span>Niveau Humeur</span>
+                            </div>
+                            <div class="niveau-stat-body">
+                                <div class="niveau-bar-row">
+                                    <div class="niveau-bar-label">
+                                        <span class="dot dot-green"></span> Faible
+                                    </div>
+                                    <div class="niveau-bar-track">
+                                        <div class="niveau-bar-fill bar-faible"
+                                             style="width:{{ totalTherapies > 0 ? ((humeurStats.faible / totalTherapies) * 100)|round ~ '%' : '0%' }}">
+                                        </div>
+                                    </div>
+                                    <span class="niveau-bar-count">{{ humeurStats.faible }}</span>
+                                </div>
+                                <div class="niveau-bar-row">
+                                    <div class="niveau-bar-label">
+                                        <span class="dot dot-amber"></span> Moyenne
+                                    </div>
+                                    <div class="niveau-bar-track">
+                                        <div class="niveau-bar-fill bar-moyenne"
+                                             style="width:{{ totalTherapies > 0 ? ((humeurStats.moyenne / totalTherapies) * 100)|round ~ '%' : '0%' }}">
+                                        </div>
+                                    </div>
+                                    <span class="niveau-bar-count">{{ humeurStats.moyenne }}</span>
+                                </div>
+                                <div class="niveau-bar-row">
+                                    <div class="niveau-bar-label">
+                                        <span class="dot dot-rose"></span> Élevée
+                                    </div>
+                                    <div class="niveau-bar-track">
+                                        <div class="niveau-bar-fill bar-elevee"
+                                             style="width:{{ totalTherapies > 0 ? ((humeurStats.elevee / totalTherapies) * 100)|round ~ '%' : '0%' }}">
+                                        </div>
+                                    </div>
+                                    <span class="niveau-bar-count">{{ humeurStats.elevee }}</span>
+                                </div>
+                                <canvas id="humeurChart" height="140" class="mt-3"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# ── Attention ── #}
+                    <div class="col-md-4">
+                        <div class="niveau-stat-card">
+                            <div class="niveau-stat-header" style="background:linear-gradient(135deg,#818cf8,#4f46e5);">
+                                <i class="fas fa-brain"></i>
+                                <span>Niveau Attention</span>
+                            </div>
+                            <div class="niveau-stat-body">
+                                <div class="niveau-bar-row">
+                                    <div class="niveau-bar-label">
+                                        <span class="dot dot-green"></span> Faible
+                                    </div>
+                                    <div class="niveau-bar-track">
+                                        <div class="niveau-bar-fill bar-faible"
+                                             style="width:{{ totalTherapies > 0 ? ((attentionStats.faible / totalTherapies) * 100)|round ~ '%' : '0%' }}">
+                                        </div>
+                                    </div>
+                                    <span class="niveau-bar-count">{{ attentionStats.faible }}</span>
+                                </div>
+                                <div class="niveau-bar-row">
+                                    <div class="niveau-bar-label">
+                                        <span class="dot dot-amber"></span> Moyenne
+                                    </div>
+                                    <div class="niveau-bar-track">
+                                        <div class="niveau-bar-fill bar-moyenne"
+                                             style="width:{{ totalTherapies > 0 ? ((attentionStats.moyenne / totalTherapies) * 100)|round ~ '%' : '0%' }}">
+                                        </div>
+                                    </div>
+                                    <span class="niveau-bar-count">{{ attentionStats.moyenne }}</span>
+                                </div>
+                                <div class="niveau-bar-row">
+                                    <div class="niveau-bar-label">
+                                        <span class="dot dot-rose"></span> Élevée
+                                    </div>
+                                    <div class="niveau-bar-track">
+                                        <div class="niveau-bar-fill bar-elevee"
+                                             style="width:{{ totalTherapies > 0 ? ((attentionStats.elevee / totalTherapies) * 100)|round ~ '%' : '0%' }}">
+                                        </div>
+                                    </div>
+                                    <span class="niveau-bar-count">{{ attentionStats.elevee }}</span>
+                                </div>
+                                <canvas id="attentionChart" height="140" class="mt-3"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# ── Stress ── #}
+                    <div class="col-md-4">
+                        <div class="niveau-stat-card">
+                            <div class="niveau-stat-header" style="background:linear-gradient(135deg,#2dd4bf,#0d9488);">
+                                <i class="fas fa-bolt"></i>
+                                <span>Niveau Stress</span>
+                            </div>
+                            <div class="niveau-stat-body">
+                                <div class="niveau-bar-row">
+                                    <div class="niveau-bar-label">
+                                        <span class="dot dot-green"></span> Faible
+                                    </div>
+                                    <div class="niveau-bar-track">
+                                        <div class="niveau-bar-fill bar-faible"
+                                             style="width:{{ totalTherapies > 0 ? ((stresseStats.faible / totalTherapies) * 100)|round ~ '%' : '0%' }}">
+                                        </div>
+                                    </div>
+                                    <span class="niveau-bar-count">{{ stresseStats.faible }}</span>
+                                </div>
+                                <div class="niveau-bar-row">
+                                    <div class="niveau-bar-label">
+                                        <span class="dot dot-amber"></span> Moyenne
+                                    </div>
+                                    <div class="niveau-bar-track">
+                                        <div class="niveau-bar-fill bar-moyenne"
+                                             style="width:{{ totalTherapies > 0 ? ((stresseStats.moyenne / totalTherapies) * 100)|round ~ '%' : '0%' }}">
+                                        </div>
+                                    </div>
+                                    <span class="niveau-bar-count">{{ stresseStats.moyenne }}</span>
+                                </div>
+                                <div class="niveau-bar-row">
+                                    <div class="niveau-bar-label">
+                                        <span class="dot dot-rose"></span> Élevée
+                                    </div>
+                                    <div class="niveau-bar-track">
+                                        <div class="niveau-bar-fill bar-elevee"
+                                             style="width:{{ totalTherapies > 0 ? ((stresseStats.elevee / totalTherapies) * 100)|round ~ '%' : '0%' }}">
+                                        </div>
+                                    </div>
+                                    <span class="niveau-bar-count">{{ stresseStats.elevee }}</span>
+                                </div>
+                                <canvas id="stresseChart" height="140" class="mt-3"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ── Table ─────────────────────────────────────────────────────── #}
+<div class="card-box">
+    <div class="card-box-header">
+        <span class="card-box-title">
+            <i class="fas fa-list"></i>
+            Liste des Exercices (<span id="visibleCount">{{ totalTherapies|default(0) }}</span>)
+        </span>
+        <input type="text" class="form-control filter-input" id="planFilterInput" placeholder="🔍 Rechercher...">
+    </div>
+
+    {# ── Barre de filtres par niveaux ── #}
+    <div class="filter-bar">
+        <span class="filter-bar-label"><i class="fas fa-sliders"></i> Filtrer par niveau :</span>
+
+        {# Humeur #}
+        <div class="filter-group">
+            <span class="filter-group-icon">😊</span>
+            <span class="filter-pill active-all" data-filter="humeur" data-val="">Tous</span>
+            <span class="filter-pill" data-filter="humeur" data-val="faible">↓ Faible</span>
+            <span class="filter-pill" data-filter="humeur" data-val="moyenne">— Moyenne</span>
+            <span class="filter-pill" data-filter="humeur" data-val="elevee">↑ Élevée</span>
+        </div>
+
+        <div class="filter-sep"></div>
+
+        {# Attention #}
+        <div class="filter-group">
+            <span class="filter-group-icon">🧠</span>
+            <span class="filter-pill active-all" data-filter="attention" data-val="">Tous</span>
+            <span class="filter-pill" data-filter="attention" data-val="faible">↓ Faible</span>
+            <span class="filter-pill" data-filter="attention" data-val="moyenne">— Moyenne</span>
+            <span class="filter-pill" data-filter="attention" data-val="elevee">↑ Élevée</span>
+        </div>
+
+        <div class="filter-sep"></div>
+
+        {# Stress #}
+        <div class="filter-group">
+            <span class="filter-group-icon">⚡</span>
+            <span class="filter-pill active-all" data-filter="stresse" data-val="">Tous</span>
+            <span class="filter-pill" data-filter="stresse" data-val="faible">↓ Faible</span>
+            <span class="filter-pill" data-filter="stresse" data-val="moyenne">— Moyenne</span>
+            <span class="filter-pill" data-filter="stresse" data-val="elevee">↑ Élevée</span>
+        </div>
+
+        <div class="filter-sep"></div>
+        <button class="filter-reset" id="resetFilters">
+            <i class="fas fa-rotate-left"></i> Réinitialiser
+        </button>
+    </div>
+
+    <div class="card-box-body p-0">
+        <table class="custom-table" id="therapieTable">
+                <thead>
+                    <tr>
+                        <th>Nom exercice</th>
+                        <th>Type</th>
+                        <th>Cible</th>
+                        <th>Durée</th>
+                        <th>Niveau</th>
+                        <th>Objectif</th>
+>>>>>>> Consultation
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
+<<<<<<< HEAD
                     {% for plan in therapyPlans|default([
                         {id:1, patient:'Adam Mejri', therapist:'Dr. Fatma Trabelsi', type:'Orthophonie', frequency:'2x/sem', startDate:'Jan 2024', progress:85, status:'active'},
                         {id:2, patient:'Sara Hamdi', therapist:'Dr. Amine Karray', type:'ABA', frequency:'3x/sem', startDate:'Fév 2024', progress:60, status:'pending'},
@@ -196,6 +1058,57 @@
                 </tbody>
             </table>
         </div>
+=======
+{% for t in therapies|default([]) %}
+                    <tr data-id="{{ t.id }}"
+                        data-nom="{{ t.nomExercice }}"
+                        data-type="{{ t.typeExercice }}"
+                        data-objectif="{{ t.objectif }}"
+                        data-description="{{ t.description }}"
+                        data-duree="{{ t.dureeMin }}"
+                        data-materiel="{{ t.materiel }}"
+                        data-adaptation="{{ t.adaptationTsa }}"
+                        data-cible="{{ t.cible }}"
+                        data-humeur="{{ t.niveauxHumeur }}"
+                        data-attention="{{ t.niveauxAttention }}"
+                        data-stresse="{{ t.niveauxStresse }}"
+                        data-comportement="{{ t.comportement }}"
+                        data-interaction="{{ t.interaction }}"
+                        data-niveau="{{ t.niveau }}">
+                        <td>
+                            <span class="exercise-name-link detail-trigger">
+                                <strong>{{ t.nomExercice }}</strong>
+                            </span>
+                        </td>
+                        <td><span class="badge-status badge-active">{{ t.typeExercice }}</span></td>
+                        <td>{{ t.cible }}</td>
+                        <td>{{ t.dureeMin }} min</td>
+                        <td>
+                            {% if t.niveau <= 1 %}
+                                <span class="badge-status badge-active">Niveau {{ t.niveau }}</span>
+                            {% elseif t.niveau <= 2 %}
+                                <span class="badge-status badge-pending">Niveau {{ t.niveau }}</span>
+                            {% else %}
+                                <span class="badge-status badge-inactive">Niveau {{ t.niveau }}</span>
+                            {% endif %}
+                        </td>
+                        <td title="{{ t.objectif }}">{{ t.objectif|length > 40 ? t.objectif|slice(0,40) ~ '…' : t.objectif }}</td>
+                        <td>
+                            <button class="btn-edit-soft me-1 edit-btn" data-id="{{ t.id }}">
+                                <i class="fas fa-edit"></i> Modifier
+                            </button>
+                            <button class="btn-danger-soft delete-btn" data-id="{{ t.id }}"
+                                data-token="{{ csrf_token('delete' ~ t.id) }}">
+                                <i class="fas fa-trash"></i> Supprimer
+                            </button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="7" class="text-center text-muted py-4">Aucun exercice trouvé.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+>>>>>>> Consultation
     </div>
 </div>
 
@@ -205,6 +1118,7 @@
 {{ parent() }}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
+<<<<<<< HEAD
 document.addEventListener('DOMContentLoaded', function() {
     const P = { p400: '#a855f7', pink: '#f472b6', indigo: '#818cf8', accent: '#e040fb' };
 
@@ -257,10 +1171,539 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.addEventListener('click', function() {
             if (confirm('Supprimer ce plan thérapeutique ?')) {
                 this.closest('tr').remove();
+=======
+document.addEventListener('DOMContentLoaded', function () {
+
+    const P = { p400:'#a855f7', pink:'#f472b6', indigo:'#818cf8', accent:'#e040fb',
+                teal:'#2dd4bf', amber:'#fbbf24', rose:'#fb7185', sky:'#38bdf8' };
+
+    /* ══════════════════════════════════════════════════════════════
+       TOAST
+    ══════════════════════════════════════════════════════════════ */
+    function showToast(type, title, msg, duration = 4000) {
+        const icons = { success:'fa-check', error:'fa-xmark', warning:'fa-triangle-exclamation' };
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.style.setProperty('--dur', duration + 'ms');
+        toast.innerHTML = `
+            <div class="toast-icon"><i class="fas ${icons[type]}"></i></div>
+            <div class="toast-body">
+                <div class="toast-title">${title}</div>
+                <div class="toast-msg">${msg}</div>
+            </div>
+            <button class="toast-close" onclick="this.closest('.toast').remove()"><i class="fas fa-xmark"></i></button>
+            <div class="toast-progress"></div>`;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.classList.add('hiding');
+            setTimeout(() => toast.remove(), 300);
+        }, duration);
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       CONFIRM MODAL
+    ══════════════════════════════════════════════════════════════ */
+    let _confirmResolve = null;
+    function showConfirm() {
+        return new Promise(resolve => {
+            _confirmResolve = resolve;
+            document.getElementById('confirmModal').classList.add('open');
+        });
+    }
+    document.getElementById('confirmCancel').addEventListener('click', () => {
+        document.getElementById('confirmModal').classList.remove('open');
+        if (_confirmResolve) _confirmResolve(false);
+    });
+    document.getElementById('confirmOk').addEventListener('click', () => {
+        document.getElementById('confirmModal').classList.remove('open');
+        if (_confirmResolve) _confirmResolve(true);
+    });
+    document.getElementById('confirmModal').addEventListener('click', function(e) {
+        if (e.target === this) { this.classList.remove('open'); if (_confirmResolve) _confirmResolve(false); }
+    });
+
+    /* ══════════════════════════════════════════════════════════════
+       DETAIL MODAL
+    ══════════════════════════════════════════════════════════════ */
+    function niveauPill(val) {
+        const map = { faible:['pill-faible','↓ Faible'], moyenne:['pill-moyenne','— Moyenne'], elevee:['pill-elevee','↑ Élevée'] };
+        const key = (val||'').toLowerCase().trim();
+        const [cls, label] = map[key] || ['pill-unknown', val||'—'];
+        return `<span class="detail-niveau-pill ${cls}">${label}</span>`;
+    }
+
+    function openDetail(d) {
+        const set  = (id, v) => { const el=document.getElementById(id); if(el) el.textContent = v||'—'; };
+        const setH = (id, h) => { const el=document.getElementById(id); if(el) el.innerHTML  = h; };
+        set('d-type',         d.type);
+        set('d-nom',          d.nom);
+        set('d-subtitle',     `Cible : ${d.cible||'—'} • ${d.duree||'—'} min • Niveau ${d.niveau||'—'}`);
+        set('d-cible',        d.cible);
+        set('d-duree',        d.duree ? d.duree+' minutes' : '—');
+        set('d-niveau',       d.niveau ? 'Niveau '+d.niveau : '—');
+        set('d-interaction',  d.interaction);
+        set('d-comportement', d.comportement);
+        set('d-adaptation',   d.adaptation);
+        set('d-objectif',     d.objectif);
+        set('d-description',  d.description);
+        set('d-materiel',     d.materiel);
+        setH('d-humeur',    niveauPill(d.humeur));
+        setH('d-attention', niveauPill(d.attention));
+        setH('d-stresse',   niveauPill(d.stresse));
+        document.getElementById('detailsModal').classList.add('open');
+    }
+
+    document.getElementById('closeDetailsModalBtn').addEventListener('click', () =>
+        document.getElementById('detailsModal').classList.remove('open'));
+    document.getElementById('detailsModal').addEventListener('click', function(e) {
+        if (e.target === this) this.classList.remove('open');
+    });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            document.getElementById('detailsModal').classList.remove('open');
+            document.getElementById('confirmModal').classList.remove('open');
+        }
+    });
+
+    // Délégation sur tbody — fonctionne avec Twig rendu côté serveur
+    document.querySelector('#therapieTable tbody').addEventListener('click', function(e) {
+        const trigger = e.target.closest('.detail-trigger');
+        if (!trigger) return;
+        const row = trigger.closest('tr');
+        if (row) openDetail(row.dataset);
+    });
+
+    /* ══════════════════════════════════════════════════════════════
+       RÈGLES DE VALIDATION
+       — integer : accepte uniquement les entiers positifs
+    ══════════════════════════════════════════════════════════════ */
+    const RULES = {
+        required: (v)        => v.trim() !== ''               || 'Ce champ est obligatoire',
+        min:      (v, n)     => v.trim().length >= +n         || `Minimum ${n} caractères requis`,
+        max:      (v, n)     => v.trim().length <= +n         || `Maximum ${n} caractères autorisés`,
+        positive: (v)        => +v > 0                        || 'La valeur doit être positive (> 0)',
+        range:    (v, mn,mx) => (+v >= +mn && +v <= +mx)      || `Valeur entre ${mn} et ${mx} requise`,
+        integer:  (v)        => /^\d+$/.test(v.trim())        || 'Veuillez saisir un nombre entier (sans virgule ni décimale)',
+    };
+
+    function validateField(el) {
+        const ruleStr = el.dataset.rule;
+        if (!ruleStr) return true;
+        const val   = el.value;
+        const errEl = document.getElementById('err-' + el.id);
+        let error   = null;
+        for (const part of ruleStr.split('|')) {
+            const [name, ...args] = part.split(':');
+            if (!RULES[name]) continue;
+            const result = RULES[name](val, ...args);
+            if (result !== true) { error = result; break; }
+        }
+        el.classList.toggle('is-invalid', !!error);
+        el.classList.toggle('is-valid',   !error && val.trim() !== '');
+        if (errEl) {
+            if (error) {
+                errEl.innerHTML = `<i class="fas fa-circle-exclamation"></i> ${error}`;
+                errEl.classList.remove('d-none');
+            } else {
+                errEl.classList.add('d-none');
+            }
+        }
+        return !error;
+    }
+
+    /* ── Validation des pills niveaux ── */
+    const niveauFields  = ['niveauxHumeur', 'niveauxAttention', 'niveauxStresse'];
+    const niveauLabels  = {
+        niveauxHumeur:    'Niveau Humeur',
+        niveauxAttention: 'Niveau Attention',
+        niveauxStresse:   'Niveau Stress',
+    };
+
+    function validateNiveau(id) {
+        const val   = document.getElementById(id)?.value || '';
+        const wrap  = document.getElementById('wrap-' + id);
+        const errEl = document.getElementById('err-' + id);
+        const ok    = val.trim() !== '';
+        wrap?.classList.toggle('is-invalid', !ok);
+        wrap?.classList.toggle('is-valid',    ok);
+        if (errEl) {
+            if (!ok) {
+                errEl.innerHTML = `<i class="fas fa-circle-exclamation"></i> Sélectionnez un niveau pour « ${niveauLabels[id]} »`;
+                errEl.classList.remove('d-none');
+            } else {
+                errEl.classList.add('d-none');
+            }
+        }
+        return ok;
+    }
+
+    /* ── validateAll : vérifie champs texte ET pills ── */
+    function validateAll() {
+        let allValid    = true;
+        let firstBad    = null;
+
+        document.querySelectorAll('#therapieForm [data-rule]').forEach(el => {
+            const ok = validateField(el);
+            if (!ok) { allValid = false; if (!firstBad) firstBad = el; }
+        });
+
+        niveauFields.forEach(id => {
+            const ok = validateNiveau(id);
+            if (!ok) { allValid = false; if (!firstBad) firstBad = document.getElementById('wrap-' + id); }
+        });
+
+        if (firstBad) {
+            firstBad.scrollIntoView({ behavior:'smooth', block:'center' });
+            if (typeof firstBad.focus === 'function') firstBad.focus();
+        }
+        return allValid;
+    }
+
+    // Live validation (champs texte)
+    document.querySelectorAll('#therapieForm [data-rule]').forEach(el => {
+        el.addEventListener('blur',  () => validateField(el));
+        el.addEventListener('input', () => { if (el.classList.contains('is-invalid')) validateField(el); });
+    });
+
+    /* ══════════════════════════════════════════════════════════════
+       PILLS — click
+    ══════════════════════════════════════════════════════════════ */
+    function setNiveauPill(targetId, val) {
+        const group = document.querySelector(`.niveau-group[data-target="${targetId}"]`);
+        if (!group) return;
+        group.querySelectorAll('.niveau-pill').forEach(p =>
+            p.classList.toggle('active', p.dataset.val === val));
+        const hidden = document.getElementById(targetId);
+        if (hidden) hidden.value = val || '';
+        // Valide immédiatement si une valeur est choisie
+        if (val) validateNiveau(targetId);
+    }
+
+    document.querySelectorAll('.niveau-group .niveau-pill').forEach(pill => {
+        pill.addEventListener('click', function() {
+            const targetId = this.closest('.niveau-group').dataset.target;
+            const already  = this.classList.contains('active');
+            setNiveauPill(targetId, already ? '' : this.dataset.val);
+        });
+    });
+
+    /* ══════════════════════════════════════════════════════════════
+       CHART
+    ══════════════════════════════════════════════════════════════ */
+    const labels = {{ chartLabels|default([])|json_encode|raw }};
+    const values = {{ chartValues|default([])|json_encode|raw }};
+    const colors = [P.p400, P.pink, P.indigo, P.accent, P.teal, P.amber, P.rose, P.sky];
+    // ── Graphique types d'exercice ─────────────────────────
+    new Chart(document.getElementById('therapieChart').getContext('2d'), {
+        type: 'doughnut',
+        data: { labels, datasets: [{ data:values, backgroundColor:colors.slice(0,labels.length), borderWidth:0, hoverOffset:8 }] },
+        options: { plugins: { legend:{ position:'bottom', labels:{ usePointStyle:true, font:{family:'DM Sans',size:11} } } }, cutout:'60%', responsive:true }
+    });
+
+    // ── Graphiques niveaux ──────────────────────────────────
+    const niveauChartLabels = ['Faible', 'Moyenne', 'Élevée'];
+    const niveauColors = {
+        bg:     ['rgba(22,163,74,.15)',  'rgba(217,119,6,.15)',  'rgba(225,29,72,.15)'],
+        border: ['#16a34a',              '#d97706',              '#e11d48'],
+        hover:  ['rgba(22,163,74,.3)',   'rgba(217,119,6,.3)',   'rgba(225,29,72,.3)'],
+    };
+
+    function makeNiveauChart(canvasId, data) {
+        const ctx = document.getElementById(canvasId);
+        if (!ctx) return;
+        new Chart(ctx.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: niveauChartLabels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: niveauColors.bg,
+                    borderColor:     niveauColors.border,
+                    borderWidth: 2,
+                    hoverBackgroundColor: niveauColors.hover,
+                    hoverOffset: 6,
+                }]
+            },
+            options: {
+                cutout: '65%',
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => {
+                                const total = ctx.dataset.data.reduce((a,b)=>a+b,0);
+                                const pct   = total > 0 ? Math.round(ctx.parsed/total*100) : 0;
+                                return ` ${ctx.label} : ${ctx.parsed} exercice(s) (${pct}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    makeNiveauChart('humeurChart',    [{{ humeurStats.faible|default(0) }}, {{ humeurStats.moyenne|default(0) }}, {{ humeurStats.elevee|default(0) }}]);
+    makeNiveauChart('attentionChart', [{{ attentionStats.faible|default(0) }}, {{ attentionStats.moyenne|default(0) }}, {{ attentionStats.elevee|default(0) }}]);
+    makeNiveauChart('stresseChart',   [{{ stresseStats.faible|default(0) }}, {{ stresseStats.moyenne|default(0) }}, {{ stresseStats.elevee|default(0) }}]);
+
+    // ── Donuts des combinaisons ──────────────────────────────────────
+    {% if combinaisons is defined and combinaisons|length > 0 %}
+    {% for combi in combinaisons %}
+    (function(){
+        var ctx = document.getElementById('combiChart{{ loop.index }}');
+        if (!ctx) return;
+        // Couleurs selon le niveau de chaque indicateur
+        var colH = '{{ combi.humeur    == "faible" ? "#bbf7d0" : (combi.humeur    == "moyenne" ? "#fde68a" : "#fecdd3") }}';
+        var colA = '{{ combi.attention == "faible" ? "#bbf7d0" : (combi.attention == "moyenne" ? "#fde68a" : "#fecdd3") }}';
+        var colS = '{{ combi.stress    == "faible" ? "#bbf7d0" : (combi.stress    == "moyenne" ? "#fde68a" : "#fecdd3") }}';
+        var brdH = '{{ combi.humeur    == "faible" ? "#16a34a" : (combi.humeur    == "moyenne" ? "#d97706" : "#e11d48") }}';
+        var brdA = '{{ combi.attention == "faible" ? "#16a34a" : (combi.attention == "moyenne" ? "#d97706" : "#e11d48") }}';
+        var brdS = '{{ combi.stress    == "faible" ? "#16a34a" : (combi.stress    == "moyenne" ? "#d97706" : "#e11d48") }}';
+        new Chart(ctx.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['😊 Humeur', '🧠 Attention', '⚡ Stress'],
+                datasets: [{
+                    data: [{{ combi.count }}, {{ combi.count }}, {{ combi.count }}],
+                    backgroundColor: [colH, colA, colS],
+                    borderColor:     [brdH, brdA, brdS],
+                    borderWidth: 2, hoverOffset: 5
+                }]
+            },
+            options: {
+                cutout: '62%', responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(c) {
+                                var labels = ['Humeur', 'Attention', 'Stress'];
+                                var vals   = ['{{ combi.humeur }}','{{ combi.attention }}','{{ combi.stress }}'];
+                                var map    = {faible:'↓ Faible', moyenne:'— Moyenne', elevee:'↑ Élevée'};
+                                return ' ' + labels[c.dataIndex] + ' : ' + (map[vals[c.dataIndex]] || vals[c.dataIndex]);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    })();
+    {% endfor %}
+    {% endif %}
+
+    /* ══════════════════════════════════════════════════════════════
+       FILTRES NIVEAUX + RECHERCHE TEXTE
+    ══════════════════════════════════════════════════════════════ */
+    const activeFilters = { humeur: '', attention: '', stresse: '' };
+
+    function applyFilters() {
+        const search = (document.getElementById('planFilterInput').value || '').toLowerCase();
+        let visible = 0;
+
+        document.querySelectorAll('#therapieTable tbody tr:not(.no-result-row)').forEach(row => {
+            const d = row.dataset;
+            const matchSearch  = !search || row.textContent.toLowerCase().includes(search);
+            const matchHumeur  = !activeFilters.humeur    || (d.humeur    || '').toLowerCase() === activeFilters.humeur;
+            const matchAttn    = !activeFilters.attention || (d.attention || '').toLowerCase() === activeFilters.attention;
+            const matchStresse = !activeFilters.stresse   || (d.stresse   || '').toLowerCase() === activeFilters.stresse;
+
+            const show = matchSearch && matchHumeur && matchAttn && matchStresse;
+            row.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+
+        const counter = document.getElementById('visibleCount');
+        if (counter) counter.textContent = visible;
+
+        let noRow = document.querySelector('#therapieTable tbody .no-result-row');
+        if (visible === 0) {
+            if (!noRow) {
+                noRow = document.createElement('tr');
+                noRow.className = 'no-result-row';
+                noRow.innerHTML = `<td colspan="7" style="text-align:center;padding:2.5rem 1rem;color:#9ca3af;font-size:.85rem;">
+                    <i class="fas fa-filter-circle-xmark" style="font-size:1.6rem;color:#c4b5fd;display:block;margin-bottom:10px;"></i>
+                    Aucun exercice ne correspond aux filtres sélectionnés.<br>
+                    <button onclick="document.getElementById('resetFilters').click()"
+                        style="margin-top:10px;background:none;border:1.5px solid #c4b5fd;color:#7c3aed;
+                               border-radius:8px;padding:5px 16px;font-size:.75rem;cursor:pointer;font-weight:600;">
+                        <i class="fas fa-rotate-left"></i> Réinitialiser
+                    </button>
+                </td>`;
+                document.querySelector('#therapieTable tbody').appendChild(noRow);
+            }
+            noRow.style.display = '';
+        } else if (noRow) {
+            noRow.style.display = 'none';
+        }
+    }
+
+    // Clic sur les pills de filtre
+    document.querySelectorAll('.filter-pill').forEach(pill => {
+        pill.addEventListener('click', function() {
+            const filterKey = this.dataset.filter;
+            const val       = this.dataset.val;
+            document.querySelectorAll(`.filter-pill[data-filter="${filterKey}"]`).forEach(p =>
+                p.classList.remove('active-all','active-faible','active-moyenne','active-elevee'));
+            this.classList.add(val === '' ? 'active-all' : 'active-' + val);
+            activeFilters[filterKey] = val;
+            applyFilters();
+        });
+    });
+
+    // Recherche texte
+    document.getElementById('planFilterInput')?.addEventListener('input', () => applyFilters());
+
+    // Réinitialiser
+    document.getElementById('resetFilters')?.addEventListener('click', () => {
+        activeFilters.humeur = activeFilters.attention = activeFilters.stresse = '';
+        document.getElementById('planFilterInput').value = '';
+        document.querySelectorAll('.filter-pill').forEach(p =>
+            p.classList.remove('active-all','active-faible','active-moyenne','active-elevee'));
+        document.querySelectorAll('.filter-pill[data-val=""]').forEach(p =>
+            p.classList.add('active-all'));
+        applyFilters();
+    });
+
+    /* ══════════════════════════════════════════════════════════════
+       RESET
+    ══════════════════════════════════════════════════════════════ */
+    function resetForm() {
+        ['editId','nomExercice','typeExercice','objectif','description','dureeMin',
+         'materiel','adaptationTsa','cible','comportement','interaction','niveau'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) { el.value = ''; el.classList.remove('is-valid','is-invalid'); }
+        });
+        niveauFields.forEach(id => {
+            setNiveauPill(id, '');
+            document.getElementById('wrap-'+id)?.classList.remove('is-valid','is-invalid');
+            document.getElementById('err-'+id)?.classList.add('d-none');
+        });
+        document.querySelectorAll('.field-error').forEach(e => e.classList.add('d-none'));
+        document.getElementById('formMode').textContent = 'Mode : Ajout';
+    }
+    document.getElementById('cancelPlanBtn')?.addEventListener('click', resetForm);
+
+    /* ══════════════════════════════════════════════════════════════
+       EDIT — charge les données dans le formulaire
+       Les pills sont chargées via setNiveauPill → si la valeur
+       existe en BDD, le niveau est marqué valide immédiatement.
+       Si le champ BDD est vide (donnée manquante), il restera
+       invalide et bloquera la sauvegarde.
+    ══════════════════════════════════════════════════════════════ */
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const d = this.closest('tr').dataset;
+            document.getElementById('editId').value         = d.id;
+            document.getElementById('nomExercice').value    = d.nom;
+            document.getElementById('typeExercice').value   = d.type;
+            document.getElementById('objectif').value       = d.objectif;
+            document.getElementById('description').value    = d.description;
+            document.getElementById('dureeMin').value       = d.duree;
+            document.getElementById('materiel').value       = d.materiel;
+            document.getElementById('adaptationTsa').value  = d.adaptation;
+            document.getElementById('cible').value          = d.cible;
+            document.getElementById('comportement').value   = d.comportement;
+            document.getElementById('interaction').value    = d.interaction;
+            document.getElementById('niveau').value         = d.niveau;
+            document.getElementById('formMode').textContent = 'Mode : Modification';
+
+            // Charge les pills — déclenche validateNiveau si valeur non vide
+            setNiveauPill('niveauxHumeur',    d.humeur);
+            setNiveauPill('niveauxAttention', d.attention);
+            setNiveauPill('niveauxStresse',   d.stresse);
+
+            // Marque les champs texte remplis comme valides
+            document.querySelectorAll('#therapieForm [data-rule]').forEach(el => {
+                if (el.value.trim() !== '') {
+                    el.classList.remove('is-invalid');
+                    el.classList.add('is-valid');
+                }
+            });
+            document.getElementById('nomExercice').scrollIntoView({ behavior:'smooth' });
+        });
+    });
+
+    /* ══════════════════════════════════════════════════════════════
+       SAVE — validateAll() bloque si un niveau est vide
+    ══════════════════════════════════════════════════════════════ */
+    document.getElementById('savePlanBtn')?.addEventListener('click', async function() {
+        if (!validateAll()) {
+            showToast('warning', 'Formulaire incomplet',
+                'Corrigez les champs en rouge. Les niveaux Humeur, Attention et Stress sont obligatoires.');
+            return;
+        }
+
+        const btn = this;
+        const ori = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner"></span> Enregistrement...`;
+
+        const editId = document.getElementById('editId').value;
+        const url    = editId ? `/admin/therapie/${editId}/edit` : `/admin/therapie/new`;
+        const body   = {
+            nomExercice:      document.getElementById('nomExercice').value,
+            typeExercice:     document.getElementById('typeExercice').value,
+            objectif:         document.getElementById('objectif').value,
+            description:      document.getElementById('description').value,
+            dureeMin:         document.getElementById('dureeMin').value,
+            materiel:         document.getElementById('materiel').value,
+            adaptationTsa:    document.getElementById('adaptationTsa').value,
+            cible:            document.getElementById('cible').value,
+            niveauxHumeur:    document.getElementById('niveauxHumeur').value,
+            niveauxAttention: document.getElementById('niveauxAttention').value,
+            niveauxStresse:   document.getElementById('niveauxStresse').value,
+            comportement:     document.getElementById('comportement').value,
+            interaction:      document.getElementById('interaction').value,
+            niveau:           document.getElementById('niveau').value,
+        };
+
+        try {
+            const res  = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+            const data = await res.json();
+            if (data.success) {
+                showToast('success', editId ? 'Modification réussie' : 'Création réussie', data.message, 4000);
+                setTimeout(() => location.reload(), 1200);
+            } else {
+                showToast('error', 'Erreur serveur', data.message, 5000);
+                btn.disabled = false; btn.innerHTML = ori;
+            }
+        } catch {
+            showToast('error', 'Erreur réseau', 'Impossible de contacter le serveur.', 5000);
+            btn.disabled = false; btn.innerHTML = ori;
+        }
+    });
+
+    /* ══════════════════════════════════════════════════════════════
+       DELETE
+    ══════════════════════════════════════════════════════════════ */
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const confirmed = await showConfirm();
+            if (!confirmed) return;
+            const id = this.dataset.id, token = this.dataset.token;
+            const form = new FormData(); form.append('_token', token);
+            try {
+                const res  = await fetch(`/admin/therapie/${id}/delete`, { method:'POST', body:form });
+                const data = await res.json();
+                if (data.success) {
+                    this.closest('tr').style.animation = 'toastOut .3s ease forwards';
+                    setTimeout(() => this.closest('tr').remove(), 300);
+                    showToast('success', 'Supprimé', data.message, 3500);
+                } else {
+                    showToast('error', 'Erreur', data.message, 5000);
+                }
+            } catch {
+                showToast('error', 'Erreur réseau', 'La suppression a échoué.', 5000);
+>>>>>>> Consultation
             }
         });
     });
 
+<<<<<<< HEAD
     // Cancel button
     document.getElementById('cancelPlanBtn')?.addEventListener('click', function() {
         document.getElementById('formMode').textContent = 'Mode : Ajout';
@@ -293,3 +1736,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 {% endblock %}
+=======
+});
+</script>
+{% endblock %}
+>>>>>>> Consultation
