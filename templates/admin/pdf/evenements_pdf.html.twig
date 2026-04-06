@@ -1,301 +1,376 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>AutiCare - Événements</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Helvetica', 'Arial', sans-serif;
-            background: white;
-            padding: 20px;
-            font-size: 11px;
-            line-height: 1.4;
-            color: #1f2937;
-        }
-        
-        /* ========== EN-TÊTE ========== */
-        .header {
-            text-align: center;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 3px solid #a855f7;
-        }
-        
-        .header h1 {
-            color: #a855f7;
-            font-size: 26px;
-            margin-bottom: 5px;
-            letter-spacing: 1px;
-        }
-        
-        .header h2 {
-            color: #6b7280;
-            font-size: 14px;
-            font-weight: normal;
-            margin-bottom: 8px;
-        }
-        
-        .header .date {
-            color: #9ca3af;
-            font-size: 9px;
-        }
-        
-        /* ========== STATISTIQUES ========== */
-        .stats-grid {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-        
-        .stat-card {
-            flex: 1;
-            padding: 15px;
-            border-radius: 12px;
-            text-align: center;
-        }
-        
-        .stat-card.purple { background: #f0e4ff; }
-        .stat-card.green { background: #e0f5e8; }
-        .stat-card.pink { background: #fce4ec; }
-        .stat-card.blue { background: #e0e7ff; }
-        
-        .stat-value {
-            font-size: 24px;
-            font-weight: bold;
-        }
-        
-        .stat-label {
-            font-size: 10px;
-            color: #6b7280;
-            margin-top: 5px;
-        }
-        
-        .purple .stat-value { color: #a855f7; }
-        .green .stat-value { color: #10b981; }
-        .pink .stat-value { color: #f472b6; }
-        .blue .stat-value { color: #818cf8; }
-        
-        /* ========== FILTRES ========== */
-        .filters {
-            background: #f3e8ff;
-            padding: 10px 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 9px;
-            color: #4b5563;
-        }
-        
-        .filters strong {
-            color: #a855f7;
-        }
-        
-        /* ========== TABLEAU ========== */
-        .section-title {
-            color: #a855f7;
-            font-size: 14px;
-            font-weight: bold;
-            margin: 20px 0 12px 0;
-            padding-bottom: 5px;
-            border-bottom: 2px solid #e5e7eb;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        
-        th {
-            background: #fce4ec;
-            padding: 10px 8px;
-            text-align: left;
-            font-weight: bold;
-            font-size: 10px;
-            border-bottom: 2px solid #e8a0c4;
-        }
-        
-        td {
-            padding: 8px;
-            border-bottom: 1px solid #e5e7eb;
-            vertical-align: top;
-        }
-        
-        .event-title {
-            font-weight: bold;
-            font-size: 11px;
-            color: #1f2937;
-        }
-        
-        .event-desc {
-            font-size: 9px;
-            color: #6b7280;
-            margin-top: 3px;
-        }
-        
-        /* ========== BADGES ========== */
-        .badge {
-            padding: 3px 8px;
-            border-radius: 20px;
-            font-size: 9px;
-            display: inline-block;
-        }
-        
-        .badge-planifie { background: #fff5e0; color: #b45309; }
-        .badge-ouvert { background: #e0f5e8; color: #2d6a4f; }
-        .badge-complet { background: #fce4ec; color: #c92a2a; }
-        .badge-annule { background: #fee2e2; color: #dc2626; }
-        
-        .sponsor-badge {
-            background: #e0fff0;
-            padding: 3px 8px;
-            border-radius: 20px;
-            font-size: 9px;
-            display: inline-block;
-            color: #1a7f5c;
-        }
-        
-        /* ========== PIED DE PAGE ========== */
-        .footer {
-            text-align: center;
-            margin-top: 25px;
-            padding-top: 12px;
-            border-top: 1px solid #e5e7eb;
-            color: #9ca3af;
-            font-size: 8px;
-        }
-        
-        /* ========== ALTERNANCE LIGNES ========== */
-        .table-row-even {
-            background-color: #faf9fe;
-        }
-        
-        .text-center {
-            text-align: center;
-        }
-        
-        .text-muted {
-            color: #9ca3af;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>AutiCare — Événements</title>
+<style>
+    body {
+        font-family: helvetica, arial, sans-serif;
+        font-size: 11px;
+        color: #1a0540;
+        background: #ffffff;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* ── HERO HEADER ── */
+    .hero-table { width: 100%; border-collapse: collapse; }
+    .hero-bg { background-color: #2d1060; }
+    .hero-left-cell { padding: 28px 24px 28px 32px; width: 60%; vertical-align: middle; }
+    .hero-right-cell { padding: 28px 32px 28px 24px; width: 40%; vertical-align: middle; text-align: right; }
+
+    .brand-name {
+        font-size: 34px;
+        font-weight: bold;
+        color: #ffffff;
+        letter-spacing: -1px;
+        line-height: 1;
+        margin: 0;
+    }
+
+    .brand-puzzle {
+        display: inline-block;
+        font-size: 30px;
+        margin-right: 8px;
+        vertical-align: middle;
+    }
+
+    .brand-tagline {
+        font-size: 8px;
+        color: #c084fc;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        margin-top: 7px;
+    }
+
+    .export-label {
+        font-size: 7.5px;
+        color: #9d7ee0;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 5px;
+    }
+
+    .export-date {
+        font-size: 10.5px;
+        color: #e2d9f3;
+        font-weight: normal;
+    }
+
+    /* ── ACCENT STRIPE ── */
+    .stripe-table { width: 100%; border-collapse: collapse; }
+    .stripe-purple { background-color: #7c3aed; height: 5px; }
+    .stripe-teal   { background-color: #0d9e75; height: 5px; }
+    .stripe-rose   { background-color: #e0427c; height: 5px; }
+    .stripe-amber  { background-color: #d97706; height: 5px; }
+
+    /* ── STATS ROW ── */
+    .stats-table { width: 100%; border-collapse: collapse; margin: 0; }
+    .stat-cell { width: 25%; padding: 22px 20px 18px; text-align: left; vertical-align: top; }
+    .stat-cell-purple { background-color: #f5f0ff; border-right: 1px solid #ede9fe; border-bottom: 2px solid #ede9fe; }
+    .stat-cell-teal   { background-color: #f0fdf9; border-right: 1px solid #d1fae5; border-bottom: 2px solid #d1fae5; }
+    .stat-cell-rose   { background-color: #fff0f5; border-right: 1px solid #fce7f3; border-bottom: 2px solid #fce7f3; }
+    .stat-cell-amber  { background-color: #fffbeb; border-bottom: 2px solid #fef3c7; }
+
+    .stat-num { font-size: 42px; font-weight: bold; line-height: 1; margin-bottom: 5px; }
+    .stat-num-purple { color: #6d28d9; }
+    .stat-num-teal   { color: #0f766e; }
+    .stat-num-rose   { color: #be185d; }
+    .stat-num-amber  { color: #b45309; }
+
+    .stat-label { font-size: 8px; font-weight: bold; letter-spacing: 1.5px; text-transform: uppercase; }
+    .stat-label-purple { color: #7c3aed; }
+    .stat-label-teal   { color: #0d9488; }
+    .stat-label-rose   { color: #be185d; }
+    .stat-label-amber  { color: #b45309; }
+
+    /* ── BODY AREA ── */
+    .body-wrap { padding: 28px 32px 40px; background: #ffffff; }
+
+    /* ── FILTER BAR ── */
+    .filter-wrap {
+        background-color: #faf5ff;
+        border: 1px solid #e9d5ff;
+        border-left: 4px solid #7c3aed;
+        padding: 10px 16px;
+        margin-bottom: 26px;
+    }
+    .filter-title {
+        font-size: 7.5px; font-weight: bold;
+        color: #7c3aed; letter-spacing: 2px;
+        text-transform: uppercase; margin-bottom: 6px;
+    }
+    .filter-pills { font-size: 0; }
+    .fpill {
+        display: inline-block;
+        background-color: #ffffff;
+        border: 1px solid #ddd6fe;
+        padding: 3px 10px;
+        margin-right: 6px; margin-top: 2px;
+        font-size: 9px; font-weight: bold; color: #5b21b6;
+    }
+
+    /* ── SECTION HEADING ── */
+    .sec-head-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+    .sec-head-icon-cell { width: 36px; vertical-align: middle; padding-right: 10px; }
+    .sec-head-icon {
+        width: 34px; height: 34px;
+        background-color: #7c3aed;
+        text-align: center;
+        vertical-align: middle;
+        font-size: 16px;
+        line-height: 34px;
+        display: block;
+    }
+    .sec-head-title-cell { vertical-align: middle; }
+    .sec-head-title { font-size: 17px; font-weight: bold; color: #2d1060; }
+    .sec-head-badge-cell { vertical-align: middle; text-align: right; width: 110px; }
+    .sec-badge {
+        display: inline-block;
+        background-color: #7c3aed;
+        color: #ffffff;
+        padding: 4px 14px;
+        font-size: 9px; font-weight: bold;
+        letter-spacing: .5px;
+    }
+
+    /* ── TABLE ── */
+    .events-table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid #ede9fe;
+    }
+
+    .events-table thead tr {
+        background-color: #2d1060;
+    }
+
+    .events-table th {
+        padding: 11px 12px;
+        font-size: 7.5px; font-weight: bold;
+        text-transform: uppercase; letter-spacing: 1.8px;
+        color: #c084fc; text-align: left;
+        white-space: nowrap;
+    }
+
+    .events-table tbody tr.row-even { background-color: #fdfcff; }
+    .events-table tbody tr.row-odd  { background-color: #ffffff; }
+
+    .events-table td {
+        padding: 11px 12px;
+        vertical-align: middle;
+        border-bottom: 1px solid #f3f0ff;
+    }
+
+    .events-table tbody tr:last-child td { border-bottom: none; }
+
+    /* Row number badge */
+    .rn {
+        display: inline-block;
+        width: 26px; height: 26px;
+        background-color: #ede9fe;
+        border: 1px solid #c4b5fd;
+        font-size: 9px; font-weight: bold; color: #6d28d9;
+        text-align: center; line-height: 26px;
+    }
+
+    .ev-name { font-size: 10.5px; font-weight: bold; color: #1a0540; margin-bottom: 3px; }
+    .ev-desc { font-size: 8.5px; color: #a78bfa; }
+
+    .dv { font-size: 10px; font-weight: bold; color: #1a0540; }
+    .tv { font-size: 10px; color: #9ca3af; }
+    .lv { font-size: 9.5px; color: #4b5563; }
+    .cv { font-size: 11px; font-weight: bold; color: #1a0540; text-align: center; display: block; }
+
+    /* Badges */
+    .badge {
+        display: inline-block;
+        padding: 3px 9px;
+        font-size: 8px; font-weight: bold;
+        white-space: nowrap;
+    }
+    .b-dot {
+        display: inline-block;
+        width: 6px; height: 6px;
+        margin-right: 4px;
+        vertical-align: middle;
+    }
+    .b-type { background-color: #ede9fe; color: #5b21b6; border: 1px solid #c4b5fd; }
+    .b-plan { background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .b-open { background-color: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+    .b-full { background-color: #ffe4e6; color: #9f1239; border: 1px solid #fda4af; }
+    .b-canc { background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+
+    /* Empty state */
+    .empty-td {
+        text-align: center; padding: 50px 20px;
+        font-size: 12px; color: #a78bfa;
+    }
+
+    /* ── FOOTER ── */
+    .footer-table { width: 100%; border-collapse: collapse; }
+    .footer-bg { background-color: #2d1060; }
+    .footer-left { padding: 18px 20px 18px 32px; vertical-align: middle; width: 70%; }
+    .footer-right { padding: 18px 32px 18px 20px; vertical-align: middle; text-align: right; width: 30%; }
+    .footer-brand { font-size: 9.5px; font-weight: bold; color: #c084fc; }
+    .footer-sub   { font-size: 8px; color: #7c3aed; margin-top: 3px; }
+    .footer-pill  {
+        display: inline-block;
+        background-color: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.2);
+        padding: 5px 16px;
+        font-size: 9px; font-weight: bold; color: #e9d5ff;
+        letter-spacing: .5px;
+    }
+
+    /* ── TOP RULE ── */
+    .top-rule-table { width: 100%; border-collapse: collapse; }
+</style>
 </head>
 <body>
 
-<!-- EN-TÊTE -->
-<div class="header">
-    <h1>🧩 AutiCare</h1>
-    <h2>Gestion des Événements</h2>
-    <div class="date">Exporté le {{ exportDate|date('d/m/Y à H:i:s') }}</div>
-</div>
-
-<!-- STATISTIQUES -->
-<div class="stats-grid">
-    <div class="stat-card purple">
-        <div class="stat-value">{{ totalEvents }}</div>
-        <div class="stat-label">Événements</div>
-    </div>
-    <div class="stat-card green">
-        <div class="stat-value">{{ upcomingEvents }}</div>
-        <div class="stat-label">À venir</div>
-    </div>
-    <div class="stat-card pink">
-        <div class="stat-value">{{ totalSponsors }}</div>
-        <div class="stat-label">Sponsors</div>
-    </div>
-    <div class="stat-card blue">
-        <div class="stat-value">{{ totalBudget }}K</div>
-        <div class="stat-label">Budget (TND)</div>
-    </div>
-</div>
-
-<!-- FILTRES ACTIFS -->
-{% set activeFilters = [] %}
-{% if filters.searchTerm is defined and filters.searchTerm != '' %}
-    {% set activeFilters = activeFilters|merge(['Recherche: "' ~ filters.searchTerm ~ '"']) %}
-{% endif %}
-{% if filters.type is defined and filters.type != 'tous' %}
-    {% set activeFilters = activeFilters|merge(['Type: ' ~ filters.type]) %}
-{% endif %}
-{% if filters.status is defined and filters.status != 'tous' %}
-    {% set activeFilters = activeFilters|merge(['Statut: ' ~ filters.status]) %}
-{% endif %}
-{% if filters.period is defined and filters.period != 'toutes' %}
-    {% set activeFilters = activeFilters|merge(['Période: ' ~ filters.period]) %}
-{% endif %}
-
-{% if activeFilters|length > 0 %}
-<div class="filters">
-    <strong>🔍 Filtres appliqués :</strong> {{ activeFilters|join(' • ') }}
-</div>
-{% endif %}
-
-<!-- LISTE DES ÉVÉNEMENTS -->
-<div class="section-title">📋 Liste des événements</div>
-
-<table>
-    <thead>
-        <tr>
-            <th width="5%">#</th>
-            <th width="25%">Titre</th>
-            <th width="12%">Date</th>
-            <th width="10%">Heure</th>
-            <th width="15%">Lieu</th>
-            <th width="12%">Type</th>
-            <th width="8%">Capacité</th>
-            <th width="13%">Statut</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for event in events %}
-        <tr {% if loop.index is even %}class="table-row-even"{% endif %}>
-            <td class="text-center">{{ loop.index }}</td>
-            <td>
-                <div class="event-title">{{ event.titre|striptags|slice(0, 60) }}</div>
-                {% if event.description %}
-                <div class="event-desc">{{ event.description|striptags|slice(0, 80) }}{% if event.description|length > 80 %}...{% endif %}</div>
-                {% endif %}
-            </td>
-            <td>{{ event.dateDebut ? event.dateDebut|date('d/m/Y') : '-' }}</td>
-            <td>{{ event.heureDebut ? event.heureDebut|date('H:i') : '-' }}</td>
-            <td>{{ event.lieu|default('-')|striptags|slice(0, 40) }}</td>
-            <td>
-                <span class="badge badge-planifie" style="background:#e0e7ff; color:#5b21b6;">{{ event.typeEvent|default('-') }}</span>
-            </td>
-            <td class="text-center">{{ event.maxParticipant|default(0) }}</td>
-            <td>
-                {% if event.status == 'planifie' %}
-                    <span class="badge badge-planifie">📅 Planifié</span>
-                {% elseif event.status == 'ouvert' %}
-                    <span class="badge badge-ouvert">✅ Ouvert</span>
-                {% elseif event.status == 'complet' %}
-                    <span class="badge badge-complet">🔴 Complet</span>
-                {% elseif event.status == 'annule' %}
-                    <span class="badge badge-annule">❌ Annulé</span>
-                {% else %}
-                    <span class="badge badge-planifie">📅 Planifié</span>
-                {% endif %}
-            </td>
-        </tr>
-        {% else %}
-        <tr>
-            <td colspan="8" class="text-center text-muted" style="padding: 40px;">
-                ⚠️ Aucun événement trouvé
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
+<!-- ══ HERO ══ -->
+<table class="hero-table" cellpadding="0" cellspacing="0">
+    <tr class="hero-bg">
+        <td class="hero-left-cell">
+            <div class="brand-name">🧩 AutiCare</div>
+            <div class="brand-tagline">Gestion des Événements</div>
+        </td>
+        <td class="hero-right-cell">
+            <div class="export-label">Rapport exporté le</div>
+            <div class="export-date">{{ exportDate|date('d/m/Y à H:i:s') }}</div>
+        </td>
+    </tr>
 </table>
 
-<!-- PIED DE PAGE -->
-<div class="footer">
-    <p>AutiCare - Application de gestion d'événements pour personnes autistes</p>
-    <p>Généré automatiquement - Total: {{ events|length }} événement(s)</p>
+<!-- ══ COLOR STRIPE ══ -->
+<table class="stripe-table" cellpadding="0" cellspacing="0">
+    <tr>
+        <td class="stripe-purple" style="width:25%"></td>
+        <td class="stripe-teal"   style="width:25%"></td>
+        <td class="stripe-rose"   style="width:25%"></td>
+        <td class="stripe-amber"  style="width:25%"></td>
+    </tr>
+</table>
+
+<!-- ══ STATS ══ -->
+<table class="stats-table" cellpadding="0" cellspacing="0">
+    <tr>
+        <td class="stat-cell stat-cell-purple">
+            <div class="stat-num stat-num-purple">{{ totalEvents }}</div>
+            <div class="stat-label stat-label-purple">Événements</div>
+        </td>
+        <td class="stat-cell stat-cell-teal">
+            <div class="stat-num stat-num-teal">{{ upcomingEvents }}</div>
+            <div class="stat-label stat-label-teal">À venir</div>
+        </td>
+        <td class="stat-cell stat-cell-rose">
+            <div class="stat-num stat-num-rose">{{ totalSponsors }}</div>
+            <div class="stat-label stat-label-rose">Sponsors</div>
+        </td>
+        <td class="stat-cell stat-cell-amber">
+            <div class="stat-num stat-num-amber">{{ totalBudget }}K</div>
+            <div class="stat-label stat-label-amber">Budget TND</div>
+        </td>
+    </tr>
+</table>
+
+<!-- ══ BODY ══ -->
+<div class="body-wrap">
+
+    <!-- Filters -->
+    {% set af = [] %}
+    {% if filters.searchTerm is defined and filters.searchTerm != '' %}{% set af = af|merge(['Recherche : "' ~ filters.searchTerm ~ '"']) %}{% endif %}
+    {% if filters.type is defined and filters.type != 'tous' %}{% set af = af|merge(['Type : ' ~ filters.type]) %}{% endif %}
+    {% if filters.status is defined and filters.status != 'tous' %}{% set af = af|merge(['Statut : ' ~ filters.status]) %}{% endif %}
+    {% if filters.period is defined and filters.period != 'toutes' %}{% set af = af|merge(['Période : ' ~ filters.period]) %}{% endif %}
+    {% if af|length > 0 %}
+    <div class="filter-wrap">
+        <div class="filter-title">Filtres actifs</div>
+        <div class="filter-pills">
+            {% for f in af %}<span class="fpill">{{ f }}</span>{% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Section heading -->
+    <table class="sec-head-table" cellpadding="0" cellspacing="0">
+        <tr>
+            <td class="sec-head-icon-cell">
+                <span class="sec-head-icon">📋</span>
+            </td>
+            <td class="sec-head-title-cell">
+                <span class="sec-head-title">Liste des événements</span>
+            </td>
+            <td class="sec-head-badge-cell">
+                <span class="sec-badge">{{ events|length }} résultat{% if events|length > 1 %}s{% endif %}</span>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Events table -->
+    <table class="events-table" cellpadding="0" cellspacing="0">
+        <thead>
+            <tr>
+                <th style="width:36px;">#</th>
+                <th style="width:22%;">Titre</th>
+                <th style="width:9%;">Date</th>
+                <th style="width:7%;">Heure</th>
+                <th style="width:13%;">Lieu</th>
+                <th style="width:13%;">Type</th>
+                <th style="width:6%; text-align:center;">Cap.</th>
+                <th>Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for event in events %}
+            <tr class="{{ loop.index is even ? 'row-even' : 'row-odd' }}">
+                <td><span class="rn">{{ loop.index }}</span></td>
+                <td>
+                    <div class="ev-name">{{ event.titre|striptags|slice(0,52) }}</div>
+                    {% if event.description %}
+                    <div class="ev-desc">{{ event.description|striptags|slice(0,68) }}{% if event.description|length > 68 %}…{% endif %}</div>
+                    {% endif %}
+                </td>
+                <td><span class="dv">{{ event.dateDebut ? event.dateDebut|date('d/m/Y') : '—' }}</span></td>
+                <td><span class="tv">{{ event.heureDebut ? event.heureDebut|date('H:i') : '—' }}</span></td>
+                <td><span class="lv">{{ event.lieu|default('—')|striptags|slice(0,30) }}</span></td>
+                <td><span class="badge b-type">{{ event.typeEvent|default('—') }}</span></td>
+                <td style="text-align:center;"><span class="cv">{{ event.maxParticipant|default(0) }}</span></td>
+                <td>
+                    {% if event.status == 'ouvert' %}
+                        <span class="badge b-open"><span class="b-dot" style="background:#10b981;border-radius:50%;"></span>Ouvert</span>
+                    {% elseif event.status == 'complet' %}
+                        <span class="badge b-full"><span class="b-dot" style="background:#f43f5e;border-radius:50%;"></span>Complet</span>
+                    {% elseif event.status == 'annule' %}
+                        <span class="badge b-canc"><span class="b-dot" style="background:#ef4444;border-radius:50%;"></span>Annulé</span>
+                    {% else %}
+                        <span class="badge b-plan"><span class="b-dot" style="background:#f59e0b;border-radius:50%;"></span>Planifié</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="8" class="empty-td">Aucun événement trouvé pour ces critères.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
 </div>
+
+<!-- ══ FOOTER ══ -->
+<table class="footer-table" cellpadding="0" cellspacing="0">
+    <tr class="footer-bg">
+        <td class="footer-left">
+            <div class="footer-brand">AutiCare</div>
+            <div class="footer-sub">Application de gestion pour personnes autistes · Généré automatiquement · Total : {{ events|length }} événement{% if events|length > 1 %}s{% endif %}</div>
+        </td>
+        <td class="footer-right">
+            <span class="footer-pill">{{ events|length }} événement{% if events|length > 1 %}s{% endif %}</span>
+        </td>
+    </tr>
+</table>
 
 </body>
 </html>
