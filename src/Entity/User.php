@@ -4,11 +4,13 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'user')]
+#[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -46,7 +48,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $imagePath = null;
 
-    // ==================== GETTERS ET SETTERS ====================
+    #[ORM\Column(type: 'string', length: 6, nullable: true)]
+    private ?string $resetCode = null;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $resetCodeExpiresAt = null;
+
+    #[ORM\Column]
+    private bool $isVerified = false;
 
     public function getId(): ?int
     {
@@ -130,7 +139,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    // SETTER CORRIGÉ - Accepte string OU DateTime
     public function setCreatedAt(\DateTimeInterface|string|null $createdAt): static
     {
         if ($createdAt === null) {
@@ -174,7 +182,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    // ==================== MÉTHODES REQUISES PAR SYMFONY ====================
+    public function getResetCode(): ?string
+    {
+        return $this->resetCode;
+    }
+
+    public function setResetCode(?string $resetCode): static
+    {
+        $this->resetCode = $resetCode;
+        return $this;
+    }
+
+    public function getResetCodeExpiresAt(): ?\DateTimeInterface
+    {
+        return $this->resetCodeExpiresAt;
+    }
+
+    public function setResetCodeExpiresAt(?\DateTimeInterface $resetCodeExpiresAt): static
+    {
+        $this->resetCodeExpiresAt = $resetCodeExpiresAt;
+        return $this;
+    }
+
+    public function isResetCodeValid(): bool
+    {
+        if (!$this->resetCode || !$this->resetCodeExpiresAt) {
+            return false;
+        }
+        return $this->resetCodeExpiresAt > new \DateTime();
+    }
 
     public function getRoles(): array
     {
@@ -191,11 +227,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function eraseCredentials(): void
     {
-        // Effacer les données sensibles si nécessaire
     }
 
     public function getUserIdentifier(): string
     {
         return $this->email;
+    }
+
+    public function isVerified(): bool
+    {
+        return $this->isVerified;
+    }
+
+    public function setIsVerified(bool $isVerified): static
+    {
+        $this->isVerified = $isVerified;
+
+        return $this;
     }
 }

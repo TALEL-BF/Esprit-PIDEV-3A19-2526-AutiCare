@@ -1,9 +1,6 @@
-# config/packages/security.yaml
 security:
     password_hashers:
-        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
-        App\Entity\User:
-            algorithm: auto
+        App\Entity\User: 'auto'
 
     providers:
         app_user_provider:
@@ -23,15 +20,13 @@ security:
                 check_path: app_signin
                 username_parameter: email
                 password_parameter: password
-                default_target_path: admin_dashboard
                 enable_csrf: true
             logout:
                 path: app_logout
-                target: app_signin
+                target: app_home
             remember_me:
                 secret: '%kernel.secret%'
                 lifetime: 604800
-                path: /
 
     access_control:
         - { path: ^/admin, roles: ROLE_ADMIN }
@@ -42,21 +37,13 @@ security:
         - { path: ^/signin, roles: PUBLIC_ACCESS }
         - { path: ^/signup, roles: PUBLIC_ACCESS }
         - { path: ^/login, roles: PUBLIC_ACCESS }
-        - { path: ^/connexion, roles: PUBLIC_ACCESS }
-        - { path: ^/$, roles: PUBLIC_ACCESS }
+        - { path: ^/forgot-password, roles: PUBLIC_ACCESS }
+        - { path: ^/reset-password, roles: PUBLIC_ACCESS }
+        - { path: ^/, roles: PUBLIC_ACCESS }
 
     role_hierarchy:
-        ROLE_ADMIN: [ROLE_PARENT, ROLE_PROFESSEUR, ROLE_PSYCHOLOGUE, ROLE_ENFANT, ROLE_USER]
-        ROLE_PARENT: [ROLE_USER]
-        ROLE_PROFESSEUR: [ROLE_USER]
-        ROLE_PSYCHOLOGUE: [ROLE_USER]
-        ROLE_ENFANT: [ROLE_USER]
-
-when@test:
-    security:
-        password_hashers:
-            Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
-                algorithm: auto
-                cost: 4
-                time_cost: 3
-                memory_cost: 10
+        ROLE_ADMIN: [ROLE_PARENT, ROLE_PROFESSEUR, ROLE_PSYCHOLOGUE, ROLE_ENFANT]
+        ROLE_PARENT: []
+        ROLE_PROFESSEUR: []
+        ROLE_PSYCHOLOGUE: []
+        ROLE_ENFANT: []

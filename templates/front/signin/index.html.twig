@@ -286,7 +286,7 @@
                                         </div>
                                     {% endif %}
 
-                                    {# FORMULAIRE DE CONNEXION - ACTION CORRIGÉE VERS app_signin #}
+                                    {# FORMULAIRE DE CONNEXION #}
                                     <form method="post" action="{{ path('app_signin') }}">
                                         <div class="mb-3">
                                             <label class="form-label fw-600 text-dark">Adresse email</label>
@@ -307,7 +307,10 @@
                                         <div class="mb-3">
                                             <div class="d-flex justify-content-between align-items-center mb-1">
                                                 <label class="form-label fw-600 text-dark mb-0">Mot de passe</label>
-                                                <a href="#" class="text-primary small text-decoration-none">Mot de passe oublié ?</a>
+                                                {# LIEN MOT DE PASSE OUBLIÉ CORRIGÉ #}
+                                                <a href="{{ path('app_forgot_password') }}" class="text-primary small text-decoration-none">
+                                                    Mot de passe oublié ?
+                                                </a>
                                             </div>
                                             <div class="input-icon">
                                                 <i class="fas fa-lock"></i>

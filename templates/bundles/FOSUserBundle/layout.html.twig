@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>AutiCare - Connexion</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .card {
+            border-radius: 20px;
+            border: none;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            width: 450px;
+            max-width: 90%;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+            text-align: center;
+            padding: 25px;
+            border-radius: 20px 20px 0 0;
+        }
+        .card-header h3 {
+            margin: 0;
+            font-weight: 600;
+        }
+        .card-header p {
+            margin: 10px 0 0;
+            opacity: 0.9;
+        }
+        .btn-primary {
+            background: #9b59b6;
+            border: none;
+            border-radius: 12px;
+            padding: 12px;
+            width: 100%;
+            font-weight: 600;
+        }
+        .btn-primary:hover {
+            background: #8e44ad;
+            transform: translateY(-2px);
+        }
+        .form-control {
+            border-radius: 12px;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+        }
+        .form-control:focus {
+            border-color: #9b59b6;
+            box-shadow: 0 0 0 3px rgba(155,89,182,0.1);
+        }
+        .alert {
+            border-radius: 12px;
+            border: none;
+        }
+        .alert-success {
+            background: linear-gradient(135deg, #d4fc79, #96e6a1);
+            color: #1e7b1e;
+        }
+        .alert-danger {
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            color: #c62828;
+        }
+        a {
+            color: #9b59b6;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-brain"></i> AutiCare</h3>
+            <p>{% block header %}Plateforme éducative et psychologique{% endblock %}</p>
+        </div>
+        <div class="card-body p-4">
+            {% if app.request.hasPreviousSession %}
+                {% for type, messages in app.session.flashbag.all() %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ type }}">{{ message }}</div>
+                    {% endfor %}
+                {% endfor %}
+            {% endif %}
+
+            {% block fos_user_content %}{% endblock %}
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,27 @@
+1.
+http://127.0.0.1:8000/parent/dashboard
+http://127.0.0.1:8000/enfant/dashboard
+http://127.0.0.1:8000/professeur/dashboard
+http://127.0.0.1:8000/psychologue/dashboard
+http://127.0.0.1:8000/signup
+http://127.0.0.1:8000/signin
+2. TABLEAU DES COMPTES DE TEST
+Rôle	Email	Mot de passe	Dashboard URL
+Admin	admin@test.com	admin123	/admin/dashboard
+Parent	parent@test.com	123456	/parent/dashboard
+Enfant	enfant@test.com	123456	/enfant/dashboard
+Professeur	professeur@test.com	123456	/professeur/dashboard
+Psychologue	psy@test.com	123456	/psychologue/dashboard
+
+3. TESTER LES ERREURS DE CONNEXION
+Test 1 : Email incorrect
+Champ	Valeur
+Email	faux@test.com
+Mot de passe	admin123
+Test 2 : Mot de passe incorrect
+Champ	Valeur
+Email	admin@test.com
+Mot de passe	faux123
+4.pour tester:
+php bin/console cache:clear
+symfony serve
