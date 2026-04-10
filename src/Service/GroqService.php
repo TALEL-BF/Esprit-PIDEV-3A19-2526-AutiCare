@@ -27,10 +27,7 @@ class GroqService
         $this->model = $groqModel;
     }
 
-    /**
-     * Appel à l'API Groq (comme appelGemini en Java)
-     */
-    private function callGroq(string $prompt): string
+       private function callGroq(string $prompt): string
     {
         try {
             $response = $this->httpClient->request('POST', $this->apiUrl . '/chat/completions', [
@@ -65,9 +62,7 @@ class GroqService
         }
     }
 
-    /**
-     * Nettoie la réponse JSON (comme en Java)
-     */
+    
     private function nettoyerReponseJSON(string $texte): string
     {
         // Enlever tout ce qui est avant le premier {
@@ -85,9 +80,7 @@ class GroqService
         return $texte;
     }
 
-    /**
-     * Nettoie la réponse texte (comme en Java)
-     */
+    
     private function nettoyerReponse(string $texte): string
     {
         // Supprimer les phrases d'introduction
@@ -105,9 +98,7 @@ class GroqService
         return trim($texte);
     }
 
-    /**
-     * Analyse l'émotion (comme analyserTexteAvecFallback en Java)
-     */
+   
     public function analyzeUserRequest(string $text): array
     {
         try {
@@ -152,13 +143,7 @@ class GroqService
         }
     }
 
-    /**
-     * Génère un conseil (comme genererConseil en Java)
-     */
-   /**
- * Génère un conseil (comme genererConseil en Java)
- * Retourne une string (pas un array)
- */
+   
 public function generateAdvice(string $userText, string $emotion): string
 {
     try {
@@ -186,9 +171,7 @@ public function generateAdvice(string $userText, string $emotion): string
     }
 }
 
-/**
- * Conseils de secours (fallback)
- */
+
 private function getFallbackAdvice(string $emotion): string
 {
     $advices = [
