@@ -39,13 +39,9 @@ class Event
     )]
     private ?string $description = null;
 
-    #[ORM\Column(name: 'typeEvent', length: 255)]
-    #[Assert\NotBlank(message: "Le type d'événement est obligatoire")]
-    #[Assert\Choice(
-        choices: ["Atelier", "Conférence", "Sortie", "Formation"],
-        message: "Veuillez sélectionner un type valide"
-    )]
-    private ?string $typeEvent = null;
+   #[ORM\Column(name: 'typeEvent', length: 255)]
+#[Assert\NotBlank(message: "Le type d'événement est obligatoire")]
+private ?string $typeEvent = null;
     
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: "Le lieu est obligatoire")]

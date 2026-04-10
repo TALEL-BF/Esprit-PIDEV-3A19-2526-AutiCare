@@ -7,6 +7,8 @@
 {{ parent() }}
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
+
+
 /* Boutons lecture vocale */
 .btn-speak, .btn-stop {
     background: linear-gradient(135deg, #8b5cf6, #a78bfa);
@@ -154,7 +156,7 @@
         display: flex;
         align-items: center;
         overflow: hidden;
-        background-image: url("{{ asset('uploads/images/bear2.png') }}");
+        background-image: url("{{ asset('uploads/images/image (10).png') }}");
         background-size: cover;
         background-position: 50% 50%;
         background-attachment: fixed;
@@ -429,47 +431,47 @@
         flex-wrap: wrap;
     }
 
-    .btn {
-        padding: 10px 25px;
-        border-radius: 50px;
-        border: none;
-        font-weight: 800;
-        font-family: 'Baloo 2', cursive;
-        cursor: pointer;
-        transition: all 0.3s;
-        font-size: 14px;
-    }
+    .controls .btn {
+    padding: 10px 25px;
+    border-radius: 50px;
+    border: none;
+    font-weight: 800;
+    font-family: 'Baloo 2', cursive;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 14px;
+}
 
-    .btn-primary {
-        background: linear-gradient(135deg, #8b5cf6, #a78bfa);
-        color: white;
-        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
-    }
+.controls .btn-primary {
+    background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+    color: white;
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+}
 
-    .btn-primary:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(139, 92, 246, 0.6);
-    }
+.controls .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.6);
+}
 
-    .btn-danger {
-        background: linear-gradient(135deg, #ef4444, #dc2626);
-        color: white;
-    }
+.controls .btn-danger {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+}
 
-    .btn-danger:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
-    }
+.controls .btn-danger:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+}
 
-    .btn-secondary {
-        background: linear-gradient(135deg, #e5e7eb, #d1d5db);
-        color: #4b5563;
-    }
+.controls .btn-secondary {
+    background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+    color: #4b5563;
+}
 
-    .btn-secondary:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    }
+.controls .btn-secondary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
 
     /* Loading */
     .loading {
@@ -745,6 +747,7 @@
 {% endblock %}
 
 {% block body %}
+
     <!-- SIDE MASCOTS - PERSONNAGES SUR LES CÔTÉS -->
     <div class="side-mascot-left">🐻‍❄️🌈</div>
     <div class="side-mascot-right">🦋✨</div>

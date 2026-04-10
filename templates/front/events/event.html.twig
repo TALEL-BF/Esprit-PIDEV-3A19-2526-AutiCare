@@ -24,7 +24,35 @@
 
         * { box-sizing: border-box; }
         body { background: var(--bg); font-family: 'Nunito', sans-serif; }
+/* Badges dynamiques pour les cartes */
+.badge-ia, .badge-group, .badge-ambiance {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 30px;
+}
 
+.badge-ia {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1.5px solid #bbf7d0;
+}
+
+.badge-group {
+    background: #f3e8ff;
+    color: #7c3aed;
+    border: 1.5px solid #e9d5ff;
+}
+
+.badge-ambiance {
+    background: #e0f2fe;
+    color: #0284c7;
+    border: 1.5px solid #bae6fd;
+}
         /* HERO BANNER */
         .hero-banner {
             position: relative;
@@ -411,7 +439,7 @@
                     <div class="col-lg-5 col-md-4 hero-mascot-wrap">
                         <a href="{{ path('voice_assistant') }}" class="hero-mascot-link" style="text-decoration:none;cursor:pointer;">
                             <div class="hero-mascot-bubble">
-                                <span class="hero-mascot-icon">🌿</span>
+                                <span class="hero-mascot-icon">🎙️</span>
                                 <span class="hero-mascot-label">Prêt pour les aventures des émotions ?</span>
                             </div>
                         </a>
@@ -466,7 +494,7 @@
                     <div class="col-sm-6 col-lg-4 event-item" data-category="{{ event.typeEvent }}">
                         {# Wrapper provides the top padding so badge never gets cropped by the row gap #}
                         <div class="event-card-wrapper" style="height:100%;">
-                            <div class="event-card" data-color="{{ colorIndex }}">
+                            <div class="event-card" data-color="{{ colorIndex }}" data-event-id="{{ event.idEvent }}">
 
                                 {# Date badge — centered, color auto-inherits from [data-color] CSS rules above #}
                                 <div class="date-badge-top">
@@ -497,11 +525,26 @@
                                     <span class="card-type-tag tag-{{ event.typeEvent }}">{{ emoji }} {{ event.typeEvent }}</span>
                                     <h3 class="card-title">{{ event.titre }}</h3>
                                     <p class="card-desc">{{ event.description|slice(0,100) }}{% if event.description|length > 100 %}...{% endif %}</p>
-                                    <div class="card-badges">
-                                        <span class="badge-calm">🔇 Calme</span>
-                                        <span class="badge-low">🧘 Faible</span>
-                                        <span class="badge-age">👥 5-10 ans</span>
-                                    </div>
+                                   <div class="card-badges">
+    <span class="badge-ia">
+        🧠 Calcul...
+    </span>
+    <span class="badge-group">
+        👥 {{ event.maxParticipant <= 15 ? 'Très petit' : (event.maxParticipant <= 30 ? 'Petit' : (event.maxParticipant <= 60 ? 'Moyen' : (event.maxParticipant <= 100 ? 'Grand' : 'Très grand'))) }}
+    </span>
+    <span class="badge-ambiance">
+        {% set text = event.titre ~ ' ' ~ event.description %}
+        {% if 'calme' in text|lower or 'silence' in text|lower or 'zen' in text|lower %}
+            🔇 Calme
+        {% elseif 'musique' in text|lower or 'concert' in text|lower or 'fête' in text|lower %}
+            🔊 Animé
+        {% elseif 'atelier' in text|lower or 'créatif' in text|lower %}
+            🎨 Créatif
+        {% else %}
+            ⚪ Standard
+        {% endif %}
+    </span>
+</div>
                                     <div class="card-stats">
                                         <span class="stat-chip chip-lieu">📍 {{ event.lieu }}</span>
                                         <span class="stat-chip chip-places">🪑 {{ event.participantsCount|default(0) }}/{{ event.maxParticipant }}</span>
@@ -767,5 +810,35 @@
                 }
             });
         });
+        // Charger les scores IA pour chaque carte
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.event-card').forEach((card, index) => {
+        const eventId = card.dataset.eventId;
+        const badgeIa = card.querySelector('.badge-ia');
+        
+        if (eventId && badgeIa) {
+            fetch('/event/score/' + eventId)
+                .then(response => response.json())
+                .then(data => {
+                    badgeIa.innerHTML = `🧠 ${data.score}%`;
+                    
+                    // Changer la couleur selon le score
+                    if (data.score >= 70) {
+                        badgeIa.style.background = '#dcfce7';
+                        badgeIa.style.color = '#15803d';
+                    } else if (data.score >= 40) {
+                        badgeIa.style.background = '#ffedd5';
+                        badgeIa.style.color = '#b45309';
+                    } else {
+                        badgeIa.style.background = '#fee2e2';
+                        badgeIa.style.color = '#b91c1c';
+                    }
+                })
+                .catch(error => {
+                    badgeIa.innerHTML = '🧠 --%';
+                });
+        }
+    });
+});
     </script>
 {% endblock %}

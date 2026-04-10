@@ -29,69 +29,75 @@ class AiPlanningService
      * Génère un planning pour un événement et le sauvegarde en BDD
      */
     public function generatePlanning(Event $event, EntityManagerInterface $em): array
-    {
-        $prompt = $this->buildPrompt($event);
+{
+    $prompt = $this->buildPrompt($event);
+    
+    // Log 1: On commence
+    error_log('=== GENERATE PLANNING START ===');
+    error_log('Event: ' . $event->getTitre());
+    
+    try {
+        $url = $this->apiUrl . '/chat/completions';
+        error_log('URL: ' . $url);
         
-        try {
-            // Construction de l'URL complète pour Groq
-            $url = $this->apiUrl . '/chat/completions';
-            
-            $response = $this->httpClient->request('POST', $url, [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $this->apiKey,
-                    'Content-Type' => 'application/json',
-                ],
-                'json' => [
-                    'model' => $this->model,
-                    'messages' => [
-                        [
-                            'role' => 'system',
-                            'content' => 'Tu es un expert en organisation d\'événements pour enfants autistes. Tu génères des plannings adaptés avec créneaux courts (15-20min), pauses sensorielles, et structure visuelle. Tu réponds uniquement en JSON valide, sans texte explicatif avant ou après.'
-                        ],
-                        [
-                            'role' => 'user',
-                            'content' => $prompt
-                        ]
+        $response = $this->httpClient->request('POST', $url, [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Content-Type' => 'application/json',
+            ],
+            'json' => [
+                'model' => $this->model,
+                'messages' => [
+                    [
+                        'role' => 'system',
+                        'content' => 'Tu es un expert en organisation d\'événements pour enfants autistes.'
                     ],
-                    'temperature' => 0.7,
-                    'max_tokens' => 2000,
-                ]
-            ]);
-            
-            $statusCode = $response->getStatusCode();
-            
-            if ($statusCode !== 200) {
-                $errorContent = $response->getContent(false);
-                throw new \Exception('API returned status ' . $statusCode . ': ' . $errorContent);
-            }
-            
-            $data = $response->toArray();
-            $content = $data['choices'][0]['message']['content'];
-            
-            // Nettoyer le JSON (enlever les balises markdown si présentes)
-            $content = trim($content);
-            $content = preg_replace('/^```json\s*|\s*```$/', '', $content);
-            $content = preg_replace('/^```\s*|\s*```$/', '', $content);
-            
-            $result = json_decode($content, true);
-            
-            // Vérifier que le JSON est valide
-            if ($result === null) {
-                throw new \Exception('Invalid JSON response: ' . substr($content, 0, 200));
-            }
-            
-            // 🔥 Sauvegarder le planning en base de données
-            $event->setPlanning(json_encode($result, JSON_UNESCAPED_UNICODE));
-            $em->persist($event);
-            $em->flush();
-            
-            return $result;
-            
-        } catch (\Exception $e) {
-            throw new \Exception('Erreur API Groq: ' . $e->getMessage());
+                    [
+                        'role' => 'user',
+                        'content' => $prompt
+                    ]
+                ],
+                'temperature' => 0.7,
+                'max_tokens' => 2000,
+            ]
+        ]);
+        
+        error_log('Response status: ' . $response->getStatusCode());
+        
+        $data = $response->toArray();
+        $content = $data['choices'][0]['message']['content'];
+        
+        error_log('Content received, length: ' . strlen($content));
+        
+        $content = trim($content);
+        $content = preg_replace('/^```json\s*|\s*```$/', '', $content);
+        $content = preg_replace('/^```\s*|\s*```$/', '', $content);
+        
+        $result = json_decode($content, true);
+        
+        if ($result === null) {
+            error_log('JSON decode error. Content: ' . substr($content, 0, 500));
+            throw new \Exception('Invalid JSON response');
         }
+        
+        error_log('Planning generated, creneaux count: ' . count($result['creneaux'] ?? []));
+        
+        $event->setPlanning(json_encode($result, JSON_UNESCAPED_UNICODE));
+        $em->persist($event);
+        $em->flush();
+        
+        error_log('=== GENERATE PLANNING SUCCESS ===');
+        
+        return $result;
+        
+    } catch (\Exception $e) {
+        error_log('=== GENERATE PLANNING ERROR ===');
+        error_log('Message: ' . $e->getMessage());
+        error_log('File: ' . $e->getFile());
+        error_log('Line: ' . $e->getLine());
+        throw new \Exception('Erreur API Groq: ' . $e->getMessage());
     }
-
+}
     /**
      * Récupère le planning sauvegardé d'un événement
      */

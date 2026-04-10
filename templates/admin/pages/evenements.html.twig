@@ -26,6 +26,110 @@
     --pastel-mint-dark: #7ef5c8;
     --pastel-coral: #ffe0e0;
 }
+/* ========== AI SUGGESTION ANIMATIONS ========== */
+@keyframes aiPulse {
+    0% { background-color: #fef3c7; transform: scale(1); border-color: #f59e0b; }
+    50% { background-color: #fde68a; transform: scale(1.02); border-color: #f59e0b; }
+    100% { background-color: #fef3c7; transform: scale(1); border-color: #f59e0b; }
+}
+
+@keyframes aiSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+/* ========== BOUTON PLANNING IA ========== */
+.btn-planning-ia {
+    background: linear-gradient(135deg, var(--pastel-purple-dark), #a78bfa);
+    color: white;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-decoration: none;
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+}
+
+.btn-planning-ia:hover {
+    transform: scale(1.1) translateY(-2px);
+    box-shadow: 0 6px 16px rgba(139, 92, 246, 0.5);
+    background: linear-gradient(135deg, #a78bfa, var(--pastel-purple-dark));
+}
+
+.btn-planning-ia i {
+    font-size: 1.1rem;
+    color: white;
+}
+
+/* Style pour l'en-tête de la colonne Planning */
+.th-planning {
+    text-align: center;
+    width: 60px;
+}
+
+/* Ajustement du tableau */
+.custom-table td {
+    vertical-align: middle;
+    padding: 12px 8px;
+}
+
+/* Centre la colonne Planning */
+.custom-table td:nth-child(11),
+.custom-table th:nth-child(11) {
+    text-align: center;
+}
+.ai-highlight {
+    animation: aiPulse 0.6s ease-in-out 3;
+    border: 2px solid #f59e0b !important;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2) !important;
+}
+
+.ai-suggestion-banner {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border-left: 4px solid #f59e0b;
+    padding: 12px 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    animation: aiSlideIn 0.4s ease;
+    display: none;
+}
+
+.ai-suggestion-banner.show {
+    display: block;
+}
+
+.ai-change-arrow {
+    display: inline-block;
+    animation: bounce 0.5s ease;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(10px); }
+}
+
+.ai-toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #dcfce7;
+    color: #15803d;
+    padding: 12px 20px;
+    border-radius: 12px;
+    z-index: 10001;
+    animation: slideInRight 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
 
 /* ========== FORM ERROR STYLES ========== */
 .form-error {
@@ -573,13 +677,15 @@ select[multiple] option:checked {
                 </div>
                 <div class="col-md-6">
                     <label class="form-label"><i class="fas fa-tag"></i> Type d'événement <span class="required-star">*</span></label>
-                    <select class="form-select" id="eventType" name="eventType">
-                        <option value="">Sélectionner un type</option>
-                        <option value="Atelier">🎨 Atelier</option>
-                        <option value="Conférence">🎤 Conférence</option>
-                        <option value="Sortie">🚶 Sortie</option>
-                        <option value="Formation">📚 Formation</option>
-                    </select>
+                   <input type="text" class="form-control" id="eventType" name="eventType" 
+       placeholder="Ex: Atelier, Conférence, Sortie, Formation..."
+       list="eventTypeList">
+<datalist id="eventTypeList">
+    <option value="Atelier">🎨 Atelier</option>
+    <option value="Conférence">🎤 Conférence</option>
+    <option value="Sortie">🚶 Sortie</option>
+    <option value="Formation">📚 Formation</option>
+</datalist>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label"><i class="fas fa-map-marker-alt"></i> Lieu <span class="required-star">*</span></label>
@@ -781,9 +887,9 @@ select[multiple] option:checked {
 <div class="card-box">
     <div class="card-box-header">
         <span class="card-box-title"><i class="fas fa-list"></i> Liste des Événements</span>
-        <a href="{{ path('admin_evenements_export_pdf') }}" class="btn-outline-purple" style="padding: 6px 15px; text-decoration: none;">
-            <i class="fas fa-file-pdf"></i> Exporter PDF
-        </a>
+      <a href="{{ path('admin_predictions') }}" class="btn-outline-purple" style="padding: 6px 15px; text-decoration: none;">
+    <i class="fas fa-brain"></i> 🤖 Prédictions IA
+</a>
     </div>
     <div class="card-box-body p-0">
         <div class="table-wrapper">
@@ -799,6 +905,7 @@ select[multiple] option:checked {
                         <th>Capacité</th>
                         <th>Statut</th>
                         <th>Sponsors</th>
+                        <th>Planning IA</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -885,6 +992,56 @@ function copyImagePath() {
         showTempMessage('✅ Chemin copié !', 'success');
     }
 }
+// ========== CHECK FOR EDIT PARAMETER FROM URL ==========
+const urlParams = new URLSearchParams(window.location.search);
+const editEventIdFromUrl = urlParams.get('edit');
+
+// Check for "Apply All" suggestions from sessionStorage FIRST
+const allSuggestions = sessionStorage.getItem('ai_all_suggestions');
+if (allSuggestions && editEventIdFromUrl) {
+    const suggestions = JSON.parse(allSuggestions);
+    sessionStorage.setItem('ai_suggest_field', 'multiple');
+    sessionStorage.setItem('ai_suggest_value', JSON.stringify(suggestions));
+    sessionStorage.removeItem('ai_all_suggestions');
+    sessionStorage.setItem('ai_processing_done', 'true');
+    
+    // Load the event directly
+    setTimeout(() => {
+        loadEventForEdit(editEventIdFromUrl);
+    }, 200);
+}
+// Otherwise, check for single suggestion from PredictionController
+else {
+    const directEditId = '{{ directEditId|default('') }}';
+    if (directEditId && directEditId !== '') {
+        // Get AI suggestion from session
+        fetch('/admin/predictions/get-suggestion')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.suggestion) {
+                    sessionStorage.setItem('ai_suggest_field', data.suggestion.field);
+                    sessionStorage.setItem('ai_suggest_value', data.suggestion.value);
+                    sessionStorage.setItem('ai_suggest_points', data.suggestion.points);
+                    sessionStorage.setItem('ai_suggest_eventId', data.suggestion.eventId);
+                }
+                // Load the event for editing
+                setTimeout(() => {
+                    if (directEditId) {
+                        loadEventForEdit(directEditId);
+                    }
+                }, 200);
+            })
+            .catch(error => {
+                console.error('Error getting suggestion:', error);
+                setTimeout(() => {
+                    if (directEditId) {
+                        loadEventForEdit(directEditId);
+                    }
+                }, 200);
+            });
+    }
+}
+
 
 // ========== VALIDATION RULES ==========
 const validationRules = {
@@ -1272,7 +1429,7 @@ function loadEvents() {
             if (!data.events || data.events.length === 0) {
                 tableBody.innerHTML = `
                     <tr>
-                        <td colspan="10" style="text-align: center; padding: 40px;">
+                        <td colspan="11" style="text-align: center; padding: 40px;">
                             <i class="fas fa-calendar-times fa-3x text-muted mb-3 d-block"></i>
                             <p class="text-muted">Aucun événement trouvé</p>
                             <small>Essayez d'autres critères</small>
@@ -1294,26 +1451,42 @@ function loadEvents() {
                         `${event.dateDebut} à ${event.heureDebut || '--:--'}` : 
                         'Date non définie';
                     
+                    let imageHtml = '';
+                    if (event.imagePath && event.imagePath !== '') {
+                        imageHtml = `<img src="${event.imagePath}" alt="${event.titre}" class="event-image" style="width:50px;height:50px;object-fit:cover;border-radius:10px;" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'event-image-placeholder\'><i class=\'fas fa-calendar-alt\'></i></div>'">`;
+                    } else if (event.image && event.image !== '') {
+                        imageHtml = `<img src="/uploads/events/${event.image}" alt="${event.titre}" class="event-image" style="width:50px;height:50px;object-fit:cover;border-radius:10px;" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'event-image-placeholder\'><i class=\'fas fa-calendar-alt\'></i></div>'">`;
+                    } else {
+                        imageHtml = `<div class="event-image-placeholder"><i class="fas fa-calendar-alt"></i></div>`;
+                    }
+                    
                     return `
                         <tr>
                             <td>${index + 1}</td>
-                         
-<td>
-    ${event.imagePath && event.imagePath !== '' ? 
-        `<img src="${event.imagePath}" alt="${event.titre}" class="event-image" style="width:50px;height:50px;object-fit:cover;border-radius:10px;" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'event-image-placeholder\'><i class=\'fas fa-calendar-alt\'></i></div>'">` : 
-        `<div class="event-image-placeholder"><i class="fas fa-calendar-alt"></i></div>`
-    }
-</td>
-                            <td><strong>${escapeHtml(event.titre)}</strong><br><small>${escapeHtml(event.description ? event.description.substring(0, 50) : '')}</small></td>
+                            <td>${imageHtml}</td>
+                            <td>
+                                <strong>${escapeHtml(event.titre)}</strong>
+                                <br>
+                                <small>${escapeHtml(event.description ? event.description.substring(0, 50) : '')}</small>
+                            </td>
                             <td><span class="badge-grey">${escapeHtml(event.typeEvent || 'Non défini')}</span></td>
                             <td>${dateTimeStr}</td>
                             <td>${escapeHtml(event.lieu || '-')}</td>
                             <td><strong>${(event.maxParticipant || 0).toLocaleString()}</strong></td>
                             <td>${statusBadge}</td>
                             <td><span class="badge-grey"><i class="fas fa-handshake"></i> ${event.sponsorCount || 0}</span></td>
+                            <td style="text-align: center;">
+                                <a href="/admin/event-schedule/${event.idEvent}" class="btn-planning-ia" title="Planning IA">
+                                    <i class="fas fa-robot"></i>
+                                </a>
+                            </td>
                             <td>
-                                <button class="btn-edit-soft me-1 edit-event" data-id="${event.idEvent}"><i class="fas fa-edit"></i> Modifier</button>
-                                <button class="btn-danger-soft delete-event" data-id="${event.idEvent}"><i class="fas fa-trash"></i> Supprimer</button>
+                                <button class="btn-edit-soft me-1 edit-event" data-id="${event.idEvent}">
+                                    <i class="fas fa-edit"></i> Modifier
+                                </button>
+                                <button class="btn-danger-soft delete-event" data-id="${event.idEvent}">
+                                    <i class="fas fa-trash"></i> Supprimer
+                                </button>
                             </td>
                         </tr>
                     `;
@@ -1333,7 +1506,7 @@ function loadEvents() {
         if (tableBody) {
             tableBody.innerHTML = `
                 <tr>
-                    <td colspan="10" style="text-align: center; color: red; padding: 40px;">
+                    <td colspan="11" style="text-align: center; color: red; padding: 40px;">
                         <i class="fas fa-exclamation-circle fa-2x mb-2 d-block"></i>
                         Erreur lors du chargement des données
                     </td>
@@ -1342,7 +1515,6 @@ function loadEvents() {
         }
     });
 }
-
 function updateActiveFilters(type, status, period, sortBy, search) {
     const container = document.getElementById('activeFiltersContainer');
     const listElement = document.getElementById('activeFiltersList');
@@ -1420,6 +1592,11 @@ function handleEventEditClick(e) {
 }
 // ========== LOAD EVENT FOR EDIT ==========
 function loadEventForEdit(id) {
+    // Check for AI suggestion from sessionStorage
+    const suggestField = sessionStorage.getItem('ai_suggest_field');
+    const suggestValue = sessionStorage.getItem('ai_suggest_value');
+    const suggestPoints = sessionStorage.getItem('ai_suggest_points');
+    
     showTempMessage('Chargement de l\'événement...', 'info');
     
     fetch(`/admin/evenements/get/${id}`, {
@@ -1433,7 +1610,7 @@ function loadEventForEdit(id) {
         if (data.success && data.event) {
             const event = data.event;
             
-            // Remplir le formulaire
+            // Fill all form fields
             document.getElementById('eventId').value = event.idEvent;
             document.getElementById('eventTitle').value = event.titre || '';
             document.getElementById('eventDescription').value = event.description || '';
@@ -1446,49 +1623,499 @@ function loadEventForEdit(id) {
             document.getElementById('eventEndTime').value = event.heureFin || '';
             document.getElementById('eventStatus').value = event.status || 'planifie';
             
-            // AFFICHER L'IMAGE EXISTANTE
+            // Handle image
             if (event.image && event.image !== '') {
                 const currentImageContainer = document.getElementById('currentImageContainer');
                 const currentImagePreview = document.getElementById('currentImagePreview');
                 const currentImageName = document.getElementById('currentImageName');
                 const currentImagePath = document.getElementById('currentImagePath');
                 
-                // Construire le chemin correct de l'image
                 let imageFullPath = event.image;
                 if (!imageFullPath.startsWith('/') && !imageFullPath.startsWith('http')) {
-                    imageFullPath = '/uploads/events/' + imageFullPath;
+                    if (imageFullPath.includes('uploads/')) {
+                        imageFullPath = '/' + imageFullPath;
+                    } else {
+                        imageFullPath = '/uploads/events/' + imageFullPath;
+                    }
                 }
                 
-                if (currentImagePreview) currentImagePreview.src = imageFullPath;
-                if (currentImageName) currentImageName.textContent = event.image;
-                if (currentImagePath) currentImagePath.value = imageFullPath;
-                if (currentImageContainer) currentImageContainer.style.display = 'block';
-            } else {
-                document.getElementById('currentImageContainer').style.display = 'none';
+                if (currentImagePreview) {
+                    currentImagePreview.src = imageFullPath;
+                    currentImagePreview.style.display = 'block';
+                }
+                if (currentImageName) {
+                    const fileName = event.image.split('/').pop();
+                    currentImageName.textContent = fileName;
+                }
+                if (currentImagePath) {
+                    currentImagePath.value = imageFullPath;
+                }
+                if (currentImageContainer) {
+                    currentImageContainer.style.display = 'block';
+                }
+                const requiredStar = document.getElementById('imageRequiredStar');
+                if (requiredStar) requiredStar.style.display = 'none';
             }
             
-            // Changer le mode du formulaire
-            document.getElementById('formMode').innerHTML = `Mode : Modification <i class="fas fa-edit"></i>`;
+            // ========== APPLY SUGGESTIONS ==========
+            if (suggestField && suggestValue && suggestField !== 'null' && suggestValue !== 'null') {
+                if (suggestField === 'multiple') {
+                    // Apply multiple suggestions one by one
+                    const multipleSuggestions = JSON.parse(suggestValue);
+                    applyMultipleSuggestionsToForm(multipleSuggestions);
+                } else {
+                    // Apply single suggestion
+                    setTimeout(() => {
+                        applySuggestionToForm(suggestField, suggestValue, suggestPoints);
+                    }, 500);
+                }
+            }
             
-            // Cacher l'étoile rouge pour l'image (optionnel en modification)
-            const requiredStar = document.getElementById('imageRequiredStar');
-            if (requiredStar) requiredStar.style.display = 'none';
+            // Update form mode badge
+            const formMode = document.getElementById('formMode');
+            if (formMode) {
+                if (suggestField && suggestField !== 'null') {
+                    formMode.innerHTML = `Mode : Modification <i class="fas fa-edit"></i> <span style="background: #fef3c7; color: #f59e0b; padding: 2px 8px; border-radius: 20px; margin-left: 8px;">✨ Suggestion IA</span>`;
+                } else {
+                    formMode.innerHTML = `Mode : Modification <i class="fas fa-edit"></i>`;
+                }
+            }
             
-            // Supprimer les messages d'erreur existants
             clearValidationErrors();
             
-            // Scroller vers le formulaire
+            // Scroll to form
             document.querySelector('.card-box').scrollIntoView({ behavior: 'smooth', block: 'start' });
             
-            showTempMessage('Événement chargé pour modification', 'success');
+            showTempMessage('✅ Événement chargé avec succès', 'success');
+            
+            // Clear session storage after processing
+            setTimeout(() => {
+                sessionStorage.removeItem('ai_suggest_field');
+                sessionStorage.removeItem('ai_suggest_value');
+                sessionStorage.removeItem('ai_suggest_points');
+                sessionStorage.removeItem('ai_suggest_eventId');
+                sessionStorage.removeItem('ai_processing_done');
+            }, 10000);
+            
         } else {
-            showTempMessage('Erreur lors du chargement de l\'événement', 'danger');
+            showTempMessage('❌ Erreur: Événement non trouvé', 'danger');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showTempMessage('Erreur réseau lors du chargement', 'danger');
+        showTempMessage('❌ Erreur réseau lors du chargement', 'danger');
     });
+}
+// Apply multiple suggestions one after another with animation
+function applyMultipleSuggestionsToForm(suggestions) {
+    let currentIndex = 0;
+    
+    function applyNext() {
+        if (currentIndex >= suggestions.length) {
+            showTempMessage(`✅ ${suggestions.length} suggestion(s) appliquées avec succès !`, 'success');
+            return;
+        }
+        
+        const suggestion = suggestions[currentIndex];
+        const fieldMap = {
+            'capacite': 'eventCapacity',
+            'type': 'eventType',
+            'description': 'eventDescription',
+            'titre': 'eventTitle',
+            'maxParticipant': 'eventCapacity'
+        };
+        
+        const elementId = fieldMap[suggestion.field];
+        const inputElement = document.getElementById(elementId);
+        
+        if (inputElement) {
+            const oldValue = inputElement.value;
+            
+            if (oldValue == suggestion.value) {
+                currentIndex++;
+                applyNext();
+                return;
+            }
+            
+            inputElement.classList.add('ai-highlight');
+            inputElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // For SELECT elements (eventType)
+            if (inputElement.tagName === 'SELECT') {
+                let optionFound = false;
+                let matchedValue = null;
+                
+                for (let i = 0; i < inputElement.options.length; i++) {
+                    if (inputElement.options[i].value === suggestion.value) {
+                        matchedValue = inputElement.options[i].value;
+                        optionFound = true;
+                        break;
+                    }
+                }
+                
+                if (optionFound) {
+                    setTimeout(() => {
+                        inputElement.value = matchedValue;
+                        const changeEvent = new Event('change', { bubbles: true });
+                        inputElement.dispatchEvent(changeEvent);
+                        const newDisplayText = inputElement.options[inputElement.selectedIndex]?.textContent || matchedValue;
+                        showTempMessage(`✨ ${getFieldName(suggestion.field)} : ${oldValue} → ${newDisplayText} (+${suggestion.points} points)`, 'success');
+                        inputElement.classList.remove('ai-highlight');
+                        currentIndex++;
+                        setTimeout(applyNext, 800);
+                    }, 500);
+                } else {
+                    showAddTypeConfirmPopup(suggestion.value, inputElement, suggestion.field, oldValue, suggestion.points);
+                    inputElement.classList.remove('ai-highlight');
+                    return;
+                }
+            }
+            // For NUMBER inputs
+            else if (inputElement.type === 'number') {
+                setTimeout(() => {
+                    const startValue = parseInt(oldValue) || 0;
+                    const endValue = parseInt(suggestion.value) || 0;
+                    const duration = 500;
+                    const startTime = performance.now();
+                    
+                    function animateNumber(currentTime) {
+                        const elapsed = currentTime - startTime;
+                        const progress = Math.min(elapsed / duration, 1);
+                        const currentValue = Math.round(startValue + (endValue - startValue) * progress);
+                        inputElement.value = currentValue;
+                        
+                        if (progress < 1) {
+                            requestAnimationFrame(animateNumber);
+                        } else {
+                            inputElement.value = endValue;
+                            const inputEvent = new Event('input', { bubbles: true });
+                            inputElement.dispatchEvent(inputEvent);
+                            if (typeof validateField === 'function') {
+                                validateField(inputElement, false);
+                            }
+                            showTempMessage(`✨ ${getFieldName(suggestion.field)} : ${oldValue} → ${suggestion.value} (+${suggestion.points} points)`, 'success');
+                            inputElement.classList.remove('ai-highlight');
+                            currentIndex++;
+                            setTimeout(applyNext, 800);
+                        }
+                    }
+                    requestAnimationFrame(animateNumber);
+                }, 100);
+            }
+            // For TEXT inputs and TEXTAREA
+            else {
+                // Special handling for description - simplified toast message
+                if (suggestion.field === 'description') {
+                    inputElement.value = '';
+                    let index = 0;
+                    const text = suggestion.value.toString();
+                    const typingInterval = setInterval(() => {
+                        if (index < text.length) {
+                            inputElement.value += text[index];
+                            index++;
+                        } else {
+                            clearInterval(typingInterval);
+                            if (typeof validateField === 'function') {
+                                validateField(inputElement, false);
+                            }
+                            const inputEvent = new Event('input', { bubbles: true });
+                            inputElement.dispatchEvent(inputEvent);
+                            showTempMessage(`✨ ${getFieldName(suggestion.field)} mise à jour (+${suggestion.points} points)`, 'success');
+                            inputElement.classList.remove('ai-highlight');
+                            currentIndex++;
+                            setTimeout(applyNext, 800);
+                        }
+                    }, 30);
+                } else {
+                    inputElement.value = '';
+                    let index = 0;
+                    const text = suggestion.value.toString();
+                    const typingInterval = setInterval(() => {
+                        if (index < text.length) {
+                            inputElement.value += text[index];
+                            index++;
+                        } else {
+                            clearInterval(typingInterval);
+                            if (typeof validateField === 'function') {
+                                validateField(inputElement, false);
+                            }
+                            const inputEvent = new Event('input', { bubbles: true });
+                            inputElement.dispatchEvent(inputEvent);
+                            showTempMessage(`✨ ${getFieldName(suggestion.field)} : ${oldValue} → ${suggestion.value} (+${suggestion.points} points)`, 'success');
+                            inputElement.classList.remove('ai-highlight');
+                            currentIndex++;
+                            setTimeout(applyNext, 800);
+                        }
+                    }, 50);
+                }
+            }
+            
+            setTimeout(() => {
+                inputElement.classList.remove('ai-highlight');
+            }, 2000);
+        } else {
+            console.warn(`Element not found: ${elementId} for field ${suggestion.field}`);
+            currentIndex++;
+            applyNext();
+        }
+    }
+    
+    applyNext();
+}
+function applySuggestionToForm(field, value, points) {
+    const fieldMap = {
+        'capacite': 'eventCapacity',
+        'type': 'eventType',
+        'description': 'eventDescription',
+        'titre': 'eventTitle',
+        'maxParticipant': 'eventCapacity'
+    };
+    
+    const elementId = fieldMap[field];
+    const inputElement = document.getElementById(elementId);
+    
+    if (inputElement) {
+        const oldValue = inputElement.value;
+        
+        // Skip if value is the same
+        if (oldValue == value) {
+            showTempMessage(`ℹ️ ${getFieldName(field)} est déjà à ${value}`, 'info');
+            return;
+        }
+        
+        // Highlight
+        inputElement.classList.add('ai-highlight');
+        inputElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // For SELECT elements (eventType)
+        if (inputElement.tagName === 'SELECT') {
+            let optionFound = false;
+            let matchedValue = null;
+            let matchedText = null;
+            
+            for (let i = 0; i < inputElement.options.length; i++) {
+                if (inputElement.options[i].value === value) {
+                    matchedValue = inputElement.options[i].value;
+                    matchedText = inputElement.options[i].textContent;
+                    optionFound = true;
+                    break;
+                }
+            }
+            
+            if (!optionFound) {
+                showAddTypeConfirmPopup(value, inputElement, field, oldValue, points);
+                inputElement.classList.remove('ai-highlight');
+                return;
+            }
+            
+            setTimeout(() => {
+                inputElement.value = matchedValue;
+                const changeEvent = new Event('change', { bubbles: true });
+                inputElement.dispatchEvent(changeEvent);
+                showTempMessage(`✨ ${getFieldName(field)} : ${oldValue} → ${matchedText} ${points ? `(+${points} points)` : ''}`, 'success');
+                inputElement.classList.remove('ai-highlight');
+            }, 500);
+        }
+        // For NUMBER inputs (eventCapacity)
+        else if (inputElement.type === 'number') {
+            setTimeout(() => {
+                const startValue = parseInt(oldValue) || 0;
+                const endValue = parseInt(value) || 0;
+                const duration = 500;
+                const startTime = performance.now();
+                
+                function animateNumber(currentTime) {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const currentValue = Math.round(startValue + (endValue - startValue) * progress);
+                    inputElement.value = currentValue;
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(animateNumber);
+                    } else {
+                        inputElement.value = endValue;
+                        const inputEvent = new Event('input', { bubbles: true });
+                        inputElement.dispatchEvent(inputEvent);
+                        if (typeof validateField === 'function') {
+                            validateField(inputElement, false);
+                        }
+                        showTempMessage(`✨ ${getFieldName(field)} : ${oldValue} → ${value} ${points ? `(+${points} points)` : ''}`, 'success');
+                        inputElement.classList.remove('ai-highlight');
+                    }
+                }
+                requestAnimationFrame(animateNumber);
+            }, 100);
+        }
+        // For TEXT inputs and TEXTAREA
+        else {
+            // Special handling for description - simplified toast message
+            if (field === 'description') {
+                inputElement.value = '';
+                let index = 0;
+                const text = value.toString();
+                const typingInterval = setInterval(() => {
+                    if (index < text.length) {
+                        inputElement.value += text[index];
+                        index++;
+                    } else {
+                        clearInterval(typingInterval);
+                        if (typeof validateField === 'function') {
+                            validateField(inputElement, false);
+                        }
+                        const inputEvent = new Event('input', { bubbles: true });
+                        inputElement.dispatchEvent(inputEvent);
+                        // Simplified message for description
+                        showTempMessage(`✨ ${getFieldName(field)} mise à jour ${points ? `(+${points} points)` : ''}`, 'success');
+                        inputElement.classList.remove('ai-highlight');
+                    }
+                }, 30);
+            } else {
+                // For title and other text fields - show full before/after
+                inputElement.value = '';
+                let index = 0;
+                const text = value.toString();
+                const typingInterval = setInterval(() => {
+                    if (index < text.length) {
+                        inputElement.value += text[index];
+                        index++;
+                    } else {
+                        clearInterval(typingInterval);
+                        if (typeof validateField === 'function') {
+                            validateField(inputElement, false);
+                        }
+                        const inputEvent = new Event('input', { bubbles: true });
+                        inputElement.dispatchEvent(inputEvent);
+                        showTempMessage(`✨ ${getFieldName(field)} : ${oldValue} → ${value} ${points ? `(+${points} points)` : ''}`, 'success');
+                        inputElement.classList.remove('ai-highlight');
+                    }
+                }, 50);
+            }
+        }
+        
+        setTimeout(() => {
+            inputElement.classList.remove('ai-highlight');
+        }, 2000);
+    } else {
+        console.warn(`Element not found: ${elementId} for field ${field}`);
+        showTempMessage(`⚠️ Champ ${getFieldName(field)} non trouvé`, 'warning');
+    }
+}
+
+// Show confirmation popup to add new event type
+function showAddTypeConfirmPopup(newType, inputElement, field, oldValue, points) {
+    console.log('showAddTypeConfirmPopup called with:', newType);
+    
+    let overlay = document.getElementById('addTypeOverlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'addTypeOverlay';
+        overlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+        `;
+        document.body.appendChild(overlay);
+    }
+    
+    overlay.innerHTML = `
+        <div style="background: white; border-radius: 24px; padding: 25px; width: 400px; max-width: 90%; text-align: center; animation: slideDown 0.3s ease;">
+            <div style="font-size: 48px; margin-bottom: 15px;">🤔</div>
+            <h3 style="margin: 0 0 10px 0; color: #1f2937;">Nouveau type d'événement</h3>
+            <p style="margin: 0 0 10px 0; color: #6b7280;">
+                Le type "<strong style="color: #a855f7;">${escapeHtml(newType)}</strong>" n'existe pas encore.
+            </p>
+            <p style="margin: 0 0 20px 0; color: #6b7280; font-size: 0.9rem;">
+                Voulez-vous l'ajouter à la liste ?
+            </p>
+            <div style="display: flex; gap: 12px; justify-content: center;">
+                <button id="confirmAddTypeBtn" style="background: linear-gradient(135deg, #a855f7, #e879f9); color: white; border: none; padding: 10px 24px; border-radius: 40px; cursor: pointer; font-weight: 600;">
+                    ✅ Oui, ajouter
+                </button>
+                <button id="cancelAddTypeBtn" style="background: #f3f4f6; color: #374151; border: none; padding: 10px 24px; border-radius: 40px; cursor: pointer; font-weight: 600;">
+                    ❌ Non, ignorer
+                </button>
+            </div>
+        </div>
+    `;
+    
+    overlay.style.display = 'flex';
+    
+    document.getElementById('confirmAddTypeBtn').onclick = function() {
+        addNewEventType(newType, inputElement, field, oldValue, points);
+        overlay.remove();
+    };
+    
+    document.getElementById('cancelAddTypeBtn').onclick = function() {
+        overlay.remove();
+        showTempMessage(`💡 Suggestion ignorée pour "${newType}"`, 'info');
+        inputElement.classList.remove('ai-highlight');
+    };
+    
+    overlay.onclick = function(e) {
+        if (e.target === overlay) {
+            overlay.remove();
+            inputElement.classList.remove('ai-highlight');
+        }
+    };
+}
+
+
+// Add new event type to database and select it
+function addNewEventType(newType, inputElement, field, oldValue, points) {
+    console.log('addNewEventType called with:', newType);
+    showTempMessage('📝 Ajout du nouveau type...', 'info');
+    
+    fetch('/admin/evenements/add-event-type', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ type: newType })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Response:', data);
+        if (data.success) {
+            let emoji = '📌';
+            const typeLower = newType.toLowerCase();
+            if (typeLower.includes('atelier')) emoji = '🎨';
+            else if (typeLower.includes('conférence')) emoji = '🎤';
+            else if (typeLower.includes('sortie')) emoji = '🚶';
+            else if (typeLower.includes('formation')) emoji = '📚';
+            else if (typeLower.includes('en ligne') || typeLower.includes('web')) emoji = '💻';
+            
+            const newOption = document.createElement('option');
+            newOption.value = newType;
+            newOption.textContent = `${emoji} ${newType}`;
+            inputElement.appendChild(newOption);
+            
+            inputElement.value = newType;
+            const changeEvent = new Event('change', { bubbles: true });
+            inputElement.dispatchEvent(changeEvent);
+            
+            showTempMessage(`✨ Nouveau type "${newType}" ajouté et sélectionné ! ${points ? `(+${points} points)` : ''}`, 'success');
+            inputElement.classList.remove('ai-highlight');
+        } else {
+            showTempMessage(`⚠️ Impossible d'ajouter le type "${newType}"`, 'warning');
+            inputElement.classList.remove('ai-highlight');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showTempMessage(`⚠️ Erreur lors de l'ajout du type`, 'warning');
+        inputElement.classList.remove('ai-highlight');
+    });
+}
+function closeDetailCard() {
+    document.getElementById('detailCard').style.display = 'none';
 }
 
 function handleEventDeleteClick(e) {
@@ -1504,115 +2131,7 @@ function handleEventDeleteClick(e) {
     document.getElementById('deleteConfirmPopup').style.display = 'flex';
 }
 
-function loadEvents() {
-    const searchTerm = document.getElementById('smartSearch')?.value || '';
-    const type = document.getElementById('filterType')?.value || 'tous';
-    const status = document.getElementById('filterStatus')?.value || 'tous';
-    const period = document.getElementById('filterPeriod')?.value || 'toutes';
-    const sortBy = document.getElementById('filterSort')?.value || 'date_desc';
-    
-    const loadingIndicator = document.getElementById('loadingIndicator');
-    const tableBody = document.getElementById('eventTableBody');
-    
-    if (loadingIndicator) loadingIndicator.style.display = 'block';
-    
-    const formData = new URLSearchParams();
-    formData.append('search', searchTerm);
-    formData.append('type', type);
-    formData.append('status', status);
-    formData.append('period', period);
-    formData.append('sortBy', sortBy);
-    
-    fetch('{{ path('admin_evenements_search') }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: formData.toString()
-    })
-    .then(response => response.json())
-    .then(data => {
-        const resultCount = document.getElementById('resultCount');
-        if (resultCount) resultCount.textContent = data.total || 0;
-        
-        if (tableBody) {
-            if (!data.events || data.events.length === 0) {
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="10" style="text-align: center; padding: 40px;">
-                            <i class="fas fa-calendar-times fa-3x text-muted mb-3 d-block"></i>
-                            <p class="text-muted">Aucun événement trouvé</p>
-                            <small>Essayez d'autres critères</small>
-                        </td>
-                    </tr>
-                `;
-            } else {
-                tableBody.innerHTML = data.events.map((event, index) => {
-                    let statusBadge = '';
-                    switch(event.status) {
-                        case 'planifie': statusBadge = '<span class="badge-grey" style="background:#fff5e0; color:#b45309;">📅 Planifié</span>'; break;
-                        case 'ouvert': statusBadge = '<span class="badge-grey" style="background:#e0f5e8; color:#2d6a4f;">🔓 Ouvert</span>'; break;
-                        case 'complet': statusBadge = '<span class="badge-grey" style="background:#f8e4f0; color:#c92a2a;">✅ Complet</span>'; break;
-                        case 'annule': statusBadge = '<span class="badge-grey" style="background:#e5e7eb; color:#6b7280;">❌ Annulé</span>'; break;
-                        default: statusBadge = '<span class="badge-grey">' + event.status + '</span>';
-                    }
-                    
-                    const dateTimeStr = event.dateDebut ? 
-                        `${event.dateDebut} à ${event.heureDebut || '--:--'}` : 
-                        'Date non définie';
-                    
-                    //  CORRECTION IMAGE - Utiliser event.imagePath directement
-                    let imageHtml = '';
-                    if (event.imagePath && event.imagePath !== '') {
-                        imageHtml = `<img src="${event.imagePath}" alt="${event.titre}" class="event-image" style="width:50px;height:50px;object-fit:cover;border-radius:10px;" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'event-image-placeholder\'><i class=\'fas fa-calendar-alt\'></i></div>'">`;
-                    } else if (event.image && event.image !== '') {
-                        imageHtml = `<img src="/uploads/events/${event.image}" alt="${event.titre}" class="event-image" style="width:50px;height:50px;object-fit:cover;border-radius:10px;" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'event-image-placeholder\'><i class=\'fas fa-calendar-alt\'></i></div>'">`;
-                    } else {
-                        imageHtml = `<div class="event-image-placeholder"><i class="fas fa-calendar-alt"></i></div>`;
-                    }
-                    
-                    return `
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td>${imageHtml}</td>
-                            <td><strong>${escapeHtml(event.titre)}</strong><br><small>${escapeHtml(event.description ? event.description.substring(0, 50) : '')}</small></td>
-                            <td><span class="badge-grey">${escapeHtml(event.typeEvent || 'Non défini')}</span></td>
-                            <td>${dateTimeStr}</td>
-                            <td>${escapeHtml(event.lieu || '-')}</td>
-                            <td><strong>${(event.maxParticipant || 0).toLocaleString()}</strong></td>
-                            <td>${statusBadge}</td>
-                            <td><span class="badge-grey"><i class="fas fa-handshake"></i> ${event.sponsorCount || 0}</span></td>
-                            <td>
-                                <button class="btn-edit-soft me-1 edit-event" data-id="${event.idEvent}"><i class="fas fa-edit"></i> Modifier</button>
-                                <button class="btn-danger-soft delete-event" data-id="${event.idEvent}"><i class="fas fa-trash"></i> Supprimer</button>
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
-                
-                attachEventButtons();
-            }
-        }
-        
-        updateActiveFilters(type, status, period, sortBy, searchTerm);
-        
-        if (loadingIndicator) loadingIndicator.style.display = 'none';
-    })
-    .catch(error => {
-        console.error('Erreur:', error);
-        if (loadingIndicator) loadingIndicator.style.display = 'none';
-        if (tableBody) {
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="10" style="text-align: center; color: red; padding: 40px;">
-                        <i class="fas fa-exclamation-circle fa-2x mb-2 d-block"></i>
-                        Erreur lors du chargement des données
-                    </td>
-                </tr>
-            `;
-        }
-    });
-}
+
 // ========== POPUP FUNCTIONS ==========
 function showConfirmPopup() {
     if (!validateFormForSubmit()) {
@@ -1792,6 +2311,144 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     loadEvents();
+});
+// ========== AI SUGGESTION HANDLER ==========
+// Check if coming from AI suggestion
+function checkForAISuggestion() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const suggestField = urlParams.get('suggest_field');
+    const suggestValue = urlParams.get('suggest_value');
+    const suggestPoints = urlParams.get('suggest_points');
+    const suggestOriginal = urlParams.get('suggest_original');
+    
+    if (suggestField && suggestValue) {
+        // Map field names to element IDs
+        const fieldMap = {
+            'capacite': 'eventCapacity',
+            'type': 'eventType',
+            'description': 'eventDescription',
+            'titre': 'eventTitle'
+        };
+        
+        const elementId = fieldMap[suggestField];
+        const inputElement = document.getElementById(elementId);
+        
+        if (inputElement) {
+            const oldValue = inputElement.value;
+            
+            // Create and show banner
+            let banner = document.getElementById('aiSuggestionBanner');
+            if (!banner) {
+                banner = document.createElement('div');
+                banner.id = 'aiSuggestionBanner';
+                banner.className = 'ai-suggestion-banner';
+                const formHeader = document.querySelector('.card-box-header');
+                if (formHeader) {
+                    formHeader.parentNode.insertBefore(banner, formHeader.nextSibling);
+                }
+            }
+            
+            banner.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <i class="fas fa-magic fa-2x" style="color: #f59e0b;"></i>
+                    <div style="flex: 1;">
+                        <strong>✨ Suggestion IA appliquée</strong>
+                        <p style="margin: 0; font-size: 0.85rem;">
+                            ${getFieldName(suggestField)} : 
+                            <span style="text-decoration: line-through; opacity: 0.7;">${escapeHtml(oldValue)}</span>
+                            <span class="ai-change-arrow"> → </span>
+                            <strong style="color: #f59e0b;">${escapeHtml(suggestValue)}</strong>
+                            ${suggestPoints ? `<span style="background: #dcfce7; padding: 2px 8px; border-radius: 20px; margin-left: 10px;">+${suggestPoints} points</span>` : ''}
+                        </p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.classList.remove('show')" style="background: none; border: none; cursor: pointer;">✕</button>
+                </div>
+            `;
+            banner.classList.add('show');
+            
+            // Highlight the field
+            inputElement.classList.add('ai-highlight');
+            
+            // ANIMATION: Type the new value
+            const originalValue = inputElement.value;
+            
+            if (inputElement.tagName === 'SELECT') {
+                // For select, just change value with visual feedback
+                setTimeout(() => {
+                    inputElement.value = suggestValue;
+                    inputElement.style.transition = 'all 0.3s';
+                    showAIToast(`✅ ${getFieldName(suggestField)} modifié : ${originalValue} → ${suggestValue}`);
+                }, 500);
+            } else if (inputElement.tagName === 'TEXTAREA') {
+                // For textarea, show typing effect
+                inputElement.value = '';
+                let index = 0;
+                const text = suggestValue;
+                const typingInterval = setInterval(() => {
+                    if (index < text.length) {
+                        inputElement.value += text[index];
+                        index++;
+                    } else {
+                        clearInterval(typingInterval);
+                        showAIToast(`✅ ${getFieldName(suggestField)} mis à jour !`);
+                        // Trigger validation
+                        validateField(inputElement, false);
+                    }
+                }, 30);
+            } else {
+                // For input fields, type it
+                inputElement.value = '';
+                let index = 0;
+                const text = suggestValue.toString();
+                const typingInterval = setInterval(() => {
+                    if (index < text.length) {
+                        inputElement.value += text[index];
+                        index++;
+                    } else {
+                        clearInterval(typingInterval);
+                        showAIToast(`✅ ${getFieldName(suggestField)} : ${originalValue} → ${suggestValue} ${suggestPoints ? `(+${suggestPoints} points)` : ''}`);
+                        // Trigger validation
+                        validateField(inputElement, false);
+                    }
+                }, 50);
+            }
+            
+            // Remove highlight after animation
+            setTimeout(() => {
+                inputElement.classList.remove('ai-highlight');
+            }, 3000);
+            
+            // Also update the form mode badge to show it's AI-enhanced
+            const formMode = document.getElementById('formMode');
+            if (formMode && !formMode.innerHTML.includes('IA')) {
+                formMode.innerHTML = `Mode : Modification <i class="fas fa-edit"></i> <span style="background: #fef3c7; color: #f59e0b; padding: 2px 8px; border-radius: 20px; margin-left: 8px;">✨ Suggestion IA</span>`;
+            }
+        }
+    }
+}
+
+function getFieldName(field) {
+    const names = {
+        'capacite': 'Capacité',
+        'type': 'Type d\'événement',
+        'description': 'Description',
+        'titre': 'Titre',
+        'maxParticipant': 'Capacité'
+    };
+    return names[field] || field;
+}
+
+function showAIToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'ai-toast';
+    toast.innerHTML = `<i class="fas fa-robot"></i> ${message}`;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 4000);
+}
+
+// Call this when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    checkForAISuggestion();
 });
 </script>
 {% endblock %}

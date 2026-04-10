@@ -3,6 +3,11 @@
 namespace App\Controller;
 
 use App\Entity\Event;
+use App\Service\GroqService;
+use App\Service\WeatherService;
+use App\Service\EventAIPredictor;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Contracts\Cache\CacheInterface;
 use App\Repository\EventRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -14,7 +19,7 @@ class EventController extends AbstractController
 {
     #[Route('/events', name: 'app_events')]
     #[Route('/evenements', name: 'app_evenements')]
-    public function index(Request $request, EventRepository $eventRepository): Response
+   public function index(Request $request, EventRepository $eventRepository, GroqService $groqService, EventAIPredictor $predictor, CacheInterface $cache): Response
     {
         // Récupérer les paramètres de recherche
         $searchTerm = $request->query->get('search');
@@ -157,6 +162,117 @@ class EventController extends AbstractController
             'totalEvents' => $totalEvents
         ]);
     }
+    /**
+ * Récupère le score IA d'un événement (API)
+ */
+#[Route('/event/score/{id}', name: 'app_event_score', methods: ['GET'])]
+public function getEventScore(int $id, EventRepository $eventRepository, EventAIPredictor $predictor): JsonResponse
+{
+    $event = $eventRepository->find($id);
+    if (!$event) {
+        return $this->json(['error' => 'Event not found'], 404);
+    }
+    
+    $score = $predictor->predictAutismScore($event);
+    $level = $score >= 70 ? 'Très adapté' : ($score >= 40 ? 'Modérément adapté' : 'Peu adapté');
+    
+    return $this->json([
+        'score' => round($score, 1),
+        'level' => $level
+    ]);
+}
+
+/**
+ * Analyse IA détaillée pour un événement (API)
+ */
+#[Route('/event/analyze/{id}', name: 'app_event_analyze', methods: ['POST'])]
+public function analyzeEvent(int $id, EventRepository $eventRepository, GroqService $groqService, EventAIPredictor $predictor): JsonResponse
+{
+    $event = $eventRepository->find($id);
+    if (!$event) {
+        return $this->json(['error' => 'Event not found'], 404);
+    }
+    
+    $score = $predictor->predictAutismScore($event);
+    
+    $eventData = [
+        'title' => $event->getTitre(),
+        'type' => $event->getTypeEvent(),
+        'description' => $event->getDescription(),
+        'capacity' => $event->getMaxParticipant(),
+        'currentScore' => round($score, 1)
+    ];
+    
+    $analysis = $groqService->generateEventAnalysis($eventData);
+    
+    return $this->json([
+        'success' => true,
+        'analysis' => $analysis,
+        'score' => round($score, 1)
+    ]);
+}
+/**
+ * API pour récupérer la liste "À apporter"
+ */
+/**
+ * API pour récupérer la liste "À apporter"
+ */
+#[Route('/event/bring/{id}', name: 'app_event_bring', methods: ['GET'])]
+public function getBringList(int $id, EventRepository $eventRepository, GroqService $groqService, EventAIPredictor $predictor): JsonResponse
+{
+    $event = $eventRepository->find($id);
+    if (!$event) {
+        return $this->json(['error' => 'Event not found'], 404);
+    }
+    
+    $score = $predictor->predictAutismScore($event);
+    
+    $eventData = [
+        'title' => $event->getTitre(),
+        'type' => $event->getTypeEvent(),
+        'description' => $event->getDescription(),
+        'lieu' => $event->getLieu(),  // ← AJOUTÉ
+        'capacity' => $event->getMaxParticipant(),
+        'score' => round($score, 1)
+    ];
+    
+    $bringList = $groqService->generateBringList($eventData);
+    
+    return $this->json([
+        'success' => true,
+        'items' => $bringList
+    ]);
+}
+
+/**
+ * API pour récupérer les conseils personnalisés
+ */
+#[Route('/event/tips/{id}', name: 'app_event_tips', methods: ['GET'])]
+public function getTips(int $id, EventRepository $eventRepository, GroqService $groqService, EventAIPredictor $predictor): JsonResponse
+{
+    $event = $eventRepository->find($id);
+    if (!$event) {
+        return $this->json(['error' => 'Event not found'], 404);
+    }
+    
+    $score = $predictor->predictAutismScore($event);
+    
+    $eventData = [
+        'title' => $event->getTitre(),
+        'type' => $event->getTypeEvent(),
+        'description' => $event->getDescription(),
+        'lieu' => $event->getLieu(),  // ← AJOUTÉ
+        'capacity' => $event->getMaxParticipant(),
+        'score' => round($score, 1)
+    ];
+    
+    $tips = $groqService->generateTips($eventData);
+    
+    return $this->json([
+        'success' => true,
+        'tips' => $tips
+    ]);
+}
    #[Route('/event/{id}', name: 'app_event_show')]
 public function show(int $id, EntityManagerInterface $entityManager): Response
 {
@@ -175,9 +291,12 @@ public function show(int $id, EntityManagerInterface $entityManager): Response
         if (strpos($imageName, '/') === 0) {
             $imagePath = $imageName;
         } else {
-            $imagePath = '/' . $imageName;  // ← AJOUTE LE SLASH AU DÉBUT
+            $imagePath = '/' . $imageName;
         }
     }
+    
+    // ✅ AJOUTE CETTE LIGNE - Décode le planning
+    $planningData = json_decode($event->getPlanning(), true);
     
     $sponsors = $event->getSponsors();
     
@@ -193,10 +312,98 @@ public function show(int $id, EntityManagerInterface $entityManager): Response
     
     return $this->render('front/events/show.html.twig', [
         'event' => $event,
-        'imagePath' => $imagePath,  // ← ENVOIE LE CHEMIN CORRIGÉ
+        'planningData' => $planningData,  // ← AJOUTE CETTE LIGNE
+        'imagePath' => $imagePath,
         'sponsors' => $sponsors,
         'similarEvents' => $similarEvents
     ]);
+}
+#[Route('/event/stats/{id}', name: 'app_event_stats', methods: ['GET'])]
+public function getEventStats(int $id, EventRepository $eventRepository, EventAIPredictor $predictor): JsonResponse
+{
+    $event = $eventRepository->find($id);
+    if (!$event) {
+        return $this->json(['error' => 'Event not found'], 404);
+    }
+    
+    $score = $predictor->predictAutismScore($event);
+    
+    // Calcul des stats basées sur le score et le type d'événement
+    $stats = $this->calculateEventStats($event, $score);
+    
+    return $this->json($stats);
+}
+
+private function calculateEventStats(Event $event, float $score): array
+{
+    // Niveau sonore
+    if ($score >= 70) {
+        $noise = ['emoji' => '🔇', 'value' => 'Très calme'];
+    } elseif ($score >= 40) {
+        $noise = ['emoji' => '🔊', 'value' => 'Modéré'];
+    } else {
+        $noise = ['emoji' => '📢', 'value' => 'Élevé'];
+    }
+    
+    // Charge sensorielle
+    $type = $event->getTypeEvent();
+    $sensoryMap = [
+        'Atelier' => ['emoji' => '🎨', 'value' => 'Faible'],
+        'Conférence' => ['emoji' => '👥', 'value' => 'Moyenne'],
+        'Sortie' => ['emoji' => '🚀', 'value' => 'Élevée'],
+        'Sport' => ['emoji' => '⚽', 'value' => 'Élevée'],
+        'Bien-être' => ['emoji' => '🌿', 'value' => 'Faible'],
+    ];
+    $sensory = $sensoryMap[$type] ?? ['emoji' => '🧘', 'value' => 'Moyenne'];
+    
+    // Âge recommandé
+    $capacity = $event->getMaxParticipant();
+    if ($capacity <= 15) {
+        $age = '3-6 ans';
+    } elseif ($capacity <= 30) {
+        $age = '5-10 ans';
+    } else {
+        $age = '8-14 ans';
+    }
+    
+    // Niveau d'activité
+    $activityMap = [
+        'Atelier' => ['emoji' => '🪑', 'value' => 'Assis'],
+        'Conférence' => ['emoji' => '🪑', 'value' => 'Assis'],
+        'Sortie' => ['emoji' => '🚶', 'value' => 'Debout / Marche'],
+        'Sport' => ['emoji' => '🏃', 'value' => 'Actif'],
+    ];
+    $activity = $activityMap[$type] ?? ['emoji' => '🧘', 'value' => 'Mixte'];
+    
+    // Recommandation
+    if ($score >= 70) {
+        $recommendation = ['emoji' => '⭐⭐⭐', 'value' => 'Excellent'];
+    } elseif ($score >= 40) {
+        $recommendation = ['emoji' => '⭐⭐', 'value' => 'Bon'];
+    } else {
+        $recommendation = ['emoji' => '⭐', 'value' => 'À adapter'];
+    }
+    
+    return [
+        'noise' => $noise,
+        'sensory' => $sensory,
+        'age' => ['emoji' => '👥', 'value' => $age],
+        'activity' => $activity,
+        'recommendation' => $recommendation
+    ];
+}
+#[Route('/event/weather/{id}', name: 'app_event_weather', methods: ['GET'])]
+public function getWeather(int $id, EventRepository $eventRepository, WeatherService $weatherService): JsonResponse
+{
+    $event = $eventRepository->find($id);
+    
+    if (!$event) {
+        return $this->json(['error' => 'Event not found'], 404);
+    }
+    
+    $weather = $weatherService->getWeather($event->getLieu());
+    
+    return $this->json($weather);
 }
     
 }
