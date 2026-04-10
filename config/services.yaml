@@ -19,6 +19,39 @@ services:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
+    App\Service\AiPlanningService:
+        arguments:
+            $apiKey: '%env(GROQ_API_KEY)%'
+            $apiUrl: '%env(GROQ_API_URL)%'
+            $model: '%env(GROQ_MODEL)%'
+
+    # Service pour AssemblyAI (transcription vocale)
+    App\Service\AssemblyAiService:
+        arguments:
+            $apiKey: '%env(ASSEMBLYAI_API_KEY)%'
+            $apiUrl: '%env(ASSEMBLYAI_API_URL)%'
+    
+    # Service pour Groq (recommandations vocales)
+    App\Service\GroqService:
+        arguments:
+            $groqApiKey: '%env(GROQ_API_KEY)%'
+            $groqApiUrl: '%env(GROQ_API_URL)%'
+            $groqModel: '%env(GROQ_MODEL)%'
+
+    # image generatorcours
+    App\Service\StabilityImageService:
+        arguments:
+            $apiKey: '%env(STABILITY_API_KEY)%'        
+            
+    # Service pour recommandation vocale (combine AssemblyAI + Groq)
+    App\Service\VoiceRecommendationService:
+        arguments:
+            $assemblyAi: '@App\Service\AssemblyAiService'
+            $groq: '@App\Service\GroqService'
+            $eventRepository: '@App\Repository\EventRepository'
+
+
+            
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

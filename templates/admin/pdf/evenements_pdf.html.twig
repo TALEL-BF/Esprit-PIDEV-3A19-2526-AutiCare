@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>AutiCare - Rapport des Événements</title>
+    <style>
+        body {
+            font-family: 'DejaVu Sans', Arial, sans-serif;
+            font-size: 11pt;
+            color: #1f2937;
+            background-color: #f9fafb;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 28pt;
+            color: #4f46e5;
+            margin-bottom: 5px;
+        }
+
+        .header h2 {
+            font-size: 14pt;
+            color: #6b7280;
+            font-weight: normal;
+        }
+
+        /* ===== TABLE ===== */
+        .table-wrapper {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10pt;
+        }
+
+        th {
+            background-color: #4f46e5;
+            color: white;
+            padding: 12px 10px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        tr:hover td {
+            background-color: #f3f4f6;
+        }
+
+        /* ===== BADGES ===== */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 8pt;
+            font-weight: 600;
+            color: white;
+        }
+
+        .badge-planifie { background-color: #facc15; }
+        .badge-ouvert { background-color: #10b981; }
+        .badge-complet { background-color: #ef4444; }
+        .badge-annule { background-color: #6b7280; }
+
+        .type-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 8pt;
+            font-weight: 600;
+            color: white;
+        }
+
+        .type-Atelier { background-color: #6366f1; }
+        .type-Conférence { background-color: #db2777; }
+        .type-Sortie { background-color: #059669; }
+        .type-Formation { background-color: #3730a3; }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            text-align: center;
+            font-size: 8pt;
+            color: #9ca3af;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+    <h1>Rapport des Événements</h1>
+    <h2>Exporté le {{ exportDate|date('d/m/Y à H:i') }}</h2>
+</div>
+
+<!-- TABLE -->
+<div class="table-wrapper">
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Événement</th>
+                <th>Date</th>
+                <th>Heure</th>
+                <th>Lieu</th>
+                <th>Type</th>
+                <th>Places</th>
+                <th>Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for event in events %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ event.titre|striptags }}</td>
+                <td>{{ event.dateDebut ? event.dateDebut|date('d/m/Y') : '-' }}</td>
+                <td>{{ event.heureDebut ? event.heureDebut|date('H:i') : '-' }}</td>
+                <td>{{ event.lieu|default('-')|striptags }}</td>
+                <td>
+                    {% set typeClass = 'type-' ~ event.typeEvent|replace({'é':'e'}) %}
+                    <span class="type-badge {{ typeClass }}">{{ event.typeEvent|default('-') }}</span>
+                </td>
+                <td>{{ event.maxParticipant|default(0) }}</td>
+                <td>
+                    {% if event.status == 'planifie' %}
+                        <span class="badge badge-planifie">Planifié</span>
+                    {% elseif event.status == 'ouvert' %}
+                        <span class="badge badge-ouvert">Ouvert</span>
+                    {% elseif event.status == 'complet' %}
+                        <span class="badge badge-complet">Complet</span>
+                    {% elseif event.status == 'annule' %}
+                        <span class="badge badge-annule">Annulé</span>
+                    {% else %}
+                        <span class="badge badge-planifie">Planifié</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="8" class="text-center" style="padding: 40px;">
+                    Aucun événement trouvé
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+    AutiCare - L'inclusion par l'éducation
+</div>
+
+</body>
+</html>

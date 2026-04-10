@@ -208,11 +208,7 @@ class Cours
         return $this;
     }
 
-    // ========== METHODES POUR LES MOTS ET IMAGES ==========
-
-    /**
-     * Retourne la liste des mots sous forme de tableau
-     */
+    
     public function getMotsArray(): array
     {
         if (empty($this->mots)) {

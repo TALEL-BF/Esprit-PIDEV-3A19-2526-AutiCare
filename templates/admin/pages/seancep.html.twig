@@ -1,0 +1,572 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Auticare — Séances{% endblock %}
+
+{% block page_title %}Gestion des Séances{% endblock %}
+{% set seances = sessions|default(seances|default([])) %}
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .filter-input {
+        width: 200px;
+        font-size: .8rem;
+        padding: 6px 12px;
+    }
+
+    .seance-filters-panel {
+        width: 100%;
+        background: #faf8ff;
+        border: 1px solid #eadbff;
+        border-radius: 12px;
+        padding: 12px;
+        margin-top: 8px;
+    }
+
+    .seance-filters-main {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .seance-search-wrap {
+        position: relative;
+    }
+
+    .seance-search-wrap i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9b6be8;
+        font-size: .9rem;
+    }
+
+    .seance-search-wrap .form-control {
+        padding-left: 34px;
+    }
+
+    .seance-filters-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(160px, 1fr));
+        gap: 10px;
+    }
+
+    @media (max-width: 1200px) {
+        .seance-filters-main {
+            grid-template-columns: 1fr;
+        }
+
+        .seance-filters-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .seance-filters-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .pro-kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(180px, 1fr));
+        gap: 12px;
+    }
+
+    .pro-kpi-card {
+        background: linear-gradient(180deg, #ffffff 0%, #faf7ff 100%);
+        border: 1px solid #eadbff;
+        border-radius: 12px;
+        padding: 14px;
+    }
+
+    .pro-kpi-label {
+        font-size: .78rem;
+        color: #6b7280;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: .3px;
+    }
+
+    .pro-kpi-value {
+        font-size: 1.45rem;
+        font-weight: 700;
+        color: #5b21b6;
+        line-height: 1.1;
+    }
+
+    .pro-kpi-sub {
+        margin-top: 6px;
+        font-size: .8rem;
+        color: #7c3aed;
+    }
+
+    @media (max-width: 992px) {
+        .pro-kpi-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div class="page-header">
+    <h2><i class="fas fa-calendar-check me-2" style="color:var(--purple-500)"></i>Gestion des Séances</h2>
+    <p>Planifier et administrer les séances pédagogiques et leur suivi</p>
+</div>
+
+{% for message in app.flashes('success') %}
+    <div class="alert alert-success">{{ message }}</div>
+{% endfor %}
+
+<div class="row g-3 mb-4">
+    {% set nb_total = seances|length %}
+    {% set nb_confirmes = 0 %}
+    {% set nb_planifies = 0 %}
+    {% set nb_annules = 0 %}
+    {% set total_duree = 0 %}
+    {% for item in seances %}
+        {% if item.statutSeance == 'confirme' %}
+            {% set nb_confirmes = nb_confirmes + 1 %}
+        {% elseif item.statutSeance == 'planifiee' or item.statutSeance == 'planifiée' %}
+            {% set nb_planifies = nb_planifies + 1 %}
+        {% elseif item.statutSeance == 'annule' or item.statutSeance == 'annulé' %}
+            {% set nb_annules = nb_annules + 1 %}
+        {% endif %}
+
+        {% set total_duree = total_duree + (item.duree ?? 0) %}
+    {% endfor %}
+
+    {% set taux_confirmation = nb_total > 0 ? ((nb_confirmes * 100) / nb_total)|round(1) : 0 %}
+    {% set taux_annulation = nb_total > 0 ? ((nb_annules * 100) / nb_total)|round(1) : 0 %}
+    {% set duree_moyenne = nb_total > 0 ? (total_duree / nb_total)|round(0) : 0 %}
+
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Total Séances</div>
+                    <div class="stat-value">{{ nb_total }}</div>
+                </div>
+                <div class="stat-icon purple"><i class="fas fa-calendar-check"></i></div>
+            </div>
+            <div class="stat-change up"><i class="fas fa-chart-line"></i> base globale</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Confirmées</div>
+                    <div class="stat-value">{{ nb_confirmes }}</div> 
+                </div>
+                <div class="stat-icon violet"><i class="fas fa-check-circle"></i></div>  
+            </div>
+            <div class="stat-change up"><i class="fas fa-thumbs-up"></i> séances validées</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Planifiées</div>
+                    <div class="stat-value">{{ nb_planifies }}</div>
+                </div>
+                <div class="stat-icon pink"><i class="fas fa-clock"></i></div>   
+            </div>
+            <div class="stat-change text-warning"><i class="fas fa-hourglass-half"></i> en attente</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Annulées</div>
+                    <div class="stat-value">{{ nb_annules }}</div>
+                </div>
+                <div class="stat-icon indigo"><i class="fas fa-times-circle"></i></div>
+            </div>
+            <div class="stat-change text-danger" style="color: var(--bs-danger);"><i class="fas fa-exclamation-circle"></i> à reprogrammer</div>
+        </div>
+    </div>
+</div>
+
+<div class="card-box mb-4">
+    <div class="card-box-header">
+        <span class="card-box-title"><i class="fas fa-chart-line"></i> Indicateurs de performance</span>
+    </div>
+    <div class="card-box-body">
+        <div class="pro-kpi-grid">
+            <div class="pro-kpi-card">
+                <div class="pro-kpi-label">Taux de confirmation</div>
+                <div class="pro-kpi-value">{{ taux_confirmation }}%</div>
+                <div class="pro-kpi-sub">{{ nb_confirmes }} séance(s) confirmée(s) sur {{ nb_total }}</div>
+            </div>
+            <div class="pro-kpi-card">
+                <div class="pro-kpi-label">Taux d'annulation</div>
+                <div class="pro-kpi-value">{{ taux_annulation }}%</div>
+                <div class="pro-kpi-sub">{{ nb_annules }} séance(s) annulée(s) sur {{ nb_total }}</div>
+            </div>
+            <div class="pro-kpi-card">
+                <div class="pro-kpi-label">Durée moyenne</div>
+                <div class="pro-kpi-value">{{ duree_moyenne }} min</div>
+                <div class="pro-kpi-sub">Total cumulé: {{ total_duree }} min</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-8">
+        <div class="card-box">
+            <div class="card-box-header">
+                <span class="card-box-title"><i class="fas fa-plus-circle"></i> {{ isEdit ? 'Modifier la séance' : 'Nouvelle séance' }}</span>
+                <span class="form-mode-badge">Mode : {{ isEdit ? 'Modification' : 'Ajout' }}</span>
+            </div>
+            <div class="card-box-body">
+                {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+                {% if form.vars.submitted %}{{ form_errors(form) }}{% endif %}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        {{ form_label(form.titreSeance, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.titreSeance, {'attr': {'class': 'form-control'}}) }}
+                        {% if form.vars.submitted %}{{ form_errors(form.titreSeance) }}{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_label(form.dateSeance, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.dateSeance, {'attr': {'class': 'form-control'}}) }}
+                        {% if form.vars.submitted %}{{ form_errors(form.dateSeance) }}{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_label(form.joursSemaine, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.joursSemaine, {'attr': {'class': 'form-select'}}) }}
+                        {% if form.vars.submitted %}{{ form_errors(form.joursSemaine) }}{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_label(form.duree, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.duree, {'attr': {'class': 'form-control'}}) }}
+                        {% if form.vars.submitted %}{{ form_errors(form.duree) }}{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_label(form.statutSeance, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.statutSeance, {'attr': {'class': 'form-select'}}) }}
+                        {% if form.vars.submitted %}{{ form_errors(form.statutSeance) }}{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_label(form.idAutiste, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.idAutiste, {'attr': {'class': 'form-control'}}) }}
+                        {% if form.vars.submitted %}{{ form_errors(form.idAutiste) }}{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_label(form.idProfesseur, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.idProfesseur, {'attr': {'class': 'form-control'}}) }}
+                        {% if form.vars.submitted %}{{ form_errors(form.idProfesseur) }}{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_label(form.idCours, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.idCours, {'attr': {'class': 'form-control'}}) }}
+                        {% if form.vars.submitted %}{{ form_errors(form.idCours) }}{% endif %}
+                    </div>
+                    <div class="col-12">
+                        {{ form_label(form.description, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 2}}) }}
+                        {% if form.vars.submitted %}{{ form_errors(form.description) }}{% endif %}
+                    </div>
+                    <div class="col-12 d-flex gap-2">
+                        <button class="btn-purple"><i class="fas fa-save"></i> {{ isEdit ? 'Mettre à jour' : 'Enregistrer' }}</button>
+                        {% if isEdit %}
+                            <a href="{{ path('admin_seance') }}" class="btn-outline-purple"><i class="fas fa-times"></i> Annuler</a>
+                        {% else %}
+                            <button type="reset" class="btn-outline-purple"><i class="fas fa-times"></i> Annuler</button>
+                        {% endif %}
+                    </div>
+                </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card-box h-100">
+            <div class="card-box-header">
+                <span class="card-box-title"><i class="fas fa-chart-pie"></i> Répartition des statuts</span>
+            </div>
+            <div class="card-box-body">
+                <canvas id="seanceChart" height="240"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card-box">
+    <div class="card-box-header">
+        <span class="card-box-title"><i class="fas fa-list"></i> Liste des séances</span>
+        <div class="seance-filters-panel">
+            <div class="seance-filters-main">
+                <div class="seance-search-wrap">
+                    <i class="fas fa-search"></i>
+                    <input type="text" class="form-control" id="seanceSearchInput" placeholder="Rechercher par titre, date, jour, durée ou statut...">
+                </div>
+                <button type="button" class="btn-outline-purple" id="resetSeanceFilters">
+                    <i class="fas fa-undo-alt me-1"></i> Réinitialiser
+                </button>
+            </div>
+
+            <div class="seance-filters-grid">
+                <select class="form-select" id="seanceDayFilter">
+                    <option value="">Jour: Tous</option>
+                    <option value="lundi">Lundi</option>
+                    <option value="mardi">Mardi</option>
+                    <option value="mercredi">Mercredi</option>
+                    <option value="jeudi">Jeudi</option>
+                    <option value="vendredi">Vendredi</option>
+                    <option value="samedi">Samedi</option>
+                    <option value="dimanche">Dimanche</option>
+                </select>
+                <select class="form-select" id="seanceStatusFilter">
+                    <option value="">Statut: Tous</option>
+                    <option value="confirmée">Confirmée</option>
+                    <option value="planifiée">Planifiée</option>
+                    <option value="annulée">Annulée</option>
+                    <option value="autres">Autres</option>
+                </select>
+                <select class="form-select" id="seanceDurationFilter">
+                    <option value="">Durée: Toutes</option>
+                    <option value="short">Courte (<= 30 min)</option>
+                    <option value="medium">Moyenne (31 - 60 min)</option>
+                    <option value="long">Longue (> 60 min)</option>
+                </select>
+                <select class="form-select" id="seanceSortSelect">
+                    <option value="">Tri: défaut</option>
+                    <option value="date_asc">Date croissante</option>
+                    <option value="date_desc">Date décroissante</option>
+                    <option value="duree_asc">Durée croissante</option>
+                    <option value="duree_desc">Durée décroissante</option>
+                    <option value="titre_asc">Titre (A-Z)</option>
+                    <option value="titre_desc">Titre (Z-A)</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="card-box-body p-0">
+        <div class="table-wrapper">
+            <table class="custom-table" id="seanceTable">
+                <thead>
+                    <tr>
+                        <th>Titre</th>
+                        <th>Date/Heure</th>
+                        <th>Jour</th>
+                        <th>Durée</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for seance in seances %}
+                    <tr>
+                        <td>{{ seance.titreSeance }}</td>
+                        <td>{{ seance.dateSeance ? seance.dateSeance|date('d/m/Y H:i') : '-' }}</td>
+                        <td>{{ seance.joursSemaine }}</td>
+                        <td>{{ seance.duree }} min</td>
+                        <td>
+                            {% if seance.statutSeance == 'confirme' %}
+                                <span class="badge-status badge-active">Confirmée</span>
+                            {% elseif seance.statutSeance == 'planifiee' %}
+                                <span class="badge-status badge-pending">Planifiée</span>
+                            {% elseif seance.statutSeance == 'annule' %}
+                                <span class="badge-status badge-inactive">Annulée</span>
+                            {% else %}
+                                <span class="badge-status badge-purple">{{ seance.statutSeance|capitalize }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ path('admin_seance_edit', {id: seance.id}) }}" class="btn-edit-soft me-1">Modifier</a>
+                            <form method="post" action="{{ path('admin_seance_delete', {id: seance.id}) }}" style="display:inline" onsubmit="return confirm('Supprimer cette séance ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_seance_' ~ seance.id) }}">
+                                <button class="btn-danger-soft">Supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="6" class="text-center py-3">Aucune séance enregistrée.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const P = { p400: '#a855f7', pink: '#f472b6', indigo: '#818cf8', accent: '#e040fb' };
+
+    const stats = { planifiee: 0, confirme: 0, annule: 0, autres: 0 };
+    {% for seance in seances %}
+        {% if seance.statutSeance == 'planifiee' %}
+            stats.planifiee++;
+        {% elseif seance.statutSeance == 'confirme' %}
+            stats.confirme++;
+        {% elseif seance.statutSeance == 'annule' %}
+            stats.annule++;
+        {% else %}
+            stats.autres++;
+        {% endif %}
+    {% endfor %}
+
+    new Chart(document.getElementById('seanceChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Planifiée', 'Confirmée', 'Annulée', 'Autres'],
+            datasets: [{
+                data: [stats.planifiee, stats.confirme, stats.annule, stats.autres],
+                backgroundColor: [P.p400, P.pink, P.indigo, P.accent],
+                borderWidth: 0,
+                hoverOffset: 8
+            }]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        usePointStyle: true,
+                        font: { family: 'DM Sans', size: 11 }
+                    }
+                }
+            },
+            cutout: '60%',
+            responsive: true
+        }
+    });
+
+    const seanceSearchInput = document.getElementById('seanceSearchInput');
+    const seanceDayFilter = document.getElementById('seanceDayFilter');
+    const seanceStatusFilter = document.getElementById('seanceStatusFilter');
+    const seanceDurationFilter = document.getElementById('seanceDurationFilter');
+    const seanceSortSelect = document.getElementById('seanceSortSelect');
+    const resetSeanceFilters = document.getElementById('resetSeanceFilters');
+    const seanceTableBody = document.querySelector('#seanceTable tbody');
+    const seanceDefaultSort = 'date_desc';
+
+    function getSeanceCellText(row, index) {
+        return (row.children[index]?.textContent || '').trim();
+    }
+
+    function parseSeanceDateTime(dateText) {
+        const normalized = (dateText || '').trim();
+        const parts = normalized.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})$/);
+        if (!parts) {
+            return null;
+        }
+
+        const [, day, month, year, hour, minute] = parts;
+        return new Date(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute));
+    }
+
+    function getSeanceDuration(row) {
+        const durationText = getSeanceCellText(row, 3);
+        const parsed = parseInt(durationText, 10);
+        return Number.isNaN(parsed) ? null : parsed;
+    }
+
+    function isOtherSeanceStatus(statusText) {
+        const normalized = statusText.toLowerCase();
+        return normalized !== ''
+            && normalized !== 'confirmée'
+            && normalized !== 'planifiée'
+            && normalized !== 'annulée';
+    }
+
+    function applyAdvancedSeanceFilters() {
+        const searchValue = (seanceSearchInput?.value || '').toLowerCase();
+        const dayValue = (seanceDayFilter?.value || '').toLowerCase();
+        const statusValue = (seanceStatusFilter?.value || '').toLowerCase();
+        const durationValue = seanceDurationFilter?.value || '';
+        const sortValue = seanceSortSelect?.value || '';
+
+        const rows = Array.from(document.querySelectorAll('#seanceTable tbody tr'));
+
+        rows.forEach((row) => {
+            const rowText = row.textContent.toLowerCase();
+            const dayText = getSeanceCellText(row, 2).toLowerCase();
+            const statusText = getSeanceCellText(row, 4).toLowerCase();
+            const duration = getSeanceDuration(row);
+
+            const matchesSearch = searchValue === '' || rowText.includes(searchValue);
+            const matchesDay = dayValue === '' || dayText === dayValue;
+            const matchesStatus = statusValue === ''
+                || (statusValue === 'autres' ? isOtherSeanceStatus(statusText) : statusText.includes(statusValue));
+
+            let matchesDuration = true;
+            if (durationValue === 'short') {
+                matchesDuration = duration !== null && duration <= 30;
+            } else if (durationValue === 'medium') {
+                matchesDuration = duration !== null && duration > 30 && duration <= 60;
+            } else if (durationValue === 'long') {
+                matchesDuration = duration !== null && duration > 60;
+            }
+
+            row.style.display = (matchesSearch && matchesDay && matchesStatus && matchesDuration) ? '' : 'none';
+        });
+
+        const visibleRows = rows.filter((row) => row.style.display !== 'none');
+        if (sortValue !== '' && visibleRows.length > 1) {
+            visibleRows.sort((a, b) => {
+                if (sortValue === 'date_asc') {
+                    const aDate = parseSeanceDateTime(getSeanceCellText(a, 1));
+                    const bDate = parseSeanceDateTime(getSeanceCellText(b, 1));
+                    if (!aDate || !bDate) return 0;
+                    return aDate - bDate;
+                }
+                if (sortValue === 'date_desc') {
+                    const aDate = parseSeanceDateTime(getSeanceCellText(a, 1));
+                    const bDate = parseSeanceDateTime(getSeanceCellText(b, 1));
+                    if (!aDate || !bDate) return 0;
+                    return bDate - aDate;
+                }
+                if (sortValue === 'duree_asc') {
+                    return (getSeanceDuration(a) ?? 0) - (getSeanceDuration(b) ?? 0);
+                }
+                if (sortValue === 'duree_desc') {
+                    return (getSeanceDuration(b) ?? 0) - (getSeanceDuration(a) ?? 0);
+                }
+                if (sortValue === 'titre_asc') {
+                    return getSeanceCellText(a, 0).localeCompare(getSeanceCellText(b, 0), 'fr', { sensitivity: 'base' });
+                }
+                if (sortValue === 'titre_desc') {
+                    return getSeanceCellText(b, 0).localeCompare(getSeanceCellText(a, 0), 'fr', { sensitivity: 'base' });
+                }
+                return 0;
+            });
+
+            visibleRows.forEach((row) => seanceTableBody.appendChild(row));
+        }
+    }
+
+    [seanceSearchInput, seanceDayFilter, seanceStatusFilter, seanceDurationFilter, seanceSortSelect].forEach((el) => {
+        el?.addEventListener('input', applyAdvancedSeanceFilters);
+        el?.addEventListener('change', applyAdvancedSeanceFilters);
+    });
+
+    resetSeanceFilters?.addEventListener('click', function() {
+        if (seanceSearchInput) seanceSearchInput.value = '';
+        if (seanceDayFilter) seanceDayFilter.value = '';
+        if (seanceStatusFilter) seanceStatusFilter.value = '';
+        if (seanceDurationFilter) seanceDurationFilter.value = '';
+        if (seanceSortSelect) seanceSortSelect.value = seanceDefaultSort;
+        applyAdvancedSeanceFilters();
+    });
+
+    if (seanceSortSelect && !seanceSortSelect.value) {
+        seanceSortSelect.value = seanceDefaultSort;
+    }
+    applyAdvancedSeanceFilters();
+});
+</script>
+{% endblock %}

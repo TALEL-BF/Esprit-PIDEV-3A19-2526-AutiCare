@@ -1,0 +1,1078 @@
+{# templates/front/events/show.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}AutiCare - {{ event.titre }} ✨{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 50%, #fae8ff 100%);
+            font-family: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f0ecfd; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(135deg, #a78bfa, #c084fc); border-radius: 10px; }
+
+        /* ══════════════════════════════
+           HERO BANNER - ORIGINAL UNTOUCHED
+        ══════════════════════════════ */
+        .hero-banner {
+            position: relative;
+            min-height: 550px;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            background-image: url("{{ asset('uploads/images/autism.jpg') }}");
+            background-size: cover;
+            background-position: 50% 60%;
+            background-attachment: fixed;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                105deg,
+                rgba(155, 107, 255, 0.55) 0%,
+                rgba(183, 148, 244, 0.45) 55%,
+                rgba(199, 125, 255, 0.35) 100%
+            );
+            z-index: 1;
+        }
+
+        .hero-banner::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(circle, rgba(255,255,255,0.15) 2px, transparent 2px);
+            background-size: 40px 40px;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .hero-inner {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            padding: 3.5rem 0 4rem;
+        }
+      
+/* Emoji qui saute en haut à droite */
+.top-right-jumping-emoji {
+    position: absolute;
+    top: 30px;
+    right: 40px;
+    z-index: 100;
+    cursor: pointer;
+}
+
+.jump-emoji-right {
+    font-size: 3.5rem;
+    display: inline-block;
+    animation: jumpRight 0.8s ease-in-out infinite;
+    filter: drop-shadow(0 5px 15px rgba(232, 121, 249, 0.6));
+    transition: all 0.2s ease;
+}
+
+.jump-emoji-right:hover {
+    animation: none;
+    transform: scale(1.3) rotate(15deg);
+}
+
+@keyframes jumpRight {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-20px) rotate(10deg);
+    }
+}
+
+        .hero-bc a  { color: rgba(76, 29, 149, 0.7); font-size:.85rem; font-weight:700; text-decoration:none; transition:all .2s; }
+        .hero-bc a:hover { color:#6d28d9; transform:translateX(3px); display:inline-block; }
+        .hero-bc .sep    { color: rgba(76, 29, 149, 0.5); margin: 0 8px; }
+        .hero-bc .cur    { color: #6d28d9; font-size:.85rem; font-weight:800; }
+
+        .hero-title {
+            font-family: 'Baloo 2', cursive;
+            font-size: clamp(2.2rem, 6vw, 3.8rem);
+            font-weight: 800;
+            color: white;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+            animation: fadeInUp 0.8s ease;
+            text-shadow: 0 3px 18px rgba(0,0,0,0.35);
+        }
+
+        .hero-title .accent {
+            background: linear-gradient(135deg, #ff69b4, #ff9ecf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero-sub {
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.85);
+            font-weight: 600;
+            max-width: 550px;
+            line-height: 1.5;
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.8s ease 0.1s backwards;
+            text-shadow: 0 1px 6px rgba(0,0,0,0.2);
+        }
+
+        /* ── COUNTDOWN FIX: uniform boxes, proper row ── */
+        .hero-timer {
+            display: flex;
+            justify-content: flex-start;
+            gap: 1rem;
+            flex-wrap: nowrap;
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.8s ease 0.2s backwards;
+        }
+
+        .time-box {
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 0.9rem 0;
+            width: 84px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(139, 92, 246, 0.15);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            flex-shrink: 0;
+        }
+
+        .time-box:hover {
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 0 20px 45px rgba(139, 92, 246, 0.25);
+            background: white;
+        }
+
+        .time-number {
+            font-size: 2rem;
+            font-weight: 800;
+            font-family: 'Baloo 2', monospace;
+            background: linear-gradient(135deg, #7c3aed, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            display: block;
+        }
+
+        .time-label {
+            font-size: 0.62rem;
+            font-weight: 800;
+            color: #6d28d9;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-top: 0.3rem;
+            display: block;
+        }
+
+        /* Join button */
+        .hero-join-btn {
+            background: linear-gradient(135deg, #ff69b4, #ff9ecf, #c77dff);
+            color: white;
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.15rem;
+            font-weight: 800;
+            padding: 1rem 3rem;
+            border: none;
+            border-radius: 80px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 8px 25px rgba(255,105,180,0.3);
+            letter-spacing: 1px;
+            animation: fadeInUp 0.8s ease 0.3s backwards;
+        }
+
+        .hero-join-btn:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(255,105,180,0.5);
+            background: linear-gradient(135deg, #ff9ecf, #c77dff, #a855f7);
+        }
+
+        .hero-wave {
+            position: absolute;
+            bottom: -2px; left: 0; right: 0;
+            z-index: 2;
+            line-height: 0;
+        }
+        .hero-wave svg { display: block; width: 100%; }
+
+        /* Floating magical elements */
+        .magical-float {
+            position: absolute;
+            z-index: 2;
+            pointer-events: none;
+            animation: floatMagic 4s ease-in-out infinite;
+            filter: drop-shadow(0 0 8px rgba(255,255,255,0.5));
+        }
+
+        @keyframes floatMagic {
+            0%,100% { opacity: 0.7; transform: translateY(0px) rotate(0deg); }
+            50%      { opacity: 1;   transform: translateY(-15px) rotate(5deg); }
+        }
+
+        .float-1 { top:10%;  left:8%;   font-size:2rem;  animation-delay:0s;   }
+        .float-2 { bottom:18%; left:5%;  font-size:1.6rem; animation-delay:0.5s; }
+        .float-3 { top:20%;  right:8%;  font-size:1.8rem; animation-delay:1s;   }
+        .float-4 { bottom:25%; left:12%; font-size:1.3rem; animation-delay:0.3s; }
+        .float-5 { top:55%;  right:20%; font-size:1.5rem; animation-delay:0.7s; }
+        .float-6 { top:15%;  right:30%; font-size:1.2rem; animation-delay:1.4s; }
+        .float-7 { bottom:10%; right:12%; font-size:2rem; animation-delay:0.9s; }
+        .float-8 { top:40%;  left:3%;   font-size:1.4rem; animation-delay:1.8s; }
+
+        /* Spinning star */
+        @keyframes spinStar {
+            0%   { transform: rotate(0deg) scale(1);   opacity: 0.8; }
+            50%  { transform: rotate(180deg) scale(1.3); opacity: 1; }
+            100% { transform: rotate(360deg) scale(1);  opacity: 0.8; }
+        }
+        .float-spin { animation: spinStar 6s linear infinite !important; }
+
+        /* Pulse glow */
+        @keyframes pulseGlow {
+            0%,100% { transform: scale(1);   opacity: 0.7; filter: drop-shadow(0 0 4px rgba(255,255,255,0.4)); }
+            50%      { transform: scale(1.4); opacity: 1;   filter: drop-shadow(0 0 12px rgba(255,255,255,0.9)); }
+        }
+        .float-pulse { animation: pulseGlow 3s ease-in-out infinite !important; }
+
+        /* ══════════════════════════════
+           MAIN CONTENT
+        ══════════════════════════════ */
+        .event-page {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 50px 30px 60px;
+        }
+
+        .main-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(250,245,255,0.95));
+            border-radius: 56px;
+            padding: 40px;
+            border: 2px solid rgba(196,181,253,0.4);
+            box-shadow: 0 25px 50px rgba(139, 92, 246, 0.15);
+            margin-bottom: 35px;
+            transition: all 0.4s;
+            backdrop-filter: blur(2px);
+        }
+
+        .main-card:hover {
+            box-shadow: 0 30px 60px rgba(139, 92, 246, 0.2);
+            border-color: rgba(196,181,253,0.7);
+        }
+
+        .two-columns-layout {
+            display: flex;
+            gap: 40px;
+            align-items: stretch;
+        }
+
+        .col-left {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .col-right {
+            flex: 0.9;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        /* Image */
+        .image-container {
+            border-radius: 40px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(139, 92, 246, 0.25);
+            transition: all 0.4s;
+            position: relative;
+        }
+
+        .image-container::after {
+            content: '✨';
+            position: absolute;
+            bottom: 15px; right: 15px;
+            font-size: 2rem;
+            opacity: 0;
+            transition: all 0.3s;
+            text-shadow: 0 0 10px white;
+        }
+
+        .image-container:hover::after { opacity: 1; transform: rotate(10deg); }
+        .image-container:hover { transform: scale(1.01); box-shadow: 0 25px 50px rgba(139, 92, 246, 0.35); }
+
+        .event-image {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.6s;
+        }
+
+        .image-container:hover .event-image { transform: scale(1.03); }
+
+        .description-box {
+            background: linear-gradient(135deg, #F3EEFF, #FAF5FF);
+            border-radius: 28px;
+            padding: 22px 24px;
+            border: 2px solid #E8DCFF;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .description-box::before {
+            content: '📖';
+            position: absolute;
+            bottom: -20px; right: -20px;
+            font-size: 80px;
+            opacity: 0.06;
+            pointer-events: none;
+        }
+
+        .description-box:hover {
+            border-color: #c4b5fd;
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(139, 92, 246, 0.08);
+        }
+
+        .description-title {
+            font-size: 1rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e8dcff;
+        }
+
+        .description-text {
+            font-size: 1rem;
+            color: #6B7280;
+            line-height: 1.65;
+            max-height: 120px;
+            overflow-y: auto;
+            padding-right: 6px;
+        }
+
+        .description-text::-webkit-scrollbar { width: 3px; }
+        .description-text::-webkit-scrollbar-thumb { background: #c4b5fd; border-radius: 4px; }
+
+        /* Organizer card — same style as description */
+        .organizer-card {
+            background: linear-gradient(135deg, #F8F3FF, #FDF8FF);
+            border-radius: 28px;
+            padding: 22px 24px;
+            border: 2px solid #E8DCFF;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .organizer-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.08);
+            border-color: #D9C8FF;
+        }
+
+        .organizer-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: #8b5cf6;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e8dcff;
+        }
+
+        .organizer-text {
+            font-size: 0.82rem;
+            color: #6B7280;
+            line-height: 1.6;
+        }
+
+        /* Magic Info Card */
+        .magic-info-card {
+            background: linear-gradient(135deg, #f5f0ff, #ffffff);
+            border-radius: 36px;
+            padding: 28px;
+            border: 2px solid #c4b5fd;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .magic-info-card::before {
+            content: '✨';
+            position: absolute;
+            top: -15px; right: -15px;
+            font-size: 60px;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+
+        .magic-info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(139, 92, 246, 0.15);
+        }
+
+        .magic-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #7c3aed, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 25px;
+            text-align: center;
+            font-family: 'Baloo 2', cursive;
+        }
+
+        .info-grid { display: flex; flex-direction: column; gap: 20px; }
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            padding: 8px 0;
+            border-bottom: 1px dashed #e0d4ff;
+            transition: all 0.2s;
+        }
+
+        .info-row:hover { transform: translateX(5px); border-bottom-color: #c4b5fd; }
+        .info-row:last-child { border-bottom: none; }
+
+        .info-icon {
+            width: 50px;
+            height: 50px;
+            flex-shrink: 0;
+            object-fit: contain;
+            transition: transform 0.3s;
+        }
+
+        .info-row:hover .info-icon { transform: scale(1.1) rotate(5deg); }
+
+        .info-content { flex: 1; }
+
+        .info-label-small {
+            font-size: 0.7rem;
+            color: #8b5cf6;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+        }
+
+        .info-value-large {
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: #1e1a3c;
+        }
+
+        /* ANALYSIS BAR */
+        .analysis-bar {
+            background: linear-gradient(135deg, #ffffff, #faf5ff);
+            border-radius: 80px;
+            padding: 15px 30px;
+            margin-bottom: 35px;
+            border: 2px solid #c4b5fd;
+            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.1);
+            transition: all 0.3s;
+        }
+
+        .analysis-bar:hover { transform: translateY(-2px); box-shadow: 0 15px 35px rgba(139, 92, 246, 0.15); }
+
+        .analysis-items {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 25px;
+        }
+
+        .analysis-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 5px 12px;
+            border-radius: 40px;
+            transition: all 0.2s;
+        }
+
+        .analysis-item:hover { background: rgba(139, 92, 246, 0.1); transform: scale(1.05); }
+        .analysis-emoji { font-size: 1.5rem; }
+        .analysis-text { font-size: 0.9rem; font-weight: 700; color: #4b5563; }
+        .analysis-sep { font-size: 1.3rem; color: #c4b5fd; animation: pulse 2s ease infinite; }
+
+        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+        .stars { color: #fbbf24; font-size: 1.1rem; letter-spacing: 3px; }
+
+        .analyze-btn {
+            background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+            color: white;
+            font-weight: 800;
+            border-radius: 50px;
+            padding: 10px 30px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            font-family: 'Baloo 2', cursive;
+        }
+
+        .analyze-btn:hover { transform: scale(1.05); box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4); }
+
+        /* 2 BOXES */
+        .two-boxes-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 35px;
+            margin-bottom: 35px;
+        }
+
+        .bring-card, .conseils-card {
+            background: linear-gradient(135deg, #ffffff, #faf5ff);
+            border-radius: 40px;
+            border: 2px solid #e0d4ff;
+            padding: 30px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bring-card:hover, .conseils-card:hover {
+            transform: translateY(-8px);
+            border-color: #c4b5fd;
+            box-shadow: 0 20px 40px rgba(139, 92, 246, 0.15);
+        }
+
+        .section-title, .conseils-title {
+            font-size: 1.4rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #5b21b6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 2px solid #e0d4ff;
+            padding-bottom: 12px;
+        }
+
+        .bring-list, .conseils-list { display: flex; flex-direction: column; gap: 15px; }
+
+        .bring-item, .conseil-item {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            background: #f8f4ff;
+            border-radius: 28px;
+            padding: 14px 20px;
+            border: 1px solid #e0d4ff;
+            transition: all 0.2s;
+        }
+
+        .bring-item:hover, .conseil-item:hover {
+            transform: translateX(8px);
+            border-color: #c4b5fd;
+            background: linear-gradient(135deg, #faf5ff, #ffffff);
+            box-shadow: 0 5px 15px rgba(139, 92, 246, 0.1);
+        }
+
+        .bring-icon, .conseil-icon { font-size: 1.6rem; min-width: 45px; text-align: center; }
+        .bring-label  { font-size: 0.95rem; font-weight: 800; color: #5b21b6; }
+        .bring-sub    { font-size: 0.7rem;  color: #8b5cf6; }
+        .conseil-text { font-size: 0.9rem;  color: #4a5568; line-height: 1.4; }
+        .conseil-bold { font-weight: 800;   color: #7c3aed; margin-right: 8px; }
+
+        /* ACTION BUTTONS */
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 35px 0 40px;
+            flex-wrap: wrap;
+        }
+
+        .btn-participate {
+            background: linear-gradient(135deg, #8b5cf6, #c084fc, #a78bfa);
+            color: white;
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.15rem;
+            font-weight: 800;
+            padding: 15px 45px;
+            border-radius: 80px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
+            letter-spacing: 1px;
+        }
+
+        .btn-participate:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 20px 40px rgba(139, 92, 246, 0.5); }
+
+        .btn-ia {
+            background: linear-gradient(135deg, #c4b5fd, #d9c9ff, #e8dcff);
+            color: #5b21b6;
+            font-family: 'Baloo 2', cursive;
+            font-size: 1rem;
+            font-weight: 800;
+            padding: 13px 40px;
+            border-radius: 80px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 20px rgba(196, 181, 253, 0.4);
+        }
+
+        .btn-ia:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 15px 30px rgba(196, 181, 253, 0.5); }
+
+        .btn-participants {
+            background: linear-gradient(135deg, #10b981, #34d399, #6ee7b7);
+            color: white;
+            font-family: 'Baloo 2', cursive;
+            font-size: 1rem;
+            font-weight: 800;
+            padding: 13px 40px;
+            border-radius: 80px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-participants:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 15px 30px rgba(16, 185, 129, 0.5); }
+
+        /* WEATHER CARD */
+        .weather-card {
+            background: linear-gradient(135deg, #f5f0ff, #ffffff);
+            border-radius: 40px;
+            padding: 30px;
+            border: 2px solid #c4b5fd;
+            margin-bottom: 35px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .weather-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(139, 92, 246, 0.15); }
+        .weather-title { font-size: 1.3rem; font-weight: 800; color: #7c3aed; margin-bottom: 20px; }
+
+        /* SPONSORS */
+        .sponsors-section {
+            background: linear-gradient(135deg, #f5f0ff, #ffffff);
+            border-radius: 56px;
+            padding: 40px;
+            border: 2px solid #d9c9ff;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .sponsors-section:hover { transform: translateY(-5px); box-shadow: 0 20px 45px rgba(139, 92, 246, 0.12); }
+
+        .sponsors-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #7c3aed, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 35px;
+            font-family: 'Baloo 2', cursive;
+        }
+
+        .sponsors-grid { display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; }
+
+        .sponsor-item {
+            text-align: center;
+            background: white;
+            padding: 20px 25px;
+            border-radius: 32px;
+            min-width: 120px;
+            transition: all 0.3s;
+            border: 1px solid #e0d4ff;
+        }
+
+        .sponsor-item:hover { transform: translateY(-8px) scale(1.03); box-shadow: 0 15px 30px rgba(139, 92, 246, 0.2); border-color: #c4b5fd; }
+        .sponsor-image { width: 60px; height: 60px; object-fit: contain; }
+        .sponsor-name  { font-weight: 800; margin-top: 12px; color: #6d28d9; font-size: 0.85rem; }
+
+        /* RESPONSIVE */
+        @media (max-width: 992px) {
+            .two-columns-layout { flex-direction: column; }
+            .two-boxes-grid     { grid-template-columns: 1fr; gap: 25px; }
+            .desc-org-row       { grid-template-columns: 1fr; }
+            .time-box           { width: 70px; padding: 0.7rem 0; }
+            .time-number        { font-size: 1.6rem; }
+            .event-page         { padding: 30px 20px; }
+            .main-card          { padding: 25px; }
+            .action-buttons     { gap: 20px; }
+            .btn-participate, .btn-ia, .btn-participants { padding: 12px 30px; font-size: 0.95rem; }
+            .analysis-items     { gap: 15px; }
+            .event-image        { height: 300px; }
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner        { background-attachment: scroll; }
+            .hero-timer         { gap: 0.6rem; }
+            .time-box           { width: 60px; padding: 0.5rem 0; }
+            .time-number        { font-size: 1.3rem; }
+            .time-label         { font-size: 0.55rem; }
+            .hero-join-btn      { font-size: 0.95rem; padding: 0.8rem 2rem; }
+            .analysis-items     { flex-direction: column; gap: 10px; }
+            .analysis-sep       { display: none; }
+            .event-image        { height: 250px; }
+            .magic-title, .sponsors-title { font-size: 1.3rem; }
+            .section-title, .conseils-title { font-size: 1.2rem; }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+
+    {% set typeEmojis = {'Atelier': '🎨', 'Conférence': '🎤', 'Sortie': '🚀', 'Training': '🏋️', 'Bien-être': '🌿', 'Sport': '⚽', 'Jeux': '🧸'} %}
+    {% set emoji = typeEmojis[event.typeEvent] ?? '🎉' %}
+
+    <!-- HERO BANNER — ORIGINAL, UNTOUCHED -->
+    <div class="hero-banner">
+        <!-- EMOJI QUI SAUTE EN HAUT À DROITE -->
+    
+        <div class="magical-float float-1">⭐</div>
+        <div class="magical-float float-2">✨</div>
+        <div class="magical-float float-3 float-spin">🌟</div>
+        <div class="magical-float float-4">💫</div>
+        <div class="magical-float float-5 float-pulse">🎉</div>
+        <div class="magical-float float-6">🦋</div>
+        <div class="magical-float float-7 float-spin">🌈</div>
+        <div class="magical-float float-8">🎀</div>
+
+        <div class="hero-inner">
+            <div class="container">
+                <div class="hero-bc mb-3">
+                    <a href="{{ path('app_home') }}">🏠 Accueil</a>
+                    <span class="sep">›</span>
+                    <a href="{{ path('app_events') }}">🎪 Événements</a>
+                    <span class="sep">›</span>
+                    <span class="cur">{{ event.titre }}</span>
+                </div>
+                <h1 class="hero-title">
+                    Détails <span class="accent">Magiques</span> ✨
+                </h1>
+                <p class="hero-sub">
+                    {{ event.titre }} — une aventure unique pour ton enfant
+                </p>
+
+                <!-- COUNTDOWN: 4 uniform boxes in a row -->
+                <div class="hero-timer" id="heroTimer">
+                    <div class="time-box">
+                        <span class="time-number" id="daysBox">00</span>
+                        <span class="time-label">Jours</span>
+                    </div>
+                    <div class="time-box">
+                        <span class="time-number" id="hoursBox">00</span>
+                        <span class="time-label">Heures</span>
+                    </div>
+                    <div class="time-box">
+                        <span class="time-number" id="minutesBox">00</span>
+                        <span class="time-label">Minutes</span>
+                    </div>
+                    <div class="time-box">
+                        <span class="time-number" id="secondsBox">00</span>
+                        <span class="time-label">Secondes</span>
+                    </div>
+                </div>
+
+                <button class="hero-join-btn" id="joinBtnHero" {% if event.status == 'complet' or event.status == 'annule' %}disabled{% endif %}>
+                    🎉 REJOINDRE L'AVENTURE 🎉
+                </button>
+            </div>
+        </div>
+
+        <div class="hero-wave">
+            <svg viewBox="0 0 1440 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+                <path d="M0,80 
+                         C80,80 100,50 140,50 
+                         C160,50 180,60 200,60 
+                         C220,60 240,40 270,40 
+                         C300,40 320,60 340,60 
+                         C360,60 380,50 400,55 
+                         C420,55 440,70 470,70 
+                         C500,70 520,50 550,50 
+                         C580,50 600,65 620,65 
+                         C650,65 670,45 700,45 
+                         C730,45 750,60 770,60 
+                         C790,60 810,50 840,55 
+                         C860,55 880,70 910,70 
+                         C940,70 960,50 990,50 
+                         C1020,50 1040,65 1060,65 
+                         C1080,65 1100,55 1130,55 
+                         C1150,55 1170,40 1200,40 
+                         C1230,40 1250,60 1270,60 
+                         C1290,60 1310,50 1340,50 
+                         C1370,50 1390,60 1440,60 
+                         L1440,120 L0,120 Z" 
+                      fill="#FAF5FF"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="event-page">
+
+        <div class="main-card">
+            <div class="two-columns-layout">
+
+                <!-- LEFT COLUMN: Image → Description below -->
+                <div class="col-left">
+                 <div class="image-container">
+    {% if event.image %}
+        {# 🔥 AJOUTE UN SLASH AU DÉBUT #}
+        <img src="/{{ event.image }}" alt="{{ event.titre }}" class="event-image">
+    {% else %}
+        <div class="event-image" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#e8f5e0,#fff9e0);font-size:80px;">
+            {{ emoji }}
+        </div>
+    {% endif %}
+</div>
+   
+
+                    <!-- DESCRIPTION: directly under image -->
+                    <div class="description-box">
+                        <div class="description-title">
+                            <span>📖✨</span> Description
+                        </div>
+                        <div class="description-text">
+                            {{ event.description }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN: Info card → Organizer below -->
+                <div class="col-right">
+                    <div class="magic-info-card">
+                        <div class="magic-title">✨ Informations magiques ✨</div>
+
+                        <div class="info-grid">
+                            <div class="info-row">
+                                <div class="info-icon" style="font-size:2rem;">📅</div>
+                                <div class="info-content">
+                                    <div class="info-label-small">Date magique</div>
+                                    <div class="info-value-large">{{ event.dateDebut|date('d F Y') }}</div>
+                                </div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-icon" style="font-size:2rem;">⏰</div>
+                                <div class="info-content">
+                                    <div class="info-label-small">Heure enchantée</div>
+                                    <div class="info-value-large">{{ event.heureDebut|date('H:i') }} - {{ event.heureFin|date('H:i') }}</div>
+                                </div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-icon" style="font-size:2rem;">📍</div>
+                                <div class="info-content">
+                                    <div class="info-label-small">Lieu secret</div>
+                                    <div class="info-value-large">{{ event.lieu }}</div>
+                                </div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-icon" style="font-size:2rem;">🏷️</div>
+                                <div class="info-content">
+                                    <div class="info-label-small">Type d'aventure</div>
+                                    <div class="info-value-large" style="color:#8b5cf6;font-weight:800;">{{ event.typeEvent }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ORGANIZER: directly under info card -->
+                    <div class="organizer-card">
+                        <div class="organizer-title">
+                            <span>👤✨</span> Qui organise ?
+                        </div>
+                        <div class="organizer-text">
+                            L'association AutiCare crée des aventures magiques adaptées à tous les enfants.
+                            Notre équipe de fées et de lutins est formée pour accueillir chaque enfant
+                            dans un monde de douceur et de bienveillance.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ANALYSIS BAR -->
+        <div class="analysis-bar">
+            <div class="analysis-items">
+                <div class="analysis-item"><span class="analysis-emoji">🔇</span><span class="analysis-text">Calme</span></div>
+                <span class="analysis-sep">•</span>
+                <div class="analysis-item"><span class="analysis-emoji">🧘</span><span class="analysis-text">Faible</span></div>
+                <span class="analysis-sep">•</span>
+                <div class="analysis-item"><span class="analysis-emoji">👥</span><span class="analysis-text">5-10 ans</span></div>
+                <span class="analysis-sep">•</span>
+                <div class="analysis-item"><span class="analysis-emoji">🪑</span><span class="analysis-text">Assis</span></div>
+                <span class="analysis-sep">•</span>
+                <div class="analysis-item"><span class="stars">⭐⭐⭐</span><span class="analysis-text">Excellent</span></div>
+                <span class="analysis-sep">•</span>
+                <button class="analyze-btn" id="analyzeBtn">🔍 analyser</button>
+            </div>
+        </div>
+
+        <!-- 2 BOXES -->
+        <div class="two-boxes-grid">
+            <div class="bring-card">
+                <div class="section-title">🎒 À apporter</div>
+                <div class="bring-list">
+                    <div class="bring-item"><div class="bring-icon">💧</div><div><div class="bring-label">Bouteille d'eau</div><div class="bring-sub">Rester bien hydraté !</div></div></div>
+                    <div class="bring-item"><div class="bring-icon">🍎</div><div><div class="bring-label">Petit goûter sain</div><div class="bring-sub">Sans allergènes</div></div></div>
+                    <div class="bring-item"><div class="bring-icon">🧸</div><div><div class="bring-label">Objet réconfortant</div><div class="bring-sub">Doudou, jouet préféré</div></div></div>
+                    <div class="bring-item"><div class="bring-icon">👕</div><div><div class="bring-label">Vêtements confortables</div><div class="bring-sub">Pour bouger librement</div></div></div>
+                </div>
+            </div>
+
+            <div class="conseils-card">
+                <div class="conseils-title">💡 Nos conseils</div>
+                <div class="conseils-list">
+                    <div class="conseil-item"><div class="conseil-icon">🕐</div><div class="conseil-text"><span class="conseil-bold">Arrivez 15 min avant</span>Pour une acclimatation en douceur.</div></div>
+                    <div class="conseil-item"><div class="conseil-icon">🌿</div><div class="conseil-text"><span class="conseil-bold">Coin calme disponible</span>Espace de retrait sensoriel.</div></div>
+                    <div class="conseil-item"><div class="conseil-icon">💬</div><div class="conseil-text"><span class="conseil-bold">Parlez-nous avant</span>Pour tout besoin spécifique.</div></div>
+                    <div class="conseil-item"><div class="conseil-icon">🍽️</div><div class="conseil-text"><span class="conseil-bold">Signalez les allergies</span>Nous adaptons le goûter.</div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3 ACTION BUTTONS -->
+        <div class="action-buttons">
+            <button class="btn-participate" id="registerBtn">✨ Participer à l'aventure ✨</button>
+            <button class="btn-ia" id="rapportIABtn">💡🧩 Guide IA</button>
+            <button class="btn-participants" id="viewParticipantsBtn">👥 Voir les participations</button>
+        </div>
+
+        <!-- WEATHER -->
+        <div class="weather-card">
+            <div class="weather-title">☀️🌙 MÉTÉO DU JOUR 🌙☀️</div>
+            <div style="font-size:1rem;font-weight:700;color:#7c3aed;">📍 {{ event.lieu }}</div>
+            <div style="display:flex;justify-content:center;gap:50px;margin:20px 0;">
+                <div style="text-align:center;"><div style="font-size:2rem;">🌤️</div><div style="font-weight:700;font-size:1.2rem;">22°C</div><div style="font-size:0.7rem;color:#8b5cf6;">Température</div></div>
+                <div style="text-align:center;"><div style="font-size:2rem;">💧</div><div style="font-weight:700;font-size:1.2rem;">65%</div><div style="font-size:0.7rem;color:#8b5cf6;">Humidité</div></div>
+                <div style="text-align:center;"><div style="font-size:2rem;">🌬️</div><div style="font-weight:700;font-size:1.2rem;">10 km/h</div><div style="font-size:0.7rem;color:#8b5cf6;">Vent</div></div>
+            </div>
+            <div style="font-size:0.9rem;font-style:italic;color:#a78bfa;">✨ Une belle journée pour s'amuser ! ✨</div>
+        </div>
+
+        <!-- SPONSORS -->
+        <div class="sponsors-section">
+            <div class="sponsors-title">✨ Nos partenaires magiques ✨</div>
+            <div class="sponsors-grid">
+                {% if sponsors|default([])|length > 0 %}
+                    {% for sponsor in sponsors %}
+                        <div class="sponsor-item">
+                            {% if sponsor.image %}
+                                <img src="{{ sponsor.image }}" alt="{{ sponsor.nom }}" class="sponsor-image">
+                            {% else %}
+                                <div style="font-size:45px;">🏢</div>
+                            {% endif %}
+                            <div class="sponsor-name">{{ sponsor.nom }}</div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color:#a78bfa;font-size:1rem;">✨ De nouveaux partenaires arrivent bientôt ✨</p>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        // DYNAMIC COUNTDOWN TIMER
+        const eventDateStr = "{{ event.dateDebut|date('Y-m-d') }}";
+        const eventTimeStr = "{{ event.heureDebut|date('H:i:s') }}";
+        const eventDateTime = new Date(eventDateStr + 'T' + eventTimeStr);
+
+        function pad(n) { return String(n).padStart(2, '0'); }
+
+        function updateBoxedTimer() {
+            const now  = new Date();
+            const diff = eventDateTime - now;
+
+            if (diff <= 0) {
+                ['daysBox','hoursBox','minutesBox','secondsBox'].forEach(id => {
+                    document.getElementById(id).textContent = '00';
+                });
+                return;
+            }
+
+            const days    = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours   = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            document.getElementById('daysBox').textContent    = pad(days);
+            document.getElementById('hoursBox').textContent   = pad(hours);
+            document.getElementById('minutesBox').textContent = pad(minutes);
+            document.getElementById('secondsBox').textContent = pad(seconds);
+        }
+
+        updateBoxedTimer();
+        setInterval(updateBoxedTimer, 1000);
+
+        // Buttons
+        document.getElementById('joinBtnHero')?.addEventListener('click', function() {
+            if (!this.disabled) alert('🎉✨ Félicitations ! ✨🎉\n\nTu es inscrit(e) à cette aventure magique !\nTu recevras bientôt un email de confirmation.\n\n🌟 On a hâte de te voir ! 🌟');
+        });
+
+        document.getElementById('registerBtn')?.addEventListener('click', function() {
+            alert('🎉✨ Félicitations ! ✨🎉\n\nTu es inscrit(e) à cette aventure magique !\nTu recevras bientôt un email de confirmation.\n\n🌟 On a hâte de te voir ! 🌟');
+        });
+
+        document.getElementById('rapportIABtn')?.addEventListener('click', function() {
+            alert('💡🧩 CONSEILS IA PERSONNALISÉS 🧩💡\n\n✨ Recommandations pour cet événement :\n\n🔇 Environnement calme adapté\n🧘 Charge sensorielle faible\n👥 Âge recommandé: 5-10 ans\n🪑 Activité assise confortable\n\n🌟 Une expérience parfaitement adaptée pour votre enfant !');
+        });
+
+        document.getElementById('viewParticipantsBtn')?.addEventListener('click', function() {
+            alert('👥 LISTE DES PARTICIPANTS 👥\n\n📊 Statistiques :\n• 15 personnes inscrites\n• 8 enfants\n• 7 accompagnateurs\n\n✨ Une belle communauté bienveillante !');
+        });
+
+        document.getElementById('analyzeBtn')?.addEventListener('click', function() {
+            alert('🔍 ANALYSE DÉTAILLÉE DE L\'ÉVÉNEMENT 🔍\n\n📊 Niveau sonore: Calme\n🧘 Charge sensorielle: Faible\n👥 Âge recommandé: 5-10 ans\n🪑 Niveau d\'activité: Assis\n⭐ Recommandation: Excellent\n\n✨ Cet événement est parfaitement adapté aux enfants autistes !');
+        });
+    </script>
+{% endblock %}

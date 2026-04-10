@@ -105,7 +105,7 @@ class CoursController extends AbstractController
         CoursRepository $coursRepository
     ): Response {
 
-        // Récupérer ou créer l'entité
+        
         $idCours = $request->request->get('id_cours');
         if ($idCours && !empty($idCours)) {
             $cours = $coursRepository->find($idCours);
@@ -117,7 +117,7 @@ class CoursController extends AbstractController
             $cours = new Cours();
         }
 
-        // ── Lecture des champs depuis la requête HTML ──
+        
         $data        = $request->request->all('cours') ?: [];
         $titre       = trim($data['titre'] ?? '');
         $typeCours   = trim($data['typeCours'] ?? '');

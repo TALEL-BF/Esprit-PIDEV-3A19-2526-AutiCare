@@ -228,7 +228,7 @@
         .f-pill[data-filter="Motricité"].active   { background: linear-gradient(135deg, var(--lavender), var(--violet)); }
         .f-pill[data-filter="Langage"].active     { background: linear-gradient(135deg, var(--rose), var(--mauve)); }
 
-        .search-wrap { position: relative; }
+        .search-wrap { position: relative; display: flex; gap: 10px; align-items: center; }
         .search-wrap i {
             position: absolute; left: 13px;
             top: 50%; transform: translateY(-50%);
@@ -247,6 +247,241 @@
             border-color: var(--mauve);
             background: #fff;
             box-shadow: 0 0 0 4px rgba(155,107,255,.12);
+        }
+
+        /* Bouton IA génération - style mauve/rose */
+        .btn-ia-generate {
+            background: linear-gradient(135deg, var(--mauve), var(--rose));
+            color: white;
+            border: none;
+            padding: 9px 20px;
+            border-radius: 40px;
+            font-family: 'Baloo 2', cursive;
+            font-size: .88rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(155,107,255,0.3);
+            white-space: nowrap;
+        }
+        .btn-ia-generate:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 6px 20px rgba(155,107,255,0.4);
+            background: linear-gradient(135deg, var(--mauve-light), var(--rose-light));
+        }
+        .btn-ia-generate:active {
+            transform: translateY(0);
+        }
+
+        /* Modal IA - grand format mauve/rose */
+        .ia-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        .ia-modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .ia-modal {
+            background: linear-gradient(135deg, #fff, #faf5ff);
+            border-radius: 40px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(155,107,255,0.3);
+            animation: modalSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 2px solid rgba(155,107,255,0.2);
+        }
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-60px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        .ia-modal-header {
+            background: linear-gradient(135deg, var(--mauve), var(--rose));
+            color: white;
+            padding: 25px 30px;
+            border-radius: 40px 40px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .ia-modal-header h3 {
+            margin: 0;
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .ia-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            font-size: 32px;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .ia-close:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(90deg);
+        }
+        .ia-modal-body {
+            padding: 30px;
+        }
+        .ia-prompt-area {
+            margin-bottom: 25px;
+        }
+        .ia-prompt-area label {
+            font-family: 'Baloo 2', cursive;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 10px;
+            display: block;
+            font-size: 1.1rem;
+        }
+        .ia-prompt-area textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9d5ff;
+            border-radius: 20px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1rem;
+            resize: vertical;
+            transition: all 0.2s;
+            background: #fff;
+        }
+        .ia-prompt-area textarea:focus {
+            outline: none;
+            border-color: var(--mauve);
+            box-shadow: 0 0 0 4px rgba(155,107,255,0.15);
+        }
+        
+        .ia-generate-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--mauve), var(--rose));
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 30px;
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .ia-generate-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(155,107,255,0.4);
+            background: linear-gradient(135deg, var(--mauve-light), var(--rose-light));
+        }
+        .ia-generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .ia-loading {
+            text-align: center;
+            padding: 50px;
+            background: linear-gradient(135deg, #faf5ff, #fff);
+            border-radius: 25px;
+            margin-top: 20px;
+        }
+        .ia-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #f3e8ff;
+            border-top-color: var(--rose);
+            border-right-color: var(--mauve);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .ia-loading p {
+            font-family: 'Baloo 2', cursive;
+            font-size: 1rem;
+            color: var(--mauve);
+        }
+        .ia-result {
+            text-align: center;
+            background: linear-gradient(135deg, #faf5ff, #fff);
+            border-radius: 25px;
+            padding: 25px;
+            margin-top: 20px;
+            animation: fadeInUp 0.5s ease;
+        }
+        .ia-result img {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(155,107,255,0.2);
+            border: 3px solid white;
+        }
+        .ia-result-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        .ia-use-btn, .ia-regenerate-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 30px;
+            font-family: 'Baloo 2', cursive;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .ia-use-btn {
+            background: linear-gradient(135deg, var(--mauve), var(--lavender));
+            color: white;
+        }
+        .ia-regenerate-btn {
+            background: linear-gradient(135deg, var(--rose), var(--rose-light));
+            color: white;
+        }
+        .ia-use-btn:hover, .ia-regenerate-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
         }
 
         /* ══════════════════════════════
@@ -504,6 +739,10 @@
         @media (max-width: 768px) {
             .hero-mascot-wrap { display: none; }
             .hero-banner { background-attachment: scroll; }
+            .btn-ia-generate span { display: none; }
+            .btn-ia-generate { padding: 9px 15px; }
+            .ia-modal { max-width: 95%; }
+            .ia-modal-header h3 { font-size: 1.3rem; }
         }
     </style>
 {% endblock %}
@@ -590,6 +829,53 @@
                 <div class="search-wrap">
                     <i class="fas fa-search"></i>
                     <input type="text" id="searchCourse" placeholder="Chercher un cours...">
+                    <button type="button" class="btn-ia-generate" id="iaGenerateBtn">
+                        <i class="fas fa-magic"></i>
+                        <span>Générer avec IA</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal IA - Grand format Mauve/Rose -->
+    <div id="iaModal" class="ia-modal-overlay">
+        <div class="ia-modal">
+            <div class="ia-modal-header">
+                <h3>
+                    <i class="fas fa-robot"></i> 
+                    Générateur d'Images IA
+                </h3>
+                <button class="ia-close" id="iaCloseBtn">&times;</button>
+            </div>
+            <div class="ia-modal-body">
+                <div class="ia-prompt-area">
+                    <label>🎨 Décrivez l'image à générer</label>
+                    <textarea id="iaPrompt" rows="4" placeholder="Ex: Un enfant qui lit un livre, dessin animé, coloré, style enfantin, fond blanc..."></textarea>
+                    <small style="color: var(--mauve); display: block; margin-top: 8px;">
+                        💡 Astuce: Ajoutez "dessin animé", "coloré", "style enfantin" pour de meilleurs résultats
+                    </small>
+                </div>
+                
+                <button type="button" id="iaGenerateImageBtn" class="ia-generate-btn">
+                    <i class="fas fa-magic"></i> Générer l'image (HD)
+                </button>
+                
+                <div id="iaLoading" class="ia-loading" style="display: none;">
+                    <div class="ia-spinner"></div>
+                    <p>✨ Génération en cours, veuillez patienter... ✨</p>
+                </div>
+                
+                <div id="iaResult" class="ia-result" style="display: none;">
+                    <img id="iaGeneratedImage" src="" alt="Image générée">
+                    <div class="ia-result-buttons">
+                        <button type="button" id="iaUseImageBtn" class="ia-use-btn">
+                            <i class="fas fa-download"></i> Télécharger l'image
+                        </button>
+                        <button type="button" id="iaRegenerateBtn" class="ia-regenerate-btn">
+                            <i class="fas fa-sync-alt"></i> Régénérer
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -703,5 +989,139 @@
             document.getElementById('noResults').classList.toggle('d-none', visible > 0);
         }
     })();
+
+    // IA Image Generator - Mode Standard HD uniquement
+    (function() {
+        const modal = document.getElementById('iaModal');
+        const openBtn = document.getElementById('iaGenerateBtn');
+        const closeBtn = document.getElementById('iaCloseBtn');
+        const generateBtn = document.getElementById('iaGenerateImageBtn');
+        const promptInput = document.getElementById('iaPrompt');
+        const loadingDiv = document.getElementById('iaLoading');
+        const resultDiv = document.getElementById('iaResult');
+        const generatedImage = document.getElementById('iaGeneratedImage');
+        const useImageBtn = document.getElementById('iaUseImageBtn');
+        const regenerateBtn = document.getElementById('iaRegenerateBtn');
+        
+        let currentImageUrl = null;
+        let currentFilename = null;
+        
+        // Open modal
+        if (openBtn) {
+            openBtn.addEventListener('click', () => {
+                modal.classList.add('active');
+                promptInput.value = '';
+                resultDiv.style.display = 'none';
+                loadingDiv.style.display = 'none';
+            });
+        }
+        
+        // Close modal
+        closeBtn.addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+            }
+        });
+        
+        // Generate image (mode standard HD uniquement)
+        generateBtn.addEventListener('click', async () => {
+            const prompt = promptInput.value.trim();
+            
+            if (prompt.length < 3) {
+                alert('Veuillez décrire l\'image à générer (minimum 3 caractères)');
+                return;
+            }
+            
+            loadingDiv.style.display = 'block';
+            resultDiv.style.display = 'none';
+            generateBtn.disabled = true;
+            
+            try {
+                const formData = new FormData();
+                formData.append('prompt', prompt);
+                formData.append('mode', 'standard'); // Mode HD uniquement
+                
+                const response = await fetch('/admin/image/generate', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentImageUrl = data.imageUrl;
+                    currentFilename = data.filename;
+                    generatedImage.src = currentImageUrl;
+                    resultDiv.style.display = 'block';
+                    resultDiv.style.animation = 'none';
+                    resultDiv.offsetHeight;
+                    resultDiv.style.animation = 'fadeInUp 0.5s ease';
+                } else {
+                    alert('Erreur: ' + (data.error || 'Génération échouée'));
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('Erreur lors de la génération de l\'image');
+            } finally {
+                loadingDiv.style.display = 'none';
+                generateBtn.disabled = false;
+            }
+        });
+        
+        // Download image
+        useImageBtn.addEventListener('click', () => {
+            if (currentImageUrl) {
+                const link = document.createElement('a');
+                link.href = currentImageUrl;
+                link.download = currentFilename || 'ia-generated-image.png';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Notification de succès
+                const notification = document.createElement('div');
+                notification.style.position = 'fixed';
+                notification.style.bottom = '20px';
+                notification.style.right = '20px';
+                notification.style.background = 'linear-gradient(135deg, var(--mauve), var(--rose))';
+                notification.style.color = 'white';
+                notification.style.padding = '12px 24px';
+                notification.style.borderRadius = '25px';
+                notification.style.fontFamily = 'Baloo 2, cursive';
+                notification.style.fontWeight = 'bold';
+                notification.style.zIndex = '1001';
+                notification.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
+                notification.innerHTML = '✅ Image téléchargée avec succès!';
+                document.body.appendChild(notification);
+                setTimeout(() => notification.remove(), 3000);
+            }
+        });
+        
+        // Regenerate
+        regenerateBtn.addEventListener('click', () => {
+            generateBtn.click();
+        });
+        
+        // Animation CSS additionnelle
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    })();
     </script>
+    
 {% endblock %}

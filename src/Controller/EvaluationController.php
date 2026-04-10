@@ -25,7 +25,7 @@ class EvaluationController extends AbstractController
         $filterCourseId = $request->query->get('cours_id');
         
         if ($filterCourseId && $filterCourseId !== 'all') {
-            $evaluations = $evaluationRepository->findByCoursId($filterCourseId);
+            $evaluations = $evaluationRepository->findBy(['idCours' => $filterCourseId]);
         } else {
             $evaluations = $evaluationRepository->findAll();
         }
@@ -57,7 +57,8 @@ class EvaluationController extends AbstractController
     public function save(
         Request $request,
         EntityManagerInterface $em,
-        EvaluationRepository $evaluationRepository
+        EvaluationRepository $evaluationRepository,
+        CoursRepository $coursRepository
     ): Response {
         $idEval = $request->request->get('id_eval');
         
@@ -67,45 +68,81 @@ class EvaluationController extends AbstractController
                 $this->addFlash('error', 'Question non trouvée');
                 return $this->redirectToRoute('admin_evaluation');
             }
-            $form = $this->createForm(EvaluationType::class, $evaluation);
         } else {
             $evaluation = new Evaluation();
-            $form = $this->createForm(EvaluationType::class, $evaluation);
         }
         
+        // Créer le formulaire et le remplir manuellement car handleRequest ne fonctionne pas correctement avec les relations
+        $form = $this->createForm(EvaluationType::class, $evaluation);
         $form->handleRequest($request);
         
-        // Validation spécifique : vérifier que les choix sont différents
-        if ($form->isSubmitted()) {
-            $choix1 = $form->get('choix1')->getData();
-            $choix2 = $form->get('choix2')->getData();
-            $choix3 = $form->get('choix3')->getData();
-            
+        // Récupération manuelle des données car handleRequest peut échouer
+        $question = $request->request->get('question');
+        $choix1 = $request->request->get('choix1');
+        $choix2 = $request->request->get('choix2');
+        $choix3 = $request->request->get('choix3');
+        $bonneReponse = $request->request->get('bonne_reponse');
+        $score = $request->request->get('score');
+        $coursId = $request->request->get('cours_id');
+        
+        // Validation manuelle
+        $errors = [];
+        
+        if (empty($question) || strlen($question) < 10) {
+            $errors[] = 'La question doit contenir au moins 10 caractères';
+        }
+        if (empty($choix1)) {
+            $errors[] = 'Le choix 1 ne peut pas être vide';
+        }
+        if (empty($choix2)) {
+            $errors[] = 'Le choix 2 ne peut pas être vide';
+        }
+        if (empty($choix3)) {
+            $errors[] = 'Le choix 3 ne peut pas être vide';
+        }
+        if (empty($bonneReponse)) {
+            $errors[] = 'Veuillez sélectionner la bonne réponse';
+        }
+        if (empty($score) || $score < 1 || $score > 100) {
+            $errors[] = 'Le score doit être compris entre 1 et 100';
+        }
+        if (empty($coursId)) {
+            $errors[] = 'Veuillez sélectionner un cours';
+        }
+        
+        // Vérifier que les choix sont différents
+        if ($choix1 && $choix2 && $choix3) {
             if ($choix1 === $choix2 || $choix1 === $choix3 || $choix2 === $choix3) {
-                $this->addFlash('error', 'Les trois choix doivent être différents');
-                return $this->redirectToRoute('admin_evaluation');
+                $errors[] = 'Les trois choix doivent être différents';
             }
         }
         
-        if ($form->isSubmitted() && $form->isValid()) {
-            // Récupérer l'ID du cours depuis l'entité Cours
-            $cours = $evaluation->getCours();
-            if ($cours) {
-                $evaluation->setIdCours($cours->getIdCours());
+        if (count($errors) > 0) {
+            foreach ($errors as $error) {
+                $this->addFlash('error', $error);
             }
-            
-            $em->persist($evaluation);
-            $em->flush();
-            
-            $this->addFlash('success', 'Question enregistrée avec succès');
             return $this->redirectToRoute('admin_evaluation');
         }
         
-        // Si le formulaire n'est pas valide, afficher les erreurs
-        foreach ($form->getErrors(true) as $error) {
-            $this->addFlash('error', $error->getMessage());
+        // Remplir l'entité manuellement
+        $evaluation->setQuestion($question);
+        $evaluation->setChoix1($choix1);
+        $evaluation->setChoix2($choix2);
+        $evaluation->setChoix3($choix3);
+        $evaluation->setBonneReponse($bonneReponse);
+        $evaluation->setScore((int)$score);
+        $evaluation->setIdCours((int)$coursId);
+        
+        // Récupérer et définir la relation Cours
+        $cours = $coursRepository->find($coursId);
+        if ($cours) {
+            $evaluation->setCours($cours);
         }
         
+        $em->persist($evaluation);
+        $em->flush();
+        
+        $this->addFlash('success', 'Question enregistrée avec succès');
         return $this->redirectToRoute('admin_evaluation');
     }
     
