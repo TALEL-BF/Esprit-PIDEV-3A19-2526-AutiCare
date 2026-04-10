@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Code OTP - AutiCare</title>
+</head>
+<body style="margin:0; padding:0; font-family: Arial, sans-serif; background-color:#f4f4f4;">
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="padding:20px;">
+        <tr>
+            <td align="center">
+                
+                <!-- Container -->
+                <table width="500" cellpadding="0" cellspacing="0" style="background:white; border-radius:12px; padding:30px; box-shadow:0 5px 15px rgba(0,0,0,0.1);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td align="center" style="padding-bottom:20px;">
+                            <h2 style="color:#9b59b6; margin:0;">🔐 AutiCare</h2>
+                            <p style="color:#777; margin:5px 0;">Vérification OTP</p>
+                        </td>
+                    </tr>
+
+                    <!-- Body -->
+                    <tr>
+                        <td>
+                            <p style="font-size:16px; color:#333;">
+                                Bonjour <strong>{{ user.prenom }} {{ user.nom }}</strong>,
+                            </p>
+
+                            <p style="font-size:15px; color:#555;">
+                                Vous avez demandé la réinitialisation de votre mot de passe.
+                            </p>
+
+                            <p style="font-size:15px; color:#555;">
+                                Voici votre code OTP :
+                            </p>
+
+                            <!-- OTP BOX -->
+                            <div style="text-align:center; margin:30px 0;">
+                                <span style="
+                                    display:inline-block;
+                                    background:#9b59b6;
+                                    color:white;
+                                    font-size:32px;
+                                    font-weight:bold;
+                                    letter-spacing:10px;
+                                    padding:15px 25px;
+                                    border-radius:10px;
+                                ">
+                                    {{ otp }}
+                                </span>
+                            </div>
+
+                            <p style="font-size:14px; color:#777;">
+                                ⏳ Ce code est valable pendant <strong>10 minutes</strong>.
+                            </p>
+
+                            <p style="font-size:14px; color:#777;">
+                                Si vous n'avez pas demandé cette action, ignorez cet email.
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td align="center" style="padding-top:30px;">
+                            <hr style="border:none; border-top:1px solid #eee;">
+                            <p style="font-size:12px; color:#aaa;">
+                                © AutiCare - Plateforme éducative et psychologique
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>
