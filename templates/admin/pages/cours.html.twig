@@ -205,6 +205,28 @@ textarea.form-control.is-valid {
 }
 .btn-cancel-cours:hover { background:#fce7f3; transform:translateY(-1px); }
 
+/* ── Bouton Todo List ── */
+.btn-todo-list {
+    background: linear-gradient(135deg, #FF9F43, #FFB976);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    padding: .65rem 1.4rem;
+    font-weight: 700;
+    font-size: .9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(255, 159, 67, 0.3);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.btn-todo-list:hover {
+    background: linear-gradient(135deg, #F39C12, #FF9F43);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(255, 159, 67, 0.4);
+}
+
 /* ── Bouton danger ── */
 .btn-danger-soft {
     background:var(--pastel-rose); color:#be185d;
@@ -573,6 +595,9 @@ textarea.form-control.is-valid {
                         </button>
                         <button type="button" class="btn-cancel-cours" id="cancelCourseBtn">
                             <i class="fas fa-times me-1"></i> Annuler
+                        </button>
+                        <button type="button" class="btn-todo-list" id="todoListBtn" onclick="location.href='{{ path('admin_todolist') }}'">
+                            <i class="fas fa-tasks me-1"></i> Todo List
                         </button>
                     </div>
 

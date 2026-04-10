@@ -106,7 +106,7 @@
         }
 
         /* Stat pills sur le hero */
-        .hero-stats { display: flex; gap: 12px; flex-wrap: wrap; }
+        .hero-stats { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
         .hero-stat {
             display: inline-flex; align-items: center; gap: 8px;
             background: rgba(255,255,255,0.15);
@@ -125,6 +125,33 @@
             font-size: 1.15rem;
             font-weight: 800;
             color: var(--rose-light);
+        }
+
+        /* Bouton Espace Dessin dans le hero */
+        .hero-drawing-btn {
+            background: linear-gradient(135deg, #ee59d0, #bd1fa8);
+            color: white;
+            border: none;
+            padding: 9px 20px;
+            border-radius: 50px;
+            font-family: 'Baloo 2', cursive;
+            font-size: .88rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(255,68,68,0.3);
+            white-space: nowrap;
+            text-decoration: none;
+        }
+        .hero-drawing-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 6px 20px rgba(255,68,68,0.4);
+            background: linear-gradient(135deg, #FF8888, #FF6666);
+            color: white;
+            text-decoration: none;
         }
 
         /* Mascot flottante côté droit */
@@ -249,7 +276,7 @@
             box-shadow: 0 0 0 4px rgba(155,107,255,.12);
         }
 
-        /* Bouton IA génération - style mauve/rose */
+        /* Bouton IA génération */
         .btn-ia-generate {
             background: linear-gradient(135deg, var(--mauve), var(--rose));
             color: white;
@@ -276,7 +303,7 @@
             transform: translateY(0);
         }
 
-        /* Modal IA - grand format mauve/rose */
+        /* Modal IA - Grand format Mauve/Rose */
         .ia-modal-overlay {
             position: fixed;
             top: 0;
@@ -741,6 +768,8 @@
             .hero-banner { background-attachment: scroll; }
             .btn-ia-generate span { display: none; }
             .btn-ia-generate { padding: 9px 15px; }
+            .hero-drawing-btn span { display: none; }
+            .hero-drawing-btn { padding: 9px 15px; }
             .ia-modal { max-width: 95%; }
             .ia-modal-header h3 { font-size: 1.3rem; }
         }
@@ -789,6 +818,9 @@
                             <div class="hero-stat">
                                 🎯 <span class="hs-num">4</span> catégories
                             </div>
+                            <a href="{{ path('app_drawing') }}" class="hero-drawing-btn">
+                                🎨 <span>Espace dessin</span>
+                            </a>
                         </div>
                     </div>
 
@@ -838,7 +870,7 @@
         </div>
     </div>
 
-    <!-- Modal IA - Grand format Mauve/Rose -->
+    <!-- Modal IA - Grand format Mauve/Rose (sans choix de mode) -->
     <div id="iaModal" class="ia-modal-overlay">
         <div class="ia-modal">
             <div class="ia-modal-header">

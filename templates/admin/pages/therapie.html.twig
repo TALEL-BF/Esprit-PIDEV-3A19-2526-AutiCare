@@ -6,10 +6,10 @@
 {% block stylesheets %}
 {{ parent() }}
 <style>
-
+/* ── Filter input ─────────────────────────────────────────────── */
 .filter-input { width: 200px; font-size: .8rem; padding: 6px 12px; }
 
-
+/* ── Toast notifications ───────────────────────────────── */
 #toast-container {
     position: fixed; top: 24px; right: 24px;
     z-index: 9999; display: flex; flex-direction: column; gap: 12px;
@@ -65,7 +65,7 @@
 }
 @keyframes toastProgress { from { width:100%; } to { width:0%; } }
 
-
+/* ── Modals overlay ──────────────────────────────────── */
 .modal-overlay {
     display: none; position: fixed; inset: 0;
     background: rgba(15,10,40,.55); z-index: 9000;
@@ -79,6 +79,7 @@
     to   { opacity:1; transform: scale(1)   translateY(0);    }
 }
 
+/* ── Confirm box ─────────────────────────────────────── */
 .confirm-box {
     background: #fff; border-radius: 20px;
     padding: 2rem; width: 100%; max-width: 400px;
@@ -168,6 +169,7 @@
 }
 .exercise-name-link:hover { color: #4c1d95; border-color: #6d28d9; }
 
+/* ── Form validation ─────────────────────────────────── */
 .form-control.is-valid, textarea.is-valid {
     border-color: #10b981 !important;
     box-shadow: 0 0 0 3px rgba(16,185,129,.12) !important;
@@ -274,7 +276,7 @@ textarea.is-valid, textarea.is-invalid { background-position: right 12px top 12p
     color: #1e1b4b; text-align: right; flex-shrink: 0;
 }
 
-
+/* ── Combinaisons ────────────────────────────────────── */
 .combi-table { width: 100%; border-collapse: separate; border-spacing: 0; }
 .combi-table thead th {
     background: #f5f3ff; color: #5b21b6;
@@ -333,6 +335,7 @@ textarea.is-valid, textarea.is-invalid { background-position: right 12px top 12p
 }
 .combi-toggle:hover { text-decoration: underline; }
 
+/* ── Filtres niveau pills ─────────────────────────────── */
 .filter-bar {
     display: flex; align-items: center; gap: 10px;
     flex-wrap: wrap; padding: 12px 20px;
@@ -470,7 +473,7 @@ textarea.is-valid, textarea.is-invalid { background-position: right 12px top 12p
     </div>
 </div>
 
-
+{# ── Stats cards ───────────────────────────────────────────────── #}
 <div class="page-header">
     <h2><i class="fas fa-heartbeat me-2" style="color:var(--purple-500)"></i>Gestion des Thérapies</h2>
     <p>Exercices et plans thérapeutiques pour enfants TSA</p>
@@ -657,6 +660,7 @@ textarea.is-valid, textarea.is-invalid { background-position: right 12px top 12p
     </div>
 </div>
 
+{# ── Statistiques Niveaux ───────────────────────────────────────── #}
 <div class="row g-3 mb-4">
     <div class="col-12">
         <div class="card-box">

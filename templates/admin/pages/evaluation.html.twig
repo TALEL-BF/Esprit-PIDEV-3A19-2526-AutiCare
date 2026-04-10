@@ -7,7 +7,7 @@
 {% block stylesheets %}
 {{ parent() }}
 <style>
-    /* Vos styles CSS (gardez-les identiques) */
+    /* Vos styles CSS */
     :root {
         --pastel-sky: #dbeafe;
         --pastel-sky-b: #9fc8f7;
@@ -19,6 +19,10 @@
         --pastel-yellow-b: #fde68a;
         --txt-soft: #475569;
         --txt-label: #334155;
+        --rose-pastel: #FFE4E9;
+        --rose-fonce: #FF69B4;
+        --mauve-pastel: #E8D5FF;
+        --mauve-fonce: #9B59B6;
     }
 
     /* Validation states */
@@ -188,7 +192,7 @@
         position: absolute;
         top: 0; left: 0; right: 0;
         height: 4px;
-        background: linear-gradient(90deg, #916ff7, #a793f7, #d2aff7);
+        background: linear-gradient(90deg, #ff69b4, #9b59b6, #c4b5fd);
         border-radius: 20px 20px 0 0;
     }
     .form-card-header {
@@ -206,14 +210,14 @@
         align-items: center;
         gap: 8px;
     }
-    .form-card-header h5 i { color: #9b7afb; }
+    .form-card-header h5 i { color: #ff69b4; }
     .mode-pill {
         font-size: 0.72rem;
         font-weight: 700;
         padding: 4px 14px;
         border-radius: 20px;
-        background: var(--pastel-lavender);
-        color: #601bd0;
+        background: linear-gradient(135deg, #FFE4E9, #E8D5FF);
+        color: #9b59b6;
         letter-spacing: .4px;
         text-transform: uppercase;
     }
@@ -223,47 +227,67 @@
     .eval-form-label {
         font-size: 0.78rem;
         font-weight: 700;
-        color: #6f26ec;
+        background: linear-gradient(135deg, #FF69B4, #9B59B6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
         text-transform: uppercase;
         letter-spacing: .5px;
         margin-bottom: 8px;
         display: block;
     }
     .eval-form-control {
-        border: 1.5px solid #e9d5ff;
+        border: 2px solid #FFE4E9;
         border-radius: 12px;
         padding: 10px 14px;
         font-size: 0.88rem;
         color: #1f2937;
-        background: #fefbff;
+        background: linear-gradient(135deg, #FFF9FC, #FDF8FF);
         width: 100%;
-        transition: all .2s;
+        transition: all 0.3s ease;
         outline: none;
     }
     .eval-form-control:focus {
-        border-color: #8762f5;
+        border-color: #FF69B4;
         background: white;
-        box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.12);
+        box-shadow: 0 0 0 4px rgba(255, 105, 180, 0.1), 0 0 0 4px rgba(155, 89, 182, 0.05);
     }
     textarea.eval-form-control {
         resize: vertical;
         min-height: 72px;
-        background: #fefbff;
     }
-    select.eval-form-control { cursor: pointer; }
+    select.eval-form-control { 
+        cursor: pointer;
+    }
 
     /* Choice groups */
     .choice-group {
-        background: linear-gradient(135deg, #fefbff, #faf7ff);
+        background: linear-gradient(135deg, #FFF9FC, #FDF8FF);
         border-radius: 14px;
         padding: 16px 18px;
-        border: 1.5px solid var(--pastel-lavender);
-        transition: all .25s ease;
+        border: 2px solid #FFE4E9;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    .choice-group::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #FF69B4, #9B59B6);
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    .choice-group:hover::before {
+        transform: translateX(0);
     }
     .choice-group:hover {
-        border-color: #a28ef2;
+        border-color: #FF69B4;
         background: white;
-        box-shadow: 0 4px 12px rgba(167, 139, 250, 0.12);
+        box-shadow: 0 4px 15px rgba(255, 105, 180, 0.15);
         transform: translateY(-2px);
     }
     .choice-number {
@@ -273,7 +297,7 @@
         width: 24px;
         height: 24px;
         border-radius: 12px;
-        background: linear-gradient(135deg, #a78bfa, #c4b5fd);
+        background: linear-gradient(135deg, #FF69B4, #9B59B6);
         color: white;
         font-size: 0.7rem;
         font-weight: 700;
@@ -282,7 +306,7 @@
 
     /* Buttons */
     .btn-save {
-        background: linear-gradient(135deg, #818cf8, #a78bfa);
+        background: linear-gradient(135deg, #FF69B4, #9B59B6);
         color: white;
         border: none;
         border-radius: 14px;
@@ -294,18 +318,18 @@
         align-items: center;
         gap: 8px;
         transition: all 0.2s ease;
-        box-shadow: 0 4px 12px rgba(129, 140, 248, 0.3);
+        box-shadow: 0 4px 12px rgba(255, 105, 180, 0.3);
     }
     .btn-save:hover {
         transform: translateY(-2px);
-        background: linear-gradient(135deg, #6366f1, #8b5cf6);
-        box-shadow: 0 6px 18px rgba(99, 102, 241, 0.35);
+        background: linear-gradient(135deg, #FF1493, #8E44AD);
+        box-shadow: 0 6px 18px rgba(255, 105, 180, 0.4);
     }
     .btn-save:active { transform: translateY(0); }
     .btn-cancel-eval {
-        background: var(--pastel-rose);
-        color: #9d174d;
-        border: 1.5px solid var(--pastel-rose-b);
+        background: linear-gradient(135deg, #FFE4E9, #E8D5FF);
+        color: #9B59B6;
+        border: 1.5px solid #FF69B4;
         border-radius: 14px;
         padding: 10px 24px;
         font-size: 0.85rem;
@@ -317,8 +341,59 @@
         transition: all 0.2s ease;
     }
     .btn-cancel-eval:hover {
-        background: #fce7f3;
+        background: linear-gradient(135deg, #FFD6E3, #DDC8FF);
         transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(255, 105, 180, 0.15);
+    }
+
+    /* Bouton Générer par IA */
+    .btn-generate-ia {
+        background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
+        color: white;
+        border: none;
+        border-radius: 14px;
+        padding: 11px 26px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        transition: all 0.25s ease;
+        box-shadow: 0 4px 16px rgba(139, 92, 246, 0.4);
+        position: relative;
+        overflow: hidden;
+        letter-spacing: 0.3px;
+    }
+    .btn-generate-ia::before {
+        content: '';
+        position: absolute;
+        top: -50%; left: -50%;
+        width: 200%; height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
+        transform: scale(0);
+        transition: transform 0.4s ease;
+    }
+    .btn-generate-ia:hover::before { transform: scale(1); }
+    .btn-generate-ia:hover {
+        transform: translateY(-2px);
+        background: linear-gradient(135deg, #9333ea 0%, #4f46e5 100%);
+        box-shadow: 0 8px 24px rgba(139, 92, 246, 0.5);
+    }
+    .btn-generate-ia:active { transform: translateY(0); }
+    .btn-generate-ia:disabled {
+        opacity: 0.65;
+        transform: none;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+    .btn-generate-ia .ia-sparkle {
+        font-size: 1rem;
+        animation: sparkle 1.5s infinite;
+    }
+    @keyframes sparkle {
+        0%, 100% { transform: scale(1) rotate(0deg); }
+        50% { transform: scale(1.2) rotate(15deg); }
     }
 
     /* Table card */
@@ -347,22 +422,22 @@
         align-items: center;
         gap: 8px;
     }
-    .table-card-title i { color: #a78bfa; }
+    .table-card-title i { color: #ff69b4; }
     .filter-input {
         border: 1.5px solid var(--pastel-lavender);
         border-radius: 12px;
         padding: 7px 14px 7px 36px;
         font-size: 0.82rem;
         color: #4c1d95;
-        background: #fefbff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23a78bfa' stroke-width='2.5'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 12px center;
+        background: #fefbff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23ff69b4' stroke-width='2.5'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 12px center;
         outline: none;
         width: 200px;
         transition: all .2s;
     }
     .filter-input:focus {
-        border-color: #c4b5fd;
+        border-color: #ff69b4;
         background-color: white;
-        box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.1);
+        box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.1);
     }
 
     /* Table */
@@ -372,7 +447,7 @@
         padding: 12px 16px;
         font-size: 0.72rem;
         font-weight: 700;
-        color: #7c3aed;
+        color: #9b59b6;
         text-transform: uppercase;
         letter-spacing: .5px;
         border-bottom: 1.5px solid var(--pastel-lavender);
@@ -386,11 +461,11 @@
         vertical-align: middle;
     }
     .eval-table tbody tr { transition: all .15s ease; }
-    .eval-table tbody tr:hover { background: linear-gradient(135deg, #fefbff, #faf7ff); }
+    .eval-table tbody tr:hover { background: linear-gradient(135deg, #FFF9FC, #FDF8FF); }
     .eval-table tbody tr:last-child td { border-bottom: none; }
 
     .cours-cell { font-weight: 600; color: #4c1d95; }
-    .cours-cell small { font-weight: 400; color: #a78bfa; font-size: 0.75rem; }
+    .cours-cell small { font-weight: 400; color: #ff69b4; font-size: 0.75rem; }
 
     .score-pill {
         display: inline-flex;
@@ -399,8 +474,8 @@
         width: 34px;
         height: 34px;
         border-radius: 12px;
-        background: linear-gradient(135deg, var(--pastel-lavender), var(--pastel-lavender-b));
-        color: #6d28d9;
+        background: linear-gradient(135deg, #FFE4E9, #E8D5FF);
+        color: #9b59b6;
         font-weight: 700;
         font-size: 0.85rem;
     }
@@ -408,17 +483,17 @@
         display: inline-flex;
         align-items: center;
         gap: 5px;
-        background: rgba(167, 139, 250, 0.12);
-        color: #7c3aed;
+        background: linear-gradient(135deg, #FFE4E9, #E8D5FF);
+        color: #9b59b6;
         padding: 4px 12px;
         border-radius: 20px;
         font-size: 0.75rem;
         font-weight: 700;
-        border: 1px solid rgba(167, 139, 250, 0.25);
+        border: 1px solid rgba(255, 105, 180, 0.25);
     }
     .btn-edit-eval {
-        background: var(--pastel-lavender);
-        color: #601dcb;
+        background: linear-gradient(135deg, #FFE4E9, #E8D5FF);
+        color: #9b59b6;
         border: none;
         border-radius: 10px;
         padding: 6px 14px;
@@ -431,12 +506,12 @@
         transition: all .15s ease;
     }
     .btn-edit-eval:hover {
-        background: #ddd6fe;
+        background: linear-gradient(135deg, #FFD6E3, #DDC8FF);
         transform: translateY(-2px);
-        box-shadow: 0 2px 8px rgba(167, 139, 250, 0.2);
+        box-shadow: 0 2px 8px rgba(255, 105, 180, 0.2);
     }
     .btn-del-eval {
-        background: var(--pastel-rose);
+        background: #fce7f3;
         color: #be185d;
         border: none;
         border-radius: 10px;
@@ -461,13 +536,363 @@
     }
     .empty-state i {
         font-size: 2.5rem;
-        color: var(--pastel-lavender);
+        color: #ff69b4;
         margin-bottom: 12px;
         display: block;
     }
     .empty-state p { font-size: 0.9rem; margin: 0; }
-    .choice-group, .btn-save, .btn-cancel-eval {
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* ===== MODAL IA — DESIGN AMÉLIORÉ ===== */
+    .modal-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(15, 5, 40, 0.65);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        animation: fadeIn 0.25s ease;
+        padding: 16px;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from { transform: translateY(40px) scale(0.97); opacity: 0; }
+        to   { transform: translateY(0)    scale(1);    opacity: 1; }
+    }
+
+    .modal-container {
+        background: #ffffff;
+        border-radius: 28px;
+        width: 100%;
+        max-width: 860px;
+        max-height: 88vh;
+        overflow: hidden;
+        box-shadow: 0 32px 80px rgba(88, 28, 135, 0.25), 0 0 0 1px rgba(167,139,250,0.15);
+        animation: slideUp 0.35s cubic-bezier(.22,.68,0,1.2);
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Header modal */
+    .modal-header {
+        padding: 22px 28px 20px;
+        background: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #ec4899 100%);
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-shrink: 0;
+        position: relative;
+        overflow: hidden;
+    }
+    .modal-header::before {
+        content: '✦ ✦ ✦';
+        position: absolute;
+        right: 70px; top: 8px;
+        font-size: 0.6rem;
+        color: rgba(255,255,255,0.25);
+        letter-spacing: 6px;
+    }
+    .modal-header-content { flex: 1; }
+    .modal-header h3 {
+        margin: 0 0 4px 0;
+        font-size: 1.15rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        letter-spacing: -0.2px;
+    }
+    .modal-header-sub {
+        font-size: 0.78rem;
+        color: rgba(255,255,255,0.8);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .modal-close {
+        background: rgba(255,255,255,0.18);
+        border: 1px solid rgba(255,255,255,0.25);
+        color: white;
+        font-size: 1rem;
+        cursor: pointer;
+        width: 34px; height: 34px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        flex-shrink: 0;
+        margin-left: 12px;
+    }
+    .modal-close:hover {
+        background: rgba(255,255,255,0.3);
+        transform: rotate(90deg) scale(1.1);
+    }
+
+    /* Barre sélection */
+    .select-all-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 4px;
+        margin-bottom: 16px;
+        border-bottom: 2px solid #f3e8ff;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    .select-all-bar-left { display: flex; align-items: center; gap: 10px; }
+    .select-all-btn {
+        background: linear-gradient(135deg, #7c3aed, #a855f7);
+        color: white;
+        border: none;
+        padding: 7px 18px;
+        border-radius: 20px;
+        font-size: 0.79rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        box-shadow: 0 2px 8px rgba(124,58,237,0.3);
+    }
+    .select-all-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(124,58,237,0.4);
+    }
+    .selected-count {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #7c3aed;
+        background: #f3e8ff;
+        padding: 4px 12px;
+        border-radius: 20px;
+    }
+    .questions-total-info {
+        font-size: 0.78rem;
+        color: #9ca3af;
+        font-style: italic;
+    }
+
+    /* Body */
+    .modal-body {
+        padding: 22px 28px;
+        overflow-y: auto;
+        flex: 1;
+        scrollbar-width: thin;
+        scrollbar-color: #c4b5fd #f3e8ff;
+    }
+    .modal-body::-webkit-scrollbar { width: 6px; }
+    .modal-body::-webkit-scrollbar-track { background: #f3e8ff; border-radius: 10px; }
+    .modal-body::-webkit-scrollbar-thumb { background: #c4b5fd; border-radius: 10px; }
+
+    /* Carte de question */
+    .question-preview-item {
+        background: #fefbff;
+        border: 2px solid #e9d5ff;
+        border-radius: 18px;
+        padding: 18px 20px 16px;
+        margin-bottom: 14px;
+        transition: all 0.22s ease;
+        position: relative;
+        cursor: pointer;
+    }
+    .question-preview-item:hover {
+        border-color: #a855f7;
+        box-shadow: 0 6px 20px rgba(168,85,247,0.12);
+        transform: translateY(-1px);
+    }
+    .question-preview-item.selected {
+        background: linear-gradient(135deg, #fdf4ff, #f0fdf4);
+        border-color: #22c55e;
+        box-shadow: 0 4px 16px rgba(34,197,94,0.1);
+    }
+    .question-preview-item.selected .q-index-badge {
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+    }
+
+    /* Numéro de question */
+    .q-index-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px; height: 26px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #a855f7, #7c3aed);
+        color: white;
+        font-size: 0.7rem;
+        font-weight: 800;
+        margin-right: 8px;
+        flex-shrink: 0;
+        transition: background 0.2s;
+    }
+
+    /* Checkbox custom */
+    .question-checkbox {
+        position: absolute;
+        top: 18px;
+        right: 18px;
+        width: 22px; height: 22px;
+        cursor: pointer;
+        accent-color: #22c55e;
+    }
+
+    .question-text-preview {
+        font-weight: 700;
+        color: #3b0764;
+        margin-bottom: 14px;
+        padding-right: 40px;
+        font-size: 0.93rem;
+        line-height: 1.5;
+        display: flex;
+        align-items: flex-start;
+    }
+    .question-text-preview span { flex: 1; }
+
+    /* Réponses */
+    .choices-preview {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+    }
+    .choice-preview {
+        background: white;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.79rem;
+        border: 1.5px solid #e9d5ff;
+        color: #4c1d95;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        transition: all 0.15s;
+    }
+    .choice-preview.correct {
+        background: linear-gradient(135deg, #fdf4ff, #f0fdf4);
+        border-color: #22c55e;
+        color: #15803d;
+        font-weight: 700;
+        box-shadow: 0 2px 8px rgba(34,197,94,0.15);
+    }
+    .choice-preview.correct i { color: #22c55e; }
+    .choice-label {
+        width: 18px; height: 18px;
+        background: #e9d5ff;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.62rem;
+        font-weight: 800;
+        color: #7c3aed;
+        flex-shrink: 0;
+    }
+    .choice-preview.correct .choice-label {
+        background: #22c55e;
+        color: white;
+    }
+
+    /* Score badge */
+    .score-badge-preview {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: linear-gradient(135deg, #fdf4ff, #ede9fe);
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #7c3aed;
+        margin-top: 12px;
+        border: 1px solid #e9d5ff;
+    }
+
+    /* Footer */
+    .modal-footer {
+        padding: 16px 28px;
+        border-top: 2px solid #f3e8ff;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: linear-gradient(135deg, #fefbff, #faf7ff);
+        flex-shrink: 0;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    .modal-footer-info {
+        font-size: 0.78rem;
+        color: #9ca3af;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .btn-save-selected {
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        color: white;
+        border: none;
+        border-radius: 14px;
+        padding: 11px 30px;
+        font-size: 0.85rem;
+        font-weight: 800;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+        box-shadow: 0 4px 14px rgba(34,197,94,0.35);
+        letter-spacing: 0.2px;
+    }
+    .btn-save-selected:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 22px rgba(34,197,94,0.45);
+        background: linear-gradient(135deg, #16a34a, #15803d);
+    }
+    .btn-save-selected:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+    .btn-cancel-modal {
+        background: white;
+        color: #6b7280;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 14px;
+        padding: 11px 24px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+    }
+    .btn-cancel-modal:hover {
+        background: #f9fafb;
+        border-color: #d1d5db;
+        color: #374151;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
     }
 </style>
 {% endblock %}
@@ -616,6 +1041,9 @@
                 <button type="button" class="btn-cancel-eval" id="cancelBtn">
                     <i class="fas fa-times"></i> Annuler
                 </button>
+                <button type="button" id="generateIABtn" class="btn-generate-ia">
+                    <i class="fas fa-magic ia-sparkle"></i> Générer par IA
+                </button>
             </div>
         </div>
     </form>
@@ -707,7 +1135,6 @@
 {{ parent() }}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Vos scripts JS identiques (gardez-les)
     function setValid(fieldId, message, groupId) {
         const el = document.getElementById(fieldId);
         const fb = document.getElementById('feedback-' + fieldId);
@@ -939,6 +1366,292 @@ document.addEventListener('DOMContentLoaded', function () {
         const scoreEl = document.getElementById('f_score');
         if (scoreEl) scoreEl.value = '1';
     });
+
+    // ========== GÉNÉRATION PAR IA AVEC MODAL ==========
+    const generateIABtn = document.getElementById('generateIABtn');
+    if (generateIABtn) {
+        generateIABtn.addEventListener('click', async function() {
+            const coursSelect = document.getElementById('f_cours_id');
+            const coursId = coursSelect.value;
+            
+            if (!coursId) {
+                showNotification('Veuillez d\'abord sélectionner un cours', 'error');
+                return;
+            }
+            
+            const coursNom = coursSelect.options[coursSelect.selectedIndex]?.text || '';
+            
+            if (!confirm(`🤖 Générer 5 questions pour le cours : "${coursNom}" ?\n\nL'IA va créer automatiquement des questions adaptées.`)) {
+                return;
+            }
+            
+            const originalText = generateIABtn.innerHTML;
+            generateIABtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Génération...';
+            generateIABtn.disabled = true;
+            
+            try {
+                const formData = new FormData();
+                formData.append('cours_id', coursId);
+                formData.append('nb_questions', 5);
+                
+                const response = await fetch('{{ path('admin_evaluation_generate_ia') }}', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Ouvrir le modal avec les questions générées
+                    openQuestionsModal(data.questions, data.cours_id, data.cours_titre);
+                } else {
+                    showNotification(data.error || 'Erreur lors de la génération', 'error');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showNotification('Erreur de connexion au service IA', 'error');
+            } finally {
+                generateIABtn.innerHTML = originalText;
+                generateIABtn.disabled = false;
+            }
+        });
+    }
+
+    // Fonction pour ouvrir le modal des questions
+    function openQuestionsModal(questions, coursId, coursTitre) {
+        // Créer le modal
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.id = 'questionsModal';
+        
+        // Générer le HTML du modal
+        modal.innerHTML = `
+            <div class="modal-container">
+                <div class="modal-header">
+                    <div class="modal-header-content">
+                        <h3>
+                            <i class="fas fa-magic"></i>
+                            Questions générées par l'IA
+                        </h3>
+                        <p class="modal-header-sub">
+                            <i class="fas fa-book-open"></i>
+                            Cours : <strong>${escapeHtml(coursTitre)}</strong>
+                        </p>
+                    </div>
+                    <button class="modal-close" onclick="closeModal()" title="Fermer">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="select-all-bar">
+                        <div class="select-all-bar-left">
+                            <button type="button" class="select-all-btn" id="selectAllBtn">
+                                <i class="fas fa-check-double"></i> Tout sélectionner
+                            </button>
+                            <span class="selected-count" id="selectedCount">0 sélectionnée(s)</span>
+                        </div>
+                        <span class="questions-total-info"><i class="fas fa-info-circle"></i> Cochez les questions à sauvegarder</span>
+                    </div>
+                    <div id="questionsList">
+                        ${generateQuestionsList(questions)}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="modal-footer-info">
+                        <i class="fas fa-robot"></i> Générées automatiquement par IA
+                    </div>
+                    <div style="display:flex;gap:10px;align-items:center;">
+                        <button type="button" class="btn-cancel-modal" onclick="closeModal()">
+                            <i class="fas fa-times"></i> Annuler
+                        </button>
+                        <button type="button" class="btn-save-selected" id="saveSelectedBtn">
+                            <i class="fas fa-save"></i> Sauvegarder la sélection
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Stocker les données dans l'objet modal
+        modal.questionsData = questions;
+        modal.coursId = coursId;
+        
+        // Gérer la sélection "Tout sélectionner"
+        const selectAllBtn = modal.querySelector('#selectAllBtn');
+        selectAllBtn.addEventListener('click', () => {
+            const checkboxes = modal.querySelectorAll('.question-checkbox');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            checkboxes.forEach(cb => {
+                cb.checked = !allChecked;
+                const item = cb.closest('.question-preview-item');
+                if (cb.checked) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+            updateSelectedCount(modal);
+        });
+        
+        // Gérer les changements individuels de checkbox
+        modal.querySelectorAll('.question-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const item = this.closest('.question-preview-item');
+                if (this.checked) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+                updateSelectedCount(modal);
+            });
+        });
+        
+        // Gérer la sauvegarde
+        const saveBtn = modal.querySelector('#saveSelectedBtn');
+        saveBtn.addEventListener('click', async () => {
+            const selectedCheckboxes = modal.querySelectorAll('.question-checkbox:checked');
+            const selectedQuestions = [];
+            
+            selectedCheckboxes.forEach(cb => {
+                const index = parseInt(cb.getAttribute('data-index'));
+                selectedQuestions.push(modal.questionsData[index]);
+            });
+            
+            if (selectedQuestions.length === 0) {
+                showNotification('Veuillez sélectionner au moins une question', 'error');
+                return;
+            }
+            
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sauvegarde...';
+            
+            try {
+                const response = await fetch('{{ path('admin_evaluation_save_selected') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        questions: selectedQuestions,
+                        cours_id: coursId
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification(data.message, 'success');
+                    closeModal();
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showNotification(data.error || 'Erreur lors de la sauvegarde', 'error');
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = '<i class="fas fa-save"></i> Sauvegarder sélection';
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showNotification('Erreur lors de la sauvegarde', 'error');
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fas fa-save"></i> Sauvegarder sélection';
+            }
+        });
+        
+        // Mettre à jour le compteur initial
+        updateSelectedCount(modal);
+    }
+
+    // Fonction pour générer la liste des questions
+    function generateQuestionsList(questions) {
+        return questions.map((q, index) => {
+            const isCorrect1 = q.bonne_reponse === 'choix1';
+            const isCorrect2 = q.bonne_reponse === 'choix2';
+            const isCorrect3 = q.bonne_reponse === 'choix3';
+
+            const makeChoice = (label, text, isCorrect) => `
+                <span class="choice-preview ${isCorrect ? 'correct' : ''}">
+                    <span class="choice-label">${isCorrect ? '✓' : label}</span>
+                    ${escapeHtml(text)}
+                </span>`;
+
+            return `
+                <div class="question-preview-item selected" onclick="toggleQuestion(this)">
+                    <input type="checkbox" class="question-checkbox" data-index="${index}" checked>
+                    <div class="question-text-preview">
+                        <span class="q-index-badge">${index + 1}</span>
+                        <span>${escapeHtml(q.question)}</span>
+                    </div>
+                    <div class="choices-preview">
+                        ${makeChoice('A', q.choix1, isCorrect1)}
+                        ${makeChoice('B', q.choix2, isCorrect2)}
+                        ${makeChoice('C', q.choix3, isCorrect3)}
+                    </div>
+                    <div class="score-badge-preview">
+                        <i class="fas fa-star"></i> ${q.score} point${q.score > 1 ? 's' : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Toggle sélection par clic sur la carte
+    window.toggleQuestion = function(item) {
+        const cb = item.querySelector('.question-checkbox');
+        if (!cb) return;
+        cb.checked = !cb.checked;
+        item.classList.toggle('selected', cb.checked);
+        const modal = document.getElementById('questionsModal');
+        if (modal) updateSelectedCount(modal);
+    };
+
+    // Fonction pour mettre à jour le compteur de sélection
+    function updateSelectedCount(modal) {
+        const selectedCount = modal.querySelectorAll('.question-checkbox:checked').length;
+        const totalCount = modal.querySelectorAll('.question-checkbox').length;
+        const countSpan = modal.querySelector('#selectedCount');
+        if (countSpan) {
+            countSpan.innerHTML = `${selectedCount}/${totalCount} sélectionnée(s)`;
+        }
+    }
+
+    // Fonction pour fermer le modal
+    window.closeModal = function() {
+        const modal = document.getElementById('questionsModal');
+        if (modal) {
+            modal.remove();
+        }
+    };
+
+    // Fonction utilitaire pour échapper le HTML
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `alert-${type === 'success' ? 'success' : 'error'}`;
+        notification.style.position = 'fixed';
+        notification.style.top = '20px';
+        notification.style.right = '20px';
+        notification.style.zIndex = '10001';
+        notification.style.minWidth = '300px';
+        notification.style.animation = 'slideIn 0.3s ease';
+        notification.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i> ${message}`;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
 });
 </script>
 {% endblock %}
