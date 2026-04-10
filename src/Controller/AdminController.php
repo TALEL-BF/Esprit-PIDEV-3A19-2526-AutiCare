@@ -15,7 +15,7 @@ class AdminController extends AbstractController
         return $this->render('admin/pages/dashboard.html.twig');
     }
 
-   
+   // ==================== UTILISATEURS ====================
 #[Route('/admin/users', name: 'admin_users')]
 public function users(): Response
 {
@@ -29,12 +29,13 @@ public function usersRoles(): Response
 }
 
 
+// ==================== COURS ====================
  #[Route('/admin/cours', name: 'admin_cours')]
     public function cours(CoursRepository $coursRepository): Response
     {
         $cours_list = $coursRepository->findAll();
 
-       
+        // Calcul du total des mots
         $totalMots = 0;
         foreach ($cours_list as $cours) {
             if ($cours->getMots()) {
@@ -56,7 +57,7 @@ public function coursModules(): Response
 {
     return $this->render('admin/pages/cours_modules.html.twig');
 }
-
+// ==================== ÉVÉNEMENTS ====================
 #[Route('/admin/evenements', name: 'admin_evenements')]
 public function evenements(): Response
 {

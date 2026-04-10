@@ -14,13 +14,14 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/admin/article')]
 final class ArticleController extends AbstractController
 {
-    
+    // ── INDEX ────────────────────────────────────────────────────────────
     #[Route('', name: 'admin_article', methods: ['GET'])]
     public function index(ArticleEntityRepository $repo): Response
     {
         $articles = $repo->findAll();
         $total    = count($articles);
 
+        // Stats par catégorie
         $cats = [];
         $totalLikes = 0;
         foreach ($articles as $a) {
@@ -30,7 +31,7 @@ final class ArticleController extends AbstractController
         }
         arsort($cats);
 
-       
+        // Auteurs uniques
         $auteurs = array_unique(array_map(fn($a) => $a->getAuteur(), $articles));
 
         return $this->render('admin/pages/article.html.twig', [
@@ -43,7 +44,7 @@ final class ArticleController extends AbstractController
         ]);
     }
 
-    
+    // ── NEW ──────────────────────────────────────────────────────────────
     #[Route('/new', name: 'admin_article_new', methods: ['POST'])]
     public function new(Request $request, EntityManagerInterface $em): JsonResponse
     {
@@ -82,7 +83,7 @@ final class ArticleController extends AbstractController
         }
     }
 
-   
+    // ── DELETE ───────────────────────────────────────────────────────────
     #[Route('/{id}/delete', name: 'admin_article_delete', methods: ['POST'])]
     public function delete(Request $request, ArticleEntity $a, EntityManagerInterface $em): JsonResponse
     {
