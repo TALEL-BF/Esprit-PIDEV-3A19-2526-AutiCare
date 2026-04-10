@@ -31,25 +31,25 @@ class FaceEmotionController extends AbstractController
             throw $this->createNotFoundException('Événement non trouvé');
         }
         
-     
+        // Nettoyer la session
         $session->clear();
         
-       
+        // ✅ STOCKER L'ID DE L'ÉVÉNEMENT POUR PLUS TARD
         $session->set('emotion_event_id', $idEvent);
         
-       
+        // ✅ GÉNÉRER SEULEMENT 1 HISTOIRE (pas 3)
         $histoire = $this->groqService->genererHistoireCourte($event->getTitre());
         $histoire = $this->nettoyerHistoire($histoire);
         $histoires = [$histoire];
         
-      
+        // Stocker en session
         $session->set('emotion_histoires', $histoires);
         $session->set('emotion_histoire_actuelle', 0);
         $session->set('emotion_etape_actuelle', 0);
         $session->set('emotion_score', 0);
         $session->set('emotion_etapes_validees', []);
         
-       
+        // Parser la première histoire
         $etapes = $this->analyserEmotions($histoire);
         $session->set('emotion_etapes', $etapes);
         
@@ -123,153 +123,160 @@ class FaceEmotionController extends AbstractController
         ]);
     }
     
-    #[Route('/api/emotion/capture', name: 'api_emotion_capture', methods: ['POST'])]
-    public function captureEmotion(Request $request, EmotionDetectionService $emotionService, SessionInterface $session): JsonResponse
-    {
-        $data = json_decode($request->getContent(), true);
-        $base64Image = $data['image'] ?? null;
-        
-        if (!$base64Image) {
-            return $this->json(['success' => false, 'message' => 'Aucune image'], 400);
-        }
-        
-        // État du jeu
-        $histoireActuelle = $session->get('emotion_histoire_actuelle', 0);
-        $etapeActuelle = $session->get('emotion_etape_actuelle', 0);
-        $etapes = $session->get('emotion_etapes', []);
-        $score = $session->get('emotion_score', 0);
-        $etapesValidees = $session->get('emotion_etapes_validees', []);
-        
-       
-        if ($histoireActuelle >= 1) {
-            return $this->json([
-                'success' => true,
-                'game_finished' => true,
-                'score' => $score
-            ]);
-        }
-        
-        // Vérifier si déjà validé
-        $etapeId = $histoireActuelle . '_' . $etapeActuelle;
-        if (in_array($etapeId, $etapesValidees)) {
-            return $this->json([
-                'success' => true,
-                'correct' => false,
-                'already_validated' => true,
-                'message' => '✅ Déjà validé ! Passe à la suite.'
-            ]);
-        }
-        
-        // Détecter l'émotion
-        $detection = $emotionService->detectEmotionFull($base64Image);
-        
-        if (!$detection['face_detected']) {
-            return $this->json([
-                'success' => false,
-                'message' => '👤 Aucun visage détecté'
-            ]);
-        }
-        
-        $emotionDetectee = $detection['emotion'];
-        $emotionAttendue = $etapes[$etapeActuelle]['emotion'];
-        
-        // Normaliser pour comparaison
-        $emotionDetecteeNorm = $this->normaliserEmotion($emotionDetectee);
-        $emotionAttendueNorm = $this->normaliserEmotion($emotionAttendue);
-        
-        if ($emotionDetecteeNorm === $emotionAttendueNorm) {
-            // Bonne émotion
-            $newScore = $score + 1;
-            $etapesValidees[] = $etapeId;
-            
-            $session->set('emotion_score', $newScore);
-            $session->set('emotion_etapes_validees', $etapesValidees);
-            
-            // Générer explication
-            $explication = $this->genererExplicationEmotion($emotionAttendue);
-            
-            return $this->json([
-                'success' => true,
-                'correct' => true,
-                'score' => $newScore,
-                'message' => '🎉 Bravo ! C\'est bien de la ' . $emotionAttendue . ' !',
-                'emotion_attendue' => $emotionAttendue,
-                'explication' => $explication,
-                'icone' => $this->getEmotionIcone($emotionAttendue),
-                'couleur' => $this->getEmotionCouleur($emotionAttendue),
-                'face_rect' => $detection['face_rect'] ?? null
-            ]);
-        }
-        
+   #[Route('/api/emotion/capture', name: 'api_emotion_capture', methods: ['POST'])]
+public function captureEmotion(Request $request, EmotionDetectionService $emotionService, SessionInterface $session): JsonResponse
+{
+    $data = json_decode($request->getContent(), true);
+    $base64Image = $data['image'] ?? null;
+    
+    if (!$base64Image) {
+        return $this->json(['success' => false, 'message' => 'Aucune image'], 400);
+    }
+    
+    // État du jeu
+    $histoireActuelle = $session->get('emotion_histoire_actuelle', 0);
+    $etapeActuelle = $session->get('emotion_etape_actuelle', 0);
+    $etapes = $session->get('emotion_etapes', []);
+    $score = $session->get('emotion_score', 0);
+    $etapesValidees = $session->get('emotion_etapes_validees', []);
+    
+    // Log pour debug
+    error_log('=== CAPTURE ===');
+    error_log('Etape actuelle: ' . $etapeActuelle);
+    error_log('Total étapes: ' . count($etapes));
+    
+    // Vérifier fin du jeu
+    if ($etapeActuelle >= count($etapes)) {
         return $this->json([
             'success' => true,
-            'correct' => false,
-            'message' => '😅 Essaie encore ! Fais une expression de ' . $emotionAttendue,
-            'emotion_detectee' => $emotionDetectee,
-            'emotion_attendue' => $emotionAttendue
+            'game_finished' => true,
+            'score' => $score
         ]);
     }
     
+    // Vérifier si déjà validé
+    $etapeId = $histoireActuelle . '_' . $etapeActuelle;
+    if (in_array($etapeId, $etapesValidees)) {
+        return $this->json([
+            'success' => true,
+            'correct' => false,
+            'already_validated' => true,
+            'message' => '✅ Déjà validé ! Passe à la suite.'
+        ]);
+    }
+    
+    // Détecter l'émotion
+    $detection = $emotionService->detectEmotionFull($base64Image);
+    
+    if (!$detection['face_detected']) {
+        return $this->json([
+            'success' => false,
+            'message' => '👤 Aucun visage détecté'
+        ]);
+    }
+    
+    $emotionDetectee = $detection['emotion'];
+    $emotionAttendue = $etapes[$etapeActuelle]['emotion'];
+    
+    $emotionDetecteeNorm = $this->normaliserEmotion($emotionDetectee);
+    $emotionAttendueNorm = $this->normaliserEmotion($emotionAttendue);
+    
+    if ($emotionDetecteeNorm === $emotionAttendueNorm) {
+        // Bonne émotion
+        $newScore = $score + 1;
+        $etapesValidees[] = $etapeId;
+        
+        // ✅ INCÉMENTER L'ÉTAPE ICI
+        $nouvelleEtape = $etapeActuelle + 1;
+        
+        $session->set('emotion_score', $newScore);
+        $session->set('emotion_etapes_validees', $etapesValidees);
+        $session->set('emotion_etape_actuelle', $nouvelleEtape);  // ← TRÈS IMPORTANT
+        
+        error_log('✅ Émotion correcte! Nouvelle étape: ' . $nouvelleEtape);
+        
+        $explication = $this->genererExplicationEmotion($emotionAttendue);
+        
+        return $this->json([
+            'success' => true,
+            'correct' => true,
+            'score' => $newScore,
+            'message' => '🎉 Bravo ! C\'est bien de la ' . $emotionAttendue . ' !',
+            'emotion_attendue' => $emotionAttendue,
+            'explication' => $explication,
+            'icone' => $this->getEmotionIcone($emotionAttendue),
+            'couleur' => $this->getEmotionCouleur($emotionAttendue),
+            'face_rect' => $detection['face_rect'] ?? null
+        ]);
+    }
+    
+    return $this->json([
+        'success' => true,
+        'correct' => false,
+        'message' => '😅 Essaie encore ! Fais une expression de ' . $emotionAttendue,
+        'emotion_detectee' => $emotionDetectee,
+        'emotion_attendue' => $emotionAttendue
+    ]);
+}
     #[Route('/api/emotion/next', name: 'api_emotion_next', methods: ['POST'])]
-    public function nextStep(Request $request, SessionInterface $session): JsonResponse
-    {
-        $data = json_decode($request->getContent(), true);
-        $nouvelleHistoire = $data['nouvelle_histoire'] ?? false;
-        
-        $histoireActuelle = $session->get('emotion_histoire_actuelle', 0);
-        $etapeActuelle = $session->get('emotion_etape_actuelle', 0);
-        $etapes = $session->get('emotion_etapes', []);
+public function nextStep(Request $request, SessionInterface $session): JsonResponse
+{
+    $data = json_decode($request->getContent(), true);
+    $nouvelleHistoire = $data['nouvelle_histoire'] ?? false;
+    
+    $etapeActuelle = $session->get('emotion_etape_actuelle', 0);
+    $etapes = $session->get('emotion_etapes', []);
+    
+    error_log('=== NEXT STEP ===');
+    error_log('Etape actuelle: ' . $etapeActuelle);
+    error_log('Total étapes: ' . count($etapes));
+    
+    if ($nouvelleHistoire) {
+        // Nouvelle histoire
         $histoires = $session->get('emotion_histoires', []);
+        $histoireActuelle = $session->get('emotion_histoire_actuelle', 0);
+        $nouvelleHistoireActuelle = $histoireActuelle + 1;
         
-        if ($nouvelleHistoire) {
-            // ✅ Passer à l'histoire suivante (mais on n'a qu'une seule histoire)
-            $histoireActuelle++;
-            
-            // ✅ Fin du jeu si plus d'histoire
-            if ($histoireActuelle >= 1) {
-                return $this->json([
-                    'success' => true,
-                    'game_finished' => true,
-                    'score' => $session->get('emotion_score', 0)
-                ]);
-            }
-            
-            $nouvellesEtapes = $this->analyserEmotions($histoires[$histoireActuelle]);
-            $session->set('emotion_histoire_actuelle', $histoireActuelle);
-            $session->set('emotion_etapes', $nouvellesEtapes);
-            $session->set('emotion_etape_actuelle', 0);
-            
+        if ($nouvelleHistoireActuelle >= count($histoires)) {
             return $this->json([
                 'success' => true,
-                'histoire_actuelle' => $histoireActuelle,
-                'etape_actuelle' => 0,
-                'etapes' => $nouvellesEtapes,
-                'texte' => $nouvellesEtapes[0]['texte'],
-                'emotion_attendue' => $nouvellesEtapes[0]['emotion'],
-                'icone' => $this->getEmotionIcone($nouvellesEtapes[0]['emotion'])
-            ]);
-        } else {
-            // Étape suivante dans la même histoire
-            $etapeActuelle++;
-            
-            if ($etapeActuelle >= count($etapes)) {
-                return $this->json([
-                    'success' => true,
-                    'histoire_terminee' => true
-                ]);
-            }
-            
-            $session->set('emotion_etape_actuelle', $etapeActuelle);
-            
-            return $this->json([
-                'success' => true,
-                'etape_actuelle' => $etapeActuelle,
-                'texte' => $etapes[$etapeActuelle]['texte'],
-                'emotion_attendue' => $etapes[$etapeActuelle]['emotion'],
-                'icone' => $this->getEmotionIcone($etapes[$etapeActuelle]['emotion'])
+                'game_finished' => true
             ]);
         }
+        
+        $nouvellesEtapes = $this->analyserEmotions($histoires[$nouvelleHistoireActuelle]);
+        $session->set('emotion_histoire_actuelle', $nouvelleHistoireActuelle);
+        $session->set('emotion_etapes', $nouvellesEtapes);
+        $session->set('emotion_etape_actuelle', 0);
+        $session->set('emotion_score', 0);
+        $session->set('emotion_etapes_validees', []);
+        
+        return $this->json([
+            'success' => true,
+            'histoire_actuelle' => $nouvelleHistoireActuelle,
+            'etape_actuelle' => 0,
+            'texte' => $nouvellesEtapes[0]['texte'],
+            'emotion_attendue' => $nouvellesEtapes[0]['emotion'],
+            'icone' => $this->getEmotionIcone($nouvellesEtapes[0]['emotion'])
+        ]);
     }
+    
+    // Étape suivante (déjà incrémentée dans captureEmotion)
+    if ($etapeActuelle >= count($etapes)) {
+        return $this->json([
+            'success' => true,
+            'histoire_terminee' => true
+        ]);
+    }
+    
+    return $this->json([
+        'success' => true,
+        'etape_actuelle' => $etapeActuelle,
+        'texte' => $etapes[$etapeActuelle]['texte'],
+        'emotion_attendue' => $etapes[$etapeActuelle]['emotion'],
+        'icone' => $this->getEmotionIcone($etapes[$etapeActuelle]['emotion'])
+    ]);
+}
     
     #[Route('/api/emotion/previous', name: 'api_emotion_previous', methods: ['POST'])]
     public function previousStep(SessionInterface $session): JsonResponse
