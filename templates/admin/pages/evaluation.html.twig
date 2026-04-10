@@ -398,13 +398,16 @@
         70%       { transform: scale(0.9) rotate(-10deg); opacity: 1; }
     }
 
-    /* Table card */
+    /* Table card - Version scrollable */
     .table-card {
         background: white;
         border-radius: 20px;
         border: 1.5px solid var(--pastel-lavender);
         box-shadow: 0 4px 20px rgba(167, 139, 250, 0.06);
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        max-height: 500px;
     }
     .table-card-header {
         display: flex;
@@ -415,6 +418,7 @@
         background: linear-gradient(135deg, #fefbff, #faf7ff);
         flex-wrap: wrap;
         gap: 12px;
+        flex-shrink: 0;
     }
     .table-card-title {
         font-size: 0.92rem;
@@ -442,9 +446,21 @@
         box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.1);
     }
 
+    /* Table scrollable */
+    .table-responsive {
+        overflow-y: auto;
+        flex: 1;
+        min-height: 0;
+    }
+
     /* Table */
-    .eval-table { width: 100%; border-collapse: collapse; }
-    .eval-table thead tr { background: linear-gradient(135deg, #fefbff, #faf7ff); }
+    .eval-table { 
+        width: 100%; 
+        border-collapse: collapse;
+    }
+    .eval-table thead tr { 
+        background: linear-gradient(135deg, #fefbff, #faf7ff);
+    }
     .eval-table th {
         padding: 12px 16px;
         font-size: 0.72rem;
@@ -454,6 +470,10 @@
         letter-spacing: .5px;
         border-bottom: 1.5px solid var(--pastel-lavender);
         white-space: nowrap;
+        background: linear-gradient(135deg, #fefbff, #faf7ff);
+        position: sticky;
+        top: 0;
+        z-index: 10;
     }
     .eval-table td {
         padding: 14px 16px;
@@ -597,7 +617,6 @@
         position: relative;
         overflow: hidden;
     }
-    /* Fond animé étoiles */
     .modal-header::before {
         content: '';
         position: absolute;
@@ -607,7 +626,6 @@
             radial-gradient(circle at 85% 20%, rgba(255,255,255,0.06) 0%, transparent 35%);
         pointer-events: none;
     }
-    /* Particules décoratives */
     .modal-header::after {
         content: '✦  ✧  ✦  ✧  ✦';
         position: absolute;
@@ -634,7 +652,6 @@
         letter-spacing: -0.3px;
         text-shadow: 0 1px 8px rgba(0,0,0,0.15);
     }
-    /* Badge IA dans le titre */
     .modal-header h3 .ia-badge {
         background: rgba(255,255,255,0.22);
         border: 1px solid rgba(255,255,255,0.35);
@@ -754,7 +771,6 @@
         cursor: pointer;
         overflow: hidden;
     }
-    /* Barre latérale colorée */
     .question-preview-item::before {
         content: '';
         position: absolute;
@@ -781,7 +797,6 @@
         width: 5px;
     }
 
-    /* NUMÉROTATION SUPPRIMÉE - plus de badge */
     .q-index-badge {
         display: none;
     }
@@ -798,7 +813,6 @@
     }
     .question-text-preview span { flex: 1; }
 
-    /* Réponses */
     .choices-preview {
         display: flex;
         gap: 7px;
@@ -842,7 +856,6 @@
         color: white;
     }
 
-    /* Score badge */
     .score-badge-preview {
         display: inline-flex;
         align-items: center;
@@ -1107,7 +1120,7 @@
     </form>
 </div>
 
-<!-- Liste des questions -->
+<!-- Liste des questions scrollable -->
 <div class="table-card">
     <div class="table-card-header">
         <span class="table-card-title"><i class="fas fa-list"></i> Liste des questions</span>
@@ -1460,7 +1473,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 const data = await response.json();
                 
                 if (data.success) {
-                    // Ouvrir le modal avec les questions générées
                     openQuestionsModal(data.questions, data.cours_id, data.cours_titre);
                 } else {
                     showNotification(data.error || 'Erreur lors de la génération', 'error');
@@ -1475,14 +1487,11 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Fonction pour ouvrir le modal des questions
     function openQuestionsModal(questions, coursId, coursTitre) {
-        // Créer le modal
         const modal = document.createElement('div');
         modal.className = 'modal-overlay';
         modal.id = 'questionsModal';
         
-        // Générer le HTML du modal
         modal.innerHTML = `
             <div class="modal-container">
                 <div class="modal-header">
@@ -1533,11 +1542,9 @@ document.addEventListener('DOMContentLoaded', function () {
         
         document.body.appendChild(modal);
         
-        // Stocker les données dans l'objet modal
         modal.questionsData = questions;
         modal.coursId = coursId;
         
-        // Gérer la sélection "Tout sélectionner"
         const selectAllBtn = modal.querySelector('#selectAllBtn');
         selectAllBtn.addEventListener('click', () => {
             const checkboxes = modal.querySelectorAll('.question-checkbox');
@@ -1554,7 +1561,6 @@ document.addEventListener('DOMContentLoaded', function () {
             updateSelectedCount(modal);
         });
         
-        // Gérer les changements individuels de checkbox
         modal.querySelectorAll('.question-checkbox').forEach(checkbox => {
             checkbox.addEventListener('change', function() {
                 const item = this.closest('.question-preview-item');
@@ -1567,7 +1573,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
         
-        // Gérer la sauvegarde
         const saveBtn = modal.querySelector('#saveSelectedBtn');
         saveBtn.addEventListener('click', async () => {
             const selectedCheckboxes = modal.querySelectorAll('.question-checkbox:checked');
@@ -1619,11 +1624,9 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
         
-        // Mettre à jour le compteur initial
         updateSelectedCount(modal);
     }
 
-    // Fonction pour générer la liste des questions (sans numérotation)
     function generateQuestionsList(questions) {
         return questions.map((q, index) => {
             const isCorrect1 = q.bonne_reponse === 'choix1';
@@ -1655,7 +1658,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }).join('');
     }
 
-    // Toggle sélection par clic sur la carte
     window.toggleQuestion = function(item) {
         const cb = item.querySelector('.question-checkbox');
         if (!cb) return;
@@ -1665,7 +1667,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (modal) updateSelectedCount(modal);
     };
 
-    // Fonction pour mettre à jour le compteur de sélection
     function updateSelectedCount(modal) {
         const selectedCount = modal.querySelectorAll('.question-checkbox:checked').length;
         const totalCount = modal.querySelectorAll('.question-checkbox').length;
@@ -1675,7 +1676,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Fonction pour fermer le modal
     window.closeModal = function() {
         const modal = document.getElementById('questionsModal');
         if (modal) {
@@ -1683,7 +1683,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
-    // Fonction utilitaire pour échapper le HTML
     function escapeHtml(str) {
         if (!str) return '';
         return str
