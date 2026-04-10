@@ -31,25 +31,25 @@ class FaceEmotionController extends AbstractController
             throw $this->createNotFoundException('Événement non trouvé');
         }
         
-        // Nettoyer la session
+     
         $session->clear();
         
-        // ✅ STOCKER L'ID DE L'ÉVÉNEMENT POUR PLUS TARD
+       
         $session->set('emotion_event_id', $idEvent);
         
-        // ✅ GÉNÉRER SEULEMENT 1 HISTOIRE (pas 3)
+       
         $histoire = $this->groqService->genererHistoireCourte($event->getTitre());
         $histoire = $this->nettoyerHistoire($histoire);
         $histoires = [$histoire];
         
-        // Stocker en session
+      
         $session->set('emotion_histoires', $histoires);
         $session->set('emotion_histoire_actuelle', 0);
         $session->set('emotion_etape_actuelle', 0);
         $session->set('emotion_score', 0);
         $session->set('emotion_etapes_validees', []);
         
-        // Parser la première histoire
+       
         $etapes = $this->analyserEmotions($histoire);
         $session->set('emotion_etapes', $etapes);
         
@@ -140,7 +140,7 @@ class FaceEmotionController extends AbstractController
         $score = $session->get('emotion_score', 0);
         $etapesValidees = $session->get('emotion_etapes_validees', []);
         
-        // ✅ Vérifier fin du jeu (1 seule histoire)
+       
         if ($histoireActuelle >= 1) {
             return $this->json([
                 'success' => true,
