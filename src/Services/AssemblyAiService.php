@@ -24,23 +24,20 @@ class AssemblyAiService
         $this->apiUrl = rtrim($apiUrl, '/');
     }
 
-    /**
-     * Transcrit un fichier audio
-     */
+    
     public function transcribe(string $audioPath): array
     {
         try {
             $this->logger->info('=== Starting transcription ===');
             
-            // 1. Upload du fichier audio
+           
             $uploadUrl = $this->uploadAudio($audioPath);
             $this->logger->info('Upload URL: ' . $uploadUrl);
             
-            // 2. Lancer la transcription
+           
             $transcriptId = $this->startTranscription($uploadUrl);
             $this->logger->info('Transcript ID: ' . $transcriptId);
             
-            // 3. Attendre le résultat
             $result = $this->waitForResult($transcriptId);
             
             return [
