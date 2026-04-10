@@ -21,13 +21,11 @@ class WeatherService
         $this->apiKey = $apiKey;
     }
 
-    /**
-     * Récupère la météo pour une ville
-     */
+   
     public function getWeather(string $city): array
     {
         try {
-            // Appel à l'API OpenWeather
+           
             $response = $this->httpClient->request('GET', 'https://api.openweathermap.org/data/2.5/weather', [
                 'query' => [
                     'q' => $city,
@@ -56,9 +54,7 @@ class WeatherService
         }
     }
     
-    /**
-     * Récupère les prévisions pour une ville (optionnel)
-     */
+   
     public function getForecast(string $city, int $days = 5): array
     {
         try {
@@ -80,9 +76,7 @@ class WeatherService
         }
     }
     
-    /**
-     * Icône météo selon le code OpenWeather
-     */
+   
     private function getWeatherIcon(string $iconCode): string
     {
         $icons = [
@@ -100,9 +94,7 @@ class WeatherService
         return $icons[$iconCode] ?? '🌡️';
     }
     
-    /**
-     * Météo par défaut (si API indisponible)
-     */
+   
     private function getFallbackWeather(): array
     {
         return [
