@@ -33,317 +33,370 @@ class EvenementsController extends AbstractController
         $this->sponsorRepository = $sponsorRepository;
     }
 
-   #[Route('/admin/evenements', name: 'admin_evenements')]
-public function index(Request $request, EntityManagerInterface $em): Response
-{
-    $events = $em->getRepository(Event::class)->findAll();
-    $sponsors = $em->getRepository(Sponsor::class)->findAll();
-    
-    $totalEvents = count($events);
-    $today = new \DateTime();
-    $upcomingEvents = 0;
-    $totalParticipants = 0;
-    
-    $typeStats = [];
-    foreach ($events as $event) {
-        $type = $event->getTypeEvent();
-        if (!isset($typeStats[$type])) {
-            $typeStats[$type] = 0;
-        }
-        $typeStats[$type]++;
+    #[Route('/admin/evenements', name: 'admin_evenements')]
+    public function index(Request $request, EntityManagerInterface $em, EventAIPredictor $predictor): Response
+    {
+        $events = $em->getRepository(Event::class)->findAll();
+        $sponsors = $em->getRepository(Sponsor::class)->findAll();
         
-        if ($event->getDateDebut() >= $today) {
-            $upcomingEvents++;
+        // 🔥 Load ML model for predictions
+        $predictor->loadModel();
+        
+        $totalEvents = count($events);
+        $today = new \DateTime();
+        $upcomingEvents = 0;
+        $totalParticipants = 0;
+        
+        $typeStats = [];
+        $scoreStats = [
+            'excellent' => 0,  // >=80
+            'good' => 0,       // 70-79
+            'moderate' => 0,   // 55-69
+            'low' => 0,        // 40-54
+            'poor' => 0        // <40
+        ];
+        
+        foreach ($events as $event) {
+            $type = $event->getTypeEvent();
+            if (!isset($typeStats[$type])) {
+                $typeStats[$type] = 0;
+            }
+            $typeStats[$type]++;
+            
+            if ($event->getDateDebut() >= $today) {
+                $upcomingEvents++;
+            }
+            
+            // 🔥 Calculate AI score for each event
+            $score = $predictor->predictAutismScore($event);
+            if ($score >= 80) $scoreStats['excellent']++;
+            elseif ($score >= 70) $scoreStats['good']++;
+            elseif ($score >= 55) $scoreStats['moderate']++;
+            elseif ($score >= 40) $scoreStats['low']++;
+            else $scoreStats['poor']++;
         }
+        
+        $directEditId = $request->query->get('edit');
+        
+        return $this->render('admin/pages/evenements.html.twig', [
+            'events' => $events,
+            'sponsors' => $sponsors,
+            'totalEvents' => $totalEvents,
+            'upcomingEvents' => $upcomingEvents,
+            'totalParticipants' => $totalParticipants,
+            'typeStats' => $typeStats,
+            'scoreStats' => $scoreStats,
+            'directEditId' => $directEditId,
+            'modelTrained' => $predictor->isTrained()
+        ]);
     }
     
-    // 🔥 CHECK FOR EDIT PARAMETER
-    $directEditId = $request->query->get('edit');
+    // 🔥 NEW: Get AI score for a single event (AJAX)
+    #[Route('/admin/evenements/ai-score/{id}', name: 'admin_evenements_ai_score', methods: ['GET'])]
+    public function getAiScore(int $id, EntityManagerInterface $em, EventAIPredictor $predictor): JsonResponse
+    {
+        $event = $em->getRepository(Event::class)->find($id);
+        
+        if (!$event) {
+            return $this->json(['success' => false, 'error' => 'Event not found'], 404);
+        }
+        
+        $score = $predictor->predictAutismScore($event);
+        
+        return $this->json([
+            'success' => true,
+            'score' => round($score, 1),
+            'level' => $this->getScoreLevel($score),
+            'class' => $this->getScoreClass($score),
+            'icon' => $this->getScoreIcon($score)
+        ]);
+    }
     
-    return $this->render('admin/pages/evenements.html.twig', [
-        'events' => $events,
-        'sponsors' => $sponsors,
-        'totalEvents' => $totalEvents,
-        'upcomingEvents' => $upcomingEvents,
-        'totalParticipants' => $totalParticipants,
-        'typeStats' => $typeStats,
-        'directEditId' => $directEditId,  // ← ADD THIS LINE
-    ]);
-}
+    // 🔥 NEW: Train ML model manually
+    #[Route('/admin/evenements/train-model', name: 'admin_evenements_train_model', methods: ['POST'])]
+    public function trainModel(EntityManagerInterface $em, EventAIPredictor $predictor): JsonResponse
+    {
+        $events = $em->getRepository(Event::class)->findAll();
+        
+        if (empty($events)) {
+            return $this->json(['success' => false, 'message' => 'No events to train on'], 400);
+        }
+        
+        try {
+            $startTime = microtime(true);
+            $predictor->train($events);
+            $trainingTime = round((microtime(true) - $startTime) * 1000, 2);
+            
+            return $this->json([
+                'success' => true,
+                'message' => 'Model trained on ' . count($events) . ' events',
+                'training_time_ms' => $trainingTime
+            ]);
+        } catch (\Exception $e) {
+            return $this->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
     #[Route('/admin/evenements/add', name: 'admin_evenements_add', methods: ['POST'])]
-public function addEvent(
-    Request $request, 
-    EntityManagerInterface $em, 
-    SluggerInterface $slugger,
-    ValidatorInterface $validator
-): JsonResponse
-{
-   
-    error_log('=== ADD EVENT ===');
-    error_log('POST: ' . print_r($request->request->all(), true));
-    error_log('FILES: ' . print_r($request->files->all(), true));
-    
-    $event = new Event();
-    
-    
-    $event->setTitre(trim($request->request->get('eventTitle', '')));
-    $event->setDescription(trim($request->request->get('eventDescription', '')));
-    $event->setTypeEvent($request->request->get('eventType', ''));
-    $event->setLieu(trim($request->request->get('eventLocation', '')));
-    $event->setMaxParticipant((int)$request->request->get('eventCapacity', 0));
-    
-    
-    $startDate = $request->request->get('eventStartDate');
-    $startTime = $request->request->get('eventStartTime');
-    
-    if ($startDate) {
-        $event->setDateDebut(new \DateTime($startDate));
-    }
-    
-    if ($startTime) {
-        $timeOnly = \DateTime::createFromFormat('H:i', $startTime);
-        if ($timeOnly) {
-            $event->setHeureDebut($timeOnly);
-        }
-    }
-    
-    $endDate = $request->request->get('eventEndDate');
-    $endTime = $request->request->get('eventEndTime');
-    
-    if ($endDate && !empty($endDate)) {
-        $event->setDateFin(new \DateTime($endDate));
-    }
-    
-    if ($endTime && !empty($endTime)) {
-        $timeOnly = \DateTime::createFromFormat('H:i', $endTime);
-        if ($timeOnly) {
-            $event->setHeureFin($timeOnly);
-        }
-    }
-    
-   
-    $status = $request->request->get('eventStatus', 'planifie');
-    $event->setStatus($status);
-    
- 
-    $imageFile = $request->files->get('eventImage');
-    
-  
-    error_log('Image file: ' . ($imageFile ? $imageFile->getClientOriginalName() : 'NULL'));
-    
-    if (!$imageFile) {
-        return $this->json(['success' => false, 'errors' => ['Une image est obligatoire pour l\'événement']]);
-    }
-    
-    $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
-    $safeFilename = $slugger->slug($originalFilename);
-    $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->getClientOriginalExtension();
-    
-    
-    $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/events';
-    error_log('Upload directory: ' . $uploadDir);
-    error_log('Directory exists? ' . (file_exists($uploadDir) ? 'YES' : 'NO'));
-    
-    try {
-        if (!file_exists($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
-            error_log('Created directory');
+    public function addEvent(
+        Request $request, 
+        EntityManagerInterface $em, 
+        SluggerInterface $slugger,
+        ValidatorInterface $validator,
+        EventAIPredictor $predictor
+    ): JsonResponse
+    {
+        error_log('=== ADD EVENT ===');
+        error_log('POST: ' . print_r($request->request->all(), true));
+        error_log('FILES: ' . print_r($request->files->all(), true));
+        
+        $event = new Event();
+        
+        $event->setTitre(trim($request->request->get('eventTitle', '')));
+        $event->setDescription(trim($request->request->get('eventDescription', '')));
+        $event->setTypeEvent($request->request->get('eventType', ''));
+        $event->setLieu(trim($request->request->get('eventLocation', '')));
+        $event->setMaxParticipant((int)$request->request->get('eventCapacity', 0));
+        
+        $startDate = $request->request->get('eventStartDate');
+        $startTime = $request->request->get('eventStartTime');
+        
+        if ($startDate) {
+            $event->setDateDebut(new \DateTime($startDate));
         }
         
-        $imageFile->move($uploadDir, $newFilename);
-        error_log('File moved successfully: ' . $newFilename);
-        
-      
-        $event->setImage('uploads/events/' . $newFilename);
-        error_log('Image path stored: ' . $event->getImage());
-        
-    } catch (FileException $e) {
-        error_log('Upload error: ' . $e->getMessage());
-        return $this->json(['success' => false, 'errors' => ['Erreur lors de l\'upload: ' . $e->getMessage()]]);
-    }
-    
-   
-    $errors = $validator->validate($event);
-    
-    if (count($errors) > 0) {
-        $errorMessages = [];
-        foreach ($errors as $error) {
-            $errorMessages[] = $error->getMessage();
-        }
-        return $this->json(['success' => false, 'errors' => $errorMessages]);
-    }
-    
-    $em->persist($event);
-    $em->flush();
-    
-    error_log('Event saved with ID: ' . $event->getIdEvent());
-    
-    return $this->json([
-        'success' => true, 
-        'message' => 'Événement ajouté avec succès !',
-        'imagePath' => '/' . $event->getImage()
-    ]);
-}
-   #[Route('/admin/evenements/get/{id}', name: 'admin_evenements_get', methods: ['GET'])]
-public function getEvent(int $id, EntityManagerInterface $em): JsonResponse
-{
-    $event = $em->getRepository(Event::class)->find($id);
-    
-    if (!$event) {
-        return $this->json(['success' => false, 'message' => 'Événement non trouvé'], 404);
-    }
-    
-    // Get image path - stored as 'uploads/events/filename'
-    $imagePath = $event->getImage();
-    $fullImagePath = null;
-    
-    if ($imagePath) {
-        // If it starts with 'uploads/', add leading slash
-        if (str_starts_with($imagePath, 'uploads/')) {
-            $fullImagePath = '/' . $imagePath;
-        } else {
-            $fullImagePath = '/uploads/events/' . $imagePath;
-        }
-    }
-    
-    return $this->json([
-        'success' => true,
-        'event' => [
-            'idEvent' => $event->getIdEvent(),
-            'titre' => $event->getTitre(),
-            'description' => $event->getDescription(),
-            'typeEvent' => $event->getTypeEvent(),
-            'lieu' => $event->getLieu(),
-            'maxParticipant' => $event->getMaxParticipant(),
-            'dateDebut' => $event->getDateDebut()?->format('Y-m-d'),
-            'heureDebut' => $event->getHeureDebut()?->format('H:i'),
-            'dateFin' => $event->getDateFin()?->format('Y-m-d'),
-            'heureFin' => $event->getHeureFin()?->format('H:i'),
-            'status' => $event->getStatus(),
-            'image' => $fullImagePath,
-        ]
-    ]);
-}
-
-
-  #[Route('/admin/evenements/update', name: 'admin_evenements_update', methods: ['POST'])]
-public function updateEvent(
-    Request $request, 
-    EntityManagerInterface $em, 
-    SluggerInterface $slugger,
-    ValidatorInterface $validator
-): JsonResponse
-{
-    $id = $request->request->get('eventId');
-    $event = $em->getRepository(Event::class)->find($id);
-    
-    if (!$event) {
-        return $this->json(['success' => false, 'errors' => ['Événement non trouvé']]);
-    }
-    
-    // Update basic info
-    $event->setTitre(trim($request->request->get('eventTitle', '')));
-    $event->setDescription(trim($request->request->get('eventDescription', '')));
-    $event->setTypeEvent($request->request->get('eventType', ''));
-    $event->setLieu(trim($request->request->get('eventLocation', '')));
-    $event->setMaxParticipant((int)$request->request->get('eventCapacity', 0));
-    
-    // Dates
-    $startDate = $request->request->get('eventStartDate');
-    $startTime = $request->request->get('eventStartTime');
-    
-    if ($startDate) {
-        $event->setDateDebut(new \DateTime($startDate));
-    }
-    
-    if ($startTime) {
-        $timeOnly = \DateTime::createFromFormat('H:i', $startTime);
-        if ($timeOnly) {
-            $event->setHeureDebut($timeOnly);
-        }
-    }
-    
-    $endDate = $request->request->get('eventEndDate');
-    $endTime = $request->request->get('eventEndTime');
-    
-    if ($endDate && !empty($endDate)) {
-        $event->setDateFin(new \DateTime($endDate));
-    } else {
-        $event->setDateFin(null);
-    }
-    
-    if ($endTime && !empty($endTime)) {
-        $timeOnly = \DateTime::createFromFormat('H:i', $endTime);
-        if ($timeOnly) {
-            $event->setHeureFin($timeOnly);
-        }
-    } else {
-        $event->setHeureFin(null);
-    }
-    
-    $status = $request->request->get('eventStatus', 'planifie');
-    $event->setStatus($status);
-    
-    // Handle image upload
-    $imageFile = $request->files->get('eventImage');
-    
-    if ($imageFile && $imageFile->getSize() > 0) {
-        // Delete old image if exists
-        $oldImage = $event->getImage();
-        if ($oldImage) {
-            // Build correct path to old image (same format as addEvent stores)
-            $oldImagePath = $this->getParameter('kernel.project_dir') . '/public/' . $oldImage;
-            error_log('Attempting to delete old image: ' . $oldImagePath);
-            if (file_exists($oldImagePath)) {
-                unlink($oldImagePath);
-                error_log('Old image deleted successfully');
-            } else {
-                error_log('Old image not found: ' . $oldImagePath);
+        if ($startTime) {
+            $timeOnly = \DateTime::createFromFormat('H:i', $startTime);
+            if ($timeOnly) {
+                $event->setHeureDebut($timeOnly);
             }
         }
         
-        // Upload new image (same format as addEvent)
+        $endDate = $request->request->get('eventEndDate');
+        $endTime = $request->request->get('eventEndTime');
+        
+        if ($endDate && !empty($endDate)) {
+            $event->setDateFin(new \DateTime($endDate));
+        }
+        
+        if ($endTime && !empty($endTime)) {
+            $timeOnly = \DateTime::createFromFormat('H:i', $endTime);
+            if ($timeOnly) {
+                $event->setHeureFin($timeOnly);
+            }
+        }
+        
+        $status = $request->request->get('eventStatus', 'planifie');
+        $event->setStatus($status);
+        
+        $imageFile = $request->files->get('eventImage');
+        
+        error_log('Image file: ' . ($imageFile ? $imageFile->getClientOriginalName() : 'NULL'));
+        
+        if (!$imageFile) {
+            return $this->json(['success' => false, 'errors' => ['Une image est obligatoire pour l\'événement']]);
+        }
+        
         $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
         $safeFilename = $slugger->slug($originalFilename);
         $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->getClientOriginalExtension();
         
+        $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/events';
+        error_log('Upload directory: ' . $uploadDir);
+        
         try {
-            $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/events';
             if (!file_exists($uploadDir)) {
                 mkdir($uploadDir, 0777, true);
+                error_log('Created directory');
             }
+            
             $imageFile->move($uploadDir, $newFilename);
-            // ✅ Store the SAME format as addEvent: 'uploads/events/filename'
+            error_log('File moved successfully: ' . $newFilename);
+            
             $event->setImage('uploads/events/' . $newFilename);
-            error_log('New image saved: ' . $event->getImage());
+            error_log('Image path stored: ' . $event->getImage());
+            
         } catch (FileException $e) {
             error_log('Upload error: ' . $e->getMessage());
-            return $this->json(['success' => false, 'errors' => ['Erreur lors de l\'upload de l\'image: ' . $e->getMessage()]]);
+            return $this->json(['success' => false, 'errors' => ['Erreur lors de l\'upload: ' . $e->getMessage()]]);
         }
+        
+        $errors = $validator->validate($event);
+        
+        if (count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[] = $error->getMessage();
+            }
+            return $this->json(['success' => false, 'errors' => $errorMessages]);
+        }
+        
+        $em->persist($event);
+        $em->flush();
+        
+        // 🔥 Retrain model after adding event
+        $allEvents = $em->getRepository(Event::class)->findAll();
+        $predictor->train($allEvents);
+        
+        error_log('Event saved with ID: ' . $event->getIdEvent());
+        
+        return $this->json([
+            'success' => true, 
+            'message' => 'Événement ajouté avec succès !',
+            'imagePath' => '/' . $event->getImage(),
+            'aiScore' => round($predictor->predictAutismScore($event), 1)
+        ]);
     }
     
-    // Validate
-    $errors = $validator->validate($event);
-    
-    if (count($errors) > 0) {
-        $errorMessages = [];
-        foreach ($errors as $error) {
-            $errorMessages[] = $error->getMessage();
+    #[Route('/admin/evenements/get/{id}', name: 'admin_evenements_get', methods: ['GET'])]
+    public function getEvent(int $id, EntityManagerInterface $em): JsonResponse
+    {
+        $event = $em->getRepository(Event::class)->find($id);
+        
+        if (!$event) {
+            return $this->json(['success' => false, 'message' => 'Événement non trouvé'], 404);
         }
-        return $this->json(['success' => false, 'errors' => $errorMessages]);
+        
+        $imagePath = $event->getImage();
+        $fullImagePath = null;
+        
+        if ($imagePath) {
+            if (str_starts_with($imagePath, 'uploads/')) {
+                $fullImagePath = '/' . $imagePath;
+            } else {
+                $fullImagePath = '/uploads/events/' . $imagePath;
+            }
+        }
+        
+        return $this->json([
+            'success' => true,
+            'event' => [
+                'idEvent' => $event->getIdEvent(),
+                'titre' => $event->getTitre(),
+                'description' => $event->getDescription(),
+                'typeEvent' => $event->getTypeEvent(),
+                'lieu' => $event->getLieu(),
+                'maxParticipant' => $event->getMaxParticipant(),
+                'dateDebut' => $event->getDateDebut()?->format('Y-m-d'),
+                'heureDebut' => $event->getHeureDebut()?->format('H:i'),
+                'dateFin' => $event->getDateFin()?->format('Y-m-d'),
+                'heureFin' => $event->getHeureFin()?->format('H:i'),
+                'status' => $event->getStatus(),
+                'image' => $fullImagePath,
+            ]
+        ]);
     }
-    
-    $em->flush();
-    
-    return $this->json([
-        'success' => true, 
-        'message' => 'Événement modifié avec succès !',
-        'imagePath' => '/' . $event->getImage()
-    ]);
-}
+
+    #[Route('/admin/evenements/update', name: 'admin_evenements_update', methods: ['POST'])]
+    public function updateEvent(
+        Request $request, 
+        EntityManagerInterface $em, 
+        SluggerInterface $slugger,
+        ValidatorInterface $validator,
+        EventAIPredictor $predictor
+    ): JsonResponse
+    {
+        $id = $request->request->get('eventId');
+        $event = $em->getRepository(Event::class)->find($id);
+        
+        if (!$event) {
+            return $this->json(['success' => false, 'errors' => ['Événement non trouvé']]);
+        }
+        
+        $event->setTitre(trim($request->request->get('eventTitle', '')));
+        $event->setDescription(trim($request->request->get('eventDescription', '')));
+        $event->setTypeEvent($request->request->get('eventType', ''));
+        $event->setLieu(trim($request->request->get('eventLocation', '')));
+        $event->setMaxParticipant((int)$request->request->get('eventCapacity', 0));
+        
+        $startDate = $request->request->get('eventStartDate');
+        $startTime = $request->request->get('eventStartTime');
+        
+        if ($startDate) {
+            $event->setDateDebut(new \DateTime($startDate));
+        }
+        
+        if ($startTime) {
+            $timeOnly = \DateTime::createFromFormat('H:i', $startTime);
+            if ($timeOnly) {
+                $event->setHeureDebut($timeOnly);
+            }
+        }
+        
+        $endDate = $request->request->get('eventEndDate');
+        $endTime = $request->request->get('eventEndTime');
+        
+        if ($endDate && !empty($endDate)) {
+            $event->setDateFin(new \DateTime($endDate));
+        } else {
+            $event->setDateFin(null);
+        }
+        
+        if ($endTime && !empty($endTime)) {
+            $timeOnly = \DateTime::createFromFormat('H:i', $endTime);
+            if ($timeOnly) {
+                $event->setHeureFin($timeOnly);
+            }
+        } else {
+            $event->setHeureFin(null);
+        }
+        
+        $status = $request->request->get('eventStatus', 'planifie');
+        $event->setStatus($status);
+        
+        $imageFile = $request->files->get('eventImage');
+        
+        if ($imageFile && $imageFile->getSize() > 0) {
+            $oldImage = $event->getImage();
+            if ($oldImage) {
+                $oldImagePath = $this->getParameter('kernel.project_dir') . '/public/' . $oldImage;
+                if (file_exists($oldImagePath)) {
+                    unlink($oldImagePath);
+                }
+            }
+            
+            $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+            $safeFilename = $slugger->slug($originalFilename);
+            $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->getClientOriginalExtension();
+            
+            try {
+                $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/events';
+                if (!file_exists($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+                $imageFile->move($uploadDir, $newFilename);
+                $event->setImage('uploads/events/' . $newFilename);
+            } catch (FileException $e) {
+                return $this->json(['success' => false, 'errors' => ['Erreur lors de l\'upload: ' . $e->getMessage()]]);
+            }
+        }
+        
+        $errors = $validator->validate($event);
+        
+        if (count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[] = $error->getMessage();
+            }
+            return $this->json(['success' => false, 'errors' => $errorMessages]);
+        }
+        
+        $em->flush();
+        
+        // 🔥 Retrain model after updating event
+        $allEvents = $em->getRepository(Event::class)->findAll();
+        $predictor->train($allEvents);
+        
+        return $this->json([
+            'success' => true, 
+            'message' => 'Événement modifié avec succès !',
+            'imagePath' => '/' . $event->getImage(),
+            'aiScore' => round($predictor->predictAutismScore($event), 1)
+        ]);
+    }
 
     #[Route('/admin/evenements/delete', name: 'admin_evenements_delete', methods: ['DELETE'])]
-    public function deleteEvent(Request $request, EntityManagerInterface $em): JsonResponse
+    public function deleteEvent(Request $request, EntityManagerInterface $em, EventAIPredictor $predictor): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
         $id = $data['id'] ?? $request->request->get('id');
@@ -360,7 +413,7 @@ public function updateEvent(
         
         try {
             if ($event->getImage()) {
-                $imagePath = $this->getParameter('kernel.project_dir') . '/public/uploads/events/' . $event->getImage();
+                $imagePath = $this->getParameter('kernel.project_dir') . '/public/' . $event->getImage();
                 if (file_exists($imagePath)) {
                     unlink($imagePath);
                 }
@@ -368,6 +421,12 @@ public function updateEvent(
             
             $em->remove($event);
             $em->flush();
+            
+            // 🔥 Retrain model after deleting event
+            $allEvents = $em->getRepository(Event::class)->findAll();
+            if (!empty($allEvents)) {
+                $predictor->train($allEvents);
+            }
             
             return $this->json(['success' => true]);
         } catch (\Exception $e) {
@@ -445,24 +504,23 @@ public function updateEvent(
         
         $data = [];
         foreach ($events as $event) {
-           $data[] = [
-    'idEvent' => $event->getIdEvent(),
-    'titre' => $event->getTitre(),
-    'description' => $event->getDescription(),
-    'typeEvent' => $event->getTypeEvent(),
-    'lieu' => $event->getLieu(),
-    'maxParticipant' => $event->getMaxParticipant(),
-    'dateDebut' => $event->getDateDebut()?->format('Y-m-d'),
-    'heureDebut' => $event->getHeureDebut()?->format('H:i'),
-    'dateFin' => $event->getDateFin()?->format('Y-m-d'),
-    'heureFin' => $event->getHeureFin()?->format('H:i'),
-    'status' => $event->getStatus(),
-    'image' => $event->getImage(),   
-    'imagePath' => $event->getImage() ? '/' . $event->getImage() : null,
-    'sponsorCount' => $event->getSponsors()->count(),  
-    'inscrits' => 0
-];
-           
+            $data[] = [
+                'idEvent' => $event->getIdEvent(),
+                'titre' => $event->getTitre(),
+                'description' => $event->getDescription(),
+                'typeEvent' => $event->getTypeEvent(),
+                'lieu' => $event->getLieu(),
+                'maxParticipant' => $event->getMaxParticipant(),
+                'dateDebut' => $event->getDateDebut()?->format('Y-m-d'),
+                'heureDebut' => $event->getHeureDebut()?->format('H:i'),
+                'dateFin' => $event->getDateFin()?->format('Y-m-d'),
+                'heureFin' => $event->getHeureFin()?->format('H:i'),
+                'status' => $event->getStatus(),
+                'image' => $event->getImage(),
+                'imagePath' => $event->getImage() ? '/' . $event->getImage() : null,
+                'sponsorCount' => $event->getSponsors()->count(),
+                'inscrits' => 0
+            ];
         }
         
         return $this->json([
@@ -529,70 +587,53 @@ public function updateEvent(
         ]);
     }
 
-    
-
-   
-
-    
-
-   
-
-   
-   #[Route('/admin/evenements/predictions', name: 'admin_evenements_predictions')]
-public function predictions(EventAIPredictor $predictor, EntityManagerInterface $em): Response
-{
-    $events = $em->getRepository(Event::class)->findAll();
-    
-    // Train the model
-    $predictor->train($events);
-    
-    $predictions = [];
-    $totalScore = 0;
-    $bestScore = 0;
-    $bestEventName = '';
-    $goodEventsCount = 0;
-    
-    foreach ($events as $event) {
-        $score = $predictor->predictAutismScore($event);
+    #[Route('/admin/evenements/predictions', name: 'admin_evenements_predictions')]
+    public function predictions(EventAIPredictor $predictor, EntityManagerInterface $em): Response
+    {
+        $events = $em->getRepository(Event::class)->findAll();
         
-        if ($score > $bestScore) {
-            $bestScore = $score;
-            $bestEventName = $event->getTitre();
+        $predictor->train($events);
+        
+        $predictions = [];
+        $totalScore = 0;
+        $bestScore = 0;
+        $bestEventName = '';
+        $goodEventsCount = 0;
+        
+        foreach ($events as $event) {
+            $score = $predictor->predictAutismScore($event);
+            
+            if ($score > $bestScore) {
+                $bestScore = $score;
+                $bestEventName = $event->getTitre();
+            }
+            
+            if ($score >= 70) {
+                $goodEventsCount++;
+            }
+            
+            $predictions[] = [
+                'event' => $event,
+                'score' => round($score, 1),
+                'level' => $this->getScoreLevel($score)
+            ];
+            $totalScore += $score;
         }
         
-        if ($score >= 70) {
-            $goodEventsCount++;
-        }
+        usort($predictions, function($a, $b) {
+            return $b['score'] <=> $a['score'];
+        });
         
-        $predictions[] = [
-            'event' => $event,
-            'score' => round($score, 1),
-            'level' => $this->getScoreLevel($score)
-        ];
-        $totalScore += $score;
+        return $this->render('admin/pages/event_predictions.html.twig', [
+            'predictions' => $predictions,
+            'averageScore' => count($events) > 0 ? round($totalScore / count($events), 1) : 0,
+            'totalEvents' => count($events),
+            'bestScore' => round($bestScore, 1),
+            'bestEventName' => $bestEventName,
+            'goodEventsCount' => $goodEventsCount
+        ]);
     }
-    
-    // Sort by score
-    usort($predictions, function($a, $b) {
-        return $b['score'] <=> $a['score'];
-    });
-    
-    return $this->render('admin/pages/event_predictions.html.twig', [
-        'predictions' => $predictions,
-        'averageScore' => count($events) > 0 ? round($totalScore / count($events), 1) : 0,
-        'totalEvents' => count($events),
-        'bestScore' => round($bestScore, 1),
-        'bestEventName' => $bestEventName,
-        'goodEventsCount' => $goodEventsCount
-    ]);
-}
 
-private function getScoreLevel(float $score): string
-{
-    if ($score >= 70) return 'Très adapté';
-    if ($score >= 40) return 'Modérément adapté';
-    return 'Peu adapté';
-}
     #[Route('/admin/dashboard/recent-events', name: 'admin_dashboard_recent_events', methods: ['GET'])]
     public function getRecentEvents(EntityManagerInterface $em): JsonResponse
     {
@@ -666,81 +707,104 @@ private function getScoreLevel(float $score): string
             ]
         ]);
     }
-   
-#[Route('/admin/evenements/apply-suggestion', name: 'admin_evenements_apply_suggestion', methods: ['POST'])]
-public function applySuggestion(Request $request, EntityManagerInterface $em, EventAIPredictor $predictor): JsonResponse
-{
-    $data = json_decode($request->getContent(), true);
-    $event = $em->getRepository(Event::class)->find($data['eventId']);
-    
-    if (!$event) {
-        return $this->json(['success' => false, 'error' => 'Event not found']);
+
+    #[Route('/admin/evenements/apply-suggestion', name: 'admin_evenements_apply_suggestion', methods: ['POST'])]
+    public function applySuggestion(Request $request, EntityManagerInterface $em, EventAIPredictor $predictor): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $event = $em->getRepository(Event::class)->find($data['eventId']);
+        
+        if (!$event) {
+            return $this->json(['success' => false, 'error' => 'Event not found']);
+        }
+        
+        switch($data['field']) {
+            case 'capacite':
+                $event->setMaxParticipant((int)$data['value']);
+                break;
+            case 'type':
+                $event->setTypeEvent($data['value']);
+                break;
+            case 'description':
+                $currentDesc = $event->getDescription();
+                if (!str_contains($currentDesc, $data['value'])) {
+                    $event->setDescription($currentDesc . ' ' . $data['value']);
+                }
+                break;
+            case 'titre':
+                $event->setTitre($data['value']);
+                break;
+        }
+        
+        $em->flush();
+        
+        $allEvents = $em->getRepository(Event::class)->findAll();
+        $predictor->train($allEvents);
+        $newScore = $predictor->predictAutismScore($event);
+        
+        return $this->json([
+            'success' => true,
+            'newScore' => round($newScore, 1)
+        ]);
+    }
+
+    #[Route('/admin/evenements/ai-suggestions', name: 'admin_evenements_ai_suggestions', methods: ['POST'])]
+    public function aiSuggestions(Request $request, GroqService $groqService): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        
+        $eventData = [
+            'title' => $data['title'] ?? '',
+            'type' => $data['type'] ?? '',
+            'description' => $data['description'] ?? '',
+            'capacity' => $data['capacity'] ?? 0,
+            'currentScore' => $data['currentScore'] ?? 50
+        ];
+        
+        $suggestions = $groqService->generateEventImprovementSuggestions($eventData);
+        
+        return $this->json([
+            'success' => true,
+            'suggestions' => $suggestions
+        ]);
+    }
+
+    #[Route('/admin/evenements/add-event-type', name: 'admin_evenements_add_event_type', methods: ['POST'])]
+    public function addEventType(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $newType = trim($data['type']);
+        
+        if (empty($newType)) {
+            return $this->json(['success' => false, 'error' => 'Type invalide']);
+        }
+        
+        return $this->json(['success' => true, 'type' => $newType]);
     }
     
-    // Apply the suggestion based on field
-    switch($data['field']) {
-        case 'capacite':
-            $event->setMaxParticipant((int)$data['value']);
-            break;
-        case 'type':
-            $event->setTypeEvent($data['value']);
-            break;
-        case 'description':
-            // For description, you might want to append or replace
-            $currentDesc = $event->getDescription();
-            if (!str_contains($currentDesc, $data['value'])) {
-                $event->setDescription($currentDesc . ' ' . $data['value']);
-            }
-            break;
-        case 'titre':
-            $event->setTitre($data['value']);
-            break;
+    // ========== PRIVATE HELPER METHODS ==========
+    
+    private function getScoreLevel(float $score): string
+    {
+        if ($score >= 80) return 'Excellent 🌟';
+        if ($score >= 70) return 'Très adapté ✅';
+        if ($score >= 55) return 'Adapté 👍';
+        if ($score >= 40) return 'Modérément adapté ⚠️';
+        if ($score >= 25) return 'Peu adapté ❌';
+        return 'Déconseillé 🚫';
     }
     
-    $em->flush();
-    
-    // Recalculate score
-    $allEvents = $em->getRepository(Event::class)->findAll();
-    $predictor->train($allEvents);
-    $newScore = $predictor->predictAutismScore($event);
-    
-    return $this->json([
-        'success' => true,
-        'newScore' => round($newScore, 1)
-    ]);
-}
-#[Route('/admin/evenements/ai-suggestions', name: 'admin_evenements_ai_suggestions', methods: ['POST'])]
-public function aiSuggestions(Request $request, GroqService $groqService): JsonResponse
-{
-    $data = json_decode($request->getContent(), true);
-    
-    $eventData = [
-        'title' => $data['title'] ?? '',
-        'type' => $data['type'] ?? '',
-        'description' => $data['description'] ?? '',
-        'capacity' => $data['capacity'] ?? 0,
-        'currentScore' => $data['currentScore'] ?? 50
-    ];
-    
-    $suggestions = $groqService->generateEventImprovementSuggestions($eventData);
-    
-    return $this->json([
-        'success' => true,
-        'suggestions' => $suggestions
-    ]);
-}
-#[Route('/admin/evenements/add-event-type', name: 'admin_evenements_add_event_type', methods: ['POST'])]
-public function addEventType(Request $request): JsonResponse
-{
-    $data = json_decode($request->getContent(), true);
-    $newType = trim($data['type']);
-    
-    if (empty($newType)) {
-        return $this->json(['success' => false, 'error' => 'Type invalide']);
+    private function getScoreClass(float $score): string
+    {
+        if ($score >= 70) return 'success';
+        if ($score >= 40) return 'warning';
+        return 'danger';
     }
     
-    // For now, just return success - the frontend adds the option
-    return $this->json(['success' => true, 'type' => $newType]);
-}
-    
+    private function getScoreIcon(float $score): string
+    {
+        if ($score >= 70) return '🌟';
+        if ($score >= 40) return '⚠️';
+        return '❌';
+    }
 }
