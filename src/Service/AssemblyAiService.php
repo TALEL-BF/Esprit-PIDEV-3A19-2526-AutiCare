@@ -24,9 +24,7 @@ class AssemblyAiService
         $this->apiUrl = rtrim($apiUrl, '/');
     }
 
-    /**
-     * Transcrit un fichier audio
-     */
+  
     public function transcribe(string $audioPath): array
     {
         try {
@@ -54,9 +52,7 @@ class AssemblyAiService
         }
     }
 
-    /**
-     * Upload du fichier audio vers AssemblyAI
-     */
+    
     private function uploadAudio(string $audioPath): string
     {
         // ✅ Vérifier que le fichier existe
@@ -94,9 +90,7 @@ class AssemblyAiService
         return $data['upload_url'];
     }
 
-    /**
-     * Démarre la transcription AssemblyAI
-     */
+    
     private function startTranscription(string $audioUrl): string
     {
         // ✅ Vérifier que l'URL n'est pas vide
@@ -123,7 +117,7 @@ class AssemblyAiService
             ],
         ]);
         
-        // ✅ toArray(false) pour voir l'erreur réelle
+       
         $data = $response->toArray(false);
         
         $this->logger->info('Transcription response: ' . json_encode($data));
@@ -135,9 +129,7 @@ class AssemblyAiService
         return $data['id'];
     }
 
-    /**
-     * Attend le résultat de la transcription
-     */
+   
     private function waitForResult(string $transcriptId): array
     {
         $maxAttempts = 30;
