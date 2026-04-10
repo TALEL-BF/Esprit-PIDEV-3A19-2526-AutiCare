@@ -40,10 +40,10 @@ class EventController extends AbstractController
             $period = null;
         }
         
-        // Nombre d'événements par page
+        
         $limit = 6;
         
-        // Compter le total d'événements avec les filtres
+       
         $totalEvents = $eventRepository->countWithFilters(
             searchTerm: $searchTerm,
             type: $type,
@@ -62,7 +62,7 @@ class EventController extends AbstractController
             $page = $totalPages;
         }
         
-        // Récupérer les événements de la page courante
+        
         $queryBuilder = $eventRepository->createFilteredQueryBuilder(
             searchTerm: $searchTerm,
             type: $type,
@@ -91,9 +91,7 @@ class EventController extends AbstractController
         ]);
     }
     
-    /**
-     * ROUTE API pour la recherche AJAX (avec pagination)
-     */
+  
     #[Route('/api/events/search', name: 'api_events_search')]
     public function searchEvents(Request $request, EventRepository $eventRepository): Response
     {
@@ -162,9 +160,7 @@ class EventController extends AbstractController
             'totalEvents' => $totalEvents
         ]);
     }
-    /**
- * Récupère le score IA d'un événement (API)
- */
+ 
 #[Route('/event/score/{id}', name: 'app_event_score', methods: ['GET'])]
 public function getEventScore(int $id, EventRepository $eventRepository, EventAIPredictor $predictor): JsonResponse
 {
@@ -182,9 +178,7 @@ public function getEventScore(int $id, EventRepository $eventRepository, EventAI
     ]);
 }
 
-/**
- * Analyse IA détaillée pour un événement (API)
- */
+
 #[Route('/event/analyze/{id}', name: 'app_event_analyze', methods: ['POST'])]
 public function analyzeEvent(int $id, EventRepository $eventRepository, GroqService $groqService, EventAIPredictor $predictor): JsonResponse
 {
@@ -211,12 +205,7 @@ public function analyzeEvent(int $id, EventRepository $eventRepository, GroqServ
         'score' => round($score, 1)
     ]);
 }
-/**
- * API pour récupérer la liste "À apporter"
- */
-/**
- * API pour récupérer la liste "À apporter"
- */
+
 #[Route('/event/bring/{id}', name: 'app_event_bring', methods: ['GET'])]
 public function getBringList(int $id, EventRepository $eventRepository, GroqService $groqService, EventAIPredictor $predictor): JsonResponse
 {
@@ -244,9 +233,7 @@ public function getBringList(int $id, EventRepository $eventRepository, GroqServ
     ]);
 }
 
-/**
- * API pour récupérer les conseils personnalisés
- */
+
 #[Route('/event/tips/{id}', name: 'app_event_tips', methods: ['GET'])]
 public function getTips(int $id, EventRepository $eventRepository, GroqService $groqService, EventAIPredictor $predictor): JsonResponse
 {
@@ -295,7 +282,7 @@ public function show(int $id, EntityManagerInterface $entityManager): Response
         }
     }
     
-    // ✅ AJOUTE CETTE LIGNE - Décode le planning
+    
     $planningData = json_decode($event->getPlanning(), true);
     
     $sponsors = $event->getSponsors();
