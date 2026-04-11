@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit TherapieEntity{% endblock %}
+
+{% block body %}
+    <h1>Edit TherapieEntity</h1>
+
+    {{ include('therapie/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_therapie_index') }}">back to list</a>
+
+    {{ include('therapie/_delete_form.html.twig') }}
+{% endblock %}

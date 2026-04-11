@@ -1,0 +1,2307 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}AutiCare - Espace de dessin magique pour enfants{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --mauve: #9b6bff;
+            --mauve-light: #b794f4;
+            --rose: #ff69b4;
+            --rose-light: #ff9ecf;
+            --lavender: #c77dff;
+            --violet: #a855f7;
+            --dark: #1e2a3b;
+            --bg: #faf5ff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #D5B8FF, #E8D5FF);
+            font-family: 'Nunito', sans-serif;
+            min-height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(155,107,255,0.7);
+            }
+            50% { 
+                transform: scale(1.05);
+                box-shadow: 0 0 20px 5px rgba(155,107,255,0.5);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-10px) rotate(-5deg); }
+            75% { transform: translateY(10px) rotate(5deg); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes starTwinkle {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(0.5); }
+        }
+
+        .drawing-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .drawing-header {
+            background: rgba(255,255,255,0.95);
+            margin-bottom: 20px;
+            padding: 20px 30px;
+            border-radius: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border: 2px solid var(--violet);
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, var(--mauve), var(--violet));
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-family: 'Baloo 2', cursive;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+        }
+
+        .back-btn:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            animation: shake 0.3s ease;
+        }
+
+        .header-title {
+            text-align: center;
+        }
+
+        .header-title h1 {
+            font-family: 'Baloo 2', cursive;
+            font-size: 32px;
+            color: var(--dark);
+            margin: 0;
+            background: linear-gradient(135deg, var(--mauve), var(--rose));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-title p {
+            color: #666;
+            font-size: 14px;
+            margin: 5px 0 0;
+        }
+
+        .header-emoji {
+            font-size: 50px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .tools-panel {
+            background: rgba(255,255,255,0.95);
+            margin-bottom: 20px;
+            padding: 25px;
+            border-radius: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border: 2px solid var(--violet);
+        }
+
+        .tools-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .tools-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .tool-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #F5E6FF;
+            padding: 10px 20px;
+            border-radius: 40px;
+            flex-wrap: wrap;
+            transition: all 0.3s;
+        }
+
+        .tool-group:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .tool-label {
+            font-family: 'Baloo 2', cursive;
+            font-weight: bold;
+            color: var(--violet);
+            font-size: 14px;
+        }
+
+        #colorPicker {
+            width: 50px;
+            height: 40px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            background: transparent;
+            transition: transform 0.2s;
+        }
+
+        #colorPicker:hover {
+            transform: scale(1.1);
+        }
+
+        .color-presets {
+            display: flex;
+            gap: 8px;
+        }
+
+        .color-preset {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .color-preset:hover {
+            transform: scale(1.2);
+        }
+
+        .brush-slider {
+            width: 150px;
+        }
+
+        .tool-btn {
+            background: white;
+            border: 2px solid var(--violet);
+            padding: 8px 15px;
+            border-radius: 25px;
+            font-family: 'Baloo 2', cursive;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tool-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .tool-btn.active {
+            background: linear-gradient(135deg, var(--mauve), var(--violet));
+            color: white;
+            border-color: transparent;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, var(--mauve), var(--violet));
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-family: 'Baloo 2', cursive;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .shape-btn {
+            background: #FFF9C4;
+            border: 2px solid #FFA726;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .shape-btn:hover {
+            transform: scale(1.15) rotate(5deg);
+            background: #FFE082;
+        }
+
+        .canvas-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .canvas-wrapper {
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border: 5px solid var(--violet);
+            display: inline-block;
+            overflow: auto;
+            max-width: 100%;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .canvas-wrapper:hover {
+            transform: scale(1.01);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+        }
+
+        canvas {
+            display: block;
+            border-radius: 25px;
+            cursor: crosshair;
+            width: 100%;
+            height: auto;
+        }
+
+        canvas.dragging-animal {
+            cursor: grabbing;
+        }
+
+        .extra-tools {
+            background: rgba(255,255,255,0.95);
+            padding: 15px;
+            border-radius: 30px;
+            border: 2px solid var(--violet);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            transition: all 0.3s;
+        }
+
+        .extra-tools:hover {
+            transform: scale(1.02);
+        }
+
+        .extra-tools-title {
+            font-family: 'Baloo 2', cursive;
+            font-weight: bold;
+            color: var(--violet);
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .extra-tools-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .extra-btn {
+            background: #F5E6FF;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-family: 'Baloo 2', cursive;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .extra-btn:hover {
+            background: var(--mauve-light);
+            color: white;
+            transform: scale(1.05) translateX(5px);
+        }
+
+        .animals-panel {
+            background: rgba(255,255,255,0.95);
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 30px;
+            border: 2px solid var(--violet);
+        }
+
+        .animals-title {
+            font-family: 'Baloo 2', cursive;
+            font-weight: bold;
+            color: var(--violet);
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .animals-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .animal-btn {
+            background: linear-gradient(135deg, #FFF9C4, #FFE082);
+            border: 2px solid #FFA726;
+            padding: 12px 18px;
+            border-radius: 50px;
+            font-family: 'Baloo 2', cursive;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+        }
+
+        .animal-btn:hover {
+            transform: scale(1.1);
+            background: linear-gradient(135deg, #FFE082, #FFD54F);
+        }
+
+        .animal-btn.selected {
+            background: linear-gradient(135deg, var(--mauve), var(--violet));
+            color: white;
+            border-color: transparent;
+            animation: pulseGlow 0.5s ease;
+        }
+
+        .animal-controls {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px dashed var(--violet);
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            background: #F5E6FF;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 25px;
+            font-family: 'Baloo 2', cursive;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-btn:hover {
+            background: var(--mauve-light);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .message-bar {
+            background: #F5E6FF;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            border: 2px solid var(--violet);
+        }
+
+        .message-icon {
+            font-size: 30px;
+        }
+
+        .message-text {
+            font-family: 'Baloo 2', cursive;
+            font-size: 16px;
+            color: var(--violet);
+            font-weight: bold;
+        }
+
+        .floating-notification {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--mauve), var(--violet));
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-family: 'Baloo 2', cursive;
+            font-weight: bold;
+            z-index: 1000;
+            animation: slideUp 0.3s ease, fadeOut 0.3s ease 2s forwards;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            position: absolute;
+            animation: confettiFall 3s linear forwards;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .star-animation {
+            position: fixed;
+            font-size: 20px;
+            animation: starTwinkle 1s ease-out forwards;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .stroke-counter {
+            background: rgba(255,255,255,0.9);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-family: 'Baloo 2', cursive;
+            font-weight: bold;
+            color: var(--violet);
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .camera-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .camera-modal.active {
+            display: flex;
+        }
+
+        .camera-container {
+            background: white;
+            border-radius: 40px;
+            padding: 25px;
+            text-align: center;
+            border: 5px solid var(--violet);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .camera-container h3 {
+            font-family: 'Baloo 2', cursive;
+            color: var(--violet);
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+
+        .video-wrapper {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            background: #333;
+            min-width: 300px;
+            min-height: 200px;
+        }
+
+        #cameraVideo {
+            width: 100%;
+            max-width: 640px;
+            border-radius: 20px;
+            background: #333;
+            transform: scaleX(-1);
+        }
+
+        #cameraCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .camera-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .cam-btn {
+            background: linear-gradient(135deg, var(--mauve), var(--violet));
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-family: 'Baloo 2', cursive;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cam-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .cam-btn.stop {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+        }
+
+        .air-drawing-status {
+            background: #F5E6FF;
+            padding: 10px;
+            border-radius: 20px;
+            margin-top: 15px;
+            font-family: 'Baloo 2', cursive;
+            font-weight: bold;
+            color: var(--violet);
+        }
+
+        .camera-btn {
+            background: linear-gradient(135deg, #ff6b9d, var(--rose));
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-family: 'Baloo 2', cursive;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+        }
+
+        .camera-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        @media (max-width: 768px) {
+            .drawing-container {
+                padding: 10px;
+            }
+            .drawing-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            .header-title h1 {
+                font-size: 22px;
+            }
+            .header-emoji {
+                font-size: 35px;
+            }
+            .tool-group {
+                justify-content: center;
+                width: 100%;
+            }
+            .tools-row {
+                flex-direction: column;
+            }
+            .tool-btn, .action-btn {
+                font-size: 12px;
+                padding: 6px 12px;
+            }
+            .extra-tools {
+                width: 100%;
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            .extra-tools-buttons {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            .animal-btn {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="drawing-container">
+    <div class="drawing-header">
+        <button class="back-btn" onclick="window.location.href='{{ path('app_cours') }}'">
+            <i class="fas fa-arrow-left"></i> Retour aux cours
+        </button>
+        <div class="header-title">
+            <h1><i class="fas fa-paintbrush"></i> Espace de dessin magique</h1>
+            <p>Laisse libre cours à ton imagination !</p>
+        </div>
+        <div class="header-emoji">
+            <i class="fas fa-star"></i>
+            <i class="fas fa-heart"></i>
+            <i class="fas fa-smile-wink"></i>
+        </div>
+    </div>
+    
+    <div class="tools-panel">
+        <div class="tools-row">
+            <div class="tool-group">
+                <span class="tool-label"><i class="fas fa-palette"></i> Couleur:</span>
+                <input type="color" id="colorPicker" value="#9b6bff">
+                <div class="color-presets">
+                    <div class="color-preset" style="background: #9b6bff;" data-color="#9b6bff"></div>
+                    <div class="color-preset" style="background: #ff69b4;" data-color="#ff69b4"></div>
+                    <div class="color-preset" style="background: #ff4444;" data-color="#ff4444"></div>
+                    <div class="color-preset" style="background: #4CAF50;" data-color="#4CAF50"></div>
+                    <div class="color-preset" style="background: #2196F3;" data-color="#2196F3"></div>
+                    <div class="color-preset" style="background: #FF9800;" data-color="#FF9800"></div>
+                    <div class="color-preset" style="background: #000000;" data-color="#000000"></div>
+                </div>
+            </div>
+            <div class="tool-group">
+                <span class="tool-label"><i class="fas fa-paintbrush"></i> Taille:</span>
+                <input type="range" id="brushSize" min="1" max="50" value="10" class="brush-slider">
+                <span id="sizeValue" style="font-weight: bold; min-width: 30px;">10</span>
+            </div>
+            <div class="tool-group">
+                <button class="camera-btn" id="cameraBtn">
+                    <i class="fas fa-camera"></i> ✋ Air Drawing
+                </button>
+            </div>
+        </div>
+        
+        <div class="tools-row">
+            <div class="tool-group">
+                <span class="tool-label"><i class="fas fa-tools"></i> Outils:</span>
+                <button class="tool-btn active" data-tool="pencil"><i class="fas fa-pencil-alt"></i> Crayon</button>
+                <button class="tool-btn" data-tool="eraser"><i class="fas fa-eraser"></i> Gomme</button>
+                <button class="tool-btn" data-tool="star"><i class="fas fa-star"></i> Étoile</button>
+                <button class="tool-btn" data-tool="heart"><i class="fas fa-heart"></i> Cœur</button>
+                <button class="tool-btn" data-tool="rainbow"><i class="fas fa-rainbow"></i> Arc-en-ciel</button>
+            </div>
+        </div>
+        
+        <div class="tools-row">
+            <div class="tool-group">
+                <span class="tool-label"><i class="fas fa-magic"></i> Actions:</span>
+                <button class="action-btn" id="clearCanvas"><i class="fas fa-trash-alt"></i> Effacer tout</button>
+                <button class="action-btn" id="saveCanvas"><i class="fas fa-save"></i> Sauvegarder</button>
+                <button class="action-btn" id="undoBtn"><i class="fas fa-undo-alt"></i> Annuler</button>
+                <button class="action-btn" id="redoBtn"><i class="fas fa-redo-alt"></i> Refaire</button>
+                <button class="action-btn" id="downloadCanvas"><i class="fas fa-download"></i> Télécharger</button>
+            </div>
+        </div>
+        
+        <div class="tools-row">
+            <div class="tool-group">
+                <span class="tool-label"><i class="fas fa-shapes"></i> Formes magiques:</span>
+                <button class="shape-btn" data-shape="circle">⭕</button>
+                <button class="shape-btn" data-shape="square">⬛</button>
+                <button class="shape-btn" data-shape="triangle">🔺</button>
+                <button class="shape-btn" data-shape="sun">☀️</button>
+                <button class="shape-btn" data-shape="cloud">☁️</button>
+                <button class="shape-btn" data-shape="flower">🌸</button>
+                <button class="shape-btn" data-shape="star2">⭐</button>
+                <button class="shape-btn" data-shape="heart2">❤️</button>
+                <button class="shape-btn" data-shape="moon">🌙</button>
+                <button class="shape-btn" data-shape="tree">🌲</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="animals-panel">
+        <div class="animals-title">
+            <i class="fas fa-paw"></i> Animaux magiques (clique et déplace-les !) <i class="fas fa-paw"></i>
+        </div>
+        <div class="animals-grid">
+            <button class="animal-btn" data-animal="cat"><i class="fas fa-cat"></i> Chat</button>
+            <button class="animal-btn" data-animal="dog"><i class="fas fa-dog"></i> Chien</button>
+            <button class="animal-btn" data-animal="bird"><i class="fas fa-dove"></i> Oiseau</button>
+            <button class="animal-btn" data-animal="fish"><i class="fas fa-fish"></i> Poisson</button>
+            <button class="animal-btn" data-animal="butterfly"><i class="fas fa-butterfly"></i> Papillon</button>
+            <button class="animal-btn" data-animal="rabbit"><i class="fas fa-rabbit"></i> Lapin</button>
+            <button class="animal-btn" data-animal="frog"><i class="fas fa-frog"></i> Grenouille</button>
+            <button class="animal-btn" data-animal="bee"><i class="fas fa-bug"></i> Abeille</button>
+            <button class="animal-btn" data-animal="owl"><i class="fas fa-owl"></i> Hibou</button>
+            <button class="animal-btn" data-animal="penguin"><i class="fas fa-penguin"></i> Pingouin</button>
+        </div>
+        <div class="animal-controls" id="animalControls" style="display: none;">
+            <button class="control-btn" id="deleteAnimalBtn"><i class="fas fa-trash-alt"></i> Supprimer</button>
+            <button class="control-btn" id="resizeAnimalBtn"><i class="fas fa-expand-alt"></i> Redimensionner</button>
+            <button class="control-btn" id="cancelSelectBtn"><i class="fas fa-times"></i> Annuler</button>
+        </div>
+    </div>
+    
+    <div class="canvas-area">
+        <div class="canvas-wrapper">
+            <canvas id="drawingCanvas" width="900" height="550"></canvas>
+        </div>
+        
+        <div class="extra-tools">
+            <div class="extra-tools-title">
+                <i class="fas fa-crown"></i> Super outils
+            </div>
+            <div class="extra-tools-buttons">
+                <button class="extra-btn" id="fillCanvasBtn"><i class="fas fa-fill-drip"></i> Remplir tout</button>
+                <button class="extra-btn" id="rainbowBgBtn"><i class="fas fa-rainbow"></i> Fond arc-en-ciel</button>
+                <button class="extra-btn" id="sparkleBtn"><i class="fas fa-sparkles"></i> Paillettes</button>
+                <button class="extra-btn" id="confettiBtn"><i class="fas fa-confetti"></i> Confettis</button>
+                <button class="extra-btn" id="starsBtn"><i class="fas fa-star"></i> Étoiles</button>
+            </div>
+            <div class="stroke-counter">
+                <i class="fas fa-chart-line"></i> Traits: <span id="strokeCount">0</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="message-bar">
+        <div class="message-icon">🎉</div>
+        <div class="message-text">Amuse-toi bien ! Dessine ce que tu veux avec de belles couleurs !</div>
+        <div class="message-icon">✨</div>
+    </div>
+</div>
+
+<div id="cameraModal" class="camera-modal">
+    <div class="camera-container">
+        <h3><i class="fas fa-hand-peace"></i> Air Drawing - Dessine avec ton doigt !</h3>
+        <div class="video-wrapper">
+            <video id="cameraVideo" autoplay playsinline></video>
+            <canvas id="cameraCanvas"></canvas>
+        </div>
+        <div class="camera-controls">
+            <button class="cam-btn" id="startAirDrawingBtn"><i class="fas fa-play"></i> Commencer à dessiner</button>
+            <button class="cam-btn stop" id="stopAirDrawingBtn"><i class="fas fa-stop"></i> Arrêter</button>
+            <button class="cam-btn" id="closeCameraBtn"><i class="fas fa-times"></i> Fermer</button>
+        </div>
+        <div class="air-drawing-status" id="airDrawingStatus">
+            📍 Statut: Prêt - Lève ton index pour dessiner !
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+<script>
+(function() {
+    const canvas = document.getElementById('drawingCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    let drawing = false;
+    let currentColor = '#9b6bff';
+    let currentSize = 10;
+    let currentTool = 'pencil';
+    let lastX = 0, lastY = 0;
+    let strokeCount = 0;
+    
+    let animals = [];
+    let selectedAnimalIndex = -1;
+    let isDraggingAnimal = false;
+    let isResizingMode = false;
+    let dragOffsetX = 0, dragOffsetY = 0;
+    let resizeStartX = 0, resizeStartY = 0;
+    let resizeStartSize = 0;
+    
+    let history = [];
+    let historyIndex = -1;
+    const MAX_HISTORY = 50;
+    
+    let airDrawingEnabled = false;
+    let cameraModal = null;
+    let cameraVideo = null;
+    let cameraCanvas = null;
+    let cameraCtx = null;
+    let hands = null;
+    let lastAirX = null;
+    let lastAirY = null;
+    let isPinching = false;
+    let videoStream = null;
+    let detectionInterval = null;
+    
+    function initCanvas() {
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        saveToHistory();
+        redrawEverything();
+    }
+    
+    function saveToHistory() {
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        if (historyIndex < history.length - 1) {
+            history = history.slice(0, historyIndex + 1);
+        }
+        history.push(imageData);
+        if (history.length > MAX_HISTORY) history.shift();
+        historyIndex = history.length - 1;
+    }
+    
+    function restoreFromHistory() {
+        if (historyIndex >= 0) {
+            const imageData = history[historyIndex];
+            ctx.putImageData(imageData, 0, 0);
+        }
+    }
+    
+    function redrawEverything() {
+        if (historyIndex >= 0) {
+            const imageData = history[historyIndex];
+            ctx.putImageData(imageData, 0, 0);
+        }
+        drawAllAnimals();
+    }
+    
+    function undo() {
+        if (historyIndex > 0) {
+            historyIndex--;
+            restoreFromHistory();
+            drawAllAnimals();
+            showNotification('↩️ Annulé !');
+        } else {
+            showNotification('⚠️ Plus rien à annuler !');
+        }
+    }
+    
+    function redo() {
+        if (historyIndex < history.length - 1) {
+            historyIndex++;
+            restoreFromHistory();
+            drawAllAnimals();
+            showNotification('↪️ Rétabli !');
+        } else {
+            showNotification('⚠️ Plus rien à refaire !');
+        }
+    }
+    
+    function drawAllAnimals() {
+        animals.forEach((animal, index) => {
+            drawAnimalOnCanvas(animal.type, animal.x, animal.y, animal.size, index === selectedAnimalIndex);
+        });
+    }
+    
+    function drawAnimalOnCanvas(type, x, y, size, isSelected = false) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(size / 100, size / 100);
+        
+        if (isSelected) {
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = '#9b6bff';
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 55, 55, 0, 0, Math.PI * 2);
+            ctx.strokeStyle = '#9b6bff';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([5, 5]);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+        
+        ctx.strokeStyle = '#333';
+        ctx.fillStyle = currentColor;
+        ctx.lineWidth = 2;
+        
+        switch(type) {
+            case 'cat': drawCatShape(); break;
+            case 'dog': drawDogShape(); break;
+            case 'bird': drawBirdShape(); break;
+            case 'fish': drawFishShape(); break;
+            case 'butterfly': drawButterflyShape(); break;
+            case 'rabbit': drawRabbitShape(); break;
+            case 'frog': drawFrogShape(); break;
+            case 'bee': drawBeeShape(); break;
+            case 'owl': drawOwlShape(); break;
+            case 'penguin': drawPenguinShape(); break;
+        }
+        
+        ctx.restore();
+    }
+    
+    function drawCatShape() {
+        ctx.beginPath();
+        ctx.arc(0, 0, 30, 0, Math.PI * 2);
+        ctx.fillStyle = '#FFB74D';
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(-25, -20);
+        ctx.lineTo(-35, -45);
+        ctx.lineTo(-15, -30);
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(25, -20);
+        ctx.lineTo(35, -45);
+        ctx.lineTo(15, -30);
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(-12, -8, 5, 0, Math.PI * 2);
+        ctx.fillStyle = 'white';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(12, -8, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(-12, -8, 3, 0, Math.PI * 2);
+        ctx.fillStyle = '#333';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(12, -8, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.fillStyle = '#E91E63';
+        ctx.ellipse(0, 2, 4, 3, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(-15, 2);
+        ctx.lineTo(-30, -2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(-15, 5);
+        ctx.lineTo(-30, 8);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(15, 2);
+        ctx.lineTo(30, -2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(15, 5);
+        ctx.lineTo(30, 8);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(0, 10, 12, 0.1, Math.PI - 0.1);
+        ctx.stroke();
+    }
+    
+    function drawDogShape() {
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 35, 30, 0, 0, Math.PI * 2);
+        ctx.fillStyle = '#D7A86E';
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.ellipse(-22, -15, 12, 22, -0.3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.ellipse(22, -15, 12, 22, 0.3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(-12, -5, 4, 0, Math.PI * 2);
+        ctx.fillStyle = 'white';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(12, -5, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(-12, -5, 2, 0, Math.PI * 2);
+        ctx.fillStyle = '#333';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(12, -5, 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(0, 5, 8, 6, 0, 0, Math.PI * 2);
+        ctx.fillStyle = '#333';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(0, 14, 6, 8, 0, 0, Math.PI * 2);
+        ctx.fillStyle = '#FF6B6B';
+        ctx.fill();
+    }
+    
+    function drawBirdShape() {
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 22, 18, 0, 0, Math.PI * 2);
+        ctx.fillStyle = '#4FC3F7';
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(22, -8, 14, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(34, -8);
+        ctx.lineTo(46, -5);
+        ctx.lineTo(34, -3);
+        ctx.fillStyle = '#FF9800';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(26, -12, 3, 0, Math.PI * 2);
+        ctx.fillStyle = 'white';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(27, -12, 1.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#333';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(-12, -5, 18, 10, -0.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#29B6F6';
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(-20, -5);
+        ctx.lineTo(-35, -15);
+        ctx.lineTo(-30, 0);
+        ctx.fill();
+    }
+    
+    function drawFishShape() {
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 30, 18, 0, 0, Math.PI * 2);
+        ctx.fillStyle = '#FF7043';
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(-25, 0);
+        ctx.lineTo(-40, -12);
+        ctx.lineTo(-40, 12);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(12, -5, 4, 0, Math.PI * 2);
+        ctx.fillStyle = 'white';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(14, -5, 2, 0, Math.PI * 2);
+        ctx.fillStyle = '#333';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(18, 2, 5, -0.3, 0.3);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(-5, -12);
+        ctx.lineTo(5, -20);
+        ctx.lineTo(15, -12);
+        ctx.fill();
+    }
+    
+    function drawButterflyShape() {
+        ctx.beginPath();
+        ctx.ellipse(-18, -8, 18, 24, -0.3, 0, Math.PI * 2);
+        ctx.fillStyle = '#CE93D8';
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.ellipse(18, -8, 18, 24, 0.3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.ellipse(-12, 10, 14, 16, 0.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.ellipse(12, 10, 14, 16, -0.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 6, 30, 0, 0, Math.PI * 2);
+        ctx.fillStyle = '#6D4C41';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(-3, -15);
+        ctx.quadraticCurveTo(-15, -30, -8, -35);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(3, -15);
+        ctx.quadraticCurveTo(15, -30, 8, -35);
+        ctx.stroke();
+    }
+    
+    function drawRabbitShape() {
+        ctx.beginPath();
+        ctx.ellipse(0, 5, 22, 24, 0, 0, Math.PI * 2);
+        ctx.fillStyle = '#E1BEE7';
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.ellipse(-10, -25, 10, 28, -0.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.ellipse(10, -25, 10, 28, 0.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.ellipse(-10, -25, 5, 20, -0.2, 0, Math.PI * 2);
+        ctx.fillStyle = '#F8BBD0';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(10, -25, 5, 20, 0.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(-8, -2, 4, 0, Math.PI * 2);
+        ctx.fillStyle = 'white';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(8, -2, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(-8, -2, 2, 0, Math.PI * 2);
+        ctx.fillStyle = '#333';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(8, -2, 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(0, 4, 5, 4, 0, 0, Math.PI * 2);
+        ctx.fillStyle = '#F48FB1';
+        ctx.fill();
+        ctx.fillStyle = 'white';
+        ctx.fillRect(-3, 8, 2, 4);
+        ctx.fillRect(1, 8, 2, 4);
+    }
+    
+    function drawFrogShape() {
+        ctx.beginPath();
+        ctx.ellipse(0, 5, 28, 24, 0, 0, Math.PI * 2);
+        ctx.fillStyle = '#81C784';
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(-12, -12, 9, 0, Math.PI * 2);
+        ctx.fillStyle = '#A5D6A7';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(12, -12, 9, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(-12, -12, 5, 0, Math.PI * 2);
+        ctx.fillStyle = 'white';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(12, -12, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(-12, -12, 3, 0, Math.PI * 2);
+        ctx.fillStyle = '#333';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(12, -12, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(0, 8, 18, 0.1, Math.PI - 0.1);
+        ctx.stroke();
+    }
+    
+    function drawBeeShape() {
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 18, 24, 0, 0, Math.PI * 2);
+        ctx.fillStyle = '#FFC107';
+        ctx.fill();
+        for(let i = -1; i <= 1; i++) {
+            ctx.beginPath();
+            ctx.ellipse(i * 8, 0, 5, 22, 0, 0, Math.PI * 2);
+            ctx.fillStyle = '#333';
+            ctx.fill();
+        }
+        ctx.beginPath();
+        ctx.arc(20, -8, 12, 0, Math.PI * 2);
+        ctx.fillStyle = '#FFC107';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(24, -12, 4, 0, Math.PI * 2);
+        ctx.fillStyle = 'white';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(25, -12, 2, 0, Math.PI * 2);
+        ctx.fillStyle = '#333';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(-8, -18, 14, 10, -0.5, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(200,200,255,0.7)';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(8, -18, 14, 10, 0.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(28, -18);
+        ctx.lineTo(35, -28);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(32, -18);
+        ctx.lineTo(40, -25);
+        ctx.stroke();
+    }
+    
+    function drawOwlShape() {
+        ctx.beginPath();
+        ctx.ellipse(0, 5, 25, 30, 0, 0, Math.PI * 2);
+        ctx.fillStyle = '#BCAAA4';
+        ctx.fill();
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(-12, -8, 10, 0, Math.PI * 2);
+        ctx.fillStyle = 'white';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(12, -8, 10, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(-12, -8, 5, 0, Math.PI * 2);
+        ctx.fillStyle = '#FF9800';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(12, -8, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(-12, -8, 2, 0, Math.PI * 2);
+        ctx.fillStyle = '#333';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(12, -8, 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(-3, 2);
+        ctx.lineTo(0, 8);
+        ctx.lineTo(3, 2);
+        ctx.fillStyle = '#FF9800';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(-22, 5, 10, 20, -0.3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(22, 5, 10, 20, 0.3, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    
+    function drawPenguinShape() {
+        ctx.beginPath();
+        ctx.ellipse(0, 5, 22, 32, 0, 0, Math.PI * 2);
+        ctx.fillStyle = '#333';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(0, 10, 14, 22, 0, 0, Math.PI * 2);
+        ctx.fillStyle = 'white';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(0, -15, 16, 0, Math.PI * 2);
+        ctx.fillStyle = '#333';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(-6, -18, 4, 0, Math.PI * 2);
+        ctx.fillStyle = 'white';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(6, -18, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(-6, -18, 2, 0, Math.PI * 2);
+        ctx.fillStyle = '#333';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(6, -18, 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(-4, -12);
+        ctx.lineTo(0, -6);
+        ctx.lineTo(4, -12);
+        ctx.fillStyle = '#FF9800';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(-18, 0, 8, 20, -0.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(18, 0, 8, 20, 0.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(-8, 30, 8, 6, 0, 0, Math.PI * 2);
+        ctx.fillStyle = '#FF9800';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(8, 30, 8, 6, 0, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    
+    function addAnimal(type, x, y) {
+        animals.push({ type: type, x: x, y: y, size: 100 });
+        saveToHistory();
+        redrawEverything();
+        showNotification(`🐾 ${getAnimalName(type)} apparaît ! Tu peux le déplacer !`);
+        createStars();
+    }
+    
+    function getAnimalName(type) {
+        const names = { cat: 'Chat', dog: 'Chien', bird: 'Oiseau', fish: 'Poisson', butterfly: 'Papillon', rabbit: 'Lapin', frog: 'Grenouille', bee: 'Abeille', owl: 'Hibou', penguin: 'Pingouin' };
+        return names[type] || 'Animal';
+    }
+    
+    function selectAnimal(index) {
+        selectedAnimalIndex = index;
+        const controls = document.getElementById('animalControls');
+        if (selectedAnimalIndex >= 0) {
+            controls.style.display = 'flex';
+            document.querySelectorAll('.animal-btn').forEach(btn => btn.classList.remove('selected'));
+        } else {
+            controls.style.display = 'none';
+            isResizingMode = false;
+        }
+        redrawEverything();
+    }
+    
+    function deleteSelectedAnimal() {
+        if (selectedAnimalIndex >= 0) {
+            animals.splice(selectedAnimalIndex, 1);
+            selectedAnimalIndex = -1;
+            isResizingMode = false;
+            redrawEverything();
+            showNotification('🗑️ Animal supprimé !');
+            document.getElementById('animalControls').style.display = 'none';
+        }
+    }
+    
+    function getAnimalAt(x, y) {
+        for (let i = animals.length - 1; i >= 0; i--) {
+            const animal = animals[i];
+            const dx = x - animal.x;
+            const dy = y - animal.y;
+            const distance = Math.sqrt(dx*dx + dy*dy);
+            if (distance < animal.size / 1.5) return i;
+        }
+        return -1;
+    }
+    
+    function handleCanvasMouseDown(e) {
+        const pos = getMousePos(canvas, e);
+        
+        if (isResizingMode && selectedAnimalIndex >= 0) {
+            resizeStartX = pos.x;
+            resizeStartY = pos.y;
+            resizeStartSize = animals[selectedAnimalIndex].size;
+            return;
+        }
+        
+        const animalIndex = getAnimalAt(pos.x, pos.y);
+        if (animalIndex >= 0) {
+            selectAnimal(animalIndex);
+            isDraggingAnimal = true;
+            const animal = animals[animalIndex];
+            dragOffsetX = pos.x - animal.x;
+            dragOffsetY = pos.y - animal.y;
+            canvas.style.cursor = 'grabbing';
+            return;
+        } else {
+            selectAnimal(-1);
+            startDrawing(e);
+        }
+    }
+    
+    function handleCanvasMouseMove(e) {
+        const pos = getMousePos(canvas, e);
+        
+        if (isResizingMode && selectedAnimalIndex >= 0 && resizeStartX !== 0) {
+            const delta = (pos.x - resizeStartX + pos.y - resizeStartY) / 2;
+            let newSize = Math.max(50, Math.min(200, resizeStartSize + delta));
+            animals[selectedAnimalIndex].size = newSize;
+            redrawEverything();
+            return;
+        }
+        
+        if (isDraggingAnimal && selectedAnimalIndex >= 0) {
+            animals[selectedAnimalIndex].x = pos.x - dragOffsetX;
+            animals[selectedAnimalIndex].y = pos.y - dragOffsetY;
+            redrawEverything();
+            return;
+        }
+        
+        const animalIndex = getAnimalAt(pos.x, pos.y);
+        if (animalIndex >= 0) {
+            canvas.style.cursor = 'grab';
+        } else {
+            canvas.style.cursor = 'crosshair';
+        }
+        
+        if (drawing && !isDraggingAnimal && !isResizingMode) {
+            draw(e);
+        }
+    }
+    
+    function handleCanvasMouseUp(e) {
+        if (isDraggingAnimal && selectedAnimalIndex >= 0) {
+            isDraggingAnimal = false;
+            saveToHistory();
+            canvas.style.cursor = 'crosshair';
+            showNotification('✨ Animal déplacé !');
+            createStars();
+        }
+        if (isResizingMode && resizeStartX !== 0) {
+            resizeStartX = 0;
+            saveToHistory();
+            showNotification('📏 Animal redimensionné !');
+        }
+        stopDrawing();
+    }
+    
+    function getMousePos(canvas, evt) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        let clientX, clientY;
+        if (evt.touches) {
+            clientX = evt.touches[0].clientX;
+            clientY = evt.touches[0].clientY;
+        } else {
+            clientX = evt.clientX;
+            clientY = evt.clientY;
+        }
+        return {
+            x: (clientX - rect.left) * scaleX,
+            y: (clientY - rect.top) * scaleY
+        };
+    }
+    
+    function startDrawing(e) {
+        if (isDraggingAnimal || isResizingMode) return;
+        drawing = true;
+        const pos = getMousePos(canvas, e);
+        lastX = pos.x;
+        lastY = pos.y;
+        
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        if (currentTool === 'rainbow') {
+            currentColor = `hsl(${Math.random() * 360}, 70%, 60%)`;
+            ctx.strokeStyle = currentColor;
+        } else if (currentTool === 'eraser') {
+            ctx.strokeStyle = 'white';
+        } else if (currentTool === 'star') {
+            drawStar(lastX, lastY, currentSize * 2);
+            saveToHistory();
+            return;
+        } else if (currentTool === 'heart') {
+            drawHeart(lastX, lastY, currentSize);
+            saveToHistory();
+            return;
+        } else {
+            ctx.strokeStyle = currentColor;
+        }
+        ctx.lineWidth = currentSize;
+        ctx.lineTo(lastX, lastY);
+        ctx.stroke();
+    }
+    
+    function draw(e) {
+        if (!drawing || isDraggingAnimal || isResizingMode) return;
+        const pos = getMousePos(canvas, e);
+        const currentX = pos.x;
+        const currentY = pos.y;
+        
+        if (currentTool === 'star') {
+            drawStar(currentX, currentY, currentSize * 2);
+            lastX = currentX;
+            lastY = currentY;
+            return;
+        } else if (currentTool === 'heart') {
+            drawHeart(currentX, currentY, currentSize);
+            lastX = currentX;
+            lastY = currentY;
+            return;
+        }
+        
+        if (currentTool === 'rainbow') {
+            currentColor = `hsl(${Math.random() * 360}, 70%, 60%)`;
+            ctx.strokeStyle = currentColor;
+        } else if (currentTool === 'eraser') {
+            ctx.strokeStyle = 'white';
+        } else {
+            ctx.strokeStyle = currentColor;
+        }
+        
+        ctx.lineWidth = currentSize;
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(currentX, currentY);
+        ctx.stroke();
+        
+        lastX = currentX;
+        lastY = currentY;
+    }
+    
+    function stopDrawing() {
+        if (drawing) {
+            drawing = false;
+            saveToHistory();
+            strokeCount++;
+            document.getElementById('strokeCount').textContent = strokeCount;
+        }
+    }
+    
+    function drawStar(x, y, size) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.beginPath();
+        const spikes = 5;
+        const outerRadius = size;
+        const innerRadius = size / 2;
+        for (let i = 0; i < spikes * 2; i++) {
+            const radius = i % 2 === 0 ? outerRadius : innerRadius;
+            const angle = (Math.PI * 2 * i) / (spikes * 2) - Math.PI / 2;
+            const xPos = radius * Math.cos(angle);
+            const yPos = radius * Math.sin(angle);
+            if (i === 0) ctx.moveTo(xPos, yPos);
+            else ctx.lineTo(xPos, yPos);
+        }
+        ctx.closePath();
+        ctx.strokeStyle = currentTool === 'eraser' ? 'white' : currentColor;
+        ctx.lineWidth = currentSize;
+        ctx.stroke();
+        ctx.restore();
+    }
+    
+    function drawHeart(x, y, size) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.beginPath();
+        const scale = size / 20;
+        ctx.moveTo(0, scale * 10);
+        ctx.bezierCurveTo(-scale * 20, -scale * 10, -scale * 30, scale * 20, 0, scale * 35);
+        ctx.bezierCurveTo(scale * 30, scale * 20, scale * 20, -scale * 10, 0, scale * 10);
+        ctx.strokeStyle = currentTool === 'eraser' ? 'white' : currentColor;
+        ctx.lineWidth = currentSize;
+        ctx.stroke();
+        ctx.restore();
+    }
+    
+    function createConfetti() {
+        for (let i = 0; i < 100; i++) {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            confetti.style.left = Math.random() * window.innerWidth + 'px';
+            confetti.style.top = '-10px';
+            confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 70%, 60%)`;
+            confetti.style.width = Math.random() * 10 + 5 + 'px';
+            confetti.style.height = Math.random() * 10 + 5 + 'px';
+            confetti.style.position = 'fixed';
+            document.body.appendChild(confetti);
+            setTimeout(() => confetti.remove(), 3000);
+        }
+    }
+    
+    function createStars() {
+        for (let i = 0; i < 30; i++) {
+            const star = document.createElement('div');
+            star.className = 'star-animation';
+            star.innerHTML = ['⭐', '✨', '🌟', '💫'][Math.floor(Math.random() * 4)];
+            star.style.left = Math.random() * window.innerWidth + 'px';
+            star.style.top = Math.random() * window.innerHeight + 'px';
+            star.style.position = 'fixed';
+            star.style.fontSize = Math.random() * 20 + 15 + 'px';
+            document.body.appendChild(star);
+            setTimeout(() => star.remove(), 1000);
+        }
+    }
+    
+    function showNotification(message) {
+        const notification = document.createElement('div');
+        notification.className = 'floating-notification';
+        notification.innerHTML = message;
+        document.body.appendChild(notification);
+        setTimeout(() => {
+            if (notification.parentNode) notification.parentNode.removeChild(notification);
+        }, 2300);
+    }
+    
+    // ==================== FONCTIONS AIR DRAWING ====================
+    
+    async function initAirDrawing() {
+        cameraModal = document.getElementById('cameraModal');
+        cameraVideo = document.getElementById('cameraVideo');
+        cameraCanvas = document.getElementById('cameraCanvas');
+        
+        if (!cameraModal || !cameraVideo || !cameraCanvas) {
+            console.error("Éléments de caméra non trouvés");
+            showNotification('❌ Erreur: Éléments de caméra non trouvés');
+            return;
+        }
+        
+        cameraCtx = cameraCanvas.getContext('2d');
+        
+        // Vérifier si getUserMedia est disponible
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            showNotification('⚠️ Votre navigateur ne supporte pas la caméra');
+            showNotification('💡 Utilise Chrome, Edge ou Safari récent');
+            return;
+        }
+        
+        // Vérifier si la page est en HTTPS ou localhost
+        const isSecure = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+        if (!isSecure) {
+            showNotification('⚠️ La caméra nécessite HTTPS ou localhost !');
+            showNotification('💡 Utilise https:// ou http://localhost');
+            return;
+        }
+        
+        // Initialiser MediaPipe Hands
+        try {
+            hands = new Hands({
+                locateFile: (file) => {
+                    return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+                }
+            });
+            
+            hands.setOptions({
+                maxNumHands: 1,
+                modelComplexity: 1,
+                minDetectionConfidence: 0.5,
+                minTrackingConfidence: 0.5
+            });
+            
+            hands.onResults(onHandResults);
+        } catch (err) {
+            console.error("Erreur MediaPipe:", err);
+            showNotification('❌ Erreur de chargement de la détection de main');
+            return;
+        }
+        
+        // Démarrer la caméra
+        try {
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+            }
+            
+            const constraints = { 
+                video: { 
+                    width: { ideal: 640 },
+                    height: { ideal: 480 },
+                    facingMode: "user"
+                } 
+            };
+            
+            videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+            cameraVideo.srcObject = videoStream;
+            
+            // Attendre que la vidéo soit chargée
+            await new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => reject(new Error('Timeout video')), 5000);
+                cameraVideo.onloadedmetadata = () => {
+                    clearTimeout(timeout);
+                    cameraVideo.play();
+                    resolve();
+                };
+                cameraVideo.onerror = () => {
+                    clearTimeout(timeout);
+                    reject(new Error('Erreur video'));
+                };
+            });
+            
+            // Configurer le canvas de la caméra
+            const videoWidth = cameraVideo.videoWidth || 640;
+            const videoHeight = cameraVideo.videoHeight || 480;
+            cameraCanvas.width = videoWidth;
+            cameraCanvas.height = videoHeight;
+            
+            // Redimensionner l'affichage
+            cameraVideo.style.width = '100%';
+            cameraCanvas.style.width = '100%';
+            cameraCanvas.style.height = 'auto';
+            
+            showNotification('📷 Caméra activée ! Lève ton index pour dessiner dans les airs !');
+            
+        } catch (err) {
+            console.error("Erreur caméra:", err);
+            
+            if (err.name === 'NotAllowedError') {
+                showNotification('⚠️ Tu dois autoriser l\'accès à la caméra !');
+                showNotification('🔒 Clique sur "Autoriser" dans la barre d\'adresse');
+            } else if (err.name === 'NotFoundError') {
+                showNotification('⚠️ Aucune caméra trouvée sur ton appareil');
+            } else if (err.name === 'NotReadableError') {
+                showNotification('⚠️ La caméra est déjà utilisée par une autre application');
+            } else {
+                showNotification('⚠️ Impossible d\'accéder à la caméra');
+            }
+        }
+    }
+    
+    function onHandResults(results) {
+        if (!airDrawingEnabled || !cameraCtx || !cameraCanvas) return;
+        
+        // Effacer le canvas de superposition
+        cameraCtx.clearRect(0, 0, cameraCanvas.width, cameraCanvas.height);
+        
+        if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+            const landmarks = results.multiHandLandmarks[0];
+            
+            // Dessiner les points de la main sur le canvas de superposition
+            drawHandLandmarks(landmarks);
+            
+            // Obtenir la position de l'index (landmark 8)
+            const indexTip = landmarks[8];
+            
+            // Convertir les coordonnées de la caméra vers le canvas de dessin
+            const canvasX = indexTip.x * canvas.width;
+            const canvasY = indexTip.y * canvas.height;
+            
+            // Vérifier si le pouce et l'index se touchent pour activer/désactiver le dessin
+            const thumbTip = landmarks[4];
+            const indexTipPos = landmarks[8];
+            const distance = Math.hypot(thumbTip.x - indexTipPos.x, thumbTip.y - indexTipPos.y);
+            const isTouching = distance < 0.05;
+            
+            // Mettre à jour le statut
+            const statusDiv = document.getElementById('airDrawingStatus');
+            
+            if (isTouching !== isPinching) {
+                isPinching = isTouching;
+                if (isPinching) {
+                    // Commencer à dessiner
+                    lastAirX = canvasX;
+                    lastAirY = canvasY;
+                    if (statusDiv) {
+                        statusDiv.innerHTML = '🎨 Statut: DESSIN EN COURS - Bouge ton doigt ! 🎨';
+                        statusDiv.style.background = '#FFE082';
+                    }
+                    
+                    // Préparer le dessin
+                    ctx.beginPath();
+                    ctx.moveTo(canvasX, canvasY);
+                    
+                    // Configurer le style de dessin
+                    if (currentTool === 'rainbow') {
+                        currentColor = `hsl(${Math.random() * 360}, 70%, 60%)`;
+                        ctx.strokeStyle = currentColor;
+                    } else if (currentTool === 'eraser') {
+                        ctx.strokeStyle = 'white';
+                    } else {
+                        ctx.strokeStyle = currentColor;
+                    }
+                    ctx.lineWidth = currentSize;
+                    ctx.lineTo(canvasX, canvasY);
+                    ctx.stroke();
+                    
+                    showFingerTip(canvasX, canvasY);
+                } else {
+                    // Arrêter de dessiner
+                    if (lastAirX !== null) {
+                        saveToHistory();
+                        strokeCount++;
+                        document.getElementById('strokeCount').textContent = strokeCount;
+                    }
+                    lastAirX = null;
+                    lastAirY = null;
+                    if (statusDiv) {
+                        statusDiv.innerHTML = '📍 Statut: Prêt - Pince avec ton pouce et ton index pour dessiner !';
+                        statusDiv.style.background = '#F5E6FF';
+                    }
+                }
+            }
+            
+            // Dessiner si le pincement est actif
+            if (isPinching && lastAirX !== null) {
+                // Dessiner le trait
+                ctx.beginPath();
+                ctx.moveTo(lastAirX, lastAirY);
+                ctx.lineTo(canvasX, canvasY);
+                
+                if (currentTool === 'rainbow') {
+                    currentColor = `hsl(${Math.random() * 360}, 70%, 60%)`;
+                    ctx.strokeStyle = currentColor;
+                } else if (currentTool === 'eraser') {
+                    ctx.strokeStyle = 'white';
+                } else {
+                    ctx.strokeStyle = currentColor;
+                }
+                ctx.lineWidth = currentSize;
+                ctx.stroke();
+                
+                lastAirX = canvasX;
+                lastAirY = canvasY;
+                
+                showFingerTip(canvasX, canvasY);
+            } else if (isPinching) {
+                lastAirX = canvasX;
+                lastAirY = canvasY;
+            }
+            
+            // Afficher un cercle à la position du doigt sur le canvas de superposition
+            const videoX = indexTip.x * cameraCanvas.width;
+            const videoY = indexTip.y * cameraCanvas.height;
+            cameraCtx.beginPath();
+            cameraCtx.arc(videoX, videoY, 15, 0, 2 * Math.PI);
+            cameraCtx.fillStyle = isPinching ? '#ff69b4' : '#9b6bff';
+            cameraCtx.fill();
+            cameraCtx.strokeStyle = 'white';
+            cameraCtx.lineWidth = 3;
+            cameraCtx.stroke();
+            
+            // Ajouter un effet de glow
+            cameraCtx.shadowBlur = 15;
+            cameraCtx.shadowColor = isPinching ? '#ff69b4' : '#9b6bff';
+            cameraCtx.beginPath();
+            cameraCtx.arc(videoX, videoY, 20, 0, 2 * Math.PI);
+            cameraCtx.fillStyle = 'rgba(155,107,255,0.3)';
+            cameraCtx.fill();
+            cameraCtx.shadowBlur = 0;
+        }
+    }
+    
+    function drawHandLandmarks(landmarks) {
+        if (!cameraCtx) return;
+        
+        // Dessiner les connexions entre les points
+        const connections = [
+            [0, 1], [1, 2], [2, 3], [3, 4],  // Pouce
+            [0, 5], [5, 6], [6, 7], [7, 8],  // Index
+            [0, 9], [9, 10], [10, 11], [11, 12],  // Majeur
+            [0, 13], [13, 14], [14, 15], [15, 16],  // Annulaire
+            [0, 17], [17, 18], [18, 19], [19, 20],  // Auriculaire
+            [5, 9], [9, 13], [13, 17]  // Connexions entre les doigts
+        ];
+        
+        cameraCtx.strokeStyle = '#9b6bff';
+        cameraCtx.lineWidth = 3;
+        
+        connections.forEach(connection => {
+            const start = landmarks[connection[0]];
+            const end = landmarks[connection[1]];
+            if (start && end) {
+                cameraCtx.beginPath();
+                cameraCtx.moveTo(start.x * cameraCanvas.width, start.y * cameraCanvas.height);
+                cameraCtx.lineTo(end.x * cameraCanvas.width, end.y * cameraCanvas.height);
+                cameraCtx.stroke();
+            }
+        });
+        
+        // Dessiner les points
+        landmarks.forEach(landmark => {
+            cameraCtx.beginPath();
+            cameraCtx.arc(landmark.x * cameraCanvas.width, landmark.y * cameraCanvas.height, 5, 0, 2 * Math.PI);
+            cameraCtx.fillStyle = '#ff69b4';
+            cameraCtx.fill();
+            cameraCtx.strokeStyle = 'white';
+            cameraCtx.lineWidth = 2;
+            cameraCtx.stroke();
+        });
+    }
+    
+    function showFingerTip(x, y) {
+        // Créer un effet visuel temporaire sur le canvas de dessin
+        ctx.save();
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = '#ff69b4';
+        ctx.beginPath();
+        ctx.arc(x, y, currentSize / 2, 0, 2 * Math.PI);
+        ctx.fillStyle = currentTool === 'eraser' ? 'rgba(255,255,255,0.5)' : `${currentColor}80`;
+        ctx.fill();
+        ctx.restore();
+    }
+    
+    function startAirDrawing() {
+        if (!airDrawingEnabled) {
+            airDrawingEnabled = true;
+            isPinching = false;
+            lastAirX = null;
+            lastAirY = null;
+            
+            // Démarrer la boucle de détection
+            if (hands && cameraVideo && cameraVideo.readyState === 4) {
+                const detectFrame = async () => {
+                    if (airDrawingEnabled && cameraVideo && cameraVideo.readyState === 4) {
+                        await hands.send({ image: cameraVideo });
+                        requestAnimationFrame(detectFrame);
+                    }
+                };
+                detectFrame();
+            }
+            
+            const statusDiv = document.getElementById('airDrawingStatus');
+            if (statusDiv) {
+                statusDiv.innerHTML = '📍 Statut: Prêt - Pince avec ton pouce et ton index pour dessiner !';
+            }
+            showNotification('✋ Air Drawing activé ! Utilise ton index pour dessiner !');
+        }
+    }
+    
+    function stopAirDrawing() {
+        airDrawingEnabled = false;
+        isPinching = false;
+        lastAirX = null;
+        lastAirY = null;
+        if (cameraCtx) {
+            cameraCtx.clearRect(0, 0, cameraCanvas.width, cameraCanvas.height);
+        }
+        const statusDiv = document.getElementById('airDrawingStatus');
+        if (statusDiv) {
+            statusDiv.innerHTML = '📍 Statut: Arrêté - Clique sur "Commencer à dessiner" pour reprendre';
+        }
+        showNotification('✋ Air Drawing arrêté');
+    }
+    
+    function closeCamera() {
+        airDrawingEnabled = false;
+        if (videoStream) {
+            videoStream.getTracks().forEach(track => track.stop());
+            videoStream = null;
+        }
+        if (cameraModal) {
+            cameraModal.classList.remove('active');
+        }
+        showNotification('📷 Caméra fermée');
+    }
+    
+    function openCameraModal() {
+        // Vérifier si la page est en HTTPS ou localhost
+        const isSecure = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+        
+        if (!isSecure) {
+            showNotification('⚠️ La caméra nécessite HTTPS ou localhost !');
+            showNotification('💡 Utilise https:// ou http://localhost');
+            return;
+        }
+        
+        if (cameraModal) {
+            cameraModal.classList.add('active');
+            initAirDrawing();
+        } else {
+            console.error("Modal non trouvé");
+            showNotification('❌ Erreur: Impossible d\'ouvrir la caméra');
+        }
+    }
+    
+    // ==================== ÉVÉNEMENTS ====================
+    
+    canvas.addEventListener('mousedown', handleCanvasMouseDown);
+    canvas.addEventListener('mousemove', handleCanvasMouseMove);
+    canvas.addEventListener('mouseup', handleCanvasMouseUp);
+    canvas.addEventListener('mouseout', handleCanvasMouseUp);
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); handleCanvasMouseDown(e.touches[0]); });
+    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); handleCanvasMouseMove(e.touches[0]); });
+    canvas.addEventListener('touchend', handleCanvasMouseUp);
+    
+    // Boutons outils
+    document.querySelectorAll('.tool-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentTool = btn.dataset.tool;
+            showNotification(`🖌️ ${btn.textContent.trim()} sélectionné !`);
+        });
+    });
+    
+    document.getElementById('colorPicker').addEventListener('change', (e) => { currentColor = e.target.value; });
+    document.querySelectorAll('.color-preset').forEach(preset => {
+        preset.addEventListener('click', () => {
+            currentColor = preset.dataset.color;
+            document.getElementById('colorPicker').value = currentColor;
+        });
+    });
+    
+    const brushSlider = document.getElementById('brushSize');
+    const sizeValue = document.getElementById('sizeValue');
+    brushSlider.addEventListener('input', (e) => {
+        currentSize = parseInt(e.target.value);
+        sizeValue.textContent = currentSize;
+    });
+    
+    document.getElementById('clearCanvas').addEventListener('click', () => {
+        if (confirm('✨ Es-tu sûr de vouloir tout effacer ? ✨')) {
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            animals = [];
+            selectedAnimalIndex = -1;
+            saveToHistory();
+            showNotification('✨ Tout est effacé !');
+            createStars();
+        }
+    });
+    
+    document.getElementById('saveCanvas').addEventListener('click', () => {
+        const link = document.createElement('a');
+        link.download = 'mon-dessin-auticare.png';
+        link.href = canvas.toDataURL();
+        link.click();
+        showNotification('🎉 Bravo ! Ton dessin est sauvegardé !');
+        createConfetti();
+    });
+    
+    document.getElementById('downloadCanvas').addEventListener('click', () => {
+        const link = document.createElement('a');
+        link.download = 'mon-chef-doeuvre.png';
+        link.href = canvas.toDataURL();
+        link.click();
+        showNotification('📥 Super ! Téléchargé !');
+        createStars();
+    });
+    
+    document.getElementById('undoBtn').addEventListener('click', undo);
+    document.getElementById('redoBtn').addEventListener('click', redo);
+    document.getElementById('deleteAnimalBtn').addEventListener('click', deleteSelectedAnimal);
+    document.getElementById('cancelSelectBtn').addEventListener('click', () => selectAnimal(-1));
+    document.getElementById('resizeAnimalBtn').addEventListener('click', () => {
+        isResizingMode = !isResizingMode;
+        showNotification(isResizingMode ? '📏 Mode redimensionnement activé !' : '📏 Mode redimensionnement désactivé');
+    });
+    
+    document.getElementById('fillCanvasBtn').addEventListener('click', () => {
+        ctx.fillStyle = currentColor;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        saveToHistory();
+        showNotification('🎨 Canvas rempli !');
+    });
+    
+    document.getElementById('rainbowBgBtn').addEventListener('click', () => {
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        gradient.addColorStop(0, '#ff0000');
+        gradient.addColorStop(0.16, '#ff8800');
+        gradient.addColorStop(0.33, '#ffff00');
+        gradient.addColorStop(0.5, '#00ff00');
+        gradient.addColorStop(0.66, '#0088ff');
+        gradient.addColorStop(0.83, '#4400ff');
+        gradient.addColorStop(1, '#8800ff');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        saveToHistory();
+        showNotification('🌈 Magnifique arc-en-ciel !');
+        createConfetti();
+    });
+    
+    document.getElementById('sparkleBtn').addEventListener('click', () => {
+        for (let i = 0; i < 200; i++) {
+            ctx.beginPath();
+            ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, Math.random() * 5 + 2, 0, Math.PI * 2);
+            ctx.fillStyle = `hsl(${Math.random() * 360}, 100%, 70%)`;
+            ctx.fill();
+        }
+        saveToHistory();
+        showNotification('✨ Paillettes magiques ! ✨');
+        createStars();
+    });
+    
+    document.getElementById('confettiBtn').addEventListener('click', createConfetti);
+    document.getElementById('starsBtn').addEventListener('click', createStars);
+    
+    // Événements Air Drawing
+    const cameraBtn = document.getElementById('cameraBtn');
+    if (cameraBtn) {
+        cameraBtn.addEventListener('click', openCameraModal);
+    }
+    
+    const startAirBtn = document.getElementById('startAirDrawingBtn');
+    if (startAirBtn) {
+        startAirBtn.addEventListener('click', startAirDrawing);
+    }
+    
+    const stopAirBtn = document.getElementById('stopAirDrawingBtn');
+    if (stopAirBtn) {
+        stopAirBtn.addEventListener('click', stopAirDrawing);
+    }
+    
+    const closeCameraBtn = document.getElementById('closeCameraBtn');
+    if (closeCameraBtn) {
+        closeCameraBtn.addEventListener('click', closeCamera);
+    }
+    
+    const shapes = {
+        circle: () => {
+            ctx.beginPath();
+            ctx.arc(canvas.width/2, canvas.height/2, 50, 0, Math.PI * 2);
+            ctx.strokeStyle = currentColor;
+            ctx.lineWidth = currentSize;
+            ctx.stroke();
+            saveToHistory();
+            showNotification('⭕ Joli cercle !');
+        },
+        square: () => {
+            ctx.strokeStyle = currentColor;
+            ctx.lineWidth = currentSize;
+            ctx.strokeRect(canvas.width/2 - 50, canvas.height/2 - 50, 100, 100);
+            saveToHistory();
+            showNotification('⬛ Beau carré !');
+        },
+        triangle: () => {
+            ctx.beginPath();
+            ctx.moveTo(canvas.width/2, canvas.height/2 - 100);
+            ctx.lineTo(canvas.width/2 - 100, canvas.height/2 + 50);
+            ctx.lineTo(canvas.width/2 + 100, canvas.height/2 + 50);
+            ctx.closePath();
+            ctx.stroke();
+            saveToHistory();
+            showNotification('🔺 Super triangle !');
+        },
+        sun: () => {
+            ctx.beginPath();
+            ctx.arc(canvas.width/2, canvas.height/2, 40, 0, Math.PI * 2);
+            ctx.stroke();
+            for (let i = 0; i < 8; i++) {
+                const angle = i * Math.PI / 4;
+                const x1 = canvas.width/2 + 50 * Math.cos(angle);
+                const y1 = canvas.height/2 + 50 * Math.sin(angle);
+                const x2 = canvas.width/2 + 70 * Math.cos(angle);
+                const y2 = canvas.height/2 + 70 * Math.sin(angle);
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+            }
+            saveToHistory();
+            showNotification('☀️ Il fait soleil !');
+        },
+        cloud: () => {
+            ctx.beginPath();
+            ctx.ellipse(canvas.width/2 - 50, canvas.height/2, 40, 30, 0, 0, Math.PI * 2);
+            ctx.ellipse(canvas.width/2, canvas.height/2 - 10, 45, 35, 0, 0, Math.PI * 2);
+            ctx.ellipse(canvas.width/2 + 50, canvas.height/2, 40, 30, 0, 0, Math.PI * 2);
+            ctx.stroke();
+            saveToHistory();
+            showNotification('☁️ Un joli nuage !');
+        },
+        flower: () => {
+            for (let i = 0; i < 5; i++) {
+                const angle = i * 2 * Math.PI / 5;
+                const x = canvas.width/2 + 40 * Math.cos(angle);
+                const y = canvas.height/2 + 40 * Math.sin(angle);
+                ctx.beginPath();
+                ctx.ellipse(x, y, 15, 15, 0, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            ctx.beginPath();
+            ctx.ellipse(canvas.width/2, canvas.height/2, 15, 15, 0, 0, Math.PI * 2);
+            ctx.stroke();
+            saveToHistory();
+            showNotification('🌸 Une belle fleur !');
+        },
+        star2: () => {
+            drawStar(canvas.width/2, canvas.height/2, 50);
+            saveToHistory();
+            showNotification('⭐ Une jolie étoile !');
+        },
+        heart2: () => {
+            drawHeart(canvas.width/2, canvas.height/2, 30);
+            saveToHistory();
+            showNotification('❤️ Un beau cœur !');
+        },
+        moon: () => {
+            ctx.beginPath();
+            ctx.ellipse(canvas.width/2, canvas.height/2 - 20, 35, 35, 0, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.fillStyle = 'white';
+            ctx.fillRect(canvas.width/2 - 20, canvas.height/2 - 40, 50, 50);
+            saveToHistory();
+            showNotification('🌙 Une jolie lune !');
+        },
+        tree: () => {
+            ctx.beginPath();
+            ctx.rect(canvas.width/2 - 10, canvas.height/2 + 20, 20, 80);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.ellipse(canvas.width/2 - 20, canvas.height/2 - 30, 40, 40, 0, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.ellipse(canvas.width/2, canvas.height/2 - 50, 30, 30, 0, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.ellipse(canvas.width/2 - 40, canvas.height/2 - 10, 30, 30, 0, 0, Math.PI * 2);
+            ctx.stroke();
+            saveToHistory();
+            showNotification('🌲 Un bel arbre !');
+        }
+    };
+    
+    document.querySelectorAll('.shape-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const shape = btn.dataset.shape;
+            if (shapes[shape]) {
+                shapes[shape]();
+                strokeCount++;
+                document.getElementById('strokeCount').textContent = strokeCount;
+            }
+        });
+    });
+    
+    document.querySelectorAll('.animal-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const animalType = btn.dataset.animal;
+            addAnimal(animalType, canvas.width/2, canvas.height/2);
+            strokeCount++;
+            document.getElementById('strokeCount').textContent = strokeCount;
+        });
+    });
+    
+    initCanvas();
+})();
+</script>
+{% endblock %}
