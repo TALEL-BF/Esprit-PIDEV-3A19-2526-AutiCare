@@ -49,4 +49,14 @@
     </script>
 {% endif %}
 
-
+{% if app.session.flashBag.has('info') %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            {% for message in app.session.flashBag.get('info') %}
+                if (window.notify && window.notify.info) {
+                    window.notify.info('ℹ️ Information', '{{ message|escape('js') }}');
+                }
+            {% endfor %}
+        });
+    </script>
+{% endif %}
