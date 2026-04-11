@@ -602,6 +602,7 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
+            transform: scaleX(-1);
         }
 
         .camera-controls {
@@ -949,55 +950,74 @@
 
     function processAirHand(lm) {
         // lm = landmarks normalisés [0,1], miroir horizontal déjà appliqué
-        const idxUp    = fingerUp(lm, 8, 6);
-        const midUp    = fingerUp(lm, 12, 10);
-        const penUp    = idxUp && midUp;
+        // Y=0 en haut, Y=1 en bas → doigt levé = tip.y < knuckle.y
+        const idxUp  = lm[8].y  < lm[6].y;
+        const midUp  = lm[12].y < lm[10].y;
+
+        const penUp      = idxUp && midUp;
         const shouldDraw = idxUp && !midUp;
 
-        // Position du bout de l'index (landmark 8)
+        // Position lissée du bout de l'index
         const tipX = lm[8].x;
         const tipY = lm[8].y;
         smoothX = smoothX === null ? tipX : smoothX + AIR_SMOOTH * (tipX - smoothX);
         smoothY = smoothY === null ? tipY : smoothY + AIR_SMOOTH * (tipY - smoothY);
 
-        // Dessiner le curseur sur l'overlay caméra
+        // Curseur coloré sur l'overlay caméra
         const vx = smoothX * cameraCanvas.width;
         const vy = smoothY * cameraCanvas.height;
         cameraCtx.beginPath();
-        cameraCtx.arc(vx, vy, 16, 0, Math.PI * 2);
-        cameraCtx.fillStyle = penUp ? 'rgba(255,165,0,0.85)' : shouldDraw ? 'rgba(155,107,255,0.9)' : 'rgba(180,180,180,0.6)';
+        cameraCtx.arc(vx, vy, 18, 0, Math.PI * 2);
+        cameraCtx.fillStyle = penUp ? 'rgba(255,165,0,0.85)'
+                            : shouldDraw ? 'rgba(155,107,255,0.95)'
+                            : 'rgba(180,180,180,0.6)';
         cameraCtx.fill();
         cameraCtx.strokeStyle = 'white';
         cameraCtx.lineWidth = 3;
         cameraCtx.stroke();
 
-        if (!airDrawingEnabled) return;
+        if (!airDrawingEnabled) {
+            setAirStatus('▶️ Clique "Commencer" pour dessiner !');
+            return;
+        }
 
         if (penUp) {
             if (lastAirX !== null) {
                 saveToHistory();
                 strokeCount++;
                 document.getElementById('strokeCount').textContent = strokeCount;
-                lastAirX = null; lastAirY = null; smoothX = null; smoothY = null;
             }
+            lastAirX = null; lastAirY = null;
             setAirStatus('✌️ Stylo levé — baisse le majeur pour dessiner', '#FFE082');
+
         } else if (shouldDraw) {
-            const cx = smoothX * canvas.width;
+            // Inverser X pour que le dessin soit naturel (miroir comme la vidéo)
+            const cx = (1 - smoothX) * canvas.width;
             const cy = smoothY * canvas.height;
-            if (lastAirX !== null) {
+
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.lineWidth = currentSize;
+            ctx.strokeStyle = currentTool === 'rainbow'
+                ? 'hsl(' + (Math.random() * 360) + ',70%,60%)'
+                : currentTool === 'eraser' ? 'white' : currentColor;
+
+            if (lastAirX === null) {
+                // Premier point : dessine un point visible
+                ctx.beginPath();
+                ctx.arc(cx, cy, currentSize / 2, 0, Math.PI * 2);
+                ctx.fillStyle = ctx.strokeStyle;
+                ctx.fill();
+            } else {
                 ctx.beginPath();
                 ctx.moveTo(lastAirX, lastAirY);
                 ctx.lineTo(cx, cy);
-                ctx.strokeStyle = currentTool === 'rainbow'
-                    ? 'hsl(' + (Math.random() * 360) + ',70%,60%)'
-                    : currentTool === 'eraser' ? 'white' : currentColor;
-                ctx.lineWidth = currentSize;
-                ctx.lineCap = 'round';
-                ctx.lineJoin = 'round';
                 ctx.stroke();
             }
-            lastAirX = cx; lastAirY = cy;
+            lastAirX = cx;
+            lastAirY = cy;
             setAirStatus('🎨 Dessin en cours... ✨', '#C8E6C9');
+
         } else {
             if (lastAirX !== null) {
                 saveToHistory();
@@ -1005,7 +1025,7 @@
                 document.getElementById('strokeCount').textContent = strokeCount;
                 lastAirX = null; lastAirY = null;
             }
-            setAirStatus('👆 Lève l\'index seul pour dessiner !');
+            setAirStatus('☝️ Lève l\'index seul pour dessiner !');
         }
     }
 
@@ -1107,7 +1127,9 @@
 
                 const lmRaw = results.multiHandLandmarks[0];
                 // Miroir horizontal : la vidéo est scaleX(-1) en CSS
-                const lm = lmRaw.map(p => ({ x: 1 - p.x, y: p.y, z: p.z }));
+                // Pas d'inversion X : le miroir est géré par CSS transform: scaleX(-1) sur le canvas overlay
+                // Pour le dessin on garde les coords brutes (elles corresp. à l'image non-mirrored)
+                const lm = lmRaw.map(p => ({ x: p.x, y: p.y, z: p.z }));
 
                 drawSkeleton(lm);
                 processAirHand(lm);
