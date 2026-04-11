@@ -117,8 +117,11 @@
     <p>Planifier et administrer les séances pédagogiques et leur suivi</p>
 </div>
 
-{% for message in app.flashes('success') %}
+{% for message in app.session.flashBag.peek('success') %}
     <div class="alert alert-success">{{ message }}</div>
+{% endfor %}
+{% for message in app.session.flashBag.peek('warning') %}
+    <div class="alert alert-warning">{{ message }}</div>
 {% endfor %}
 
 <div class="row g-3 mb-4">
@@ -256,17 +259,17 @@
                     </div>
                     <div class="col-md-6">
                         {{ form_label(form.idAutiste, null, {'label_attr': {'class': 'form-label'}}) }}
-                        {{ form_widget(form.idAutiste, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_widget(form.idAutiste, {'attr': {'class': 'form-select'}}) }}
                         {% if form.vars.submitted %}{{ form_errors(form.idAutiste) }}{% endif %}
                     </div>
                     <div class="col-md-6">
                         {{ form_label(form.idProfesseur, null, {'label_attr': {'class': 'form-label'}}) }}
-                        {{ form_widget(form.idProfesseur, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_widget(form.idProfesseur, {'attr': {'class': 'form-select'}}) }}
                         {% if form.vars.submitted %}{{ form_errors(form.idProfesseur) }}{% endif %}
                     </div>
                     <div class="col-md-6">
                         {{ form_label(form.idCours, null, {'label_attr': {'class': 'form-label'}}) }}
-                        {{ form_widget(form.idCours, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_widget(form.idCours, {'attr': {'class': 'form-select'}}) }}
                         {% if form.vars.submitted %}{{ form_errors(form.idCours) }}{% endif %}
                     </div>
                     <div class="col-12">

@@ -111,6 +111,8 @@ class AdminPlanningController extends AbstractController
             $entityManager->remove($emploi);
             $entityManager->flush();
             $this->addFlash('success', 'Ligne d\'emploi du temps supprimee avec succes.');
+        } else {
+            $this->addFlash('warning', 'Suppression planning refusee: jeton de securite invalide.');
         }
 
         return $this->redirectToRoute('admin_planning');
@@ -147,7 +149,7 @@ class AdminPlanningController extends AbstractController
         ];
     }
 
-  private function applyEmploiSelection($form, EmploiDuTemps $emploi): void
+    private function applyEmploiSelection($form, EmploiDuTemps $emploi): void
     {
         $rdvId = $form->get('rdvSelection')->getData();
         $seanceId = $form->get('seanceSelection')->getData();
@@ -173,4 +175,4 @@ class AdminPlanningController extends AbstractController
 
         return sprintf('%d-%d', $startYear, $startYear + 1);
     }
-} 
+}

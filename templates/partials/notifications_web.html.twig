@@ -1,0 +1,62 @@
+{# Affiche les notifications web toastées depuis les flash messages #}
+{% if app.session.flashBag.has('notification_web') %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            {% for notification in app.session.flashBag.get('notification_web') %}
+                const notificationData = {{ notification|raw }};
+                if (window.notify && window.notify.fromJSON) {
+                    window.notify.fromJSON(notificationData);
+                }
+            {% endfor %}
+        });
+    </script>
+{% endif %}
+
+{# Affiche les flash messages Symfony standard avec toasts #}
+{% if app.session.flashBag.has('success') %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            {% for message in app.session.flashBag.get('success') %}
+                if (window.notify && window.notify.success) {
+                    window.notify.success('✅ Succès', '{{ message|escape('js') }}');
+                }
+            {% endfor %}
+        });
+    </script>
+{% endif %}
+
+{% if app.session.flashBag.has('error') %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            {% for message in app.session.flashBag.get('error') %}
+                if (window.notify && window.notify.error) {
+                    window.notify.error('❌ Erreur', '{{ message|escape('js') }}');
+                }
+            {% endfor %}
+        });
+    </script>
+{% endif %}
+
+{% if app.session.flashBag.has('warning') %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            {% for message in app.session.flashBag.get('warning') %}
+                if (window.notify && window.notify.warning) {
+                    window.notify.warning('⚠️ Attention', '{{ message|escape('js') }}');
+                }
+            {% endfor %}
+        });
+    </script>
+{% endif %}
+
+{% if app.session.flashBag.has('info') %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            {% for message in app.session.flashBag.get('info') %}
+                if (window.notify && window.notify.info) {
+                    window.notify.info('ℹ️ Information', '{{ message|escape('js') }}');
+                }
+            {% endfor %}
+        });
+    </script>
+{% endif %}

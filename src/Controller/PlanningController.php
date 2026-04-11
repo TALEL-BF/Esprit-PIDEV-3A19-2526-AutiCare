@@ -223,6 +223,26 @@ class PlanningController extends AbstractController
 	public function seance(EntityManagerInterface $em): Response
 	{
 		$seances = $em->getRepository(Seance::class)->findBy([], ['dateSeance' => 'ASC']);
+		$latestSeance = $em->getRepository(Seance::class)->findOneBy([], ['updatedAt' => 'DESC']);
+		$latestSeanceDetails = $em->getConnection()->fetchAssociative(
+			'SELECT
+				s.id_seance,
+				s.titre_seance,
+				s.date_seance,
+				s.jours_semaine,
+				s.duree,
+				s.created_at,
+				s.updated_at,
+				CONCAT(COALESCE(enfant.prenom, \'\'), \' \', COALESCE(enfant.nom, \'\')) AS enfant_nom,
+				CONCAT(COALESCE(prof.prenom, \'\'), \' \', COALESCE(prof.nom, \'\')) AS professeur_nom,
+				c.titre AS cours_titre
+			FROM seance s
+			LEFT JOIN user enfant ON enfant.id = s.id_autiste
+			LEFT JOIN user prof ON prof.id = s.id_professeur
+			LEFT JOIN cours c ON c.id_cours = s.id_cours
+			ORDER BY s.updated_at DESC
+			LIMIT 1'
+		);
 		$sessions = [];
 
 		foreach ($seances as $seance) {
@@ -236,11 +256,70 @@ class PlanningController extends AbstractController
 			['icon' => 'fas fa-calendar-week', 'color' => 'secondary', 'value' => count(array_unique(array_map(fn (array $s) => $s['day'], $sessions))), 'label' => 'Jours actifs'],
 		];
 
+		$latestSeanceNotification = null;
+
+		if ($latestSeance instanceof Seance) {
+			$dateSeance = $latestSeance->getDateSeance();
+			$dayLabel = (string) ($latestSeance->getJoursSemaine() ?? ($dateSeance ? $dateSeance->format('l') : 'jour non precise'));
+			$dateLabel = $dateSeance ? $dateSeance->format('d/m/Y') : 'date non precisee';
+			$timeLabel = $dateSeance ? $dateSeance->format('H:i') : 'heure non precisee';
+			$durationLabel = $latestSeance->getDuree() ? sprintf('%d min', (int) $latestSeance->getDuree()) : 'duree non precisee';
+			$createdAt = $latestSeance->getCreatedAt();
+			$updatedAt = $latestSeance->getUpdatedAt();
+			$isModified = $createdAt instanceof \DateTimeInterface
+				&& $updatedAt instanceof \DateTimeInterface
+				&& $updatedAt->getTimestamp() > ($createdAt->getTimestamp() + 5);
+
+			$childName = trim((string) ($latestSeanceDetails['enfant_nom'] ?? ''));
+			$childName = $childName !== '' ? $childName : 'votre enfant';
+
+			$professorName = trim((string) ($latestSeanceDetails['professeur_nom'] ?? ''));
+			$professorName = $professorName !== '' ? $professorName : 'professeur non precise';
+
+			$courseName = trim((string) ($latestSeanceDetails['cours_titre'] ?? ''));
+			$courseName = $courseName !== '' ? $courseName : (string) ($latestSeance->getTitreSeance() ?? 'Seance pedagogique');
+
+			$parentGreeting = 'Cher Parent';
+			$currentUser = $this->getUser();
+
+			if (is_object($currentUser) && method_exists($currentUser, 'getPrenom') && method_exists($currentUser, 'getNom')) {
+				$prenom = trim((string) $currentUser->getPrenom());
+				$nom = trim((string) $currentUser->getNom());
+				$fullName = trim($prenom . ' ' . $nom);
+
+				if ($fullName !== '') {
+					$parentGreeting = 'Bonjour ' . $fullName;
+				}
+			}
+
+			$latestSeanceNotification = [
+				'id' => sprintf('%s-%d', (string) $latestSeance->getId(), $updatedAt?->getTimestamp() ?? time()),
+				'title' => $isModified ? 'Mise a jour de seance' : 'Nouvelle seance planifiee',
+				'message' => sprintf(
+					$isModified
+						? '%s, la seance de %s a ete modifiee: cours "%s", professeur %s, jour %s (%s), heure %s, duree %s. Merci de verifier les nouveaux details.'
+						: '%s, %s a une nouvelle seance de "%s" avec %s le %s (%s) a %s. Duree prevue: %s.',
+					$parentGreeting,
+					$childName,
+					$courseName,
+					$professorName,
+					$dayLabel,
+					$dateLabel,
+					$timeLabel,
+					$durationLabel
+				),
+				'type' => $isModified ? 'warning' : 'info',
+				'icon' => $isModified ? '⚠️' : 'ℹ️',
+				'duration' => 60000,
+			];
+		}
+
 		return $this->render('front/planning/index.html.twig', [
 			'sessions' => $sessions,
 			'stats' => $stats,
 			'page_title' => 'Seances',
 			'page_subtitle' => 'Decouvrez toutes les seances pedagogiques disponibles.',
+			'latest_seance_notification' => $latestSeanceNotification,
 		]);
 	}
 }

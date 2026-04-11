@@ -69,6 +69,8 @@ class AdminRdvController extends AbstractController
             $entityManager->remove($rdv);
             $entityManager->flush();
             $this->addFlash('success', 'RDV supprime avec succes.');
+        } else {
+            $this->addFlash('warning', 'Suppression RDV refusee: jeton de securite invalide.');
         }
 
         return $this->redirectToRoute('admin_rdv');

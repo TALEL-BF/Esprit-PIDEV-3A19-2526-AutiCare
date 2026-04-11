@@ -1,7 +1,10 @@
 {# templates/front/planning/index.html.twig #}
 {% extends 'base.html.twig' %}
 
-{% block title %}AutiCare - Planning des Séances{% endblock %}
+{% set current_page_title = page_title|default('Planning') %}
+{% set current_page_subtitle = page_subtitle|default('Consultez les creneaux disponibles.') %}
+
+{% block title %}AutiCare - {{ current_page_title }}{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -156,6 +159,12 @@
         
         .page-header {
             background: linear-gradient(135deg, #4d65f9 0%, #ff4880 100%);
+            padding: 60px 0;
+        }
+
+        .page-header .display-3 {
+            letter-spacing: 0.2px;
+            font-weight: 700;
         }
         
         .btn-border-radius {
@@ -166,25 +175,25 @@
 
 {% block body %}
     <!-- Page Header -->
-    <div class="container-fluid page-header py-5 wow fadeIn" data-wow-delay="0.1s">
+    <div class="container-fluid page-header py-5">
         <div class="container text-center py-5">
-            <h1 class="display-3 text-white mb-3">Planning des Séances</h1>
-            <p class="text-white opacity-75 mb-3">Organisez votre semaine : cours en ligne et rendez-vous psychologiques</p>
-            <nav aria-label="breadcrumb">
+            <h1 class="display-3 text-white mb-3 wow fadeInDown">{{ current_page_title }}</h1>
+            <p class="text-white opacity-75 mb-3 wow fadeInUp" data-wow-delay="0.1s">{{ current_page_subtitle }}</p>
+            <nav aria-label="breadcrumb" class="wow fadeInUp" data-wow-delay="0.2s">
                 <ol class="breadcrumb justify-content-center mb-0">
                     <li class="breadcrumb-item"><a href="{{ path('app_home') }}" class="text-white">Accueil</a></li>
-                    <li class="breadcrumb-item text-secondary active">Planning</li>
+                    <li class="breadcrumb-item text-secondary active">{{ current_page_title }}</li>
                 </ol>
             </nav>
         </div>
     </div>
 
     <!-- Stats Section -->
-    <div class="container-fluid py-4 bg-light wow fadeIn">
+    <div class="container-fluid py-4 bg-light wow fadeInUp" data-wow-delay="0.05s">
         <div class="container">
             <div class="row g-3">
                 {% for stat in stats %}
-                <div class="col-md-3">
+                <div class="col-md-3 wow fadeInUp" data-wow-delay="0.{{ loop.index }}s">
                     <div class="stat-card">
                         <i class="{{ stat.icon }} fa-2x text-{{ stat.color }} mb-2"></i>
                         <h3 class="fw-bold mb-0">{{ stat.value }}</h3>
@@ -197,7 +206,7 @@
     </div>
 
     <!-- Legend & Filter -->
-    <div class="container-fluid py-4 wow fadeIn">
+    <div class="container-fluid py-4 wow fadeInUp" data-wow-delay="0.1s">
         <div class="container">
             <div class="filter-section d-flex flex-wrap align-items-center justify-content-between gap-3">
                 <div class="d-flex gap-4">
@@ -219,7 +228,7 @@
     </div>
 
     <!-- Day Tabs -->
-    <div class="container-fluid py-3 wow fadeIn">
+    <div class="container-fluid py-3 wow fadeInUp" data-wow-delay="0.15s">
         <div class="container">
             <div class="d-flex justify-content-center">
                 <div class="day-tab">
@@ -235,15 +244,15 @@
     </div>
 
     <!-- Schedule Grid -->
-    <div class="container-fluid py-4">
+    <div class="container-fluid py-4 wow fadeInUp" data-wow-delay="0.2s">
         <div class="container">
             <div id="scheduleContainer" class="row g-4">
                 <!-- Schedule will be populated by JS -->
             </div>
             <div id="noSessions" class="text-center py-5 d-none">
                 <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
-                <h5 class="text-muted">Aucune séance programmée</h5>
-                <p class="text-muted">Aucune séance n'est disponible pour ce jour. Consultez les autres jours.</p>
+                <h5 class="text-muted">Aucun element programme</h5>
+                <p class="text-muted">Aucun creneau n'est disponible pour ce jour. Consultez les autres jours.</p>
             </div>
         </div>
     </div>
@@ -302,6 +311,31 @@
     <script>
         // Sessions data from PHP
         const sessions = {{ sessions|json_encode|raw }};
+        const latestSeanceNotification = {{ (latest_seance_notification is defined and latest_seance_notification) ? latest_seance_notification|json_encode|raw : 'null' }};
+
+        function showLatestSeanceNotification() {
+            if (!latestSeanceNotification || !window.notify) {
+                return;
+            }
+
+            const storageKey = 'auticare_last_seen_seance_notification';
+            const lastSeenId = localStorage.getItem(storageKey);
+
+            if (lastSeenId === latestSeanceNotification.id) {
+                return;
+            }
+
+            window.notify.show({
+                type: latestSeanceNotification.type || 'info',
+                icon: latestSeanceNotification.icon || 'ℹ️',
+                title: latestSeanceNotification.title,
+                message: latestSeanceNotification.message,
+                duration: latestSeanceNotification.duration || 60000,
+                dismissible: true,
+            });
+
+            localStorage.setItem(storageKey, latestSeanceNotification.id);
+        }
         
         function getCurrentDay() {
             const days = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
@@ -385,12 +419,13 @@
             renderSchedule(currentDay, currentSearch);
         });
 
-     // Initialisation : activer le jour actuel
+        // Initialisation : activer le jour actuel
         const today = getCurrentDay();
         currentDay = (today !== 'Dimanche') ? today : 'Lundi';
         document.querySelectorAll('.day-btn').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.day === currentDay);
         });
         renderSchedule(currentDay);
+        showLatestSeanceNotification();
     </script>
-{% endblock %}   
+{% endblock %}

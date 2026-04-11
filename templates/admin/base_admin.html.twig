@@ -101,6 +101,12 @@
         });
     </script>
     
+    <!-- Toast Notifications JavaScript -->
+    <script src="{{ asset('js/toast-notifications.js') }}"></script>
+    
+    <!-- Display web notifications from flash messages -->
+    {% include 'partials/notifications_web.html.twig' %}
+    
     {% block javascripts %}{% endblock %}
 </body>
 </html>

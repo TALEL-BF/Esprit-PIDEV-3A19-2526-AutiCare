@@ -117,8 +117,11 @@
     <p>Planifier, suivre et administrer les rendez-vous de consultation</p>
 </div>
 
-{% for message in app.flashes('success') %}
+{% for message in app.session.flashBag.peek('success') %}
     <div class="alert alert-success">{{ message }}</div>
+{% endfor %}
+{% for message in app.session.flashBag.peek('warning') %}
+    <div class="alert alert-warning">{{ message }}</div>
 {% endfor %}
 
 <div class="row g-3 mb-4">

@@ -18,6 +18,9 @@ class SeanceType extends AbstractType
 	public function buildForm(FormBuilderInterface $builder, array $options): void
 	{
 		$isCreate = (bool) $options['is_create'];
+		$patientChoices = (array) $options['patient_choices'];
+		$professorChoices = (array) $options['professor_choices'];
+		$courseChoices = (array) $options['course_choices'];
 
 		$builder
 			->add('titreSeance', TextType::class, [
@@ -94,32 +97,38 @@ class SeanceType extends AbstractType
 					new Assert\NotBlank(['message' => 'Veuillez sélectionner un statut.']),
 				],
 			])
-			->add('idAutiste', IntegerType::class, [
+			->add('idAutiste', ChoiceType::class, [
 				'label' => 'Patient',
-				'attr' => ['placeholder' => 'ID patient'],
-				'data' => $isCreate ? null : $builder->getData()?->getIdAutiste(),
+				'choices' => $patientChoices,
+				'placeholder' => 'Selectionner un patient',
+				'choice_translation_domain' => false,
+				'data' => $isCreate ? null : (string) $builder->getData()?->getIdAutiste(),
 				'constraints' => [
-					new Assert\NotBlank(['message' => 'Veuillez indiquer le patient.']),
-					new Assert\Positive(['message' => 'L\'ID patient doit être un entier positif.']),
+					new Assert\NotBlank(['message' => 'Veuillez selectionner le patient.']),
 				],
+				'invalid_message' => 'Le patient selectionne est invalide.',
 			])
-			->add('idProfesseur', IntegerType::class, [
+			->add('idProfesseur', ChoiceType::class, [
 				'label' => 'Professeur',
-				'attr' => ['placeholder' => 'ID professeur'],
-				'data' => $isCreate ? null : $builder->getData()?->getIdProfesseur(),
+				'choices' => $professorChoices,
+				'placeholder' => 'Selectionner un professeur',
+				'choice_translation_domain' => false,
+				'data' => $isCreate ? null : (string) $builder->getData()?->getIdProfesseur(),
 				'constraints' => [
-					new Assert\NotBlank(['message' => 'Veuillez indiquer le professeur.']),
-					new Assert\Positive(['message' => 'L\'ID professeur doit être un entier positif.']),
+					new Assert\NotBlank(['message' => 'Veuillez selectionner le professeur.']),
 				],
+				'invalid_message' => 'Le professeur selectionne est invalide.',
 			])
-			->add('idCours', IntegerType::class, [
+			->add('idCours', ChoiceType::class, [
 				'label' => 'Cours',
-				'attr' => ['placeholder' => 'ID cours'],
-				'data' => $isCreate ? null : $builder->getData()?->getIdCours(),
+				'choices' => $courseChoices,
+				'placeholder' => 'Selectionner un cours',
+				'choice_translation_domain' => false,
+				'data' => $isCreate ? null : (string) $builder->getData()?->getIdCours(),
 				'constraints' => [
-					new Assert\NotBlank(['message' => 'Veuillez indiquer le cours.']),
-					new Assert\Positive(['message' => 'L\'ID cours doit être un entier positif.']),
+					new Assert\NotBlank(['message' => 'Veuillez selectionner le cours.']),
 				],
+				'invalid_message' => 'Le cours selectionne est invalide.',
 			])
 			->add('description', TextareaType::class, [
 				'label' => 'Description',
@@ -140,8 +149,14 @@ class SeanceType extends AbstractType
 		$resolver->setDefaults([
 			'data_class' => Seance::class,
 			'is_create' => false,
+			'patient_choices' => [],
+			'professor_choices' => [],
+			'course_choices' => [],
 		]);
 
 		$resolver->setAllowedTypes('is_create', 'bool');
+		$resolver->setAllowedTypes('patient_choices', 'array');
+		$resolver->setAllowedTypes('professor_choices', 'array');
+		$resolver->setAllowedTypes('course_choices', 'array');
 	}
 }

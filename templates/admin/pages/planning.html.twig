@@ -117,8 +117,11 @@
     <p>Planifier les créneaux hebdomadaires liés aux rendez-vous et aux séances</p>
 </div>
 
-{% for message in app.flashes('success') %}
+{% for message in app.session.flashBag.peek('success') %}
     <div class="alert alert-success">{{ message }}</div>
+{% endfor %}
+{% for message in app.session.flashBag.peek('warning') %}
+    <div class="alert alert-warning">{{ message }}</div>
 {% endfor %}
 
 <div class="alert alert-info">

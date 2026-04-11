@@ -1,0 +1,8 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^php bin/console doctrine:query:sql \"DESCRIBE cours\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}
