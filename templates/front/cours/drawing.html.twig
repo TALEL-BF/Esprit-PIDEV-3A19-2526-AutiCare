@@ -665,6 +665,7 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
+        /* Mode tactile pour mobile */
         @media (max-width: 768px) {
             .drawing-container {
                 padding: 10px;
@@ -856,7 +857,7 @@
             <button class="cam-btn" id="closeCameraBtn"><i class="fas fa-times"></i> Fermer</button>
         </div>
         <div class="air-drawing-status" id="airDrawingStatus">
-            📍 Statut: Prêt - Lève ton index pour dessiner !
+            📍 Statut: Prêt - Montre ton index à la caméra !
         </div>
     </div>
 </div>
@@ -864,7 +865,6 @@
 
 {% block javascripts %}
 {{ parent() }}
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
 <script>
 (function() {
     const canvas = document.getElementById('drawingCanvas');
@@ -889,17 +889,264 @@
     let historyIndex = -1;
     const MAX_HISTORY = 50;
     
+    // Variables pour l'Air Drawing (version simplifiée sans MediaPipe)
     let airDrawingEnabled = false;
     let cameraModal = null;
     let cameraVideo = null;
     let cameraCanvas = null;
     let cameraCtx = null;
-    let hands = null;
+    let videoStream = null;
     let lastAirX = null;
     let lastAirY = null;
-    let isPinching = false;
-    let videoStream = null;
-    let detectionInterval = null;
+    let lastFingerX = null;
+    let lastFingerY = null;
+    let fingerDetectionInterval = null;
+    
+    // Version simplifiée de détection de couleur de peau
+    function detectFingerPosition(video, canvas) {
+        if (!airDrawingEnabled || !video.videoWidth) return null;
+        
+        // Créer un canvas temporaire pour analyser l'image
+        const tempCanvas = document.createElement('canvas');
+        const tempCtx = tempCanvas.getContext('2d');
+        const width = video.videoWidth;
+        const height = video.videoHeight;
+        
+        tempCanvas.width = width;
+        tempCanvas.height = height;
+        
+        // Dessiner l'image de la vidéo
+        tempCtx.save();
+        tempCtx.scale(-1, 1);
+        tempCtx.drawImage(video, -width, 0, width, height);
+        tempCtx.restore();
+        
+        // Obtenir les données de l'image
+        const imageData = tempCtx.getImageData(0, 0, width, height);
+        const data = imageData.data;
+        
+        // Chercher la couleur de peau (approximation simple)
+        let skinPixels = [];
+        for (let y = 0; y < height; y += 4) {
+            for (let x = 0; x < width; x += 4) {
+                const idx = (y * width + x) * 4;
+                const r = data[idx];
+                const g = data[idx + 1];
+                const b = data[idx + 2];
+                
+                // Détection simplifiée de couleur de peau
+                if (r > 80 && g > 40 && b > 40 && r > g && r > b && Math.abs(r - g) > 15) {
+                    skinPixels.push({ x, y, r, g, b });
+                }
+            }
+        }
+        
+        if (skinPixels.length === 0) return null;
+        
+        // Trouver le point le plus haut (doigt)
+        let topPoint = skinPixels.reduce((min, p) => p.y < min.y ? p : min, skinPixels[0]);
+        
+        // Vérifier si c'est un doigt (point isolé en haut)
+        let nearbyCount = skinPixels.filter(p => Math.hypot(p.x - topPoint.x, p.y - topPoint.y) < 30).length;
+        
+        if (nearbyCount < 10) return null;
+        
+        return {
+            x: topPoint.x / width,
+            y: topPoint.y / height
+        };
+    }
+    
+    function initAirDrawing() {
+        cameraModal = document.getElementById('cameraModal');
+        cameraVideo = document.getElementById('cameraVideo');
+        cameraCanvas = document.getElementById('cameraCanvas');
+        
+        if (!cameraModal || !cameraVideo || !cameraCanvas) {
+            console.error("Éléments de caméra non trouvés");
+            showNotification('❌ Erreur: Éléments de caméra non trouvés');
+            return;
+        }
+        
+        cameraCtx = cameraCanvas.getContext('2d');
+        
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            showNotification('⚠️ Votre navigateur ne supporte pas la caméra');
+            return;
+        }
+        
+        // Démarrer la caméra
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                videoStream = stream;
+                cameraVideo.srcObject = stream;
+                
+                cameraVideo.onloadedmetadata = () => {
+                    cameraVideo.play();
+                    cameraCanvas.width = cameraVideo.videoWidth;
+                    cameraCanvas.height = cameraVideo.videoHeight;
+                    cameraVideo.style.width = '100%';
+                    cameraCanvas.style.width = '100%';
+                    cameraCanvas.style.height = 'auto';
+                    showNotification('📷 Caméra activée ! Montre ton index !');
+                };
+            })
+            .catch(err => {
+                console.error("Erreur caméra:", err);
+                if (err.name === 'NotAllowedError') {
+                    showNotification('⚠️ Autorise l\'accès à la caméra !');
+                } else {
+                    showNotification('⚠️ Impossible d\'accéder à la caméra');
+                }
+            });
+    }
+    
+    function startAirDrawing() {
+        if (!airDrawingEnabled) {
+            airDrawingEnabled = true;
+            lastAirX = null;
+            lastAirY = null;
+            lastFingerX = null;
+            lastFingerY = null;
+            
+            // Démarrer la détection
+            if (fingerDetectionInterval) clearInterval(fingerDetectionInterval);
+            
+            fingerDetectionInterval = setInterval(() => {
+                if (!airDrawingEnabled || !cameraVideo || cameraVideo.paused || !cameraVideo.videoWidth) return;
+                
+                // Détecter la position du doigt
+                const fingerPos = detectFingerPosition(cameraVideo, cameraCanvas);
+                
+                if (fingerPos && cameraCtx) {
+                    // Dessiner sur le canvas de superposition
+                    cameraCtx.clearRect(0, 0, cameraCanvas.width, cameraCanvas.height);
+                    
+                    const videoX = fingerPos.x * cameraCanvas.width;
+                    const videoY = fingerPos.y * cameraCanvas.height;
+                    
+                    // Dessiner un cercle sur la position détectée
+                    cameraCtx.beginPath();
+                    cameraCtx.arc(videoX, videoY, 20, 0, 2 * Math.PI);
+                    cameraCtx.fillStyle = '#ff69b4';
+                    cameraCtx.fill();
+                    cameraCtx.strokeStyle = 'white';
+                    cameraCtx.lineWidth = 3;
+                    cameraCtx.stroke();
+                    
+                    // Convertir en coordonnées canvas
+                    const canvasX = fingerPos.x * canvas.width;
+                    const canvasY = fingerPos.y * canvas.height;
+                    
+                    // Dessiner sur le canvas principal
+                    if (lastAirX !== null && lastAirY !== null) {
+                        ctx.beginPath();
+                        ctx.moveTo(lastAirX, lastAirY);
+                        ctx.lineTo(canvasX, canvasY);
+                        
+                        if (currentTool === 'rainbow') {
+                            ctx.strokeStyle = `hsl(${Math.random() * 360}, 70%, 60%)`;
+                        } else if (currentTool === 'eraser') {
+                            ctx.strokeStyle = 'white';
+                        } else {
+                            ctx.strokeStyle = currentColor;
+                        }
+                        ctx.lineWidth = currentSize;
+                        ctx.stroke();
+                        
+                        // Sauvegarder périodiquement
+                        if (Math.random() < 0.1) {
+                            saveToHistory();
+                            strokeCount++;
+                            document.getElementById('strokeCount').textContent = strokeCount;
+                        }
+                    }
+                    
+                    lastAirX = canvasX;
+                    lastAirY = canvasY;
+                    
+                    // Afficher un petit effet
+                    ctx.save();
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = '#ff69b4';
+                    ctx.beginPath();
+                    ctx.arc(canvasX, canvasY, currentSize / 2, 0, 2 * Math.PI);
+                    ctx.fillStyle = currentTool === 'eraser' ? 'rgba(255,255,255,0.5)' : `${currentColor}80`;
+                    ctx.fill();
+                    ctx.restore();
+                    
+                    const statusDiv = document.getElementById('airDrawingStatus');
+                    if (statusDiv) {
+                        statusDiv.innerHTML = '🎨 Statut: DESSIN EN COURS ! 🎨';
+                        statusDiv.style.background = '#FFE082';
+                    }
+                } else if (lastAirX !== null) {
+                    // Fin du dessin
+                    saveToHistory();
+                    strokeCount++;
+                    document.getElementById('strokeCount').textContent = strokeCount;
+                    lastAirX = null;
+                    lastAirY = null;
+                    
+                    const statusDiv = document.getElementById('airDrawingStatus');
+                    if (statusDiv) {
+                        statusDiv.innerHTML = '📍 Statut: Prêt - Montre ton index à la caméra !';
+                        statusDiv.style.background = '#F5E6FF';
+                    }
+                    
+                    if (cameraCtx) {
+                        cameraCtx.clearRect(0, 0, cameraCanvas.width, cameraCanvas.height);
+                    }
+                }
+            }, 100);
+            
+            showNotification('✋ Air Drawing activé ! Montre ton index à la caméra !');
+        }
+    }
+    
+    function stopAirDrawing() {
+        airDrawingEnabled = false;
+        if (fingerDetectionInterval) {
+            clearInterval(fingerDetectionInterval);
+            fingerDetectionInterval = null;
+        }
+        lastAirX = null;
+        lastAirY = null;
+        if (cameraCtx) {
+            cameraCtx.clearRect(0, 0, cameraCanvas.width, cameraCanvas.height);
+        }
+        const statusDiv = document.getElementById('airDrawingStatus');
+        if (statusDiv) {
+            statusDiv.innerHTML = '📍 Statut: Arrêté - Clique sur "Commencer" pour reprendre';
+            statusDiv.style.background = '#F5E6FF';
+        }
+        showNotification('✋ Air Drawing arrêté');
+    }
+    
+    function closeCamera() {
+        airDrawingEnabled = false;
+        if (fingerDetectionInterval) {
+            clearInterval(fingerDetectionInterval);
+            fingerDetectionInterval = null;
+        }
+        if (videoStream) {
+            videoStream.getTracks().forEach(track => track.stop());
+            videoStream = null;
+        }
+        if (cameraModal) {
+            cameraModal.classList.remove('active');
+        }
+        showNotification('📷 Caméra fermée');
+    }
+    
+    function openCameraModal() {
+        if (cameraModal) {
+            cameraModal.classList.add('active');
+            initAirDrawing();
+        } else {
+            showNotification('❌ Erreur: Impossible d\'ouvrir la caméra');
+        }
+    }
     
     function initCanvas() {
         ctx.fillStyle = 'white';
@@ -1685,365 +1932,7 @@
         }, 2300);
     }
     
-    // ==================== FONCTIONS AIR DRAWING ====================
-    
-    async function initAirDrawing() {
-        cameraModal = document.getElementById('cameraModal');
-        cameraVideo = document.getElementById('cameraVideo');
-        cameraCanvas = document.getElementById('cameraCanvas');
-        
-        if (!cameraModal || !cameraVideo || !cameraCanvas) {
-            console.error("Éléments de caméra non trouvés");
-            showNotification('❌ Erreur: Éléments de caméra non trouvés');
-            return;
-        }
-        
-        cameraCtx = cameraCanvas.getContext('2d');
-        
-        // Vérifier si getUserMedia est disponible
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            showNotification('⚠️ Votre navigateur ne supporte pas la caméra');
-            showNotification('💡 Utilise Chrome, Edge ou Safari récent');
-            return;
-        }
-        
-        // Vérifier si la page est en HTTPS ou localhost
-        const isSecure = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-        if (!isSecure) {
-            showNotification('⚠️ La caméra nécessite HTTPS ou localhost !');
-            showNotification('💡 Utilise https:// ou http://localhost');
-            return;
-        }
-        
-        // Initialiser MediaPipe Hands
-        try {
-            hands = new Hands({
-                locateFile: (file) => {
-                    return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
-                }
-            });
-            
-            hands.setOptions({
-                maxNumHands: 1,
-                modelComplexity: 1,
-                minDetectionConfidence: 0.5,
-                minTrackingConfidence: 0.5
-            });
-            
-            hands.onResults(onHandResults);
-        } catch (err) {
-            console.error("Erreur MediaPipe:", err);
-            showNotification('❌ Erreur de chargement de la détection de main');
-            return;
-        }
-        
-        // Démarrer la caméra
-        try {
-            if (videoStream) {
-                videoStream.getTracks().forEach(track => track.stop());
-            }
-            
-            const constraints = { 
-                video: { 
-                    width: { ideal: 640 },
-                    height: { ideal: 480 },
-                    facingMode: "user"
-                } 
-            };
-            
-            videoStream = await navigator.mediaDevices.getUserMedia(constraints);
-            cameraVideo.srcObject = videoStream;
-            
-            // Attendre que la vidéo soit chargée
-            await new Promise((resolve, reject) => {
-                const timeout = setTimeout(() => reject(new Error('Timeout video')), 5000);
-                cameraVideo.onloadedmetadata = () => {
-                    clearTimeout(timeout);
-                    cameraVideo.play();
-                    resolve();
-                };
-                cameraVideo.onerror = () => {
-                    clearTimeout(timeout);
-                    reject(new Error('Erreur video'));
-                };
-            });
-            
-            // Configurer le canvas de la caméra
-            const videoWidth = cameraVideo.videoWidth || 640;
-            const videoHeight = cameraVideo.videoHeight || 480;
-            cameraCanvas.width = videoWidth;
-            cameraCanvas.height = videoHeight;
-            
-            // Redimensionner l'affichage
-            cameraVideo.style.width = '100%';
-            cameraCanvas.style.width = '100%';
-            cameraCanvas.style.height = 'auto';
-            
-            showNotification('📷 Caméra activée ! Lève ton index pour dessiner dans les airs !');
-            
-        } catch (err) {
-            console.error("Erreur caméra:", err);
-            
-            if (err.name === 'NotAllowedError') {
-                showNotification('⚠️ Tu dois autoriser l\'accès à la caméra !');
-                showNotification('🔒 Clique sur "Autoriser" dans la barre d\'adresse');
-            } else if (err.name === 'NotFoundError') {
-                showNotification('⚠️ Aucune caméra trouvée sur ton appareil');
-            } else if (err.name === 'NotReadableError') {
-                showNotification('⚠️ La caméra est déjà utilisée par une autre application');
-            } else {
-                showNotification('⚠️ Impossible d\'accéder à la caméra');
-            }
-        }
-    }
-    
-    function onHandResults(results) {
-        if (!airDrawingEnabled || !cameraCtx || !cameraCanvas) return;
-        
-        // Effacer le canvas de superposition
-        cameraCtx.clearRect(0, 0, cameraCanvas.width, cameraCanvas.height);
-        
-        if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-            const landmarks = results.multiHandLandmarks[0];
-            
-            // Dessiner les points de la main sur le canvas de superposition
-            drawHandLandmarks(landmarks);
-            
-            // Obtenir la position de l'index (landmark 8)
-            const indexTip = landmarks[8];
-            
-            // Convertir les coordonnées de la caméra vers le canvas de dessin
-            const canvasX = indexTip.x * canvas.width;
-            const canvasY = indexTip.y * canvas.height;
-            
-            // Vérifier si le pouce et l'index se touchent pour activer/désactiver le dessin
-            const thumbTip = landmarks[4];
-            const indexTipPos = landmarks[8];
-            const distance = Math.hypot(thumbTip.x - indexTipPos.x, thumbTip.y - indexTipPos.y);
-            const isTouching = distance < 0.05;
-            
-            // Mettre à jour le statut
-            const statusDiv = document.getElementById('airDrawingStatus');
-            
-            if (isTouching !== isPinching) {
-                isPinching = isTouching;
-                if (isPinching) {
-                    // Commencer à dessiner
-                    lastAirX = canvasX;
-                    lastAirY = canvasY;
-                    if (statusDiv) {
-                        statusDiv.innerHTML = '🎨 Statut: DESSIN EN COURS - Bouge ton doigt ! 🎨';
-                        statusDiv.style.background = '#FFE082';
-                    }
-                    
-                    // Préparer le dessin
-                    ctx.beginPath();
-                    ctx.moveTo(canvasX, canvasY);
-                    
-                    // Configurer le style de dessin
-                    if (currentTool === 'rainbow') {
-                        currentColor = `hsl(${Math.random() * 360}, 70%, 60%)`;
-                        ctx.strokeStyle = currentColor;
-                    } else if (currentTool === 'eraser') {
-                        ctx.strokeStyle = 'white';
-                    } else {
-                        ctx.strokeStyle = currentColor;
-                    }
-                    ctx.lineWidth = currentSize;
-                    ctx.lineTo(canvasX, canvasY);
-                    ctx.stroke();
-                    
-                    showFingerTip(canvasX, canvasY);
-                } else {
-                    // Arrêter de dessiner
-                    if (lastAirX !== null) {
-                        saveToHistory();
-                        strokeCount++;
-                        document.getElementById('strokeCount').textContent = strokeCount;
-                    }
-                    lastAirX = null;
-                    lastAirY = null;
-                    if (statusDiv) {
-                        statusDiv.innerHTML = '📍 Statut: Prêt - Pince avec ton pouce et ton index pour dessiner !';
-                        statusDiv.style.background = '#F5E6FF';
-                    }
-                }
-            }
-            
-            // Dessiner si le pincement est actif
-            if (isPinching && lastAirX !== null) {
-                // Dessiner le trait
-                ctx.beginPath();
-                ctx.moveTo(lastAirX, lastAirY);
-                ctx.lineTo(canvasX, canvasY);
-                
-                if (currentTool === 'rainbow') {
-                    currentColor = `hsl(${Math.random() * 360}, 70%, 60%)`;
-                    ctx.strokeStyle = currentColor;
-                } else if (currentTool === 'eraser') {
-                    ctx.strokeStyle = 'white';
-                } else {
-                    ctx.strokeStyle = currentColor;
-                }
-                ctx.lineWidth = currentSize;
-                ctx.stroke();
-                
-                lastAirX = canvasX;
-                lastAirY = canvasY;
-                
-                showFingerTip(canvasX, canvasY);
-            } else if (isPinching) {
-                lastAirX = canvasX;
-                lastAirY = canvasY;
-            }
-            
-            // Afficher un cercle à la position du doigt sur le canvas de superposition
-            const videoX = indexTip.x * cameraCanvas.width;
-            const videoY = indexTip.y * cameraCanvas.height;
-            cameraCtx.beginPath();
-            cameraCtx.arc(videoX, videoY, 15, 0, 2 * Math.PI);
-            cameraCtx.fillStyle = isPinching ? '#ff69b4' : '#9b6bff';
-            cameraCtx.fill();
-            cameraCtx.strokeStyle = 'white';
-            cameraCtx.lineWidth = 3;
-            cameraCtx.stroke();
-            
-            // Ajouter un effet de glow
-            cameraCtx.shadowBlur = 15;
-            cameraCtx.shadowColor = isPinching ? '#ff69b4' : '#9b6bff';
-            cameraCtx.beginPath();
-            cameraCtx.arc(videoX, videoY, 20, 0, 2 * Math.PI);
-            cameraCtx.fillStyle = 'rgba(155,107,255,0.3)';
-            cameraCtx.fill();
-            cameraCtx.shadowBlur = 0;
-        }
-    }
-    
-    function drawHandLandmarks(landmarks) {
-        if (!cameraCtx) return;
-        
-        // Dessiner les connexions entre les points
-        const connections = [
-            [0, 1], [1, 2], [2, 3], [3, 4],  // Pouce
-            [0, 5], [5, 6], [6, 7], [7, 8],  // Index
-            [0, 9], [9, 10], [10, 11], [11, 12],  // Majeur
-            [0, 13], [13, 14], [14, 15], [15, 16],  // Annulaire
-            [0, 17], [17, 18], [18, 19], [19, 20],  // Auriculaire
-            [5, 9], [9, 13], [13, 17]  // Connexions entre les doigts
-        ];
-        
-        cameraCtx.strokeStyle = '#9b6bff';
-        cameraCtx.lineWidth = 3;
-        
-        connections.forEach(connection => {
-            const start = landmarks[connection[0]];
-            const end = landmarks[connection[1]];
-            if (start && end) {
-                cameraCtx.beginPath();
-                cameraCtx.moveTo(start.x * cameraCanvas.width, start.y * cameraCanvas.height);
-                cameraCtx.lineTo(end.x * cameraCanvas.width, end.y * cameraCanvas.height);
-                cameraCtx.stroke();
-            }
-        });
-        
-        // Dessiner les points
-        landmarks.forEach(landmark => {
-            cameraCtx.beginPath();
-            cameraCtx.arc(landmark.x * cameraCanvas.width, landmark.y * cameraCanvas.height, 5, 0, 2 * Math.PI);
-            cameraCtx.fillStyle = '#ff69b4';
-            cameraCtx.fill();
-            cameraCtx.strokeStyle = 'white';
-            cameraCtx.lineWidth = 2;
-            cameraCtx.stroke();
-        });
-    }
-    
-    function showFingerTip(x, y) {
-        // Créer un effet visuel temporaire sur le canvas de dessin
-        ctx.save();
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = '#ff69b4';
-        ctx.beginPath();
-        ctx.arc(x, y, currentSize / 2, 0, 2 * Math.PI);
-        ctx.fillStyle = currentTool === 'eraser' ? 'rgba(255,255,255,0.5)' : `${currentColor}80`;
-        ctx.fill();
-        ctx.restore();
-    }
-    
-    function startAirDrawing() {
-        if (!airDrawingEnabled) {
-            airDrawingEnabled = true;
-            isPinching = false;
-            lastAirX = null;
-            lastAirY = null;
-            
-            // Démarrer la boucle de détection
-            if (hands && cameraVideo && cameraVideo.readyState === 4) {
-                const detectFrame = async () => {
-                    if (airDrawingEnabled && cameraVideo && cameraVideo.readyState === 4) {
-                        await hands.send({ image: cameraVideo });
-                        requestAnimationFrame(detectFrame);
-                    }
-                };
-                detectFrame();
-            }
-            
-            const statusDiv = document.getElementById('airDrawingStatus');
-            if (statusDiv) {
-                statusDiv.innerHTML = '📍 Statut: Prêt - Pince avec ton pouce et ton index pour dessiner !';
-            }
-            showNotification('✋ Air Drawing activé ! Utilise ton index pour dessiner !');
-        }
-    }
-    
-    function stopAirDrawing() {
-        airDrawingEnabled = false;
-        isPinching = false;
-        lastAirX = null;
-        lastAirY = null;
-        if (cameraCtx) {
-            cameraCtx.clearRect(0, 0, cameraCanvas.width, cameraCanvas.height);
-        }
-        const statusDiv = document.getElementById('airDrawingStatus');
-        if (statusDiv) {
-            statusDiv.innerHTML = '📍 Statut: Arrêté - Clique sur "Commencer à dessiner" pour reprendre';
-        }
-        showNotification('✋ Air Drawing arrêté');
-    }
-    
-    function closeCamera() {
-        airDrawingEnabled = false;
-        if (videoStream) {
-            videoStream.getTracks().forEach(track => track.stop());
-            videoStream = null;
-        }
-        if (cameraModal) {
-            cameraModal.classList.remove('active');
-        }
-        showNotification('📷 Caméra fermée');
-    }
-    
-    function openCameraModal() {
-        // Vérifier si la page est en HTTPS ou localhost
-        const isSecure = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-        
-        if (!isSecure) {
-            showNotification('⚠️ La caméra nécessite HTTPS ou localhost !');
-            showNotification('💡 Utilise https:// ou http://localhost');
-            return;
-        }
-        
-        if (cameraModal) {
-            cameraModal.classList.add('active');
-            initAirDrawing();
-        } else {
-            console.error("Modal non trouvé");
-            showNotification('❌ Erreur: Impossible d\'ouvrir la caméra');
-        }
-    }
-    
-    // ==================== ÉVÉNEMENTS ====================
-    
+    // Événements
     canvas.addEventListener('mousedown', handleCanvasMouseDown);
     canvas.addEventListener('mousemove', handleCanvasMouseMove);
     canvas.addEventListener('mouseup', handleCanvasMouseUp);
@@ -2052,7 +1941,6 @@
     canvas.addEventListener('touchmove', (e) => { e.preventDefault(); handleCanvasMouseMove(e.touches[0]); });
     canvas.addEventListener('touchend', handleCanvasMouseUp);
     
-    // Boutons outils
     document.querySelectorAll('.tool-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
@@ -2154,7 +2042,6 @@
     document.getElementById('confettiBtn').addEventListener('click', createConfetti);
     document.getElementById('starsBtn').addEventListener('click', createStars);
     
-    // Événements Air Drawing
     const cameraBtn = document.getElementById('cameraBtn');
     if (cameraBtn) {
         cameraBtn.addEventListener('click', openCameraModal);
