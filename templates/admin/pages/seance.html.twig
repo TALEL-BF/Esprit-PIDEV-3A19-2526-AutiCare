@@ -7,6 +7,45 @@
 {% block stylesheets %}
 {{ parent() }}
 <style>
+    /* Intégration pro du calendrier avec le thème */
+    #calendar-seance {
+        font-family: inherit;
+        background: #fff;
+        padding: 15px;
+        border-radius: 12px;
+    }
+    .fc .fc-toolbar-title { 
+        font-size: 1.15rem !important; 
+        font-weight: 700; 
+        color: #334155; 
+    }
+    .fc .fc-button { 
+        padding: 0.4rem 0.8rem !important; 
+        font-size: 0.85rem !important;
+        font-weight: 500 !important; 
+        border-radius: 8px !important; 
+        text-transform: capitalize !important;
+    }
+    .fc .fc-button-primary {
+        background-color: #10b981 !important;
+        border-color: #10b981 !important;
+    }
+    .fc .fc-button-primary:hover {
+        background-color: #059669 !important;
+        border-color: #059669 !important;
+    }
+    /* Style pour les événements */
+    .fc-event { 
+        border-radius: 6px !important; 
+        padding: 2px 5px !important; 
+        border: none !important; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        background-color: #10b981 !important;
+        color: white !important;
+    }
+    .fc-theme-standard td, .fc-theme-standard th {
+        border-color: #f1f5f9 !important;
+    }
     .filter-input {
         width: 200px;
         font-size: .8rem;
@@ -400,14 +439,141 @@
     </div>
 </div>
 
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm border-0 rounded-4 overflow-hidden mb-4">
+            <div class="card-header bg-white border-bottom-0 pt-4 px-4 d-flex align-items-center">
+                <div class="d-flex align-items-center justify-content-center rounded-3 me-3" style="width: 40px; height: 40px; background-color: #f5f3ff; color: #7c3aed;">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div>
+                    <h5 class="mb-0 fw-bold" style="color: #6d28d9;">Planning des Séances</h5>
+                    <p class="text-muted small mb-0">Visualisation hebdomadaire et mensuelle</p>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <div id='calendar-seance' style="min-height: 500px; max-height: 700px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block javascripts %}
 {{ parent() }}
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<!-- FullCalendar JS & CSS -->
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+
+<style>
+    /* Intégration pro du calendrier avec le thème */
+    #calendar-seance {
+        font-family: inherit;
+        background: #fff;
+    }
+    .fc .fc-toolbar-title { 
+        font-size: 1.15rem !important; 
+        font-weight: 700; 
+        color: #334155; 
+    }
+    .fc .fc-button { 
+        padding: 0.4rem 0.8rem !important; 
+        font-size: 0.85rem !important;
+        font-weight: 500 !important; 
+        border-radius: 8px !important; 
+        text-transform: capitalize !important;
+    }
+    .fc .fc-button-primary {
+        background-color: #8b5cf6 !important;
+        border-color: #8b5cf6 !important;
+    }
+    .fc .fc-button-primary:hover {
+        background-color: #7c3aed !important;
+        border-color: #7c3aed !important;
+    }
+    .fc .fc-button-primary:not(:disabled).fc-button-active, 
+    .fc .fc-button-primary:not(:disabled):active {
+        background-color: #6d28d9 !important;
+        border-color: #6d28d9 !important;
+    }
+    .fc-event { 
+        border-radius: 6px !important; 
+        padding: 2px 5px !important; 
+        border: none !important; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        background-color: #f472b6 !important;
+        color: white !important;
+    }
+    .fc-theme-standard td, .fc-theme-standard th {
+        border-color: #f1f5f9 !important;
+    }
+
+    /* --- ANIMATIONS CALENDRIER --- */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fc-view-harness {
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    .fc-event { 
+        transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+        cursor: pointer;
+        background-color: #f472b6 !important; /* Rose au lieu de vert */
+        color: white !important;
+    }
+
+    .fc-event:hover {
+        transform: scale(1.02) translateY(-2px) !important;
+        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
+        z-index: 5;
+    }
+
+    .fc-button {
+        transition: all 0.2s ease !important;
+    }
+
+    .fc-button:active {
+        transform: scale(0.95);
+    }
+</style>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar-seance');
+    if (calendarEl) {
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'timeGridWeek',
+            locale: 'fr',
+            firstDay: 1,
+            slotMinTime: '08:00:00',
+            slotMaxTime: '19:00:00',
+            allDaySlot: false,
+            height: 'auto',
+            expandRows: true,
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+            buttonText: {
+                today: "Aujourd'hui",
+                month: 'Mois',
+                week: 'Semaine',
+                day: 'Jour'
+            },
+            events: '{{ path('api_events') }}?type=seance',
+            editable: true,
+            themeSystem: 'standard'
+        });
+        calendar.render();
+    }
+
     const P = { p400: '#a855f7', pink: '#f472b6', indigo: '#818cf8', accent: '#e040fb' };
+
 
     const stats = { planifiee: 0, confirme: 0, annule: 0, autres: 0 };
     {% for seance in seances %}

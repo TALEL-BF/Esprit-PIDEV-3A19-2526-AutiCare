@@ -101,7 +101,7 @@ class AdminSeanceController extends AbstractController
         return [
             'is_create' => $isCreate,
             'patient_choices' => $this->fetchUserChoicesByRoles($entityManager, ['enfant']),
-            'professor_choices' => $this->fetchUserChoicesByRoles($entityManager, ['professeur', 'psychologue']),
+            'professor_choices' => $this->fetchUserChoicesByRoles($entityManager, ['professeur']),
             'course_choices' => $this->fetchCourseChoices($entityManager),
         ];
     }
@@ -134,7 +134,7 @@ class AdminSeanceController extends AbstractController
             $role = trim((string) ($row['role'] ?? ''));
             $displayName = trim($prenom . ' ' . $nom);
             $displayName = $displayName !== '' ? $displayName : ('Utilisateur #' . $id);
-            $label = sprintf('%s (%s)', $displayName, $role !== '' ? $role : 'utilisateur');
+            $label = $displayName;
 
             $choices[$label] = $id;
         }
