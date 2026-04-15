@@ -762,6 +762,63 @@
         .empty-icon { font-size:4.5rem; display:block; margin-bottom:1rem; animation:floatEmoji 2.5s ease-in-out infinite; }
         @keyframes fadeIn { from{opacity:0} to{opacity:1} }
 
+        /* ══════════════════════════════
+           PAGINATION
+        ══════════════════════════════ */
+        .pagination-wrap {
+            padding: 2.5rem 0 1rem;
+        }
+        .pagination-mauve {
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .pagination-mauve .page-item .page-link {
+            font-family: 'Baloo 2', cursive;
+            font-weight: 700;
+            font-size: .92rem;
+            color: var(--mauve);
+            border: 2px solid #e9d5ff;
+            border-radius: 50px !important;
+            padding: 8px 18px;
+            background: #fff;
+            transition: all .22s cubic-bezier(.34,1.56,.64,1);
+            box-shadow: 0 2px 8px rgba(155,107,255,.06);
+            line-height: 1.4;
+        }
+        .pagination-mauve .page-item .page-link:hover {
+            background: #f3e8ff;
+            border-color: var(--mauve);
+            transform: translateY(-2px) scale(1.08);
+            box-shadow: 0 5px 15px rgba(155,107,255,.18);
+            color: var(--violet);
+        }
+        .pagination-mauve .page-item.active .page-link {
+            background: linear-gradient(135deg, var(--mauve), var(--lavender));
+            border-color: transparent;
+            color: #fff;
+            box-shadow: 0 5px 18px rgba(155,107,255,.40);
+            transform: scale(1.1);
+        }
+        .pagination-mauve .page-item.disabled .page-link {
+            color: #ccc;
+            border-color: #f0e6ff;
+            background: #faf5ff;
+            pointer-events: none;
+        }
+        /* Info pagination */
+        .pagination-info {
+            font-family: 'Nunito', sans-serif;
+            font-size: .84rem;
+            font-weight: 700;
+            color: #888;
+            text-align: center;
+            margin-top: .75rem;
+        }
+        .pagination-info span {
+            color: var(--mauve);
+            font-weight: 800;
+        }
+
         /* ══ Responsive ══ */
         @media (max-width: 768px) {
             .hero-mascot-wrap { display: none; }
@@ -772,6 +829,7 @@
             .hero-drawing-btn { padding: 9px 15px; }
             .ia-modal { max-width: 95%; }
             .ia-modal-header h3 { font-size: 1.3rem; }
+            .pagination-mauve .page-item .page-link { padding: 7px 13px; font-size: .82rem; }
         }
     </style>
 {% endblock %}
@@ -813,7 +871,8 @@
 
                         <div class="hero-stats">
                             <div class="hero-stat">
-                                📚 <span class="hs-num">{{ courses|length }}</span> cours disponibles
+                                {# Utilise totalCours pour afficher le total réel, pas juste la page courante #}
+                                📚 <span class="hs-num">{{ totalCours }}</span> cours disponibles
                             </div>
                             <div class="hero-stat">
                                 🎯 <span class="hs-num">4</span> catégories
@@ -976,7 +1035,92 @@
                 {% endfor %}
             </div>
 
-            {# No results #}
+            {# ══════════════════════════════
+               PAGINATION - Version modifiée pour KnpPaginatorBundle
+            ══════════════════════════════ #}
+            {% if courses.pageCount > 1 %}
+            <div class="pagination-wrap d-flex justify-content-center">
+                <div>
+                    <nav aria-label="Pagination des cours">
+                        <ul class="pagination pagination-mauve justify-content-center">
+
+                            {# ── Première page ── #}
+                            {% if courses.currentPageNumber > 1 %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ path('app_cours', app.request.query.all|merge({'page': 1})) }}" title="Première page">
+                                        «
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ path('app_cours', app.request.query.all|merge({'page': courses.currentPageNumber - 1})) }}" aria-label="Précédent">
+                                        ‹
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">«</span>
+                                </li>
+                                <li class="page-item disabled">
+                                    <span class="page-link">‹</span>
+                                </li>
+                            {% endif %}
+
+                            {# ── Numéros de pages (fenêtre glissante de 5 pages) ── #}
+                            {% set currentPage = courses.currentPageNumber %}
+                            {% set totalPages  = courses.pageCount %}
+                            {% set startPage   = max(1, currentPage - 2) %}
+                            {% set endPage     = min(totalPages, currentPage + 2) %}
+
+                            {# Affiche "..." au début si nécessaire #}
+                            {% if startPage > 1 %}
+                                <li class="page-item disabled"><span class="page-link">…</span></li>
+                            {% endif %}
+
+                            {% for i in startPage..endPage %}
+                                <li class="page-item {% if i == currentPage %}active{% endif %}">
+                                    <a class="page-link" href="{{ path('app_cours', app.request.query.all|merge({'page': i})) }}">{{ i }}</a>
+                                </li>
+                            {% endfor %}
+
+                            {# Affiche "..." à la fin si nécessaire #}
+                            {% if endPage < totalPages %}
+                                <li class="page-item disabled"><span class="page-link">…</span></li>
+                            {% endif %}
+
+                            {# ── Dernière page ── #}
+                            {% if courses.currentPageNumber < courses.pageCount %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ path('app_cours', app.request.query.all|merge({'page': courses.currentPageNumber + 1})) }}" aria-label="Suivant">
+                                        ›
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ path('app_cours', app.request.query.all|merge({'page': courses.pageCount})) }}" title="Dernière page">
+                                        »
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">›</span>
+                                </li>
+                                <li class="page-item disabled">
+                                    <span class="page-link">»</span>
+                                </li>
+                            {% endif %}
+
+                        </ul>
+                    </nav>
+
+                    {# Info : page X sur Y #}
+                    <p class="pagination-info">
+                        Page <span>{{ courses.currentPageNumber }}</span> sur <span>{{ courses.pageCount }}</span>
+                        — <span>{{ courses.totalItemCount }}</span> cours au total
+                    </p>
+                </div>
+            </div>
+            {% endif %}
+
+            {# No results (filtre JS) #}
             <div id="noResults" class="empty-state d-none">
                 <span class="empty-icon">🔍</span>
                 <h5 style="font-family:'Baloo 2',cursive;font-weight:800;color:#444;">Aucun résultat</h5>

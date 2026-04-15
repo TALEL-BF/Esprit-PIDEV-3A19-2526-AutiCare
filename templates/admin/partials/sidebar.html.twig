@@ -38,46 +38,47 @@
         </div>
 
         {# ==================== COURS ==================== #}
-         <div class="nav-item-wrap {% if app.request.get('_route') starts with 'admin_cours' %}open{% endif %}">
+        <div class="nav-item-wrap {% if app.request.get('_route') starts with 'admin_cours' or app.request.get('_route') == 'admin_stats' %}open{% endif %}">
             <div class="nav-link-item" onclick="toggleSection('cours', event)">
-                <span class="nav-icon"><i class="fas fa-book-open"></i></span>
-                Cours
+                <a href="{{ path('admin_stats') }}" class="nav-link-item-link" style="flex:1; display:flex; align-items:center; gap:12px; color:inherit; text-decoration:none;">
+                    <span class="nav-icon"><i class="fas fa-book-open"></i></span>
+                    Cours
+                </a>
                 <span class="nav-chevron"><i class="fas fa-chevron-down"></i></span>
             </div>
             <div class="nav-sub">
                 <a class="nav-sub-link {% if app.request.get('_route') == 'admin_cours' %}active{% endif %}" 
                    href="{{ path('admin_cours') }}">
-                    <i class="fas fa-book"></i> ajout Cours
+                    <i class="fas fa-plus-circle"></i> Ajouter un cours
                 </a>
-               <a class="nav-sub-link {% if app.request.get('_route') == 'admin_evaluation' %}active{% endif %}" 
-   href="{{ path('admin_evaluation') }}">
-    <i class="fas fa-layer-group"></i> ajout évaluation 
-</a>
+                <a class="nav-sub-link {% if app.request.get('_route') == 'admin_evaluation' %}active{% endif %}" 
+                   href="{{ path('admin_evaluation') }}">
+                    <i class="fas fa-layer-group"></i> Ajouter évaluation
+                </a>
             </div>
         </div>
-        {# ==================== ÉVÉNEMENTS ==================== #}
-       {# ==================== ÉVÉNEMENTS ==================== #}
-<div class="nav-item-wrap {% if app.request.get('_route') starts with 'admin_evenements' or app.request.get('_route') starts with 'admin_sponsors' %}open{% endif %}">
-    <div class="nav-link-item" onclick="toggleSection('evenement', event)">
-        <a href="{{ path('admin_evenements_dashboard') }}" class="nav-link-item-link" style="flex:1; display:flex; align-items:center; gap:12px; color:inherit; text-decoration:none;">
-            <span class="nav-icon"><i class="fas fa-calendar-alt"></i></span>
-            Événement
-        </a>
-        <span class="nav-chevron"><i class="fas fa-chevron-down"></i></span>
-    </div>
-    <div class="nav-sub">
-        <a class="nav-sub-link {% if app.request.get('_route') == 'admin_evenements' %}active{% endif %}" 
-           href="{{ path('admin_evenements') }}">
-            <i class="fas fa-calendar-alt"></i> Événements
-        </a>
-        <a class="nav-sub-link {% if app.request.get('_route') == 'admin_sponsors' %}active{% endif %}" 
-           href="{{ path('admin_sponsors') }}">
-            <i class="fas fa-handshake"></i> Sponsor
-        </a>
-    </div>
-</div>
 
-       
+        {# ==================== ÉVÉNEMENTS ==================== #}
+        <div class="nav-item-wrap {% if app.request.get('_route') starts with 'admin_evenements' or app.request.get('_route') starts with 'admin_sponsors' %}open{% endif %}">
+            <div class="nav-link-item" onclick="toggleSection('evenement', event)">
+                <a href="{{ path('admin_evenements_dashboard') }}" class="nav-link-item-link" style="flex:1; display:flex; align-items:center; gap:12px; color:inherit; text-decoration:none;">
+                    <span class="nav-icon"><i class="fas fa-calendar-alt"></i></span>
+                    Événement
+                </a>
+                <span class="nav-chevron"><i class="fas fa-chevron-down"></i></span>
+            </div>
+            <div class="nav-sub">
+                <a class="nav-sub-link {% if app.request.get('_route') == 'admin_evenements' %}active{% endif %}" 
+                   href="{{ path('admin_evenements') }}">
+                    <i class="fas fa-calendar-alt"></i> Événements
+                </a>
+                <a class="nav-sub-link {% if app.request.get('_route') == 'admin_sponsors' %}active{% endif %}" 
+                   href="{{ path('admin_sponsors') }}">
+                    <i class="fas fa-handshake"></i> Sponsor
+                </a>
+            </div>
+        </div>
+
         {# ==================== CONSULTATIONS ==================== #}
         <div class="nav-item-wrap {% if app.request.get('_route') starts with 'admin_consultations' %}open{% endif %}">
             <div class="nav-link-item" onclick="toggleSection('consultations', event)">
@@ -94,32 +95,34 @@
                    href="{{ path('admin_seance') }}">
                     <i class="fas fa-clock"></i> Séance
                 </a>
-                 <a class="nav-sub-link {% if app.request.get('_route') == 'admin_article' %}active{% endif %}" 
+                <a class="nav-sub-link {% if app.request.get('_route') == 'admin_article' %}active{% endif %}" 
                    href="{{ path('admin_article') }}">
-                    <i class="fas fa-clock"></i> Article
+                    <i class="fas fa-newspaper"></i> Article
                 </a>
             </div>
         </div>
- {# ==================== EMPLOIS ==================== #}
-<div class="nav-item-wrap {% if app.request.get('_route') starts with 'admin_planning' or app.request.get('_route') starts with 'admin_rdv' or app.request.get('_route') == 'admin_seance_emploi' %}open{% endif %}">
-    <div class="nav-link-item" onclick="toggleSection('emplois', event)">
-        <span class="nav-icon"><i class="fas fa-briefcase"></i></span>
-        Emplois
-        <span class="nav-chevron"><i class="fas fa-chevron-down"></i></span>
-    </div>
-    <div class="nav-sub">
-        <a class="nav-sub-link" href="{{ path('admin_rdv') }}">
-            <i class="fas fa-user-clock"></i> RDV
-        </a>
-        <a class="nav-sub-link {% if app.request.get('_route') == 'admin_seance_emploi' %}active{% endif %}" 
-           href="{{ path('admin_seance_emploi') }}">
-            <i class="fas fa-chart-line"></i> Séance
-        </a>
-        <a class="nav-sub-link" href="{{ path('admin_planning') }}">
-            <i class="fas fa-calendar-week"></i> Planning
-        </a>
-    </div>
-</div>
+
+        {# ==================== EMPLOIS ==================== #}
+        <div class="nav-item-wrap {% if app.request.get('_route') starts with 'admin_planning' or app.request.get('_route') starts with 'admin_rdv' or app.request.get('_route') == 'admin_seance_emploi' %}open{% endif %}">
+            <div class="nav-link-item" onclick="toggleSection('emplois', event)">
+                <span class="nav-icon"><i class="fas fa-briefcase"></i></span>
+                Emplois
+                <span class="nav-chevron"><i class="fas fa-chevron-down"></i></span>
+            </div>
+            <div class="nav-sub">
+                <a class="nav-sub-link" href="{{ path('admin_rdv') }}">
+                    <i class="fas fa-user-clock"></i> RDV
+                </a>
+                <a class="nav-sub-link {% if app.request.get('_route') == 'admin_seance_emploi' %}active{% endif %}" 
+                   href="{{ path('admin_seance_emploi') }}">
+                    <i class="fas fa-chart-line"></i> Séance
+                </a>
+                <a class="nav-sub-link" href="{{ path('admin_planning') }}">
+                    <i class="fas fa-calendar-week"></i> Planning
+                </a>
+            </div>
+        </div>
+
         {# ==================== JEU ==================== #}
         <div class="nav-item-wrap {% if app.request.get('_route') starts with 'admin_jeu' %}open{% endif %}">
             <div class="nav-link-item" onclick="toggleSection('jeu', event)">

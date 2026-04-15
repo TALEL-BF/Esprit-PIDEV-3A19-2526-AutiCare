@@ -585,6 +585,7 @@
             background: #333;
             min-width: 300px;
             min-height: 200px;
+            display: inline-block;
         }
 
         #cameraVideo {
@@ -593,8 +594,21 @@
             border-radius: 20px;
             background: #333;
             transform: scaleX(-1);
+            display: block;
         }
 
+        /* Canvas des traits dessinés dans l'air (en dessous du squelette) */
+        #airDrawCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            transform: scaleX(-1);
+        }
+
+        /* Canvas du squelette et curseur (au-dessus des traits) */
         #cameraCanvas {
             position: absolute;
             top: 0;
@@ -636,6 +650,14 @@
             background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
         }
 
+        .cam-btn.apply {
+            background: linear-gradient(135deg, #43a047, #2e7d32);
+        }
+
+        .cam-btn.clear-air {
+            background: linear-gradient(135deg, #ef6c00, #e65100);
+        }
+
         .air-drawing-status {
             background: #F5E6FF;
             padding: 10px;
@@ -664,6 +686,146 @@
         .camera-btn:hover {
             transform: scale(1.05);
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* ====== AIR DRAWING TOOLBAR ====== */
+        .air-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 15px;
+            padding: 12px 15px;
+            background: linear-gradient(135deg, #F5E6FF, #EDE7F6);
+            border-radius: 20px;
+            border: 2px solid var(--mauve-light);
+        }
+
+        .air-tool-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .air-tool-label {
+            font-family: 'Baloo 2', cursive;
+            font-weight: bold;
+            color: var(--violet);
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        #airColorPicker {
+            width: 40px;
+            height: 32px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: transparent;
+            padding: 0;
+        }
+
+        .air-color-presets {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .air-color-dot {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .air-color-dot:hover, .air-color-dot.active {
+            transform: scale(1.25);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+            border-color: var(--violet);
+        }
+
+        .rainbow-dot {
+            background: linear-gradient(135deg,#ff0080,#ff8c00,#40e0d0);
+        }
+
+        .air-brush-slider {
+            width: 100px;
+            accent-color: var(--violet);
+        }
+
+        .air-mode-btn {
+            background: white;
+            border: 2px solid var(--mauve-light);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-family: 'Baloo 2', cursive;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+            color: var(--violet);
+        }
+
+        .air-mode-btn:hover {
+            transform: scale(1.05);
+            background: #F5E6FF;
+        }
+
+        .air-mode-btn.active {
+            background: linear-gradient(135deg, var(--mauve), var(--violet));
+            color: white;
+            border-color: transparent;
+        }
+
+        .air-gesture-guide {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 10px 0;
+            padding: 8px 15px;
+            background: #EDE7F6;
+            border-radius: 15px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .air-color-indicator {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255,255,255,0.92);
+            border-radius: 20px;
+            padding: 5px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Baloo 2', cursive;
+            font-weight: bold;
+            font-size: 13px;
+            color: #333;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            z-index: 10;
+            pointer-events: none;
+            border: 2px solid var(--mauve-light);
+        }
+
+        #airColorDot {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+            flex-shrink: 0;
         }
 
         /* Mode tactile pour mobile */
@@ -792,7 +954,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="animals-panel">
         <div class="animals-title">
             <i class="fas fa-paw"></i> Animaux magiques (clique et déplace-les !) <i class="fas fa-paw"></i>
@@ -845,17 +1007,66 @@
     </div>
 </div>
 
+{# ====== MODAL CAMÉRA ====== #}
 <div id="cameraModal" class="camera-modal">
     <div class="camera-container">
-        <h3><i class="fas fa-hand-peace"></i> Air Drawing - Dessine avec ton doigt !</h3>
+        <h3><i class="fas fa-hand-peace"></i> ✋ Air Drawing Magique !</h3>
+
+        {# Barre d'outils Air Drawing #}
+        <div class="air-toolbar">
+            <div class="air-tool-group">
+                <span class="air-tool-label">🎨 Couleur Air</span>
+                <input type="color" id="airColorPicker" value="#9b6bff" title="Couleur du trait">
+                <div class="air-color-presets">
+                    <div class="air-color-dot" style="background:#9b6bff" data-color="#9b6bff"></div>
+                    <div class="air-color-dot" style="background:#ff69b4" data-color="#ff69b4"></div>
+                    <div class="air-color-dot" style="background:#ff4444" data-color="#ff4444"></div>
+                    <div class="air-color-dot" style="background:#ff9800" data-color="#ff9800"></div>
+                    <div class="air-color-dot" style="background:#4CAF50" data-color="#4CAF50"></div>
+                    <div class="air-color-dot" style="background:#2196F3" data-color="#2196F3"></div>
+                    <div class="air-color-dot" style="background:#ffffff" data-color="#ffffff" style="border:2px solid #ccc"></div>
+                    <div class="air-color-dot rainbow-dot" data-color="rainbow" title="Arc-en-ciel">🌈</div>
+                </div>
+            </div>
+            <div class="air-tool-group">
+                <span class="air-tool-label">📏 Épaisseur</span>
+                <input type="range" id="airBrushSize" min="2" max="40" value="10" class="air-brush-slider">
+                <span id="airSizeValue" style="font-weight:bold;min-width:28px;color:var(--violet)">10</span>
+            </div>
+            <div class="air-tool-group">
+                <span class="air-tool-label">🖊️ Mode</span>
+                <button class="air-mode-btn active" id="airModeDraw" data-mode="draw">✏️ Crayon</button>
+                <button class="air-mode-btn" id="airModeRainbow" data-mode="rainbow">🌈 Arc-en-ciel</button>
+                <button class="air-mode-btn" id="airModeEraser" data-mode="eraser">🧹 Gomme</button>
+            </div>
+        </div>
+
         <div class="video-wrapper">
             <video id="cameraVideo" autoplay playsinline></video>
+            {# Canvas des traits (en dessous du squelette) #}
+            <canvas id="airDrawCanvas"></canvas>
+            {# Canvas du squelette + curseur (au-dessus) #}
             <canvas id="cameraCanvas"></canvas>
+            {# Indicateur couleur actuelle flottant #}
+            <div id="airColorIndicator" class="air-color-indicator">
+                <div id="airColorDot" style="background:#9b6bff"></div>
+                <span id="airColorLabel">Crayon</span>
+            </div>
         </div>
+
+        <div class="air-gesture-guide">
+            <span>☝️ <b>Index seul</b> = dessiner</span>
+            <span>✌️ <b>Index+Majeur</b> = lever stylo</span>
+            <span>✊ <b>Poing fermé</b> = changer couleur</span>
+        </div>
+
         <div class="camera-controls">
-            <button class="cam-btn" id="startAirDrawingBtn"><i class="fas fa-play"></i> Commencer à dessiner</button>
-            <button class="cam-btn stop" id="stopAirDrawingBtn"><i class="fas fa-stop"></i> Arrêter</button>
-            <button class="cam-btn" id="closeCameraBtn"><i class="fas fa-times"></i> Fermer</button>
+            <button class="cam-btn" id="startAirDrawingBtn"><i class="fas fa-play"></i> Commencer</button>
+            <button class="cam-btn stop" id="stopAirDrawingBtn"><i class="fas fa-stop"></i> Pause</button>
+            <button class="cam-btn" style="background:linear-gradient(135deg,#7b1fa2,#6a1b9a);" id="liftPenBtn"><i class="fas fa-hand-paper"></i> Lever stylo</button>
+            <button class="cam-btn clear-air" id="clearAirBtn"><i class="fas fa-eraser"></i> Effacer</button>
+            <button class="cam-btn apply" id="applyAirBtn"><i class="fas fa-check"></i> Appliquer</button>
+            <button class="cam-btn" style="background:linear-gradient(135deg,#546e7a,#37474f);" id="closeCameraBtn"><i class="fas fa-times"></i> Fermer</button>
         </div>
         <div class="air-drawing-status" id="airDrawingStatus">
             ☝️ <b>Index seul levé</b> = dessiner &nbsp;|&nbsp; ✌️ <b>Index + majeur</b> = lever le stylo
@@ -891,22 +1102,35 @@
     const MAX_HISTORY = 50;
     
     // ============================================================
-    // AIR DRAWING — MediaPipe Hands (API legacy, 100% CDN, stable)
-    // Fonctionne sans modules ES, détection 21 landmarks main
+    // AIR DRAWING — MediaPipe Hands
+    // Dessine directement dans l'overlay caméra (airDrawCanvas)
+    // Applique sur le canvas principal via "Appliquer sur dessin"
     // ============================================================
     let airDrawingEnabled = false;
     let cameraModal = null;
     let cameraVideo = null;
-    let cameraCanvas = null;
+    let cameraCanvas = null;   // overlay : squelette + curseur
     let cameraCtx = null;
-    let videoStream  = null;
+    let airDrawCanvas = null;  // overlay : traits dessinés dans l'air
+    let airDrawCtx = null;
+    let videoStream = null;
     let lastAirX = null;
     let lastAirY = null;
-    let mpHands  = null;
-    let mpReady  = false;
+    let mpHands = null;
+    let mpReady = false;
     let airAnimId = null;
     let smoothX = null, smoothY = null;
     const AIR_SMOOTH = 0.6;
+
+    // Variables spécifiques Air Drawing (indépendantes du canvas principal)
+    let airColor = '#9b6bff';
+    let airSize  = 10;
+    let airMode  = 'draw'; // 'draw' | 'rainbow' | 'eraser'
+
+    // Couleurs cyclées par geste poing
+    const AIR_COLOR_CYCLE = ['#9b6bff','#ff69b4','#ff4444','#ff9800','#4CAF50','#2196F3','#FFD700','#ffffff'];
+    let airColorCycleIdx = 0;
+    let fistCooldown = false; // éviter de cycler trop vite
 
     // Connexions squelette main
     const HAND_BONES = [
@@ -918,12 +1142,7 @@
         [5,9],[9,13],[13,17]
     ];
 
-    function fingerUp(lm, tip, pip) {
-        return lm[tip].y < lm[pip].y;
-    }
-
     function drawSkeleton(lm) {
-        // lm = landmarks normalisés [0,1]
         const W = cameraCanvas.width, H = cameraCanvas.height;
         cameraCtx.strokeStyle = 'rgba(155,107,255,0.75)';
         cameraCtx.lineWidth = 2;
@@ -949,7 +1168,6 @@
     }
 
     function processAirHand(lm) {
-        // Détection robuste : tip doit être au-dessus du MCP ET du PIP
         function isUp(tip, mcp, pip) {
             return lm[tip].y < lm[mcp].y && lm[tip].y < lm[pip].y;
         }
@@ -958,9 +1176,21 @@
         const ringUp = isUp(16, 13, 14);
         const pinUp  = isUp(20, 17, 18);
 
-        // ☝️ Index seul → dessiner | ✌️ Index+majeur → pause
+        // ☝️ Index seul → dessiner | ✌️ Index+majeur → pause | ✊ Poing → changer couleur
         const shouldDraw = idxUp && !midUp && !ringUp && !pinUp;
         const penUp      = idxUp && midUp;
+        const isFist     = !idxUp && !midUp && !ringUp && !pinUp;
+
+        // Geste poing → cycle couleur (avec cooldown 800ms)
+        if (isFist && !fistCooldown && airMode !== 'eraser' && airMode !== 'rainbow') {
+            fistCooldown = true;
+            airColorCycleIdx = (airColorCycleIdx + 1) % AIR_COLOR_CYCLE.length;
+            airColor = AIR_COLOR_CYCLE[airColorCycleIdx];
+            updateAirColorUI(airColor);
+            setAirStatus('✊ Couleur changée ! ' + airColor, '#FFF9C4');
+            showNotification('🎨 Nouvelle couleur Air Drawing !');
+            setTimeout(() => { fistCooldown = false; }, 800);
+        }
 
         // Lissage position
         const tipX = lm[8].x;
@@ -968,25 +1198,48 @@
         smoothX = smoothX === null ? tipX : smoothX + AIR_SMOOTH * (tipX - smoothX);
         smoothY = smoothY === null ? tipY : smoothY + AIR_SMOOTH * (tipY - smoothY);
 
-        // Curseur sur overlay caméra
+        // Curseur sur overlay caméra (coords brutes, le CSS mirror gère l'affichage)
         const vx = smoothX * cameraCanvas.width;
         const vy = smoothY * cameraCanvas.height;
+
+        // Cercle curseur coloré selon la couleur active
+        const cursorColor = airMode === 'eraser'   ? 'rgba(120,120,120,0.9)'
+                          : airMode === 'rainbow'  ? 'hsl(' + (Date.now() / 10 % 360) + ',70%,60%)'
+                          : airColor;
+
         cameraCtx.beginPath();
-        cameraCtx.arc(vx, vy, 20, 0, Math.PI * 2);
+        cameraCtx.arc(vx, vy, airMode === 'eraser' ? 24 : 20, 0, Math.PI * 2);
         cameraCtx.fillStyle = penUp      ? 'rgba(255,165,0,0.9)'
-                            : shouldDraw ? 'rgba(155,107,255,1)'
+                            : isFist     ? 'rgba(255,80,80,0.9)'
+                            : shouldDraw ? cursorColor
                             : 'rgba(160,160,160,0.6)';
         cameraCtx.fill();
         cameraCtx.strokeStyle = 'white';
         cameraCtx.lineWidth = 3;
         cameraCtx.stroke();
-        // Label geste
-        cameraCtx.font = 'bold 14px sans-serif';
+
+        // Anneau coloré autour du curseur quand on dessine
+        if (shouldDraw && airMode !== 'eraser') {
+            cameraCtx.beginPath();
+            cameraCtx.arc(vx, vy, 28, 0, Math.PI * 2);
+            cameraCtx.strokeStyle = airMode === 'rainbow'
+                ? 'hsl(' + ((Date.now() / 10 + 180) % 360) + ',80%,60%)'
+                : airColor;
+            cameraCtx.lineWidth = 4;
+            cameraCtx.stroke();
+        }
+
+        cameraCtx.font = 'bold 13px sans-serif';
         cameraCtx.fillStyle = 'white';
         cameraCtx.textAlign = 'center';
-        cameraCtx.fillText(penUp ? '✌️ PAUSE' : shouldDraw ? '✏️ DESSIN' : '✋', vx, vy - 26);
+        cameraCtx.fillText(
+            isFist ? '✊ COULEUR' :
+            penUp  ? '✌️ PAUSE'  :
+            shouldDraw ? (airMode === 'eraser' ? '🧹 GOMME' : airMode === 'rainbow' ? '🌈' : '✏️ DESSIN')
+                       : '✋',
+            vx, vy - 30
+        );
 
-        // Statut TOUJOURS mis à jour (avant et après Commencer)
         if (!airDrawingEnabled) {
             setAirStatus(
                 shouldDraw ? '☝️ Geste détecté ! Clique <b>Commencer</b> !'
@@ -998,8 +1251,8 @@
         }
 
         if (penUp) {
+            // Lever le stylo
             if (lastAirX !== null) {
-                saveToHistory();
                 strokeCount++;
                 document.getElementById('strokeCount').textContent = strokeCount;
             }
@@ -1007,46 +1260,107 @@
             setAirStatus('✌️ Stylo levé — baisse le majeur pour dessiner', '#FFE082');
 
         } else if (shouldDraw) {
-            const cx = (1 - smoothX) * canvas.width;
-            const cy = smoothY * canvas.height;
+            // === DESSINER SUR airDrawCanvas (overlay caméra) ===
+            const AW = airDrawCanvas.width;
+            const AH = airDrawCanvas.height;
+            const cx = smoothX * AW;
+            const cy = smoothY * AH;
 
-            ctx.save();
-            ctx.lineCap   = 'round';
-            ctx.lineJoin  = 'round';
-            ctx.lineWidth = currentSize;
-            const airColor = currentTool === 'rainbow'
+            airDrawCtx.save();
+            airDrawCtx.lineCap   = 'round';
+            airDrawCtx.lineJoin  = 'round';
+            airDrawCtx.lineWidth = airSize;
+
+            const drawColor = airMode === 'rainbow'
                 ? 'hsl(' + (Date.now() / 10 % 360) + ',70%,60%)'
-                : currentTool === 'eraser' ? 'white' : currentColor;
-            ctx.strokeStyle = airColor;
-            ctx.fillStyle   = airColor;
+                : airColor;
+
+            if (airMode === 'eraser') {
+                airDrawCtx.globalCompositeOperation = 'destination-out';
+                airDrawCtx.strokeStyle = 'rgba(0,0,0,1)';
+                airDrawCtx.fillStyle   = 'rgba(0,0,0,1)';
+                airDrawCtx.lineWidth   = airSize * 2; // gomme plus large
+            } else {
+                airDrawCtx.globalCompositeOperation = 'source-over';
+                airDrawCtx.strokeStyle = drawColor;
+                airDrawCtx.fillStyle   = drawColor;
+            }
 
             if (lastAirX === null) {
-                ctx.beginPath();
-                ctx.arc(cx, cy, Math.max(currentSize / 2, 3), 0, Math.PI * 2);
-                ctx.fill();
+                airDrawCtx.beginPath();
+                airDrawCtx.arc(cx, cy, Math.max(airSize / 2, 3), 0, Math.PI * 2);
+                airDrawCtx.fill();
             } else {
                 const mx = (lastAirX + cx) / 2;
                 const my = (lastAirY + cy) / 2;
-                ctx.beginPath();
-                ctx.moveTo(lastAirX, lastAirY);
-                ctx.quadraticCurveTo(lastAirX, lastAirY, mx, my);
-                ctx.stroke();
+                airDrawCtx.beginPath();
+                airDrawCtx.moveTo(lastAirX, lastAirY);
+                airDrawCtx.quadraticCurveTo(lastAirX, lastAirY, mx, my);
+                airDrawCtx.stroke();
             }
-            ctx.restore();
+            airDrawCtx.restore();
 
             lastAirX = cx;
             lastAirY = cy;
-            setAirStatus('🎨 En train de dessiner... ✨', '#C8E6C9');
+            setAirStatus('🎨 En train de dessiner dans l\'air... ✨', '#C8E6C9');
 
         } else {
             if (lastAirX !== null) {
-                saveToHistory();
                 strokeCount++;
                 document.getElementById('strokeCount').textContent = strokeCount;
                 lastAirX = null; lastAirY = null;
             }
-            setAirStatus('☝️ Lève <b>uniquement l\'index</b> pour dessiner !');
+            if (!isFist) setAirStatus('☝️ Lève <b>uniquement l\'index</b> pour dessiner !');
         }
+    }
+
+    // Transfère les traits du canvas air vers le canvas principal
+    function applyAirDrawing() {
+        if (!airDrawCanvas || !airDrawCtx) return;
+        // Le canvas air est affiché avec scaleX(-1) CSS.
+        // Pour le transférer correctement sur le canvas principal, on re-mirore horizontalement.
+        ctx.save();
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(airDrawCanvas, 0, 0, canvas.width, canvas.height);
+        ctx.restore();
+        saveToHistory();
+        // Vider le canvas air après application
+        airDrawCtx.clearRect(0, 0, airDrawCanvas.width, airDrawCanvas.height);
+        showNotification('🎨 Dessin appliqué sur le canvas !');
+        createConfetti();
+    }
+
+    // Efface uniquement les traits dans l'air (sans toucher au canvas principal)
+    function clearAirCanvas() {
+        if (!airDrawCtx) return;
+        airDrawCtx.clearRect(0, 0, airDrawCanvas.width, airDrawCanvas.height);
+        lastAirX = null; lastAirY = null;
+        showNotification('🧹 Traits dans l\'air effacés !');
+    }
+
+    // Met à jour l'indicateur de couleur dans le modal caméra
+    function updateAirColorUI(color) {
+        const dot = document.getElementById('airColorDot');
+        const label = document.getElementById('airColorLabel');
+        const picker = document.getElementById('airColorPicker');
+        if (dot) {
+            if (airMode === 'rainbow') {
+                dot.style.background = 'linear-gradient(135deg,#ff0080,#ff8c00,#40e0d0)';
+            } else if (airMode === 'eraser') {
+                dot.style.background = '#ccc';
+            } else {
+                dot.style.background = color;
+            }
+        }
+        if (label) {
+            label.textContent = airMode === 'eraser' ? 'Gomme' : airMode === 'rainbow' ? 'Arc-en-ciel' : 'Crayon';
+        }
+        if (picker && airMode === 'draw') picker.value = color;
+        // Sync les points de couleur actif
+        document.querySelectorAll('.air-color-dot').forEach(d => {
+            d.classList.toggle('active', d.dataset.color === color);
+        });
     }
 
     async function loadScript(src) {
@@ -1062,16 +1376,19 @@
     }
 
     async function initAirDrawing() {
-        cameraModal  = document.getElementById('cameraModal');
-        cameraVideo  = document.getElementById('cameraVideo');
-        cameraCanvas = document.getElementById('cameraCanvas');
-        if (!cameraModal || !cameraVideo || !cameraCanvas) {
+        cameraModal    = document.getElementById('cameraModal');
+        cameraVideo    = document.getElementById('cameraVideo');
+        cameraCanvas   = document.getElementById('cameraCanvas');
+        airDrawCanvas  = document.getElementById('airDrawCanvas');
+
+        if (!cameraModal || !cameraVideo || !cameraCanvas || !airDrawCanvas) {
             showNotification('❌ Éléments caméra introuvables'); return;
         }
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             showNotification('⚠️ Caméra non supportée sur ce navigateur'); return;
         }
-        cameraCtx = cameraCanvas.getContext('2d');
+        cameraCtx  = cameraCanvas.getContext('2d');
+        airDrawCtx = airDrawCanvas.getContext('2d');
         mpReady = false;
 
         setAirStatus('📷 Démarrage de la caméra...');
@@ -1087,11 +1404,22 @@
                 setTimeout(() => rej(new Error('timeout caméra')), 8000);
             });
             await cameraVideo.play();
-            cameraCanvas.width  = cameraVideo.videoWidth  || 640;
-            cameraCanvas.height = cameraVideo.videoHeight || 480;
+
+            const vw = cameraVideo.videoWidth  || 640;
+            const vh = cameraVideo.videoHeight || 480;
+
+            // Synchroniser les dimensions des deux canvas avec la vidéo
+            cameraCanvas.width  = vw;
+            cameraCanvas.height = vh;
+            airDrawCanvas.width  = vw;
+            airDrawCanvas.height = vh;
+
             cameraVideo.style.width    = '100%';
             cameraCanvas.style.width   = '100%';
             cameraCanvas.style.height  = 'auto';
+            airDrawCanvas.style.width  = '100%';
+            airDrawCanvas.style.height = 'auto';
+
         } catch (err) {
             const msg = err.name === 'NotAllowedError'
                 ? '⚠️ Autorise la caméra dans ton navigateur !'
@@ -1099,7 +1427,7 @@
             showNotification(msg); setAirStatus(msg); return;
         }
 
-        // 2. Charger MediaPipe Hands (API legacy, stable avec script tag)
+        // 2. Charger MediaPipe Hands
         setAirStatus('⏳ Chargement du modèle IA (peut prendre 10-20s)...');
         try {
             await loadScript('https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js');
@@ -1132,11 +1460,11 @@
 
             mpHands.onResults((results) => {
                 if (!cameraCtx) return;
+                // Effacer uniquement l'overlay squelette/curseur à chaque frame
                 cameraCtx.clearRect(0, 0, cameraCanvas.width, cameraCanvas.height);
 
                 if (!results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
                     if (lastAirX !== null) {
-                        saveToHistory();
                         strokeCount++;
                         document.getElementById('strokeCount').textContent = strokeCount;
                         lastAirX = null; lastAirY = null; smoothX = null; smoothY = null;
@@ -1146,16 +1474,13 @@
                 }
 
                 const lmRaw = results.multiHandLandmarks[0];
-                // Miroir horizontal : la vidéo est scaleX(-1) en CSS
-                // Pas d'inversion X : le miroir est géré par CSS transform: scaleX(-1) sur le canvas overlay
-                // Pour le dessin on garde les coords brutes (elles corresp. à l'image non-mirrored)
                 const lm = lmRaw.map(p => ({ x: p.x, y: p.y, z: p.z }));
 
                 drawSkeleton(lm);
                 processAirHand(lm);
             });
 
-            // Boucle de traitement via requestAnimationFrame
+            // Boucle de traitement
             let sending = false;
             async function sendFrame() {
                 airAnimId = requestAnimationFrame(sendFrame);
@@ -1182,12 +1507,11 @@
     function startAirDrawing() {
         airDrawingEnabled = true;
         lastAirX = null; lastAirY = null; smoothX = null; smoothY = null;
-        showNotification('✏️ ☝️ Index seul = dessiner | ✌️ Deux doigts = pause');
+        showNotification('✏️ ☝️ Index seul = dessiner | ✌️ Deux doigts = pause | ✊ Poing = changer couleur');
         const s = document.getElementById('airDrawingStatus');
         if (s) { s.innerHTML = '☝️ Lève <b>uniquement l\'index</b> pour dessiner !'; s.style.background = '#C8E6C9'; }
-        // Si le modèle n'est pas encore prêt, on attend qu'il soit prêt
         if (!mpReady) {
-            showNotification('⏳ Modèle en cours de chargement, dessin activé dès que prêt...');
+            showNotification('⏳ Modèle en cours de chargement...');
         }
     }
 
@@ -1201,10 +1525,19 @@
     }
 
     function closeCamera() {
+        // Appliquer automatiquement les traits au canvas principal avant de fermer
+        if (airDrawCtx) {
+            // Vérifier s'il y a quelque chose à appliquer
+            const imgData = airDrawCtx.getImageData(0, 0, airDrawCanvas.width, airDrawCanvas.height);
+            const hasContent = imgData.data.some(v => v !== 0);
+            if (hasContent) {
+                applyAirDrawing();
+            }
+        }
         airDrawingEnabled = false; mpReady = false;
-        if (airAnimId)  { cancelAnimationFrame(airAnimId); airAnimId = null; }
-        if (mpHands)    { try { mpHands.close(); } catch(e){} mpHands = null; }
-        if (videoStream){ videoStream.getTracks().forEach(t => t.stop()); videoStream = null; }
+        if (airAnimId)   { cancelAnimationFrame(airAnimId); airAnimId = null; }
+        if (mpHands)     { try { mpHands.close(); } catch(e){} mpHands = null; }
+        if (videoStream) { videoStream.getTracks().forEach(t => t.stop()); videoStream = null; }
         if (cameraModal) cameraModal.classList.remove('active');
         lastAirX = null; lastAirY = null; smoothX = null; smoothY = null;
         showNotification('📷 Caméra fermée');
@@ -2000,7 +2333,7 @@
         }, 2300);
     }
     
-    // Événements
+    // === Événements canvas principal ===
     canvas.addEventListener('mousedown', handleCanvasMouseDown);
     canvas.addEventListener('mousemove', handleCanvasMouseMove);
     canvas.addEventListener('mouseup', handleCanvasMouseUp);
@@ -2110,25 +2443,70 @@
     document.getElementById('confettiBtn').addEventListener('click', createConfetti);
     document.getElementById('starsBtn').addEventListener('click', createStars);
     
-    const cameraBtn = document.getElementById('cameraBtn');
-    if (cameraBtn) {
-        cameraBtn.addEventListener('click', openCameraModal);
-    }
-    
-    const startAirBtn = document.getElementById('startAirDrawingBtn');
-    if (startAirBtn) {
-        startAirBtn.addEventListener('click', startAirDrawing);
-    }
-    
-    const stopAirBtn = document.getElementById('stopAirDrawingBtn');
-    if (stopAirBtn) {
-        stopAirBtn.addEventListener('click', stopAirDrawing);
-    }
-    
-    const closeCameraBtn = document.getElementById('closeCameraBtn');
-    if (closeCameraBtn) {
-        closeCameraBtn.addEventListener('click', closeCamera);
-    }
+    // === Boutons caméra / air drawing ===
+    document.getElementById('cameraBtn')?.addEventListener('click', openCameraModal);
+    document.getElementById('startAirDrawingBtn')?.addEventListener('click', startAirDrawing);
+    document.getElementById('stopAirDrawingBtn')?.addEventListener('click', stopAirDrawing);
+    document.getElementById('closeCameraBtn')?.addEventListener('click', closeCamera);
+    document.getElementById('applyAirBtn')?.addEventListener('click', () => {
+        applyAirDrawing();
+    });
+    document.getElementById('clearAirBtn')?.addEventListener('click', clearAirCanvas);
+
+    // Lever le stylo manuellement
+    document.getElementById('liftPenBtn')?.addEventListener('click', () => {
+        lastAirX = null; lastAirY = null;
+        showNotification('✏️ Stylo levé ! Repositionne ton doigt');
+        setAirStatus('☝️ Stylo levé — replace ton index pour continuer', '#FFE082');
+    });
+
+    // Palette couleur Air Drawing
+    document.getElementById('airColorPicker')?.addEventListener('input', (e) => {
+        airColor = e.target.value;
+        airMode = 'draw';
+        document.querySelectorAll('.air-mode-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('airModeDraw')?.classList.add('active');
+        updateAirColorUI(airColor);
+    });
+
+    document.querySelectorAll('.air-color-dot').forEach(dot => {
+        dot.addEventListener('click', () => {
+            const c = dot.dataset.color;
+            if (c === 'rainbow') {
+                airMode = 'rainbow';
+                document.querySelectorAll('.air-mode-btn').forEach(b => b.classList.remove('active'));
+                document.getElementById('airModeRainbow')?.classList.add('active');
+            } else {
+                airColor = c;
+                airMode = 'draw';
+                document.querySelectorAll('.air-mode-btn').forEach(b => b.classList.remove('active'));
+                document.getElementById('airModeDraw')?.classList.add('active');
+            }
+            updateAirColorUI(airColor);
+            showNotification('🎨 Couleur Air changée !');
+        });
+    });
+
+    // Taille du trait Air Drawing
+    document.getElementById('airBrushSize')?.addEventListener('input', (e) => {
+        airSize = parseInt(e.target.value);
+        document.getElementById('airSizeValue').textContent = airSize;
+    });
+
+    // Modes Air Drawing
+    document.querySelectorAll('.air-mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.air-mode-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            airMode = btn.dataset.mode;
+            updateAirColorUI(airColor);
+            showNotification(
+                airMode === 'eraser'  ? '🧹 Mode gomme Air activé !' :
+                airMode === 'rainbow' ? '🌈 Mode arc-en-ciel Air !' :
+                '✏️ Mode crayon Air !'
+            );
+        });
+    });
     
     const shapes = {
         circle: () => {

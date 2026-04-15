@@ -4,6 +4,7 @@
 namespace App\Controller;
 
 use App\Entity\Cours;
+use App\Pagination\ManualPagination;
 use App\Repository\CoursRepository;
 use App\Repository\EvaluationRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -18,15 +19,31 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 
 class CoursController extends AbstractController
 {
-    private const UPLOAD_DIR = '/public/uploads/images';
+    private const UPLOAD_DIR    = '/public/uploads/images';
+    private const ITEMS_PER_PAGE = 6;
 
     #[Route('/cours', name: 'app_cours')]
-    public function index(CoursRepository $coursRepository): Response
-    {
-        $courses = $coursRepository->findAll();
+    public function index(
+        CoursRepository $coursRepository,
+        Request         $request
+    ): Response {
+        $totalItemCount = $coursRepository->count([]);
+        $pageCount      = (int) ceil($totalItemCount / self::ITEMS_PER_PAGE) ?: 1;
+        $currentPage    = max(1, min($request->query->getInt('page', 1), $pageCount));
+        $offset         = ($currentPage - 1) * self::ITEMS_PER_PAGE;
+
+        $items = $coursRepository->findBy(
+            [],
+            ['idCours' => 'DESC'],
+            self::ITEMS_PER_PAGE,
+            $offset
+        );
+
+        $courses = new ManualPagination($items, $currentPage, $pageCount, $totalItemCount);
 
         return $this->render('front/cours/index.html.twig', [
-            'courses' => $courses,
+            'courses'    => $courses,
+            'totalCours' => $totalItemCount,
         ]);
     }
 
@@ -82,9 +99,23 @@ class CoursController extends AbstractController
         $cours = $coursRepository->findAll();
 
         $totalMots = 0;
+        $totalImages = 0;
         foreach ($cours as $c) {
             if ($c->getMots()) {
                 $totalMots += count(array_filter(explode(';', $c->getMots())));
+            }
+            if ($c->getImagesMots()) {
+                $imagesCount = 0;
+                $items = explode(';', $c->getImagesMots());
+                foreach ($items as $item) {
+                    if (strpos($item, ':') !== false) {
+                        $parts = explode(':', $item, 2);
+                        if (isset($parts[1])) {
+                            $imagesCount += count(explode(',', $parts[1]));
+                        }
+                    }
+                }
+                $totalImages += $imagesCount;
             }
         }
 
@@ -94,18 +125,117 @@ class CoursController extends AbstractController
             'publishedCount' => count($cours),
             'draftCount'     => 0,
             'totalMots'      => $totalMots,
+            'totalImages'    => $totalImages,
+        ]);
+    }
+
+    #[Route('/admin/cours/stats', name: 'admin_cours_stats', methods: ['GET'])]
+    public function getStats(CoursRepository $coursRepository): JsonResponse
+    {
+        $cours = $coursRepository->findAll();
+        
+        // Statistiques par type
+        $typeStats = [
+            'Académique' => 0,
+            'Social' => 0,
+            'Motricité' => 0,
+            'Langage' => 0
+        ];
+        
+        // Statistiques par niveau
+        $niveauStats = [
+            'Débutant' => 0,
+            'Intermédiaire' => 0,
+            'Avancé' => 0
+        ];
+        
+        $totalMots = 0;
+        $totalImages = 0;
+        $dureeTotale = 0;
+        
+        foreach ($cours as $c) {
+            // Par type
+            if (isset($typeStats[$c->getTypeCours()])) {
+                $typeStats[$c->getTypeCours()]++;
+            }
+            
+            // Par niveau
+            if (isset($niveauStats[$c->getNiveau()])) {
+                $niveauStats[$c->getNiveau()]++;
+            }
+            
+            // Durée totale
+            $dureeTotale += $c->getDuree();
+            
+            // Mots
+            if ($c->getMots()) {
+                $motsCount = count(array_filter(explode(';', $c->getMots())));
+                $totalMots += $motsCount;
+            }
+            
+            // Images
+            if ($c->getImagesMots()) {
+                $imagesCount = 0;
+                $items = explode(';', $c->getImagesMots());
+                foreach ($items as $item) {
+                    if (strpos($item, ':') !== false) {
+                        $parts = explode(':', $item, 2);
+                        if (isset($parts[1])) {
+                            $imagesCount += count(explode(',', $parts[1]));
+                        }
+                    }
+                }
+                $totalImages += $imagesCount;
+            }
+        }
+        
+        $totalCours = count($cours);
+        
+        // Calcul des pourcentages
+        $typePercentages = [];
+        foreach ($typeStats as $type => $count) {
+            $typePercentages[$type] = $totalCours > 0 ? round(($count / $totalCours) * 100, 1) : 0;
+        }
+        
+        $niveauPercentages = [];
+        foreach ($niveauStats as $niveau => $count) {
+            $niveauPercentages[$niveau] = $totalCours > 0 ? round(($count / $totalCours) * 100, 1) : 0;
+        }
+        
+        // Moyenne de mots par cours
+        $moyenneMotsParCours = $totalCours > 0 ? round($totalMots / $totalCours, 1) : 0;
+        
+        // Moyenne d'images par cours
+        $moyenneImagesParCours = $totalCours > 0 ? round($totalImages / $totalCours, 1) : 0;
+        
+        // Durée moyenne par cours
+        $dureeMoyenne = $totalCours > 0 ? round($dureeTotale / $totalCours, 1) : 0;
+        
+        return $this->json([
+            'typeStats' => $typeStats,
+            'niveauStats' => $niveauStats,
+            'typePercentages' => $typePercentages,
+            'niveauPercentages' => $niveauPercentages,
+            'totalCours' => $totalCours,
+            'totalMots' => $totalMots,
+            'totalImages' => $totalImages,
+            'dureeTotale' => $dureeTotale,
+            'moyenneMotsParCours' => $moyenneMotsParCours,
+            'moyenneImagesParCours' => $moyenneImagesParCours,
+            'dureeMoyenne' => $dureeMoyenne,
+            'labels' => array_keys($typeStats),
+            'data' => array_values($typeStats)
         ]);
     }
 
     #[Route('/admin/cours/save', name: 'admin_cours_save', methods: ['POST'])]
     public function save(
-        Request $request,
+        Request                $request,
         EntityManagerInterface $em,
-        SluggerInterface $slugger,
-        CoursRepository $coursRepository
+        SluggerInterface       $slugger,
+        CoursRepository        $coursRepository
     ): Response {
 
-        
         $idCours = $request->request->get('id_cours');
         if ($idCours && !empty($idCours)) {
             $cours = $coursRepository->find($idCours);
@@ -117,7 +247,6 @@ class CoursController extends AbstractController
             $cours = new Cours();
         }
 
-        
         $data        = $request->request->all('cours') ?: [];
         $titre       = trim($data['titre'] ?? '');
         $typeCours   = trim($data['typeCours'] ?? '');
@@ -158,7 +287,6 @@ class CoursController extends AbstractController
             $errors[] = 'Ajoutez au moins un mot';
         }
 
-        // ── Si erreurs : recharger la page avec les messages flash ──
         if (!empty($errors)) {
             foreach ($errors as $error) {
                 $this->addFlash('error', $error);
@@ -220,7 +348,6 @@ class CoursController extends AbstractController
 
             $motImages = [];
 
-            // Images existantes conservées
             $keptExisting = $request->request->all('existing_images_' . $index);
             if ($keptExisting && is_array($keptExisting)) {
                 foreach ($keptExisting as $img) {
@@ -235,7 +362,6 @@ class CoursController extends AbstractController
                 }
             }
 
-            // Nouvelles images uploadées
             $files = $request->files->get('images_files_' . $index);
             if ($files && is_array($files)) {
                 foreach ($files as $file) {
