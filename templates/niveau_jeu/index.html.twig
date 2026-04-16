@@ -103,6 +103,12 @@
             <a href="{{ path('app_niveau_jeu_new') }}" class="btn-purple text-decoration-none">
                 <i class="fas fa-plus me-1"></i> Ajouter
             </a>
+            <a href="{{ path('app_niveau_jeu_export_csv') }}" class="btn btn-success text-decoration-none" title="Exporter CSV">
+                <i class="fas fa-file-csv"></i>
+            </a>
+            <a href="{{ path('app_niveau_jeu_export_pdf') }}" class="btn btn-danger text-decoration-none" title="Exporter PDF">
+                <i class="fas fa-file-pdf"></i>
+            </a>
         </div>
     </div>
 
@@ -138,11 +144,11 @@
                         <td>{{ niveau.maxMoyenne }}</td>
                         <td>{{ niveau.description ?: '-' }}</td>
                         <td>
-                            <a href="{{ path('app_niveau_jeu_show', {'id': niveau.id}) }}" class="btn-edit-soft text-decoration-none me-1">
-                                Voir
+                            <a href="{{ path('app_niveau_jeu_show', {'id': niveau.id}) }}" class="btn-edit-soft text-decoration-none me-1" title="Voir">
+                                <i class="fas fa-eye"></i>
                             </a>
-                            <a href="{{ path('app_niveau_jeu_edit', {'id': niveau.id}) }}" class="btn-outline-purple text-decoration-none">
-                                Modifier
+                            <a href="{{ path('app_niveau_jeu_edit', {'id': niveau.id}) }}" class="btn-outline-purple text-decoration-none" title="Modifier">
+                                <i class="fas fa-edit"></i>
                             </a>
                         </td>
                     </tr>

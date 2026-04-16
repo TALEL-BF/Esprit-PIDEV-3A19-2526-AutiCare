@@ -17,6 +17,12 @@
             <a href="{{ path('app_suivi_total_new') }}" class="btn-purple text-decoration-none">
                 <i class="fas fa-plus me-1"></i> Ajouter
             </a>
+            <a href="{{ path('app_suivi_total_export_csv') }}" class="btn btn-success text-decoration-none" title="Exporter CSV">
+                <i class="fas fa-file-csv"></i>
+            </a>
+            <a href="{{ path('app_suivi_total_export_pdf') }}" class="btn btn-danger text-decoration-none" title="Exporter PDF">
+                <i class="fas fa-file-pdf"></i>
+            </a>
         </div>
     </div>
 
@@ -42,12 +48,11 @@
                         <td>{{ suivi_total.remarque ?: '-' }}</td>
                         <td>{{ suivi_total.niveauJeu ? suivi_total.niveauJeu.libelle : '-' }}</td>
                         <td>
-                            <a href="{{ path('app_suivi_total_show', {'id': suivi_total.id}) }}" class="btn-edit-soft text-decoration-none me-1">
-                                Voir
+                            <a href="{{ path('app_suivi_total_show', {'id': suivi_total.id}) }}" class="btn-edit-soft text-decoration-none me-1" title="Voir">
+                                <i class="fas fa-eye"></i>
                             </a>
-
-                            <a href="{{ path('app_suivi_total_edit', {'id': suivi_total.id}) }}" class="btn-outline-purple text-decoration-none">
-                                Modifier
+                            <a href="{{ path('app_suivi_total_edit', {'id': suivi_total.id}) }}" class="btn-outline-purple text-decoration-none" title="Modifier">
+                                <i class="fas fa-edit"></i>
                             </a>
                         </td>
                     </tr>

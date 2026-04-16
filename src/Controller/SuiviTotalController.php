@@ -33,7 +33,10 @@ final class SuiviTotalController extends AbstractController
         $form = $this->createForm(SuiviTotalType::class, $suiviTotal);
         $form->handleRequest($request);
 
+
         if ($form->isSubmitted() && $form->isValid()) {
+            // La moyenne est calculée automatiquement dans l'entité
+            $suiviTotal->updateMoyenne();
             $niveau = $niveauResolverService->findByMoyenne((float) $suiviTotal->getMoyenne());
 
             if ($niveau !== null) {

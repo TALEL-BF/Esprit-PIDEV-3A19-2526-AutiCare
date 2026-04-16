@@ -114,7 +114,7 @@
         </div>
 
         {# ==================== JEU ==================== #}
-        <div class="nav-item-wrap {% if app.request.get('_route') starts with 'app_niveau_jeu' or app.request.get('_route') starts with 'app_suivi_total' %}open{% endif %}">
+        <div class="nav-item-wrap {% if app.request.get('_route') starts with 'app_niveau_jeu' or app.request.get('_route') starts with 'app_suivi_total' or app.request.get('_route') starts with 'app_game_insights' %}open{% endif %}">
             <div class="nav-link-item" onclick="toggleSection('jeu', event)">
                 <span class="nav-icon"><i class="fas fa-gamepad"></i></span>
                 Jeu
@@ -128,6 +128,10 @@
                 <a class="nav-sub-link {% if app.request.get('_route') starts with 'app_suivi_total' %}active{% endif %}" 
                    href="{{ path('app_suivi_total_index') }}">
                     <i class="fas fa-chart-line"></i> Suivi total
+                </a>
+                <a class="nav-sub-link {% if app.request.get('_route') starts with 'app_game_insights' %}active{% endif %}" 
+                   href="{{ path('app_game_insights_index') }}">
+                    <i class="fas fa-brain"></i> Resume intelligent
                 </a>
             </div>
         </div>

@@ -24,7 +24,7 @@
         <span class="card-box-title"><i class="fas fa-trash-alt"></i> Suppression</span>
     </div>
     <div class="card-box-body">
-        {% include 'suivi_total/_delete_form.html.twig' %}
+        {% include 'suivi_total/_delete_form.html.twig' with {suivi_total: suivi_total} %}
     </div>
 </div>
 {% endblock %}

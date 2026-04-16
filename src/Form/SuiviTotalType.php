@@ -24,18 +24,28 @@ class SuiviTotalType extends AbstractType
                     'placeholder' => 'Ex: 1',
                 ],
             ])
-            ->add('moyenne', NumberType::class, [
-                'label' => 'Moyenne',
-                'required' => true,
-                'scale' => 2,
-                'attr' => [
-                    'class' => 'form-control',
-                    'min' => 0,
-                    'max' => 20,
-                    'step' => '0.01',
-                    'placeholder' => 'Ex: 12.50',
-                ],
-            ])
+                ->add('noteConsultation', NumberType::class, [
+                    'label' => 'Note de consultation',
+                    'required' => true,
+                    'attr' => [
+                        'class' => 'form-control',
+                        'min' => 0,
+                        'max' => 20,
+                        'step' => '0.01',
+                        'placeholder' => 'Ex: 12.50',
+                    ],
+                ])
+                ->add('noteCours', NumberType::class, [
+                    'label' => 'Note de cours',
+                    'required' => true,
+                    'attr' => [
+                        'class' => 'form-control',
+                        'min' => 0,
+                        'max' => 20,
+                        'step' => '0.01',
+                        'placeholder' => 'Ex: 12.50',
+                    ],
+                ])
             ->add('remarque', TextareaType::class, [
                 'label' => 'Remarque',
                 'required' => false,

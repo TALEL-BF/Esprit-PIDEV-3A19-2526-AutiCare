@@ -24,7 +24,7 @@
         <span class="card-box-title"><i class="fas fa-trash-alt"></i> Suppression</span>
     </div>
     <div class="card-box-body">
-        {% include 'niveau_jeu/_delete_form.html.twig' %}
+        {% include 'niveau_jeu/_delete_form.html.twig' with {niveau_jeu: niveau_jeu} %}
     </div>
 </div>
 {% endblock %}

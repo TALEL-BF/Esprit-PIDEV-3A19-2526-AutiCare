@@ -1,0 +1,33 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Export PDF — Suivis totaux{% endblock %}
+
+{% block body %}
+    <h2>Liste des suivis totaux</h2>
+    <table border="1" cellpadding="5" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>ENFANT</th>
+                <th>MOYENNE</th>
+                <th>REMARQUE</th>
+                <th>NIVEAU</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for suivi_total in suivi_totals %}
+            <tr>
+                <td>{{ suivi_total.id }}</td>
+                <td>{{ suivi_total.enfantId }}</td>
+                <td>{{ suivi_total.moyenne }}</td>
+                <td>{{ suivi_total.remarque ?: '-' }}</td>
+                <td>{{ suivi_total.niveauJeu ? suivi_total.niveauJeu.libelle : '-' }}</td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5">Aucun suivi trouvé</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

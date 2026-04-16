@@ -11,6 +11,19 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class SuiviTotalRepository extends ServiceEntityRepository
 {
+    /**
+     * Retourne le dernier SuiviTotal pour un enfant donné
+     */
+    public function findLastByEnfantId(int $enfantId): ?\App\Entity\SuiviTotal
+    {
+        return $this->createQueryBuilder('s')
+            ->andWhere('s.enfantId = :enfantId')
+            ->setParameter('enfantId', $enfantId)
+            ->orderBy('s.id', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, SuiviTotal::class);

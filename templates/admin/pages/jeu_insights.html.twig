@@ -1,0 +1,264 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Auticare - Resume intelligent{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <h2><i class="fas fa-brain me-2" style="color:var(--purple-500)"></i>Resume intelligent parent/therapeute</h2>
+    <p>Synthese hebdomadaire automatique, KPI de progression et historique clinique leger.</p>
+</div>
+
+<div class="card-box mb-4">
+    <div class="card-box-body">
+        <form method="get" action="{{ path('app_game_insights_index') }}" class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label fw-bold" for="enfantId">Id enfant</label>
+                <input id="enfantId" name="enfantId" type="number" min="1" class="form-control" value="{{ enfant_id ?? '' }}" required>
+            </div>
+            <div class="col-md-3">
+                <button class="btn-purple border-0" type="submit"><i class="fas fa-search me-1"></i>Charger les insights</button>
+            </div>
+            {% if enfant_id %}
+            <div class="col-md-4">
+                <button class="btn btn-outline-primary" name="generateAi" value="1" type="submit">
+                    <i class="fas fa-robot me-1"></i>Generer le resume IA
+                </button>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+{% for label, messages in app.flashes %}
+    {% for message in messages %}
+        <div class="alert alert-{{ label == 'danger' ? 'danger' : 'success' }}">{{ message }}</div>
+    {% endfor %}
+{% endfor %}
+
+{% if enfant_id and insights %}
+{% if ai_summary %}
+<div class="card-box mb-4">
+    <div class="card-box-header">
+        <span class="card-box-title">
+            <i class="fas fa-robot"></i>
+            Resume intelligent IA
+            <span class="badge {{ ai_summary.source == 'ai' ? 'bg-success' : 'bg-secondary' }} ms-2">{{ ai_summary.source|upper }}</span>
+        </span>
+    </div>
+    <div class="card-box-body">
+        <pre style="white-space:pre-wrap; margin-bottom:0; font-family:inherit;">{{ ai_summary.text }}</pre>
+    </div>
+</div>
+{% endif %}
+
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card-box h-100">
+            <div class="card-box-body">
+                <small class="text-muted">Id enfant</small>
+                <h4 class="mb-0">#{{ enfant_id }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card-box h-100">
+            <div class="card-box-body">
+                <small class="text-muted">Taux de reussite</small>
+                <h4 class="mb-0">{{ insights.kpis.success_rate|number_format(2, '.', ' ') }}%</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card-box h-100">
+            <div class="card-box-body">
+                <small class="text-muted">Temps moyen / jeu</small>
+                <h4 class="mb-0">{{ insights.kpis.avg_duration_seconds }} sec</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card-box h-100">
+            <div class="card-box-body">
+                <small class="text-muted">Sessions de la semaine</small>
+                <h4 class="mb-0">{{ insights.kpis.total_sessions }}</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-6">
+        <div class="card-box h-100">
+            <div class="card-box-header"><span class="card-box-title"><i class="fas fa-chart-line"></i> Progression par competence</span></div>
+            <div class="card-box-body">
+                <div class="table-wrapper">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Competence</th>
+                                <th>Semaine N</th>
+                                <th>Semaine N-1</th>
+                                <th>Delta</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for skill, values in insights.kpis.progress_by_skill %}
+                                <tr>
+                                    <td>{{ skill|capitalize }}</td>
+                                    <td>{{ values.current|number_format(2, '.', ' ') }}%</td>
+                                    <td>{{ values.previous|number_format(2, '.', ' ') }}%</td>
+                                    <td class="{{ values.delta >= 0 ? 'text-success' : 'text-danger' }}">
+                                        {{ values.delta >= 0 ? '+' : '' }}{{ values.delta|number_format(2, '.', ' ') }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card-box h-100">
+            <div class="card-box-header"><span class="card-box-title"><i class="fas fa-lightbulb"></i> Synthese hebdo automatique</span></div>
+            <div class="card-box-body">
+                <h6>Progres</h6>
+                <ul>
+                    {% for item in insights.summary.progress %}
+                        <li>{{ item }}</li>
+                    {% endfor %}
+                </ul>
+
+                <h6>Points faibles</h6>
+                <ul>
+                    {% for item in insights.summary.weak_points %}
+                        <li>{{ item }}</li>
+                    {% endfor %}
+                </ul>
+
+                <h6>Actions recommandees</h6>
+                <ul>
+                    {% for item in insights.summary.recommended_actions %}
+                        <li>{{ item }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-6">
+        <div class="card-box h-100">
+            <div class="card-box-header"><span class="card-box-title"><i class="fas fa-gamepad"></i> Ajouter une session de jeu</span></div>
+            <div class="card-box-body">
+                {{ form_start(game_session_form) }}
+                <div class="row g-2">
+                    <div class="col-md-6">{{ form_row(game_session_form.enfantId) }}</div>
+                    <div class="col-md-6">{{ form_row(game_session_form.gameTitle) }}</div>
+                    <div class="col-md-6">{{ form_row(game_session_form.skill) }}</div>
+                    <div class="col-md-6">{{ form_row(game_session_form.playedAt) }}</div>
+                    <div class="col-md-4">{{ form_row(game_session_form.score) }}</div>
+                    <div class="col-md-4">{{ form_row(game_session_form.maxScore) }}</div>
+                    <div class="col-md-4">{{ form_row(game_session_form.durationSeconds) }}</div>
+                    <div class="col-12">{{ form_row(game_session_form.notes) }}</div>
+                </div>
+                <button class="btn-purple border-0" type="submit"><i class="fas fa-save me-1"></i>Enregistrer session</button>
+                {{ form_end(game_session_form) }}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card-box h-100">
+            <div class="card-box-header"><span class="card-box-title"><i class="fas fa-notes-medical"></i> Historique clinique leger</span></div>
+            <div class="card-box-body">
+                {{ form_start(clinical_note_form) }}
+                <div class="row g-2">
+                    <div class="col-md-6">{{ form_row(clinical_note_form.enfantId) }}</div>
+                    <div class="col-md-6">{{ form_row(clinical_note_form.sessionDate) }}</div>
+                    <div class="col-12">{{ form_row(clinical_note_form.sessionNote) }}</div>
+                    <div class="col-12">{{ form_row(clinical_note_form.proposedAction) }}</div>
+                    <div class="col-12">{{ form_row(clinical_note_form.resultAfterAction) }}</div>
+                </div>
+                <button class="btn-purple border-0" type="submit"><i class="fas fa-save me-1"></i>Enregistrer note</button>
+                {{ form_end(clinical_note_form) }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card-box h-100">
+            <div class="card-box-header"><span class="card-box-title"><i class="fas fa-history"></i> Sessions recentes</span></div>
+            <div class="card-box-body p-0">
+                <div class="table-wrapper">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Jeu</th>
+                                <th>Competence</th>
+                                <th>Score</th>
+                                <th>Temps</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for s in recent_sessions %}
+                            <tr>
+                                <td>{{ s.playedAt ? s.playedAt|date('d/m/Y H:i') : '-' }}</td>
+                                <td>{{ s.gameTitle }}</td>
+                                <td>{{ s.skill|capitalize }}</td>
+                                <td>{{ s.score }}/{{ s.maxScore }}</td>
+                                <td>{{ s.durationSeconds }} sec</td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="5" class="text-center">Aucune session enregistree</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card-box h-100">
+            <div class="card-box-header"><span class="card-box-title"><i class="fas fa-file-medical"></i> Notes cliniques recentes</span></div>
+            <div class="card-box-body p-0">
+                <div class="table-wrapper">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Note</th>
+                                <th>Action</th>
+                                <th>Resultat</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for n in recent_notes %}
+                            <tr>
+                                <td>{{ n.sessionDate ? n.sessionDate|date('d/m/Y H:i') : '-' }}</td>
+                                <td>{{ n.sessionNote|slice(0, 90) }}{{ n.sessionNote|length > 90 ? '...' : '' }}</td>
+                                <td>{{ n.proposedAction ? n.proposedAction|slice(0, 60) : '-' }}{{ n.proposedAction and n.proposedAction|length > 60 ? '...' : '' }}</td>
+                                <td>{{ n.resultAfterAction ? n.resultAfterAction|slice(0, 60) : '-' }}{{ n.resultAfterAction and n.resultAfterAction|length > 60 ? '...' : '' }}</td>
+                            </tr>
+                        {% else %}
+                            <tr><td colspan="4" class="text-center">Aucune note clinique enregistree</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% elseif enfant_id %}
+<div class="alert alert-info">Aucune donnee trouvée pour cet enfant. Commence par ajouter une session de jeu et une note clinique.</div>
+{% else %}
+<div class="alert alert-warning">Saisis un Id enfant pour charger les insights.</div>
+{% endif %}
+{% endblock %}

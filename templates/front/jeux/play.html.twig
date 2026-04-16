@@ -1,0 +1,425 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Jouer - {{ game.title }}{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-10">
+                <div class="alert alert-light border text-center p-3">
+                    <div class="row g-3">
+                        <div class="col-md-6 col-lg-3">
+                            <span class="badge bg-primary">Quiz API</span>
+                            <div id="api-quiz" class="mt-1 small"></div>
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <span class="badge bg-info text-dark">Mots cles API</span>
+                            <div id="api-words" class="mt-1 small"></div>
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <span class="badge bg-success">Definition API</span>
+                            <div id="api-definition" class="mt-1 small"></div>
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <span class="badge bg-warning text-dark">Cartes API</span>
+                            <div id="api-cards" class="mt-1 small"></div>
+                        </div>
+                    </div>
+                    <hr class="my-3">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-4">
+                            <span class="badge bg-secondary">Objectif local</span>
+                            <div id="local-goal" class="mt-1"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <span class="badge bg-dark">Recompense locale</span>
+                            <div id="local-badge" class="mt-1"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <span class="badge bg-danger">Defi local</span>
+                            <div id="local-challenge" class="mt-1"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+        const localGoals = [
+            'Identifier correctement 3 emotions consecutives.',
+            'Finir le jeu en restant concentre pendant 10 minutes.',
+            'Rejouer une activite pour ameliorer le score.'
+        ];
+        const localBadges = ['Champion progression', 'Super concentration', 'Explorateur social'];
+        const localChallenges = [
+            'Terminer 2 niveaux avec calme et precision.',
+            'Faire une pause de respiration puis relancer le jeu.',
+            'Expliquer a un parent ce que tu as appris aujourd\'hui.'
+        ];
+
+        document.getElementById('local-goal').textContent = localGoals[Math.floor(Math.random() * localGoals.length)];
+        document.getElementById('local-badge').textContent = localBadges[Math.floor(Math.random() * localBadges.length)];
+        document.getElementById('local-challenge').textContent = localChallenges[Math.floor(Math.random() * localChallenges.length)];
+
+        const topicMap = {
+            'Emotions': 'emotion',
+            'Communication': 'communication',
+            'Memoire': 'memory',
+            'Motricite': 'coordination',
+            'Social': 'social',
+            'Logique': 'logic'
+        };
+
+        const apiTopic = topicMap['{{ game.category|e('js') }}'] || 'education';
+        const decodeHtml = (text) => {
+            const txt = document.createElement('textarea');
+            txt.innerHTML = text;
+            return txt.value;
+        };
+
+        // 1) Open Trivia DB (external)
+        fetch('https://opentdb.com/api.php?amount=1&type=multiple&encode=url3986')
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+                if (!data || data.response_code !== 0 || !data.results || !data.results[0]) {
+                    document.getElementById('api-quiz').textContent = 'Quiz indisponible';
+                    return;
+                }
+
+                const q = data.results[0];
+                const correct = decodeHtml(decodeURIComponent(q.correct_answer || ''));
+                const incorrect = (q.incorrect_answers || []).map(a => decodeHtml(decodeURIComponent(a)));
+                const answers = [...incorrect, correct].slice(0, 4);
+                document.getElementById('api-quiz').innerHTML =
+                    `<strong>${decodeHtml(decodeURIComponent(q.question || 'Question indisponible'))}</strong>` +
+                    `<div class="mt-1">${answers.join(' | ')}</div>`;
+            })
+            .catch(() => {
+                document.getElementById('api-quiz').textContent = 'Quiz indisponible';
+            });
+
+        // 2) Datamuse (external)
+        fetch(`https://api.datamuse.com/words?ml=${encodeURIComponent(apiTopic)}&max=6`)
+            .then(r => r.ok ? r.json() : null)
+            .then(words => {
+                const labels = Array.isArray(words) ? words.map(w => w.word).filter(Boolean).slice(0, 6) : [];
+                document.getElementById('api-words').textContent = labels.length ? labels.join(', ') : 'Mots indisponibles';
+
+                // 3) Free Dictionary API (external), based on first Datamuse word
+                const rootWord = labels[0] || apiTopic;
+                return fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(rootWord)}`)
+                    .then(r => r.ok ? r.json() : null)
+                    .then(def => {
+                        const entry = Array.isArray(def) ? def[0] : null;
+                        const d = entry && entry.meanings && entry.meanings[0] && entry.meanings[0].definitions
+                            ? entry.meanings[0].definitions[0].definition
+                            : null;
+
+                        document.getElementById('api-definition').innerHTML = d
+                            ? `<strong>${entry.word}</strong>: ${d}`
+                            : `<strong>${rootWord}</strong>: Definition indisponible`;
+                    })
+                    .catch(() => {
+                        document.getElementById('api-definition').innerHTML = `<strong>${rootWord}</strong>: Definition indisponible`;
+                    });
+            })
+            .catch(() => {
+                document.getElementById('api-words').textContent = 'Mots indisponibles';
+                document.getElementById('api-definition').textContent = 'Definition indisponible';
+            });
+
+        // 4) Deck of Cards API (external)
+        fetch('https://deckofcardsapi.com/api/deck/new/draw/?count=3')
+            .then(r => r.ok ? r.json() : null)
+            .then(cardsData => {
+                const cards = cardsData && Array.isArray(cardsData.cards)
+                    ? cardsData.cards.map(c => c.code).filter(Boolean)
+                    : [];
+                document.getElementById('api-cards').textContent = cards.length ? cards.join(' - ') : 'Cartes indisponibles';
+            })
+            .catch(() => {
+                document.getElementById('api-cards').textContent = 'Cartes indisponibles';
+            });
+        </script>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg">
+                <div class="card-body text-center">
+                    <h2 class="mb-4">{{ game.icon }} {{ game.title }}</h2>
+                    <p class="lead">{{ game.description }}</p>
+                    <div class="mb-3">
+                        <span class="badge bg-{{ game.category_color }}">{{ game.category }}</span>
+                        <span class="badge bg-secondary">{{ game.age }}</span>
+                    </div>
+                    <hr>
+                    <script>
+                    // Masquer le spinner si présent (fixe le blocage d'affichage)
+                    document.addEventListener('DOMContentLoaded', function() {
+                        var spinner = document.getElementById('spinner');
+                        if (spinner) spinner.style.display = 'none';
+                    });
+                    </script>
+                    <div id="game-area">
+                        {% if game.id == 1 %}
+                        <!-- Jeu des Émotions : Associer l'émotion à la bonne image -->
+                        <div id="emotion-game" style="margin: 30px 0;">
+                            <h5>Associe la bonne émotion à la situation !</h5>
+                            <div id="emotion-question" class="mb-3"></div>
+                            <div id="emotion-options" class="d-flex justify-content-center gap-3"></div>
+                            <div id="emotion-feedback" class="mt-3"></div>
+                            <button id="emotion-next" class="btn btn-primary mt-3" style="display:none;">Suivant</button>
+                        </div>
+                        <script>
+                        const questions = [
+                            { situation: "Un enfant reçoit un cadeau surprise.", answer: "😊", options: ["😊", "😢", "😡", "😱"] },
+                            { situation: "Un enfant a perdu son jouet préféré.", answer: "😢", options: ["😢", "😊", "😡", "😱"] },
+                            { situation: "Quelqu'un crie très fort sur l'enfant.", answer: "😡", options: ["😡", "😊", "😢", "😱"] },
+                            { situation: "L'enfant voit une grosse araignée.", answer: "😱", options: ["😱", "😊", "😢", "😡"] }
+                        ];
+                        let current = 0;
+                        let score = 0;
+                        function showQuestion() {
+                            document.getElementById('emotion-feedback').innerHTML = '';
+                            document.getElementById('emotion-next').style.display = 'none';
+                            const q = questions[current];
+                            document.getElementById('emotion-question').innerHTML = '<b>Situation :</b> ' + q.situation;
+                            const opts = q.options.map(opt => `<button class=\"btn btn-lg btn-light emotion-opt\" data-emo=\"${opt}\" style=\"font-size:2rem;\">${opt}</button>`).join(' ');
+                            document.getElementById('emotion-options').innerHTML = opts;
+                            document.querySelectorAll('.emotion-opt').forEach(btn => {
+                                btn.onclick = function() {
+                                    if (this.getAttribute('data-emo') === q.answer) {
+                                        score++;
+                                        document.getElementById('emotion-feedback').innerHTML = '<span class=\"text-success\">Bravo, bonne réponse !</span>';
+                                    } else {
+                                        document.getElementById('emotion-feedback').innerHTML = '<span class=\"text-danger\">Oups, mauvaise réponse !</span>';
+                                    }
+                                    document.querySelectorAll('.emotion-opt').forEach(b => b.disabled = true);
+                                    document.getElementById('emotion-next').style.display = 'inline-block';
+                                }
+                            });
+                        }
+                        document.getElementById('emotion-next').onclick = function() {
+                            current++;
+                            if (current < questions.length) {
+                                showQuestion();
+                            } else {
+                                document.getElementById('emotion-game').innerHTML = `<h5>Score final : ${score} / ${questions.length}</h5><div class='mb-3'>Tu as terminé le jeu des émotions !</div>`;
+                            }
+                        };
+                        showQuestion();
+                        </script>
+                        {% elseif game.id == 2 %}
+                        <!-- Puzzle des Formes : Puzzle glisser-déposer -->
+                        <div id="puzzle-game" style="margin: 30px 0;">
+                            <h5>Reconstitue le puzzle !</h5>
+                            <canvas id="puzzle-canvas" width="320" height="320" style="border:1px solid #ccc;background:#f8f9fa;"></canvas>
+                            <div id="puzzle-feedback" class="mt-3"></div>
+                        </div>
+                        <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            // Puzzle 2x2 (4 pièces) coloré sans image externe
+                            const puzzleColors = ['#ff9a9e','#a8edea','#ffecd2','#d4fc79'];
+                            let order = [0,1,2,3].sort(()=>Math.random()-0.5);
+                            let dragging = null;
+                            const canvas = document.getElementById('puzzle-canvas');
+                            const ctx = canvas.getContext('2d');
+                            function drawPuzzle() {
+                                ctx.clearRect(0,0,320,320);
+                                for(let i=0;i<4;i++) {
+                                    let idx = order[i];
+                                    ctx.fillStyle = puzzleColors[idx];
+                                    ctx.fillRect((i%2)*160, Math.floor(i/2)*160, 160, 160);
+                                    ctx.strokeStyle = '#333';
+                                    ctx.lineWidth = 2;
+                                    ctx.strokeRect((i%2)*160, Math.floor(i/2)*160, 160, 160);
+                                }
+                            }
+                            drawPuzzle();
+                            canvas.onmousedown = function(e) {
+                                const rect = canvas.getBoundingClientRect();
+                                const x = e.clientX - rect.left, y = e.clientY - rect.top;
+                                const col = Math.floor(x/160), row = Math.floor(y/160);
+                                const idx = row*2+col;
+                                dragging = idx;
+                            };
+                            canvas.onmouseup = function(e) {
+                                if(dragging===null) return;
+                                const rect = canvas.getBoundingClientRect();
+                                const x = e.clientX - rect.left, y = e.clientY - rect.top;
+                                const col = Math.floor(x/160), row = Math.floor(y/160);
+                                const idx = row*2+col;
+                                if(idx!==dragging) {
+                                    [order[dragging], order[idx]] = [order[idx], order[dragging]];
+                                    drawPuzzle();
+                                    if(order[0]===0&&order[1]===1&&order[2]===2&&order[3]===3) {
+                                        document.getElementById('puzzle-feedback').innerHTML = '<span class="text-success">Bravo, puzzle réussi !</span>';
+                                    }
+                                }
+                                dragging = null;
+                            };
+                        });
+                        {% elseif game.id == 3 %}
+                        <!-- Parole & Images PECS : Associer image et mot -->
+                        <div id="pecs-game" style="margin: 30px 0;">
+                            <h5>Associe le mot à la bonne image !</h5>
+                            <div id="pecs-question" class="mb-3"></div>
+                            <div id="pecs-options" class="d-flex justify-content-center gap-3"></div>
+                            <div id="pecs-feedback" class="mt-3"></div>
+                            <button id="pecs-next" class="btn btn-primary mt-3" style="display:none;">Suivant</button>
+                        </div>
+                        <script>
+                        const pecsQ = [
+                            { img: "🍎", word: "Pomme", options: ["Pomme","Banane","Chien"] },
+                            { img: "🐶", word: "Chien", options: ["Chat","Chien","Voiture"] },
+                            { img: "🚗", word: "Voiture", options: ["Voiture","Pomme","Chien"] }
+                        ];
+                        let pecsCur = 0, pecsScore = 0;
+                        function showPecs() {
+                            document.getElementById('pecs-feedback').innerHTML = '';
+                            document.getElementById('pecs-next').style.display = 'none';
+                            const q = pecsQ[pecsCur];
+                            document.getElementById('pecs-question').innerHTML = `<span style='font-size:3rem;'>${q.img}</span>`;
+                            document.getElementById('pecs-options').innerHTML = q.options.map(opt=>`<button class='btn btn-lg btn-light pecs-opt'>${opt}</button>`).join(' ');
+                            document.querySelectorAll('.pecs-opt').forEach(btn=>{
+                                btn.onclick = function() {
+                                    if(this.textContent===q.word) {
+                                        pecsScore++;
+                                        document.getElementById('pecs-feedback').innerHTML = '<span class="text-success">Bravo !</span>';
+                                    } else {
+                                        document.getElementById('pecs-feedback').innerHTML = '<span class="text-danger">Oups !</span>';
+                                    }
+                                    document.querySelectorAll('.pecs-opt').forEach(b=>b.disabled=true);
+                                    document.getElementById('pecs-next').style.display = 'inline-block';
+                                }
+                            });
+                        }
+                        document.getElementById('pecs-next').onclick = function() {
+                            pecsCur++;
+                            if(pecsCur<pecsQ.length) showPecs();
+                            else document.getElementById('pecs-game').innerHTML = `<h5>Score final : ${pecsScore} / ${pecsQ.length}</h5><div class='mb-3'>Tu as terminé le jeu PECS !</div>`;
+                        };
+                        showPecs();
+                        </script>
+                        {% elseif game.id == 4 %}
+                        <!-- Memory Coloré : Memory game -->
+                        <div id="memory-game" style="margin: 30px 0;">
+                            <h5>Retrouve les paires de cartes !</h5>
+                            <div id="memory-board" class="d-flex flex-wrap justify-content-center" style="max-width:320px;"></div>
+                            <div id="memory-feedback" class="mt-3"></div>
+                        </div>
+                        <script>
+                        const memIcons = ["🍎","🍎","🐶","🐶","🚗","🚗","😊","😊"];
+                        let memShuffled = memIcons.sort(()=>Math.random()-0.5), memFlipped=[], memMatched=[], memTries=0;
+                        function drawMemory() {
+                            let html = '';
+                            for(let i=0;i<8;i++) {
+                                html += `<button class='btn btn-light m-1 memory-card' data-idx='${i}' style='width:60px;height:60px;font-size:2rem;'>${memMatched.includes(i)?memShuffled[i]:(memFlipped.includes(i)?memShuffled[i]:"?")}</button>`;
+                            }
+                            document.getElementById('memory-board').innerHTML = html;
+                            document.querySelectorAll('.memory-card').forEach(btn=>{
+                                btn.onclick = function() {
+                                    const idx = +this.getAttribute('data-idx');
+                                    if(memFlipped.length<2 && !memFlipped.includes(idx) && !memMatched.includes(idx)) {
+                                        memFlipped.push(idx);
+                                        drawMemory();
+                                        if(memFlipped.length===2) {
+                                            setTimeout(()=>{
+                                                if(memShuffled[memFlipped[0]]===memShuffled[memFlipped[1]]) {
+                                                    memMatched.push(memFlipped[0],memFlipped[1]);
+                                                    if(memMatched.length===8) document.getElementById('memory-feedback').innerHTML = '<span class="text-success">Bravo, tu as gagné en '+(memTries+1)+' essais !</span>';
+                                                }
+                                                memFlipped=[]; memTries++;
+                                                drawMemory();
+                                            },700);
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                        drawMemory();
+                        </script>
+                        {% elseif game.id == 5 %}
+                        <!-- Coloriage Sensoriel : coloriage simple -->
+                        <div id="coloriage-game" style="margin: 30px 0;">
+                            <h5>Colorie la main !</h5>
+                            <canvas id="coloriage-canvas" width="200" height="200" style="border:1px solid #ccc;background:#fff;"></canvas>
+                            <div class="mt-2">
+                                <button class="btn btn-danger" onclick="setColor('red')">Rouge</button>
+                                <button class="btn btn-success" onclick="setColor('green')">Vert</button>
+                                <button class="btn btn-primary" onclick="setColor('blue')">Bleu</button>
+                            </div>
+                        </div>
+                        <script>
+                        let drawColor = 'red';
+                        function setColor(c) { drawColor = c; }
+                        const coloriageCanvas = document.getElementById('coloriage-canvas');
+                        const coloriageCtx = coloriageCanvas.getContext('2d');
+                        // Dessin main simplifié
+                        coloriageCtx.beginPath();
+                        coloriageCtx.arc(100,120,50,0,Math.PI*2); // paume
+                        coloriageCtx.moveTo(100,70); coloriageCtx.lineTo(100,30); // doigt 1
+                        coloriageCtx.moveTo(100,70); coloriageCtx.lineTo(60,40); // doigt 2
+                        coloriageCtx.moveTo(100,70); coloriageCtx.lineTo(140,40); // doigt 3
+                        coloriageCtx.moveTo(100,120); coloriageCtx.lineTo(60,170); // doigt 4
+                        coloriageCtx.moveTo(100,120); coloriageCtx.lineTo(140,170); // doigt 5
+                        coloriageCtx.stroke();
+                        coloriageCanvas.onmousedown = function(e) {
+                            const rect = coloriageCanvas.getBoundingClientRect();
+                            const x = e.clientX - rect.left, y = e.clientY - rect.top;
+                            coloriageCtx.beginPath();
+                            coloriageCtx.arc(x,y,10,0,Math.PI*2);
+                            coloriageCtx.fillStyle = drawColor;
+                            coloriageCtx.fill();
+                        };
+                        </script>
+                        {% elseif game.id == 6 %}
+                        <!-- Scénarios Sociaux : quiz de comportement -->
+                        <div id="social-game" style="margin: 30px 0;">
+                            <h5>Choisis le bon comportement !</h5>
+                            <div id="social-question" class="mb-3"></div>
+                            <div id="social-options" class="d-flex flex-column align-items-center gap-2"></div>
+                            <div id="social-feedback" class="mt-3"></div>
+                            <button id="social-next" class="btn btn-primary mt-3" style="display:none;">Suivant</button>
+                        </div>
+                        <script>
+                        const socialQ = [
+                            { situation: "Un camarade tombe dans la cour.", answer: "L'aider à se relever", options: ["Rire","L'aider à se relever","L'ignorer"] },
+                            { situation: "Tu veux jouer avec un groupe.", answer: "Demander gentiment", options: ["Crier","Demander gentiment","Prendre le jouet"] }
+                        ];
+                        let socialCur = 0, socialScore = 0;
+                        function showSocial() {
+                            document.getElementById('social-feedback').innerHTML = '';
+                            document.getElementById('social-next').style.display = 'none';
+                            const q = socialQ[socialCur];
+                            document.getElementById('social-question').innerHTML = '<b>Situation :</b> ' + q.situation;
+                            document.getElementById('social-options').innerHTML = q.options.map(opt=>`<button class='btn btn-light social-opt'>${opt}</button>`).join('');
+                            document.querySelectorAll('.social-opt').forEach(btn=>{
+                                btn.onclick = function() {
+                                    if(this.textContent===q.answer) {
+                                        socialScore++;
+                                        document.getElementById('social-feedback').innerHTML = '<span class="text-success">Bravo !</span>';
+                                    } else {
+                                        document.getElementById('social-feedback').innerHTML = '<span class="text-danger">Oups !</span>';
+                                    }
+                                    document.querySelectorAll('.social-opt').forEach(b=>b.disabled=true);
+                                    document.getElementById('social-next').style.display = 'inline-block';
+                                }
+                            });
+                        }
+                        document.getElementById('social-next').onclick = function() {
+                            socialCur++;
+                            if(socialCur<socialQ.length) showSocial();
+                            else document.getElementById('social-game').innerHTML = `<h5>Score final : ${socialScore} / ${socialQ.length}</h5><div class='mb-3'>Tu as terminé le jeu social !</div>`;
+                        };
+                        showSocial();
+                        </script>
+                        {% else %}
+                        <div class="alert alert-info mt-4">Le jeu interactif spécifique à ce jeu sera bientôt disponible !</div>
+                        {% endif %}
+                    </div>
+                    <a href="{{ path('app_jeux') }}" class="btn btn-outline-primary mt-3">Retour aux jeux</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -22,25 +22,26 @@ final class NiveauJeuController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_niveau_jeu_new', methods: ['GET', 'POST'])]
-    #[Route('/new', name: 'app_niveau_jeu_new', methods: ['GET', 'POST'])]
-public function new(Request $request, NiveauJeuRepository $repo): Response
-{
-    $niveauJeu = new NiveauJeu();
-    $form = $this->createForm(NiveauJeuType::class, $niveauJeu);
-    $form->handleRequest($request);
 
-    if ($form->isSubmitted() && $form->isValid()) {
-        $repo->save($niveauJeu, true);
+    #[Route('/new', name: 'app_niveau_jeu_new', methods: ['GET', 'POST'])]
+    public function new(Request $request, EntityManagerInterface $entityManager, NiveauJeuRepository $repo): Response
+    {
+        $niveauJeu = new NiveauJeu();
+        $form = $this->createForm(NiveauJeuType::class, $niveauJeu);
+        $form->handleRequest($request);
 
-        return $this->redirectToRoute('app_niveau_jeu_index');
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->persist($niveauJeu);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('app_niveau_jeu_index');
+        }
+
+        return $this->render('niveau_jeu/new.html.twig', [
+            'form' => $form->createView(),
+            'niveau_jeus' => $repo->findAll(),
+        ]);
     }
-
-    return $this->render('niveau_jeu/new.html.twig', [
-        'form' => $form->createView(),
-        'niveau_jeus' => $repo->findAll(), // ✅ AJOUTE ÇA
-    ]);
-}
 
     #[Route('/{id}', name: 'app_niveau_jeu_show', methods: ['GET'])]
     public function show(NiveauJeu $niveauJeu): Response
