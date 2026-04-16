@@ -40,6 +40,12 @@ class Rdv
     #[ORM\Column(name: 'updated_at', type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $updatedAt = null;
 
+    #[ORM\Column(name: 'zoom_join_url', type: Types::STRING, length: 255, nullable: true)]
+    private ?string $zoomJoinUrl = null;
+
+    #[ORM\Column(name: 'zoom_start_url', type: Types::TEXT, nullable: true)]
+    private ?string $zoomStartUrl = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -125,6 +131,30 @@ class Rdv
     public function getUpdatedAt(): ?\DateTimeInterface
     {
         return $this->updatedAt;
+    }
+
+    public function getZoomJoinUrl(): ?string
+    {
+        return $this->zoomJoinUrl;
+    }
+
+    public function setZoomJoinUrl(?string $zoomJoinUrl): self
+    {
+        $this->zoomJoinUrl = $zoomJoinUrl;
+
+        return $this;
+    }
+
+    public function getZoomStartUrl(): ?string
+    {
+        return $this->zoomStartUrl;
+    }
+
+    public function setZoomStartUrl(?string $zoomStartUrl): self
+    {
+        $this->zoomStartUrl = $zoomStartUrl;
+
+        return $this;
     }
 
     #[ORM\PrePersist]

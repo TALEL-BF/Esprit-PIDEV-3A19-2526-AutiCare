@@ -12,6 +12,19 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class PlanningController extends AbstractController
 {
+	private function getCurrentUserId(): ?int
+	{
+		$currentUser = $this->getUser();
+
+		if (is_object($currentUser) && method_exists($currentUser, 'getId')) {
+			$id = $currentUser->getId();
+
+			return is_numeric($id) ? (int) $id : null;
+		}
+
+		return null;
+	}
+
 	private function getDaysMap(): array
 	{
 		return [
@@ -73,7 +86,7 @@ class PlanningController extends AbstractController
 		return in_array($normalized, ['planifiee', 'confirmee', 'active', 'disponible'], true);
 	}
 
-	private function formatRdv(Rdv $rdv, ?string $day = null, ?string $time = null): array
+	private function formatRdv(Rdv $rdv, ?int $currentUserId = null, ?string $day = null, ?string $time = null): array
 	{
 		$date = $rdv->getDateHeureRdv();
 		$days = $this->getDaysMap();
@@ -89,6 +102,8 @@ class PlanningController extends AbstractController
 		$day = $this->normalizeDay($day);
 		$consultationType = (string) ($rdv->getTypeConsultation() ?? 'Psychologue');
 		$status = (string) ($rdv->getStatutRdv() ?? 'Inconnu');
+		$professorId = $rdv->getIdPsychologue();
+		$canHost = $currentUserId !== null && $professorId !== null && $currentUserId === (int) $professorId;
 
 		return [
 			'id' => 'r' . $rdv->getId(),
@@ -98,14 +113,17 @@ class PlanningController extends AbstractController
 			'type' => 'psychologue',
 			'specialty' => ucfirst($consultationType),
 			'therapist' => 'Psychologue',
+			'professorId' => $professorId,
 			'description' => 'Statut: ' . ucfirst($status),
 			'icon' => '👩‍⚕️',
 			'available' => $this->isAvailableStatus($status),
+			'zoomJoinUrl' => $rdv->getZoomJoinUrl(),
+			'zoomStartUrl' => $canHost ? $rdv->getZoomStartUrl() : null,
 			'level' => 'Sur rendez-vous',
 		];
 	}
 
-	private function formatSeance(Seance $seance, ?string $day = null, ?string $time = null): array
+	private function formatSeance(Seance $seance, ?int $currentUserId = null, ?string $day = null, ?string $time = null): array
 	{
 		$date = $seance->getDateSeance();
 
@@ -119,6 +137,8 @@ class PlanningController extends AbstractController
 
 		$day = $this->normalizeDay($day);
 		$status = (string) ($seance->getStatutSeance() ?? 'Inconnu');
+		$professorId = $seance->getIdProfesseur();
+		$canHost = $currentUserId !== null && $professorId !== null && $currentUserId === (int) $professorId;
 
 		return [
 			'id' => 's' . $seance->getId(),
@@ -128,15 +148,19 @@ class PlanningController extends AbstractController
 			'type' => 'cours',
 			'specialty' => 'Professeur',
 			'therapist' => 'Professeur',
+			'professorId' => $professorId,
 			'description' => $seance->getDescription() ?? 'Aucune description',
 			'icon' => '👨‍🏫',
 			'available' => $this->isAvailableStatus($status),
+			'zoomJoinUrl' => $seance->getZoomJoinUrl(),
+			'zoomStartUrl' => $canHost ? $seance->getZoomStartUrl() : null,
 			'level' => 'Tous niveaux',
 		];
 	}
 
 	private function buildPlanningSessions(EntityManagerInterface $em): array
 	{
+		$currentUserId = $this->getCurrentUserId();
 		$emplois = $em->getRepository(EmploiDuTemps::class)->findAll();
 		$rdvRepo = $em->getRepository(Rdv::class);
 		$seanceRepo = $em->getRepository(Seance::class);
@@ -149,23 +173,23 @@ class PlanningController extends AbstractController
 			if ($emploi->getIdRdv()) {
 				$rdv = $rdvRepo->find($emploi->getIdRdv());
 				if ($rdv) {
-					$sessions[] = $this->formatRdv($rdv, $day, $time);
+					$sessions[] = $this->formatRdv($rdv, $currentUserId, $day, $time);
 				}
 			} elseif ($emploi->getIdSeance()) {
 				$seance = $seanceRepo->find($emploi->getIdSeance());
 				if ($seance) {
-					$sessions[] = $this->formatSeance($seance, $day, $time);
+					$sessions[] = $this->formatSeance($seance, $currentUserId, $day, $time);
 				}
 			}
 		}
 
 		if (count($sessions) === 0) {
 			foreach ($rdvRepo->findBy([], ['dateHeureRdv' => 'ASC']) as $rdv) {
-				$sessions[] = $this->formatRdv($rdv);
+				$sessions[] = $this->formatRdv($rdv, $currentUserId);
 			}
 
 			foreach ($seanceRepo->findBy([], ['dateSeance' => 'ASC']) as $seance) {
-				$sessions[] = $this->formatSeance($seance);
+				$sessions[] = $this->formatSeance($seance, $currentUserId);
 			}
 		}
 
@@ -196,11 +220,12 @@ class PlanningController extends AbstractController
 	#[Route('/rdv-front', name: 'app_front_rdv_list')]
 	public function rdv(EntityManagerInterface $em): Response
 	{
+		$currentUserId = $this->getCurrentUserId();
 		$rdvs = $em->getRepository(Rdv::class)->findBy([], ['dateHeureRdv' => 'ASC']);
 		$sessions = [];
 
 		foreach ($rdvs as $rdv) {
-			$sessions[] = $this->formatRdv($rdv);
+			$sessions[] = $this->formatRdv($rdv, $currentUserId);
 		}
 
 		$stats = [
@@ -222,6 +247,7 @@ class PlanningController extends AbstractController
 	#[Route('/seance-front', name: 'app_front_seance_list')]
 	public function seance(EntityManagerInterface $em): Response
 	{
+		$currentUserId = $this->getCurrentUserId();
 		$seances = $em->getRepository(Seance::class)->findBy([], ['dateSeance' => 'ASC']);
 		$latestSeance = $em->getRepository(Seance::class)->findOneBy([], ['updatedAt' => 'DESC']);
 		$latestSeanceDetails = $em->getConnection()->fetchAssociative(
@@ -246,7 +272,7 @@ class PlanningController extends AbstractController
 		$sessions = [];
 
 		foreach ($seances as $seance) {
-			$sessions[] = $this->formatSeance($seance);
+			$sessions[] = $this->formatSeance($seance, $currentUserId);
 		}
 
 		$stats = [

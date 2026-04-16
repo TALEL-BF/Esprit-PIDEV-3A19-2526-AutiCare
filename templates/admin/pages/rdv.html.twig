@@ -404,6 +404,15 @@
                         <td>{{ rdv.dureeRdvMinutes }} min</td>
                         <td>
                             <a href="{{ path('admin_rdv_edit', {id: rdv.id}) }}" class="btn-edit-soft me-1">Modifier</a>
+                            {% if app.user and rdv.idPsychologue is defined and rdv.idPsychologue == app.user.id and rdv.zoomStartUrl %}
+                                <a href="{{ rdv.zoomStartUrl }}" target="_blank" class="btn-gradient me-1">
+                                    <i class="fas fa-video"></i> Lancer la réunion
+                                </a>
+                            {% elseif rdv.zoomJoinUrl %}
+                                <a href="{{ rdv.zoomJoinUrl }}" target="_blank" class="btn-outline-purple btn-sm me-1" style="padding: 4px 12px; font-size: 0.95em; vertical-align: middle;">
+                                    <i class="fas fa-sign-in-alt"></i> Rejoindre
+                                </a>
+                            {% endif %}
                             <form method="post" action="{{ path('admin_rdv_delete', {id: rdv.id}) }}" style="display:inline" onsubmit="return confirm('Supprimer ce RDV ?');">
                                 <input type="hidden" name="_token" value="{{ csrf_token('delete_rdv_' ~ rdv.id) }}">
                                 <button class="btn-danger-soft">Supprimer</button>
@@ -445,6 +454,7 @@
 
 <!-- FullCalendar JS & CSS -->
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
 <style>
     /* Intégration pro du calendrier avec le thème */
@@ -564,31 +574,34 @@ document.addEventListener('DOMContentLoaded', function() {
         {% endif %}
     {% endfor %}
 
-    new Chart(document.getElementById('rdvChart').getContext('2d'), {
-        type: 'doughnut',
-        data: {
-            labels: ['Planifiée', 'Confirmée', 'Annulée', 'Autres'],
-            datasets: [{
-                data: [stats.planifiee, stats.confirme, stats.annule, stats.autres],
-                backgroundColor: [P.p400, P.pink, P.indigo, P.accent],
-                borderWidth: 0,
-                hoverOffset: 8
-            }]
-        },
-        options: {
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        usePointStyle: true,
-                        font: { family: 'DM Sans', size: 11 }
-                    }
-                }
+    const rdvChartEl = document.getElementById('rdvChart');
+    if (rdvChartEl && typeof Chart !== 'undefined') {
+        new Chart(rdvChartEl.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Planifiée', 'Confirmée', 'Annulée', 'Autres'],
+                datasets: [{
+                    data: [stats.planifiee, stats.confirme, stats.annule, stats.autres],
+                    backgroundColor: [P.p400, P.pink, P.indigo, P.accent],
+                    borderWidth: 0,
+                    hoverOffset: 8
+                }]
             },
-            cutout: '60%',
-            responsive: true
-        }
-    });
+            options: {
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            font: { family: 'DM Sans', size: 11 }
+                        }
+                    }
+                },
+                cutout: '60%',
+                responsive: true
+            }
+        });
+    }
 
     const rdvSearchInput = document.getElementById('rdvSearchInput');
     const rdvStatusFilter = document.getElementById('rdvStatusFilter');

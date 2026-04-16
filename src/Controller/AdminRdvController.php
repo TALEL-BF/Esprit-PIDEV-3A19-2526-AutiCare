@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Rdv;
 use App\Form\RdvType;
 use App\Repository\RdvRepository;
+use App\Service\ZoomService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -15,16 +16,35 @@ use Symfony\Component\Routing\Annotation\Route;
 class AdminRdvController extends AbstractController
 {
     #[Route('/admin/rdv', name: 'admin_rdv')]
-    public function rdv(Request $request, EntityManagerInterface $entityManager, RdvRepository $rdvRepository): Response
+    public function rdv(Request $request, EntityManagerInterface $entityManager, RdvRepository $rdvRepository, ZoomService $zoomService): Response
     {
         $rdv = new Rdv();
         $form = $this->createForm(RdvType::class, $rdv, ['is_create' => true]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $zoomErrorMessage = null;
+
+            try {
+                $zoomMeeting = $zoomService->createMeeting(
+                    $rdv->getDateHeureRdv() ?? new \DateTimeImmutable('now', new \DateTimeZone('Africa/Tunis')),
+                    (string) ($rdv->getTypeConsultation() ?? 'Rendez-vous AutiCare'),
+                    (int) ($rdv->getDureeRdvMinutes() ?? 60)
+                );
+                $rdv->setZoomJoinUrl($zoomMeeting['join_url'] ?? null);
+                $rdv->setZoomStartUrl($zoomMeeting['start_url'] ?? null);
+            } catch (\Throwable $e) {
+                $zoomErrorMessage = $e->getMessage();
+                $rdv->setZoomJoinUrl(null);
+                $rdv->setZoomStartUrl(null);
+            }
+
             $entityManager->persist($rdv);
             $entityManager->flush();
             $this->addFlash('success', 'RDV ajoute avec succes.');
+            if ($zoomErrorMessage !== null) {
+                $this->addFlash('warning', 'RDV cree, mais sans lien Zoom: ' . $zoomErrorMessage);
+            }
 
             return $this->redirectToRoute('admin_rdv');
         }

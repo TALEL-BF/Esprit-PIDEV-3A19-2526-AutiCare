@@ -5,9 +5,11 @@ namespace App\Controller;
 use App\Entity\Seance;
 use App\Form\SeanceType;
 use App\Repository\SeanceRepository;
+use App\Service\ZoomService;
 use App\Service\WindowsNotificationService;
 use App\Service\WebNotificationService;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,13 +19,29 @@ use Symfony\Component\Routing\Annotation\Route;
 class AdminSeanceController extends AbstractController
 {
     #[Route('/admin/seance', name: 'admin_seance')]
-    public function seance(Request $request, EntityManagerInterface $entityManager, SeanceRepository $seanceRepository, WindowsNotificationService $windowsNotifier, WebNotificationService $webNotifier): Response
+    public function seance(Request $request, EntityManagerInterface $entityManager, SeanceRepository $seanceRepository, WindowsNotificationService $windowsNotifier, WebNotificationService $webNotifier, ZoomService $zoomService): Response
     {
         $seance = new Seance();
         $form = $this->createForm(SeanceType::class, $seance, $this->buildSeanceFormOptions($entityManager, true));
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $zoomErrorMessage = null;
+
+            try {
+                $zoomMeeting = $zoomService->createMeeting(
+                    $seance->getDateSeance() ?? new \DateTimeImmutable('now', new \DateTimeZone('Africa/Tunis')),
+                    (string) ($seance->getTitreSeance() ?? 'Seance AutiCare'),
+                    (int) ($seance->getDuree() ?? 60)
+                );
+                $seance->setZoomJoinUrl($zoomMeeting['join_url'] ?? null);
+                $seance->setZoomStartUrl($zoomMeeting['start_url'] ?? null);
+            } catch (\Throwable $e) {
+                $zoomErrorMessage = $e->getMessage();
+                $seance->setZoomJoinUrl(null);
+                $seance->setZoomStartUrl(null);
+            }
+
             $entityManager->persist($seance);
             $entityManager->flush();
             
@@ -35,7 +53,26 @@ class AdminSeanceController extends AbstractController
             $webDataJSON = $webNotifier->toJSON($webData);
             
             $this->addFlash('success', 'Seance ajoutee avec succes.');
+            if ($zoomErrorMessage !== null) {
+                $this->addFlash('warning', 'Seance creee, mais sans lien Zoom: ' . $zoomErrorMessage);
+            }
             $this->addFlash('notification_web', $webDataJSON);
+
+            if ($this->isApiRequest($request)) {
+                return new JsonResponse([
+                    'status' => 'success',
+                    'message' => 'Seance creee avec succes.',
+                    'zoom_status' => $zoomErrorMessage === null ? 'created' : 'failed',
+                    'zoom_error' => $zoomErrorMessage,
+                    'seance' => [
+                        'id' => $seance->getId(),
+                        'titre' => $seance->getTitreSeance(),
+                        'date' => $seance->getDateSeance()?->setTimezone(new \DateTimeZone('Africa/Tunis'))->format('Y-m-d\\TH:i:sP'),
+                        'duree' => $seance->getDuree(),
+                        'zoom_join_url' => $seance->getZoomJoinUrl(),
+                    ],
+                ], Response::HTTP_CREATED);
+            }
 
             return $this->redirectToRoute('admin_seance');
         }
@@ -48,6 +85,15 @@ class AdminSeanceController extends AbstractController
             'isEdit' => false,
             'entity' => null,
         ]);
+    }
+
+    private function isApiRequest(Request $request): bool
+    {
+        $acceptHeader = (string) $request->headers->get('Accept', '');
+
+        return $request->isXmlHttpRequest()
+            || $request->getRequestFormat() === 'json'
+            || str_contains(strtolower($acceptHeader), 'application/json');
     }
 
     #[Route('/admin/seance/{id}/edit', name: 'admin_seance_edit', requirements: ['id' => '\\d+'])]
