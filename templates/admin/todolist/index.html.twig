@@ -499,6 +499,39 @@
     cursor: not-allowed;
 }
 
+/* Couleurs des cartes todo par statut */
+.todo-card[data-statut="À faire"] {
+    border-left: 4px solid var(--todo-rose);
+    background: linear-gradient(135deg, #fff 0%, #FFF4F8 100%);
+}
+.todo-card[data-statut="À faire"]:hover {
+    background: linear-gradient(135deg, #FFF4F8 0%, #FFE8F0 100%);
+    border-left-color: var(--todo-rose-fonce);
+    box-shadow: 0 8px 20px rgba(255, 105, 180, 0.2);
+}
+
+.todo-card[data-statut="En cours"] {
+    border-left: 4px solid var(--todo-violet);
+    background: linear-gradient(135deg, #fff 0%, #F5F0FF 100%);
+}
+.todo-card[data-statut="En cours"]:hover {
+    background: linear-gradient(135deg, #F5F0FF 0%, #EBE0FF 100%);
+    border-left-color: var(--todo-violet-fonce);
+    box-shadow: 0 8px 20px rgba(155, 89, 182, 0.2);
+}
+
+.todo-card[data-statut="Terminé"] {
+    border-left: 4px solid #2ECC71;
+    background: linear-gradient(135deg, #fff 0%, #F0FBF5 100%);
+    opacity: 0.85;
+}
+.todo-card[data-statut="Terminé"]:hover {
+    background: linear-gradient(135deg, #F0FBF5 0%, #E0F7EC 100%);
+    border-left-color: #27AE60;
+    box-shadow: 0 8px 20px rgba(46, 204, 113, 0.2);
+    opacity: 1;
+}
+
 /* Empty message */
 .empty-message {
     text-align: center;
@@ -739,6 +772,7 @@ function createTodoCard(todo) {
     const card = document.createElement('div');
     card.className = 'todo-card';
     card.setAttribute('data-id', todo.id);
+    card.setAttribute('data-statut', todo.statut);
     card.setAttribute('draggable', 'true');
     
     const isTermine = todo.statut === 'Terminé';
