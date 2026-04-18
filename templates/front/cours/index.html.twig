@@ -293,7 +293,10 @@
                 </div>
                 <div class="position-relative">
                     <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-                    <input type="text" id="searchCourse" class="form-control ps-5 pe-4 py-2" placeholder="Rechercher un cours...">
+                    <input type="text" id="searchCourse" class="form-control ps-5 pe-5 py-2" placeholder="Rechercher un cours...">
+                    <button id="micSearchCourse" class="mic-search-btn position-absolute top-50 end-0 translate-middle-y me-3" title="Recherche vocale">
+                        <i class="fas fa-microphone"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -400,5 +403,10 @@
             });
             document.getElementById('noResults').classList.toggle('d-none', visibleCount > 0);
         });
+
+        // Initialisation de la recherche vocale
+        if (typeof initVoiceSearch === 'function') {
+            initVoiceSearch('searchCourse', 'micSearchCourse');
+        }
     </script>
 {% endblock %}

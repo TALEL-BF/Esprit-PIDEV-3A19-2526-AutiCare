@@ -83,7 +83,7 @@ class PlanningController extends AbstractController
 	{
 		$normalized = $this->normalizeForCompare($status);
 
-		return in_array($normalized, ['planifiee', 'confirmee', 'active', 'disponible'], true);
+		return in_array($normalized, ['planifiee', 'planifie', 'confirmee', 'confirme', 'active', 'disponible', 'reporte'], true);
 	}
 
 	private function formatRdv(Rdv $rdv, ?int $currentUserId = null, ?string $day = null, ?string $time = null): array
@@ -100,25 +100,40 @@ class PlanningController extends AbstractController
 		}
 
 		$day = $this->normalizeDay($day);
-		$consultationType = (string) ($rdv->getTypeConsultation() ?? 'Psychologue');
+		$consultationType = (string) ($rdv->getTypeConsultation() ?? 'Consultation');
 		$status = (string) ($rdv->getStatutRdv() ?? 'Inconnu');
 		$professorId = $rdv->getIdPsychologue();
+		$patientId = $rdv->getIdAutiste();
 		$canHost = $currentUserId !== null && $professorId !== null && $currentUserId === (int) $professorId;
+		$isPatient = $currentUserId !== null && $patientId !== null && $currentUserId === (int) $patientId;
+
+		// Titre lisible du type de consultation
+		$typeLabel = match ($this->normalizeForCompare($consultationType)) {
+			'premiereconsultation' => 'Première consultation',
+			'suivi' => 'Suivi psychologique',
+			'urgence' => 'Consultation urgente',
+			'familiale' => 'Consultation familiale',
+			'bilan' => 'Bilan psychologique',
+			default => ucfirst(str_replace('_', ' ', $consultationType)),
+		};
 
 		return [
 			'id' => 'r' . $rdv->getId(),
 			'day' => $day,
 			'time' => $time,
-			'title' => 'Consultation ' . ucfirst($consultationType),
+			'title' => $typeLabel,
 			'type' => 'psychologue',
-			'specialty' => ucfirst($consultationType),
+			'specialty' => 'Rendez-vous psychologique',
 			'therapist' => 'Psychologue',
 			'professorId' => $professorId,
-			'description' => 'Statut: ' . ucfirst($status),
+			'patientId' => $patientId,
+			'description' => 'Statut: ' . ucfirst($status) . ' — Durée: ' . ($rdv->getDureeRdvMinutes() ?? '?') . ' min',
 			'icon' => '👩‍⚕️',
 			'available' => $this->isAvailableStatus($status),
 			'zoomJoinUrl' => $rdv->getZoomJoinUrl(),
 			'zoomStartUrl' => $canHost ? $rdv->getZoomStartUrl() : null,
+			'isHost' => $canHost,
+			'isPatient' => $isPatient,
 			'level' => 'Sur rendez-vous',
 		];
 	}

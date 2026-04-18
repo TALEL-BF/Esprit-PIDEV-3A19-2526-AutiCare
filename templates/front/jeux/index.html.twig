@@ -139,7 +139,12 @@
                                     {% endfor %}
                                 </div>
                             </div>
-                            <h5 class="fw-bold mb-2">{{ game.title }}</h5>
+                            <h5 class="fw-bold mb-2 d-flex align-items-center justify-content-between">
+                                {{ game.title }}
+                                <i class="fas fa-volume-up speak-btn-global" 
+                                   onclick="AutiCareSpeech.speak('{{ game.title }}. {{ game.description|escape('js') }}')" 
+                                   title="Écouter"></i>
+                            </h5>
                             <p class="text-muted small mb-3">{{ game.description }}</p>
                             <div class="d-flex gap-2">
                                 <a href="#" class="btn btn-primary btn-border-radius text-white flex-fill">

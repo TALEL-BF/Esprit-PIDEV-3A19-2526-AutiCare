@@ -1,0 +1,111 @@
+{# templates/partials/_speech_helper.html.twig #}
+<script>
+    /**
+     * AutiCare Global Speech Service
+     */
+    const AutiCareSpeech = {
+        // Text-to-Speech (Synthèse vocale)
+        speak: function(text, lang = 'fr-FR') {
+            if (!('speechSynthesis' in window)) {
+                console.error("Speech Synthesis not supported");
+                return;
+            }
+            window.speechSynthesis.cancel(); // Stop any pending speech
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = lang;
+            utterance.pitch = 1.0;
+            utterance.rate = 1.0;
+            window.speechSynthesis.speak(utterance);
+        },
+
+        // Speech-to-Text (Reconnaissance vocale)
+        listen: function(onResult, onEnd, lang = 'fr-FR') {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert("La reconnaissance vocale n'est pas supportée par votre navigateur.");
+                return null;
+            }
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = lang;
+            recognition.continuous = false;
+            recognition.interimResults = false;
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                if (onResult) onResult(transcript);
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Speech Recognition Error:', event.error);
+                if (onEnd) onEnd();
+            };
+
+            recognition.onend = () => {
+                if (onEnd) onEnd();
+            };
+
+            recognition.start();
+            return recognition;
+        }
+    };
+
+    /**
+     * Utility to add voice search to an input
+     */
+    function initVoiceSearch(inputId, btnId) {
+        const input = document.getElementById(inputId);
+        const btn = document.getElementById(btnId);
+        if (!input || !btn) return;
+
+        btn.addEventListener('click', function() {
+            btn.classList.add('active-mic');
+            AutiCareSpeech.listen(
+                (transcript) => {
+                    input.value = transcript;
+                    input.dispatchEvent(new Event('input')); // Trigger search logic
+                },
+                () => {
+                    btn.classList.remove('active-mic');
+                }
+            );
+        });
+    }
+</script>
+
+<style>
+    .speak-btn-global {
+        cursor: pointer;
+        color: #94a3b8;
+        transition: all 0.2s;
+        padding: 5px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .speak-btn-global:hover {
+        color: var(--primary, #4d65f9);
+        background: rgba(77,101,249,0.1);
+        transform: scale(1.1);
+    }
+    
+    .mic-search-btn {
+        background: transparent;
+        border: none;
+        color: #94a3b8;
+        transition: all 0.2s;
+    }
+    .mic-search-btn:hover {
+        color: var(--primary, #4d65f9);
+    }
+    .active-mic {
+        color: #ef4444 !important;
+        animation: pulseMic 1.5s infinite;
+    }
+    @keyframes pulseMic {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+</style>

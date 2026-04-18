@@ -16,6 +16,8 @@ class RdvType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $isCreate = (bool) $options['is_create'];
+        $psychologueChoices = (array) $options['psychologue_choices'];
+        $patientChoices = (array) $options['patient_choices'];
 
         $builder
             ->add('typeConsultation', ChoiceType::class, [
@@ -81,11 +83,7 @@ class RdvType extends AbstractType
             ])
             ->add('idPsychologue', ChoiceType::class, [
                 'label' => 'Psychologue',
-                'choices' => [
-                    'Dr. Fatma Trabelsi' => 1,
-                    'Dr. Sana Mejri' => 2,
-                    'Dr. Amine Karray' => 3,
-                ],
+                'choices' => $psychologueChoices,
                 'placeholder' => 'Sélectionner un psychologue',
                 'data' => $isCreate ? null : $builder->getData()?->getIdPsychologue(),
                 'constraints' => [
@@ -94,12 +92,7 @@ class RdvType extends AbstractType
             ])
             ->add('idAutiste', ChoiceType::class, [
                 'label' => 'Patient',
-                'choices' => [
-                    'Adam Mejri' => 1,
-                    'Sara Hamdi' => 2,
-                    'Youssef Ben Amor' => 3,
-                    'Nour Gharbi' => 4,
-                ],
+                'choices' => $patientChoices,
                 'placeholder' => 'Sélectionner un patient',
                 'data' => $isCreate ? null : $builder->getData()?->getIdAutiste(),
                 'constraints' => [
@@ -113,8 +106,12 @@ class RdvType extends AbstractType
         $resolver->setDefaults([
             'data_class' => Rdv::class,
             'is_create' => false,
+            'psychologue_choices' => [],
+            'patient_choices' => [],
         ]);
 
         $resolver->setAllowedTypes('is_create', 'bool');
+        $resolver->setAllowedTypes('psychologue_choices', 'array');
+        $resolver->setAllowedTypes('patient_choices', 'array');
     }
 }

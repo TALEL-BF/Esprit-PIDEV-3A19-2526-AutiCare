@@ -7,6 +7,7 @@ use App\Form\EmploiDuTempsType;
 use App\Repository\EmploiDuTempsRepository;
 use App\Repository\RdvRepository;
 use App\Repository\SeanceRepository;
+use App\Service\ExportService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
@@ -116,6 +117,76 @@ class AdminPlanningController extends AbstractController
         }
 
         return $this->redirectToRoute('admin_planning');
+    }
+
+    #[Route('/admin/planning/export/{type}', name: 'admin_planning_export')]
+    public function export(string $type, EmploiDuTempsRepository $emploiRepository, EntityManagerInterface $entityManager, ExportService $exportService, \Twig\Environment $twig): Response
+    {
+        $emplois = $emploiRepository->findAllByNewest();
+        $headings = ['Année Scolaire', 'Jour', 'Tranche Horaire', 'Type', 'Détails'];
+        
+        $stats = [
+            'Total' => count($emplois),
+            'RDV' => 0,
+            'Séance' => 0,
+            'Autres' => 0
+        ];
+
+        $data = [];
+        foreach ($emplois as $emploi) {
+            $typeLabel = 'Autre';
+            $details = 'N/A';
+            
+            if ($emploi->getIdRdv()) {
+                $typeLabel = 'RDV';
+                $details = $this->fetchRdvDetails($entityManager, $emploi->getIdRdv());
+                $stats['RDV']++;
+            } elseif ($emploi->getIdSeance()) {
+                $typeLabel = 'Séance';
+                $details = $this->fetchSeanceDetails($entityManager, $emploi->getIdSeance());
+                $stats['Séance']++;
+            } else {
+                $stats['Autres']++;
+            }
+
+            $data[] = [
+                $emploi->getAnneeScolaire(),
+                $emploi->getJourSemaine(),
+                $emploi->getTrancheHoraire(),
+                $typeLabel,
+                $details
+            ];
+        }
+
+        $filename = 'planning_list_' . date('Y-m-d');
+
+        if ($type === 'pdf') {
+            $html = $twig->render('admin/exports/export_pdf.html.twig', [
+                'title' => 'Rapport du Planning',
+                'headings' => $headings,
+                'data' => $data,
+                'stats' => $stats
+            ]);
+            return $exportService->generatePdf($html, $filename);
+        }
+
+        return $exportService->generateExcel($headings, $data, $filename);
+    }
+
+    private function fetchRdvDetails(EntityManagerInterface $entityManager, int $id): string
+    {
+        $row = $entityManager->getConnection()->fetchAssociative('SELECT type_consultation, date_heure_rdv FROM rdv WHERE id_rdv = :id', ['id' => $id]);
+        if (!$row) return 'RDV #' . $id;
+        $date = isset($row['date_heure_rdv']) ? (new \DateTime($row['date_heure_rdv']))->format('d/m/Y H:i') : 'N/A';
+        return $row['type_consultation'] . ' (' . $date . ')';
+    }
+
+    private function fetchSeanceDetails(EntityManagerInterface $entityManager, int $id): string
+    {
+        $row = $entityManager->getConnection()->fetchAssociative('SELECT titre_seance, date_seance FROM seance WHERE id_seance = :id', ['id' => $id]);
+        if (!$row) return 'Séance #' . $id;
+        $date = isset($row['date_seance']) ? (new \DateTime($row['date_seance']))->format('d/m/Y H:i') : 'N/A';
+        return $row['titre_seance'] . ' (' . $date . ')';
     }
 
     private function getEmploiFormOptions(RdvRepository $rdvRepository, SeanceRepository $seanceRepository): array

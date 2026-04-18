@@ -151,9 +151,19 @@
 
 {% block body %}
 
-<div class="page-header">
-    <h2><i class="fas fa-calendar-check me-2" style="color:var(--purple-500)"></i>Gestion des Séances</h2>
-    <p>Planifier et administrer les séances pédagogiques et leur suivi</p>
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h2><i class="fas fa-calendar-check me-2" style="color:var(--purple-500)"></i>Gestion des Séances</h2>
+        <p>Planifier et administrer les séances pédagogiques et leur suivi</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ path('admin_seance_export', {type: 'pdf'}) }}" class="btn-outline-purple">
+            <i class="fas fa-file-pdf me-1"></i> Export PDF
+        </a>
+        <a href="{{ path('admin_seance_export', {type: 'excel'}) }}" class="btn-outline-purple" style="border-color: #10b981; color: #10b981;">
+            <i class="fas fa-file-excel me-1"></i> Export Excel
+        </a>
+    </div>
 </div>
 
 {% for message in app.session.flashBag.peek('success') %}

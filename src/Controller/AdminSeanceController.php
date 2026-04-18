@@ -8,6 +8,7 @@ use App\Repository\SeanceRepository;
 use App\Service\ZoomService;
 use App\Service\WindowsNotificationService;
 use App\Service\WebNotificationService;
+use App\Service\ExportService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -140,6 +141,72 @@ class AdminSeanceController extends AbstractController
         }
 
         return $this->redirectToRoute('admin_seance');
+    }
+
+    #[Route('/admin/seance/export/{type}', name: 'admin_seance_export')]
+    public function export(string $type, SeanceRepository $seanceRepository, EntityManagerInterface $entityManager, ExportService $exportService, \Twig\Environment $twig): Response
+    {
+        $seances = $seanceRepository->findAllByNewest();
+        $headings = ['Titre', 'Date', 'Durée (min)', 'Patient', 'Professeur', 'Cours', 'Statut'];
+        
+        $stats = [
+            'Total' => count($seances),
+            'Confirmées' => 0,
+            'Planifiées' => 0,
+            'Annulées' => 0
+        ];
+
+        $data = [];
+        foreach ($seances as $seance) {
+            $patient = $this->fetchNameById($entityManager, $seance->getIdAutiste());
+            $prof = $this->fetchNameById($entityManager, $seance->getIdProfesseur());
+            $cours = $this->fetchCourseTitleById($entityManager, $seance->getIdCours());
+            $statut = $seance->getStatutSeance();
+
+            // Stats
+            $s = strtolower($statut);
+            if ($s === 'confirme' || $s === 'confirmé' || $s === 'confirmée') $stats['Confirmées']++;
+            elseif ($s === 'planifiee' || $s === 'planifiée') $stats['Planifiées']++;
+            elseif ($s === 'annule' || $s === 'annulé' || $s === 'annulée') $stats['Annulées']++;
+            
+            $data[] = [
+                $seance->getTitreSeance(),
+                $seance->getDateSeance()?->format('d/m/Y H:i') ?? 'N/A',
+                $seance->getDuree(),
+                $patient,
+                $prof,
+                $cours,
+                $statut
+            ];
+        }
+
+        $filename = 'seance_list_' . date('Y-m-d');
+
+        if ($type === 'pdf') {
+            $html = $twig->render('admin/exports/export_pdf.html.twig', [
+                'title' => 'Rapport des Séances',
+                'headings' => $headings,
+                'data' => $data,
+                'stats' => $stats
+            ]);
+            return $exportService->generatePdf($html, $filename);
+        }
+
+        return $exportService->generateExcel($headings, $data, $filename);
+    }
+
+    private function fetchNameById(EntityManagerInterface $entityManager, ?int $id): string
+    {
+        if (!$id) return 'N/A';
+        $row = $entityManager->getConnection()->fetchAssociative('SELECT nom, prenom FROM user WHERE id = :id', ['id' => $id]);
+        return $row ? (trim($row['prenom'] . ' ' . $row['nom']) ?: 'Utilisateur #' . $id) : 'N/A';
+    }
+
+    private function fetchCourseTitleById(EntityManagerInterface $entityManager, ?int $id): string
+    {
+        if (!$id) return 'N/A';
+        $row = $entityManager->getConnection()->fetchAssociative('SELECT titre FROM cours WHERE id_cours = :id', ['id' => $id]);
+        return $row['titre'] ?? ('Cours #' . $id);
     }
 
     private function buildSeanceFormOptions(EntityManagerInterface $entityManager, bool $isCreate = false): array

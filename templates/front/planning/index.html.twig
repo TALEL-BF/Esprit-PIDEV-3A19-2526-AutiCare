@@ -280,7 +280,10 @@
                 </div>
                 <div class="position-relative">
                     <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-                    <input type="text" id="searchSession" class="form-control ps-5 pe-4" placeholder="Rechercher un professeur..." style="border-radius: 40px; border: 1px solid #e0e0e0; min-width: 220px;">
+                    <input type="text" id="searchSession" class="form-control ps-5 pe-5" placeholder="Rechercher un professeur..." style="border-radius: 40px; border: 1px solid #e0e0e0; min-width: 220px;">
+                    <button id="micSearchSession" class="mic-search-btn position-absolute top-50 end-0 translate-middle-y me-3" title="Recherche vocale">
+                        <i class="fas fa-microphone"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -340,6 +343,10 @@
                             <div>
                                 <h6 class="fw-bold mb-1">2. Ouvrez le lien de réunion</h6>
                                 <p class="text-muted small mb-0">Cliquez sur Rejoindre la réunion au moment prévu de la séance</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             
                 <div class="col-lg-6">
                     <div class="bg-primary rounded-4 p-4 text-white text-center">
@@ -434,30 +441,54 @@
                                 <span class="time-badge"><i class="far fa-clock me-1"></i> ${session.time}</span>
                                 <span class="badge bg-light text-dark ms-2">${session.level}</span>
                             </div>
-                            <h5 class="fw-bold mb-2">${session.title}</h5>
+                            <h5 class="fw-bold mb-2 d-flex align-items-center justify-content-between">
+                                ${session.title}
+                                <i class="fas fa-volume-up speak-btn-global" 
+                                   onclick="AutiCareSpeech.speak('${session.title}. ${session.description.replace(/'/g, "\\'")}')" 
+                                   title="Écouter"></i>
+                            </h5>
                             <p class="text-muted small mb-3">${session.description}</p>
                             <div class="d-flex justify-content-between align-items-center mt-3">
                                 <div class="d-flex align-items-center gap-2">
-                                    <i class="fas fa-video text-primary"></i>
-                                    <span class="small text-muted">Visioconférence</span>
+                                    <i class="fas fa-video ${session.type === 'psychologue' ? 'text-danger' : 'text-primary'}"></i>
+                                    <span class="small text-muted">Visioconférence Zoom</span>
                                 </div>
-                                ${session.available
-                                    ? (session.zoomJoinUrl
-                                        ? `<div class="session-actions">
-                                            <a href="${currentUserId !== null && Number(currentUserId) === Number(session.professorId) && session.zoomStartUrl ? session.zoomStartUrl : session.zoomJoinUrl}"
-                                               target="_blank" rel="noopener noreferrer"
-                                               class="btn-gradient">
-                                                <i class="far fa-clock"></i> ${currentUserId !== null && Number(currentUserId) === Number(session.professorId) ? 'Lancer la réunion' : 'Rejoindre la réunion'}
-                                            </a>
-                                        </div>`
-                                        : `<div class="session-actions"><span class="action-btn action-btn-disabled"><i class="fas fa-link-slash"></i> Lien indisponible</span></div>`)
-                                    : `<span class="action-pill-disabled"><i class="fas fa-clock"></i> Indisponible</span>`
-                                }
+                                ${renderZoomButton(session)}
                             </div>
                         </div>
                     </div>
                 </div>
             `).join('');
+        }
+
+        function renderZoomButton(session) {
+            if (!session.available) {
+                return `<span class="action-pill-disabled"><i class="fas fa-clock"></i> Indisponible</span>`;
+            }
+            if (!session.zoomJoinUrl) {
+                return `<span class="action-btn action-btn-disabled"><i class="fas fa-link-slash"></i> Lien indisponible</span>`;
+            }
+            // Psychologue / Hôte → bouton "Lancer la réunion"
+            if (session.isHost && session.zoomStartUrl) {
+                return `<div class="session-actions">
+                    <a href="${session.zoomStartUrl}" target="_blank" rel="noopener noreferrer"
+                       class="action-btn"
+                       style="background:linear-gradient(135deg,#ff4880,#c0392b);color:#fff;border-color:transparent;border-radius:30px;padding:9px 16px;font-size:0.82rem;font-weight:700;display:inline-flex;align-items:center;gap:6px;text-decoration:none;">
+                        <i class="fas fa-video"></i> Lancer la réunion
+                    </a>
+                </div>`;
+            }
+            // Enfant / Patient → bouton "Rejoindre"
+            const isRdv = session.type === 'psychologue';
+            const borderColor = isRdv ? '#ff4880' : 'var(--primary)';
+            const textColor   = isRdv ? '#ff4880' : 'var(--primary)';
+            return `<div class="session-actions">
+                <a href="${session.zoomJoinUrl}" target="_blank" rel="noopener noreferrer"
+                   class="action-btn action-btn-join"
+                   style="border-color:${borderColor};color:${textColor};">
+                    <i class="fas fa-sign-in-alt"></i> Rejoindre
+                </a>
+            </div>`;
         }
 
         let currentDay = "Lundi";
@@ -485,5 +516,10 @@
         });
         renderSchedule(currentDay);
         showLatestSeanceNotification();
+
+        // Initialisation de la recherche vocale
+        if (typeof initVoiceSearch === 'function') {
+            initVoiceSearch('searchSession', 'micSearchSession');
+        }
     </script>
 {% endblock %}
