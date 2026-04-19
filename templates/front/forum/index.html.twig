@@ -1,0 +1,577 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Forum des Parents — AutiCare{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+/* ══ FORUM FRONT ══════════════════════════════════════════════════════════ */
+.forum-hero {
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    border-radius: 20px;
+    padding: 32px 36px;
+    color: #fff;
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+}
+.forum-hero::before {
+    content: '';
+    position: absolute; top: -30px; right: -30px;
+    width: 160px; height: 160px;
+    background: rgba(255,255,255,.08);
+    border-radius: 50%;
+}
+.forum-hero-title { font-size: 1.6rem; font-weight: 900; margin-bottom: 6px; }
+.forum-hero-sub   { opacity: .8; font-size: .95rem; }
+.forum-hero-stats { display: flex; gap: 20px; margin-top: 16px; flex-wrap: wrap; }
+.forum-hero-stat  { background: rgba(255,255,255,.15); border-radius: 12px; padding: 8px 16px; font-size: .85rem; font-weight: 700; }
+
+/* Catégories */
+.forum-cats { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.forum-cat-btn {
+    padding: 7px 16px; border-radius: 50px;
+    border: 1.5px solid #ede9fe; background: #fff;
+    color: #5b21b6; font-size: .82rem; font-weight: 600;
+    cursor: pointer; transition: all .2s;
+}
+.forum-cat-btn:hover, .forum-cat-btn.active {
+    background: #7c3aed; color: #fff; border-color: #7c3aed;
+}
+
+/* Formulaire nouveau post */
+.forum-new-post {
+    background: #fff;
+    border-radius: 18px;
+    border: 1.5px solid #ede9fe;
+    padding: 22px 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 16px rgba(124,58,237,.08);
+}
+.forum-new-post-title {
+    font-size: 1rem; font-weight: 800; color: #1e1b4b;
+    margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+}
+.forum-form-row    { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.forum-input       { flex: 1; min-width: 160px; padding: 9px 14px; border: 1.5px solid #e5e7eb; border-radius: 10px; font-size: .85rem; color: #374151; outline: none; transition: border .2s; }
+.forum-input:focus { border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124,58,237,.1); }
+.forum-textarea    { width: 100%; min-height: 90px; padding: 12px 14px; border: 1.5px solid #e5e7eb; border-radius: 10px; font-size: .85rem; color: #374151; outline: none; resize: vertical; transition: border .2s; font-family: inherit; }
+.forum-textarea:focus { border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124,58,237,.1); }
+.forum-char-count  { font-size: .72rem; color: #9ca3af; text-align: right; margin-top: 4px; }
+.forum-select      { padding: 9px 14px; border: 1.5px solid #e5e7eb; border-radius: 10px; font-size: .85rem; color: #374151; outline: none; background: #fff; cursor: pointer; }
+.forum-select:focus{ border-color: #7c3aed; }
+.forum-submit-btn  {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    color: #fff; border: none; border-radius: 12px;
+    padding: 11px 24px; font-size: .88rem; font-weight: 700;
+    cursor: pointer; transition: all .2s;
+    box-shadow: 0 4px 14px rgba(124,58,237,.3);
+}
+.forum-submit-btn:hover   { opacity: .92; transform: translateY(-1px); }
+.forum-submit-btn:disabled{ opacity: .6; cursor: not-allowed; transform: none; }
+
+/* Cards posts */
+.forum-post-card {
+    background: #fff;
+    border-radius: 16px;
+    border: 1.5px solid #ede9fe;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    transition: box-shadow .2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,.04);
+}
+.forum-post-card:hover { box-shadow: 0 6px 24px rgba(124,58,237,.12); }
+.forum-post-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.forum-post-author {
+    display: flex; align-items: center; gap: 10px;
+}
+.forum-avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 14px; font-weight: 800; flex-shrink: 0;
+}
+.forum-avatar.psy { background: linear-gradient(135deg, #059669, #10b981); }
+.forum-author-name  { font-size: .88rem; font-weight: 700; color: #1e1b4b; }
+.forum-author-meta  { font-size: .73rem; color: #9ca3af; margin-top: 1px; }
+.forum-post-cat {
+    padding: 3px 10px; border-radius: 50px;
+    background: #f5f3ff; color: #5b21b6;
+    font-size: .7rem; font-weight: 700;
+    white-space: nowrap;
+}
+.forum-post-body { font-size: .88rem; color: #374151; line-height: 1.7; margin-bottom: 12px; }
+.forum-censure-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: #fef3c7; border: 1px solid #fcd34d;
+    border-radius: 8px; padding: 3px 10px;
+    font-size: .72rem; color: #92400e; font-weight: 600;
+    margin-bottom: 8px;
+}
+.forum-post-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    border-top: 1px solid #f5f3ff; padding-top: 10px;
+    margin-top: 4px;
+}
+.forum-reponses-toggle {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: #5b21b6; font-size: .8rem; font-weight: 600;
+    cursor: pointer; background: #f5f3ff; border: none;
+    padding: 6px 14px; border-radius: 10px; transition: all .2s;
+}
+.forum-reponses-toggle:hover { background: #ede9fe; }
+
+/* Réponses */
+.forum-reponses-zone {
+    background: #faf5ff;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-top: 12px;
+    border: 1px solid #ede9fe;
+    display: none;
+}
+.forum-reponse-item {
+    display: flex; gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #ede9fe;
+}
+.forum-reponse-item:last-of-type { border-bottom: none; }
+.forum-reponse-bubble {
+    flex: 1;
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px 14px;
+    border: 1px solid #ede9fe;
+}
+.forum-reponse-bubble.psy-bubble {
+    background: #f0fdf4;
+    border-color: #a7f3d0;
+}
+.forum-rep-author { font-size: .78rem; font-weight: 700; color: #1e1b4b; margin-bottom: 4px; }
+.forum-rep-author .psy-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #059669, #10b981);
+    color: #fff; font-size: .65rem; font-weight: 700;
+    padding: 1px 7px; border-radius: 50px; margin-left: 6px;
+    vertical-align: middle;
+}
+.forum-rep-text { font-size: .83rem; color: #374151; line-height: 1.6; }
+.forum-rep-date { font-size: .7rem; color: #9ca3af; margin-top: 4px; }
+
+/* Zone réponse rapide */
+.forum-quick-reply {
+    display: flex; gap: 8px; margin-top: 12px;
+}
+.forum-quick-input {
+    flex: 1; padding: 9px 14px; border: 1.5px solid #ddd6fe;
+    border-radius: 10px; font-size: .83rem; outline: none;
+    font-family: inherit; transition: border .2s;
+}
+.forum-quick-input:focus { border-color: #7c3aed; }
+.forum-quick-send {
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    color: #fff; border: none; border-radius: 10px;
+    padding: 9px 16px; cursor: pointer; font-size: .83rem; font-weight: 700;
+    transition: all .2s;
+}
+.forum-quick-send:hover { opacity: .9; }
+
+/* Toast */
+.forum-toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+    background: #1e1b4b; color: #fff; border-radius: 12px;
+    padding: 12px 24px; font-size: .88rem; font-weight: 600;
+    z-index: 9999; box-shadow: 0 8px 24px rgba(0,0,0,.2);
+    opacity: 0; transition: opacity .3s;
+    white-space: nowrap;
+}
+.forum-toast.show { opacity: 1; }
+
+/* Empty state */
+.forum-empty {
+    text-align: center; padding: 50px 20px;
+    color: #9ca3af;
+}
+.forum-empty i { font-size: 2.5rem; color: #c4b5fd; display: block; margin-bottom: 12px; }
+
+/* Spinner */
+.forum-spinner {
+    width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,.4);
+    border-top-color: #fff; border-radius: 50%;
+    animation: forumSpin .6s linear infinite;
+    display: inline-block; vertical-align: middle; margin-right: 6px;
+}
+@keyframes forumSpin { to { transform: rotate(360deg); } }
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div class="forum-toast" id="forumToast"></div>
+
+<div class="container" style="max-width:800px;margin:0 auto;padding:24px 16px;">
+
+    {# ── Hero ── #}
+    <div class="forum-hero">
+        <div class="forum-hero-title">💬 Forum des Parents</div>
+        <div class="forum-hero-sub">Partagez vos expériences, posez vos questions, soutenez-vous mutuellement.</div>
+        <div class="forum-hero-stats">
+            <div class="forum-hero-stat">📝 {{ totalPosts }} discussion{{ totalPosts > 1 ? 's' : '' }}</div>
+            <div class="forum-hero-stat">🤝 Communauté AutiCare</div>
+            <div class="forum-hero-stat">🔒 Espace sécurisé</div>
+        </div>
+    </div>
+
+    {# ── Nouveau post ── #}
+    <div class="forum-new-post">
+        <div class="forum-new-post-title">
+            <i class="fas fa-plus-circle" style="color:#7c3aed;"></i>
+            Partager avec la communauté
+        </div>
+        <div class="forum-form-row">
+            <input type="text" id="forumAuteur" class="forum-input" placeholder="Votre prénom (ex: Sophie, parent d'Adam)" maxlength="60">
+            <input type="text" id="forumNomEnfant" class="forum-input" placeholder="Prénom de l'enfant (optionnel)" maxlength="50">
+            <select id="forumCategorie" class="forum-select">
+                {% for cat in categories %}
+                <option value="{{ cat }}">{{ cat }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <textarea id="forumContenu" class="forum-textarea"
+            placeholder="Partagez votre expérience, posez une question, donnez un conseil... (max 1000 caractères)"
+            maxlength="1000"
+            oninput="document.getElementById('forumCharCount').textContent = this.value.length"></textarea>
+        <div class="forum-char-count"><span id="forumCharCount">0</span>/1000</div>
+        <div style="display:flex;justify-content:flex-end;margin-top:10px;">
+            <button class="forum-submit-btn" id="forumSubmitBtn" onclick="publierPost()">
+                <i class="fas fa-paper-plane"></i> Publier
+            </button>
+        </div>
+    </div>
+
+    {# ── Filtres catégories ── #}
+    <div class="forum-cats">
+        <button class="forum-cat-btn active" onclick="filtrerCat('tous', this)">
+            <i class="fas fa-th-large me-1"></i> Tous
+        </button>
+        {% for cat in categories %}
+        <button class="forum-cat-btn" onclick="filtrerCat('{{ cat }}', this)">{{ cat }}</button>
+        {% endfor %}
+    </div>
+
+    {# ── Liste des posts ── #}
+    <div id="forumPostsList">
+        {% if posts is empty %}
+        <div class="forum-empty">
+            <i class="fas fa-comments"></i>
+            <div style="font-size:1rem;font-weight:700;color:#5b21b6;margin-bottom:6px;">Soyez le premier à partager !</div>
+            <div>La communauté vous attend. Posez votre première question.</div>
+        </div>
+        {% else %}
+            {% for post in posts %}
+            <div class="forum-post-card" id="post-{{ post.id }}" data-id="{{ post.id }}">
+                <div class="forum-post-header">
+                    <div class="forum-post-author">
+                        <div class="forum-avatar">{{ post.auteur|slice(0,1)|upper }}</div>
+                        <div>
+                            <div class="forum-author-name">{{ post.auteur }}</div>
+                            <div class="forum-author-meta">
+                                {{ post.createdAt|date('d/m/Y à H:i') }}
+                                {% if post.nomEnfant %} · 👶 {{ post.nomEnfant }}{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <span class="forum-post-cat">{{ post.categorie ?? 'Général' }}</span>
+                </div>
+
+                {% if post.nbMotsCensures > 0 %}
+                <div class="forum-censure-badge">
+                    <i class="fas fa-shield-alt"></i>
+                    {{ post.nbMotsCensures }} mot{{ post.nbMotsCensures > 1 ? 's' : '' }} masqué{{ post.nbMotsCensures > 1 ? 's' : '' }}
+                </div>
+                {% endif %}
+
+                <div class="forum-post-body">{{ post.contenu }}</div>
+
+                <div class="forum-post-footer">
+                    <button class="forum-reponses-toggle" onclick="toggleReponses({{ post.id }}, this)">
+                        <i class="fas fa-comment-dots"></i>
+                        <span id="rep-count-{{ post.id }}">{{ post.reponses|length }}</span> réponse{{ post.reponses|length > 1 ? 's' : '' }}
+                    </button>
+                    <span style="font-size:.72rem;color:#c4b5fd;">{{ post.createdAt|date('d/m') }}</span>
+                </div>
+
+                {# Zone réponses #}
+                <div class="forum-reponses-zone" id="reponses-{{ post.id }}">
+                    <div id="reponses-list-{{ post.id }}">
+                        {% for rep in post.reponses %}
+                        <div class="forum-reponse-item">
+                            <div class="forum-avatar {% if rep.auteurType == 'psy' %}psy{% endif %}" style="width:30px;height:30px;font-size:11px;">
+                                {{ rep.auteur|slice(0,1)|upper }}
+                            </div>
+                            <div class="forum-reponse-bubble {% if rep.auteurType == 'psy' %}psy-bubble{% endif %}">
+                                <div class="forum-rep-author">
+                                    {{ rep.auteur }}
+                                    {% if rep.auteurType == 'psy' %}<span class="psy-badge">Psy AutiCare</span>{% endif %}
+                                </div>
+                                <div class="forum-rep-text">{{ rep.contenu }}</div>
+                                <div class="forum-rep-date">{{ rep.createdAt|date('d/m/Y à H:i') }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="forum-quick-reply">
+                        <input type="text" class="forum-quick-input" id="reply-input-{{ post.id }}"
+                            placeholder="Votre réponse... (prénom:message ou juste le message)">
+                        <button class="forum-quick-send" onclick="envoyerReponse({{ post.id }})">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+// ── Afficher toast ──────────────────────────────────────────────────────
+function showForumToast(msg, color) {
+    const t = document.getElementById('forumToast');
+    t.textContent = msg;
+    t.style.background = color || '#1e1b4b';
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ── Publier un post ─────────────────────────────────────────────────────
+async function publierPost() {
+    const auteur    = document.getElementById('forumAuteur').value.trim()    || 'Parent anonyme';
+    const nomEnfant = document.getElementById('forumNomEnfant').value.trim() || null;
+    const contenu   = document.getElementById('forumContenu').value.trim();
+    const categorie = document.getElementById('forumCategorie').value;
+    const btn       = document.getElementById('forumSubmitBtn');
+
+    if (!contenu) { showForumToast('⚠️ Le message ne peut pas être vide.', '#d97706'); return; }
+
+    btn.disabled  = true;
+    btn.innerHTML = '<span class="forum-spinner"></span> Publication...';
+
+    try {
+        const resp = await fetch('/forum/post', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ auteur, nomEnfant, contenu, categorie })
+        });
+        const data = await resp.json();
+
+        if (data.success) {
+            // Vider le formulaire
+            document.getElementById('forumContenu').value = '';
+            document.getElementById('forumCharCount').textContent = '0';
+
+            // Ajouter le post en haut de la liste
+            prependPost(data.post);
+
+            const msg = data.nbMotsCensures > 0
+                ? `✅ Publié — ${data.nbMotsCensures} mot(s) masqué(s) automatiquement`
+                : '✅ Message publié !';
+            showForumToast(msg, data.nbMotsCensures > 0 ? '#d97706' : '#059669');
+        } else {
+            showForumToast('❌ ' + data.message, '#dc2626');
+        }
+    } catch {
+        showForumToast('❌ Erreur de connexion.', '#dc2626');
+    } finally {
+        btn.disabled  = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Publier';
+    }
+}
+
+// ── Ajouter un post dynamiquement ──────────────────────────────────────
+function prependPost(post) {
+    const list = document.getElementById('forumPostsList');
+
+    // Supprimer l'empty state si présent
+    const empty = list.querySelector('.forum-empty');
+    if (empty) empty.remove();
+
+    const initiale = post.auteur.charAt(0).toUpperCase();
+    const html = `
+    <div class="forum-post-card" id="post-${post.id}" data-id="${post.id}" style="animation:toastIn .3s ease;">
+        <div class="forum-post-header">
+            <div class="forum-post-author">
+                <div class="forum-avatar">${initiale}</div>
+                <div>
+                    <div class="forum-author-name">${escHtml(post.auteur)}</div>
+                    <div class="forum-author-meta">${post.createdAt}${post.nomEnfant ? ' · 👶 '+escHtml(post.nomEnfant) : ''}</div>
+                </div>
+            </div>
+            <span class="forum-post-cat">${escHtml(post.categorie)}</span>
+        </div>
+        ${post.nbMotsCensures > 0 ? `<div class="forum-censure-badge"><i class="fas fa-shield-alt"></i> ${post.nbMotsCensures} mot(s) masqué(s)</div>` : ''}
+        <div class="forum-post-body">${escHtml(post.contenu)}</div>
+        <div class="forum-post-footer">
+            <button class="forum-reponses-toggle" onclick="toggleReponses(${post.id}, this)">
+                <i class="fas fa-comment-dots"></i>
+                <span id="rep-count-${post.id}">0</span> réponse
+            </button>
+            <span style="font-size:.72rem;color:#c4b5fd;">${post.createdAt.slice(0,5)}</span>
+        </div>
+        <div class="forum-reponses-zone" id="reponses-${post.id}">
+            <div id="reponses-list-${post.id}"></div>
+            <div class="forum-quick-reply">
+                <input type="text" class="forum-quick-input" id="reply-input-${post.id}" placeholder="Votre réponse...">
+                <button class="forum-quick-send" onclick="envoyerReponse(${post.id})">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>`;
+
+    list.insertAdjacentHTML('afterbegin', html);
+}
+
+// ── Toggle réponses ─────────────────────────────────────────────────────
+function toggleReponses(postId, btn) {
+    const zone = document.getElementById('reponses-' + postId);
+    const visible = zone.style.display === 'block';
+    zone.style.display = visible ? 'none' : 'block';
+    if (!visible) {
+        document.getElementById('reply-input-' + postId)?.focus();
+    }
+}
+
+// ── Envoyer une réponse ─────────────────────────────────────────────────
+async function envoyerReponse(postId) {
+    const input   = document.getElementById('reply-input-' + postId);
+    const texte   = input.value.trim();
+    if (!texte) return;
+
+    // Permettre "Prénom:message"
+    let auteur  = 'Parent anonyme';
+    let contenu = texte;
+    if (texte.includes(':')) {
+        const idx = texte.indexOf(':');
+        auteur  = texte.slice(0, idx).trim() || 'Parent anonyme';
+        contenu = texte.slice(idx + 1).trim();
+    }
+
+    input.value = '';
+
+    try {
+        const resp = await fetch(`/forum/post/${postId}/reponse`, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ auteur, contenu, auteurType: 'parent' })
+        });
+        const data = await resp.json();
+
+        if (data.success) {
+            appendReponse(postId, data.reponse);
+            // Mettre à jour le compteur
+            const counter = document.getElementById('rep-count-' + postId);
+            if (counter) counter.textContent = parseInt(counter.textContent) + 1;
+            showForumToast('✅ Réponse publiée !', '#059669');
+        } else {
+            showForumToast('❌ ' + data.message, '#dc2626');
+        }
+    } catch {
+        showForumToast('❌ Erreur de connexion.', '#dc2626');
+    }
+}
+
+// ── Afficher une réponse ────────────────────────────────────────────────
+function appendReponse(postId, rep) {
+    const list    = document.getElementById('reponses-list-' + postId);
+    const isPsy   = rep.auteurType === 'psy';
+    const initiale = rep.auteur.charAt(0).toUpperCase();
+
+    const html = `
+    <div class="forum-reponse-item" style="animation:toastIn .25s ease;">
+        <div class="forum-avatar ${isPsy ? 'psy' : ''}" style="width:30px;height:30px;font-size:11px;">${initiale}</div>
+        <div class="forum-reponse-bubble ${isPsy ? 'psy-bubble' : ''}">
+            <div class="forum-rep-author">
+                ${escHtml(rep.auteur)}
+                ${isPsy ? '<span class="psy-badge">Psy AutiCare</span>' : ''}
+            </div>
+            <div class="forum-rep-text">${escHtml(rep.contenu)}</div>
+            <div class="forum-rep-date">${rep.createdAt}</div>
+        </div>
+    </div>`;
+
+    list.insertAdjacentHTML('beforeend', html);
+    list.scrollTop = list.scrollHeight;
+}
+
+// ── Filtrer par catégorie ───────────────────────────────────────────────
+async function filtrerCat(cat, btn) {
+    document.querySelectorAll('.forum-cat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    try {
+        const url  = '/forum/posts' + (cat !== 'tous' ? '?categorie=' + encodeURIComponent(cat) : '');
+        const resp = await fetch(url);
+        const data = await resp.json();
+
+        const list = document.getElementById('forumPostsList');
+        if (!data.posts.length) {
+            list.innerHTML = '<div class="forum-empty"><i class="fas fa-comments"></i><div>Aucun post dans cette catégorie.</div></div>';
+            return;
+        }
+
+        list.innerHTML = data.posts.map(post => `
+            <div class="forum-post-card" id="post-${post.id}">
+                <div class="forum-post-header">
+                    <div class="forum-post-author">
+                        <div class="forum-avatar">${post.auteur.charAt(0).toUpperCase()}</div>
+                        <div>
+                            <div class="forum-author-name">${escHtml(post.auteur)}</div>
+                            <div class="forum-author-meta">${post.createdAt}${post.nomEnfant ? ' · 👶 '+escHtml(post.nomEnfant) : ''}</div>
+                        </div>
+                    </div>
+                    <span class="forum-post-cat">${escHtml(post.categorie)}</span>
+                </div>
+                ${post.nbMotsCensures > 0 ? `<div class="forum-censure-badge"><i class="fas fa-shield-alt"></i> ${post.nbMotsCensures} mot(s) masqué(s)</div>` : ''}
+                <div class="forum-post-body">${escHtml(post.contenu)}</div>
+                <div class="forum-post-footer">
+                    <button class="forum-reponses-toggle" onclick="toggleReponses(${post.id}, this)">
+                        <i class="fas fa-comment-dots"></i>
+                        <span id="rep-count-${post.id}">${post.nbReponses}</span> réponse${post.nbReponses > 1 ? 's' : ''}
+                    </button>
+                </div>
+                <div class="forum-reponses-zone" id="reponses-${post.id}">
+                    <div id="reponses-list-${post.id}"></div>
+                    <div class="forum-quick-reply">
+                        <input type="text" class="forum-quick-input" id="reply-input-${post.id}" placeholder="Votre réponse...">
+                        <button class="forum-quick-send" onclick="envoyerReponse(${post.id})"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>`).join('');
+    } catch { showForumToast('❌ Erreur lors du filtre.', '#dc2626'); }
+}
+
+// ── Escape HTML ─────────────────────────────────────────────────────────
+function escHtml(str) {
+    const d = document.createElement('div');
+    d.appendChild(document.createTextNode(String(str || '')));
+    return d.innerHTML;
+}
+
+// ── Envoi avec Entrée ───────────────────────────────────────────────────
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && e.target.classList.contains('forum-quick-input')) {
+        e.preventDefault();
+        const postId = e.target.id.replace('reply-input-', '');
+        envoyerReponse(parseInt(postId));
+    }
+});
+</script>
+{% endblock %}

@@ -25,6 +25,77 @@
     --pastel-mint: #e0fff0;
     --pastel-mint-dark: #7ef5c8;
 }
+/* ========== DROPDOWN MENU ========== */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-btn {
+    background: transparent;
+    color: var(--pastel-purple-dark);
+    border: 2px solid var(--pastel-purple-dark);
+    padding: 6px 15px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dropdown-btn:hover {
+    background: var(--pastel-purple);
+    transform: translateY(-2px);
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    margin-top: 8px;
+    background-color: white;
+    min-width: 180px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    border-radius: 12px;
+    z-index: 1000;
+    overflow: hidden;
+    border: 1px solid var(--pastel-pink-dark);
+}
+
+.dropdown-content.show {
+    display: block;
+    animation: fadeIn 0.2s ease;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    text-decoration: none;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-size: 14px;
+}
+
+.dropdown-item:hover {
+    background: var(--pastel-pink-soft);
+    color: var(--pastel-purple-dark);
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: var(--pastel-pink);
+    margin: 5px 0;
+}
 /* Add to your existing styles */
 /* ========== FORM ERROR STYLES (MATCHING EVENTS PAGE) ========== */
 .form-error {
@@ -827,9 +898,24 @@ select[multiple] option:checked {
 </div>
 
 <!-- TABLEAU DES SPONSORS -->
+<!-- TABLEAU DES SPONSORS -->
 <div class="card-box">
     <div class="card-box-header">
         <span class="card-box-title"><i class="fas fa-list"></i> Liste des Sponsors</span>
+        <div class="dropdown">
+            <button class="dropdown-btn" onclick="toggleDropdown()">
+                📊 Exporter ▼
+            </button>
+            <div class="dropdown-content" id="exportDropdown">
+                <button class="dropdown-item" onclick="exportToPDF()">
+                    📄 Exporter PDF
+                </button>
+                <div class="dropdown-divider"></div>
+                <button class="dropdown-item" onclick="exportToCSV()">
+                    📊 Exporter CSV
+                </button>
+            </div>
+        </div>
     </div>
     <div class="card-box-body p-0">
         <div class="table-wrapper">
@@ -1785,5 +1871,72 @@ document.addEventListener('DOMContentLoaded', function() {
     // Chargement initial
     loadSponsors();
 });
+function exportToCSV() {
+    // Récupérer les filtres actuels
+    const searchTerm = document.getElementById('smartSearch')?.value || '';
+    const type = document.getElementById('filterType')?.value || 'tous';
+    const sortBy = document.getElementById('filterSort')?.value || 'montant_desc';
+    
+    // Construire l'URL avec les filtres
+    const url = new URL('{{ path('admin_sponsors_export_csv') }}', window.location.origin);
+    url.searchParams.append('search', searchTerm);
+    url.searchParams.append('type', type);
+    url.searchParams.append('sortBy', sortBy);
+    
+    // Ouvrir l'export dans un nouvel onglet ou télécharger
+    window.location.href = url.toString();
+    
+    showTempMessage('📊 Export CSV en cours...', 'success');
+}
+// ========== DROPDOWN FUNCTIONS ==========
+function toggleDropdown() {
+    const dropdown = document.getElementById('exportDropdown');
+    dropdown.classList.toggle('show');
+}
+
+// Fermer le dropdown en cliquant ailleurs
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('exportDropdown');
+    const btn = document.querySelector('.dropdown-btn');
+    if (dropdown && btn && !btn.contains(event.target) && !dropdown.contains(event.target)) {
+        dropdown.classList.remove('show');
+    }
+});
+
+// ========== EXPORT PDF ==========
+function exportToPDF() {
+    const searchTerm = document.getElementById('smartSearch')?.value || '';
+    const type = document.getElementById('filterType')?.value || 'tous';
+    const sortBy = document.getElementById('filterSort')?.value || 'montant_desc';
+    
+    const url = new URL('{{ path('admin_sponsors_export_pdf') }}', window.location.origin);
+    url.searchParams.append('search', searchTerm);
+    url.searchParams.append('type', type);
+    url.searchParams.append('sortBy', sortBy);
+    
+    window.location.href = url.toString();
+    showTempMessage('📄 Export PDF en cours...', 'success');
+    
+    // Fermer le dropdown
+    document.getElementById('exportDropdown')?.classList.remove('show');
+}
+
+// ========== EXPORT CSV (mise à jour) ==========
+function exportToCSV() {
+    const searchTerm = document.getElementById('smartSearch')?.value || '';
+    const type = document.getElementById('filterType')?.value || 'tous';
+    const sortBy = document.getElementById('filterSort')?.value || 'montant_desc';
+    
+    const url = new URL('{{ path('admin_sponsors_export_csv') }}', window.location.origin);
+    url.searchParams.append('search', searchTerm);
+    url.searchParams.append('type', type);
+    url.searchParams.append('sortBy', sortBy);
+    
+    window.location.href = url.toString();
+    showTempMessage('📊 Export CSV en cours...', 'success');
+    
+    // Fermer le dropdown
+    document.getElementById('exportDropdown')?.classList.remove('show');
+}
 </script>
 {% endblock %}

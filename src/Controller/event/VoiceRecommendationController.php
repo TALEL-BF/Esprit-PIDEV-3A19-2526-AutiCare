@@ -9,9 +9,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
-use App\Service\AssemblyAiService;
-use App\Service\GroqService;
-use App\Service\VoiceRecommendationService;
+use App\Services\AssemblyAiService;
+use App\Services\GroqService;
+use App\Services\VoiceRecommendationService;
 use Psr\Log\LoggerInterface;
 
 class VoiceRecommendationController extends AbstractController
@@ -34,62 +34,67 @@ class VoiceRecommendationController extends AbstractController
     }
 
     #[Route('/api/voice/recommend', name: 'api_voice_recommend', methods: ['POST'])]
-    public function recommend(Request $request): JsonResponse
-    {
-        $tempPath = null;
+public function recommend(Request $request): JsonResponse
+{
+    $tempPath = null;
+    
+    try {
+        $this->logger->info('=== API RECOMMEND START ===');
         
-        try {
-            $this->logger->info('=== API RECOMMEND START ===');
-            
-            $audioFile = $request->files->get('audio');
-            
-            if (!$audioFile) {
-                return $this->json(['success' => false, 'error' => 'Aucun fichier audio reçu'], 400);
-            }
-            
-            // Sauvegarder le fichier temporaire
-            $originalExtension = $audioFile->getClientOriginalExtension();
-            $tempPath = sys_get_temp_dir() . '/voice_' . uniqid() . '.' . $originalExtension;
-            $audioFile->move(sys_get_temp_dir(), basename($tempPath));
-            
-            $selectedEmotion = $request->request->get('selected_emotion');
-            
-            // Appeler le service
-            $result = $this->voiceService->analyzeAndRecommend($tempPath, $selectedEmotion);
-            
-            // Nettoyer
-            if ($tempPath && file_exists($tempPath)) {
-                unlink($tempPath);
-            }
-            
-            if ($result['success']) {
-                return $this->json([
-                    'success' => true,
-                    'user_text' => $result['user_text'],
-                    'emotion' => $this->traduireEmotionPourAffichage($result['emotion']),
-                    'emotion_icon' => $this->getEmotionIcon($result['emotion']),
-                    'confidence' => $result['confidence'] ?? 0.8,
-                    'advice' => $result['advice'],
-                    'recommended_events' => $result['recommended_events'],
-                    'fallback_used' => false
-                ]);
-            } else {
-                return $this->json([
-                    'success' => false,
-                    'error' => $result['error'] ?? 'Erreur inconnue'
-                ], 500);
-            }
-            
-        } catch (\Exception $e) {
-            $this->logger->error('Erreur voice recommendation: ' . $e->getMessage());
-            
-            if ($tempPath && file_exists($tempPath)) {
-                unlink($tempPath);
-            }
-            
-            return $this->getFallbackResponse($request);
+        $audioFile = $request->files->get('audio');
+        
+        if (!$audioFile) {
+            return $this->json(['success' => false, 'error' => 'Aucun fichier audio reçu'], 400);
         }
+        
+        // Sauvegarder le fichier temporaire
+        $originalExtension = $audioFile->getClientOriginalExtension();
+        $tempPath = sys_get_temp_dir() . '/voice_' . uniqid() . '.' . $originalExtension;
+        $audioFile->move(sys_get_temp_dir(), basename($tempPath));
+        
+        $selectedEmotion = $request->request->get('selected_emotion');
+        
+        // Appeler le service
+        $result = $this->voiceService->analyzeAndRecommend($tempPath, $selectedEmotion);
+        
+        // Nettoyer
+        if ($tempPath && file_exists($tempPath)) {
+            unlink($tempPath);
+        }
+        
+        if ($result['success']) {
+            return $this->json([
+                'success' => true,
+                'user_text' => $result['user_text'],
+                'emotion' => $this->traduireEmotionPourAffichage($result['emotion']),
+                'emotion_icon' => $this->getEmotionIcon($result['emotion']),
+                'confidence' => $result['confidence'] ?? 0.8,
+                'advice' => $result['advice'],
+                'recommended_events' => $result['recommended_events'] ?? [],  // ← Peut être vide
+                'fallback_used' => false
+            ]);
+        } else {
+            return $this->json([
+                'success' => false,
+                'error' => $result['error'] ?? 'Erreur inconnue'
+            ], 500);
+        }
+        
+    } catch (\Exception $e) {
+        $this->logger->error('Erreur voice recommendation: ' . $e->getMessage());
+        
+        if ($tempPath && $tempPath && file_exists($tempPath)) {
+            unlink($tempPath);
+        }
+        
+        // 🔥 SUPPRIME L'APPEL À getFallbackResponse()
+        // 🔥 Retourne une erreur simple au lieu du fallback
+        return $this->json([
+            'success' => false,
+            'error' => 'Service temporairement indisponible. Réessaie plus tard.'
+        ], 500);
     }
+}
 
     private function getFallbackResponse(Request $request): JsonResponse
     {

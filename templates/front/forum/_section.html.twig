@@ -1,0 +1,504 @@
+{# templates/front/forum/_section.html.twig #}
+<style>
+.forum-wrap { max-width: 860px; margin: 0 auto; }
+
+/* Hero */
+.forum-hero {
+    background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+    border-radius: 22px; padding: 28px 32px; color: #fff;
+    margin-bottom: 24px; position: relative; overflow: hidden;
+    box-shadow: 0 8px 32px rgba(124,58,237,.25);
+}
+.forum-hero::before {
+    content:''; position:absolute; top:-40px; right:-40px;
+    width:180px; height:180px; background:rgba(255,255,255,.07);
+    border-radius:50%;
+}
+.forum-hero::after {
+    content:''; position:absolute; bottom:-30px; left:60px;
+    width:120px; height:120px; background:rgba(255,255,255,.05);
+    border-radius:50%;
+}
+.forum-hero-title { font-size:1.5rem; font-weight:900; margin-bottom:5px; position:relative; }
+.forum-hero-desc  { opacity:.82; font-size:.88rem; margin-bottom:14px; position:relative; }
+.forum-hero-stats { display:flex; gap:12px; flex-wrap:wrap; position:relative; }
+.forum-hero-stat  {
+    background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.25);
+    border-radius: 50px; padding: 5px 14px; font-size:.78rem; font-weight:700;
+    display:flex; align-items:center; gap:6px;
+}
+
+/* New post card */
+.forum-compose {
+    background: #fff; border-radius: 18px;
+    border: 1.5px solid #ede9fe;
+    box-shadow: 0 4px 20px rgba(124,58,237,.08);
+    overflow: hidden; margin-bottom: 20px;
+}
+.forum-compose-header {
+    background: linear-gradient(135deg, #faf5ff, #f0e6ff);
+    padding: 14px 20px; border-bottom: 1px solid #ede9fe;
+    display: flex; align-items: center; gap: 10px;
+}
+.forum-compose-title { font-size:.9rem; font-weight:800; color:#5b21b6; }
+.forum-compose-body { padding: 18px 20px; }
+.forum-form-row { display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap; }
+.forum-inp {
+    flex:1; min-width:160px; padding:10px 14px;
+    border: 1.5px solid #e5e7eb; border-radius: 11px;
+    font-size:.84rem; color:#374151; outline:none; transition:border .2s;
+    background:#fafafa;
+}
+.forum-inp:focus { border-color:#7c3aed; background:#fff; box-shadow:0 0 0 3px rgba(124,58,237,.08); }
+.forum-sel {
+    padding:10px 14px; border:1.5px solid #e5e7eb; border-radius:11px;
+    font-size:.84rem; color:#374151; outline:none; background:#fafafa;
+    cursor:pointer; transition:border .2s;
+}
+.forum-sel:focus { border-color:#7c3aed; }
+.forum-ta {
+    width:100%; min-height:90px; padding:12px 14px;
+    border:1.5px solid #e5e7eb; border-radius:11px;
+    font-size:.84rem; color:#374151; outline:none; resize:vertical;
+    transition:border .2s; font-family:inherit; background:#fafafa;
+}
+.forum-ta:focus { border-color:#7c3aed; background:#fff; box-shadow:0 0 0 3px rgba(124,58,237,.08); }
+.forum-ta-footer { display:flex; align-items:center; justify-content:space-between; margin-top:10px; }
+.forum-char { font-size:.7rem; color:#9ca3af; }
+.forum-submit {
+    display:inline-flex; align-items:center; gap:7px;
+    background:linear-gradient(135deg,#7c3aed,#4f46e5);
+    color:#fff; border:none; border-radius:12px;
+    padding:11px 26px; font-size:.86rem; font-weight:700;
+    cursor:pointer; transition:all .2s;
+    box-shadow:0 4px 16px rgba(124,58,237,.3);
+}
+.forum-submit:hover { transform:translateY(-1px); box-shadow:0 8px 24px rgba(124,58,237,.4); }
+.forum-submit:disabled { opacity:.6; cursor:not-allowed; transform:none; }
+
+/* Category filters */
+.forum-filters { display:flex; gap:7px; flex-wrap:wrap; margin-bottom:18px; align-items:center; }
+.forum-filters-label { font-size:.72rem; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.4px; }
+.forum-cat-btn {
+    padding:6px 16px; border-radius:50px;
+    border:1.5px solid #ede9fe; background:#fff;
+    color:#5b21b6; font-size:.78rem; font-weight:600;
+    cursor:pointer; transition:all .2s;
+}
+.forum-cat-btn:hover { border-color:#c4b5fd; background:#faf5ff; }
+.forum-cat-btn.active { background:#7c3aed; color:#fff; border-color:#7c3aed; box-shadow:0 4px 12px rgba(124,58,237,.25); }
+
+/* Post card */
+.forum-post {
+    background: #fff; border-radius: 16px;
+    border: 1.5px solid #f0ebff;
+    margin-bottom: 13px; overflow: hidden;
+    transition: box-shadow .2s, border-color .2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,.04);
+}
+.forum-post:hover { box-shadow:0 6px 24px rgba(124,58,237,.1); border-color:#ddd6fe; }
+
+.forum-post-head {
+    display:flex; align-items:flex-start;
+    justify-content:space-between; gap:10px;
+    padding:14px 16px 10px;
+}
+.forum-avatar-wrap { display:flex; align-items:center; gap:10px; }
+.forum-avatar {
+    width:38px; height:38px; border-radius:50%; flex-shrink:0;
+    background:linear-gradient(135deg,#7c3aed,#4f46e5);
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size:14px; font-weight:800;
+    box-shadow:0 3px 10px rgba(124,58,237,.3);
+}
+.forum-author { font-size:.87rem; font-weight:700; color:#1e1b4b; }
+.forum-meta   { font-size:.7rem; color:#9ca3af; margin-top:2px; }
+.forum-badges { display:flex; gap:6px; align-items:center; flex-shrink:0; }
+.forum-cat-tag {
+    background:#f5f3ff; color:#5b21b6;
+    border-radius:50px; font-size:.68rem; font-weight:700;
+    padding:3px 10px; border:1px solid #ede9fe;
+}
+.forum-censure-badge {
+    display:inline-flex; align-items:center; gap:4px;
+    background:#fef9ec; border:1px solid #fde68a;
+    border-radius:50px; font-size:.68rem; color:#92400e; font-weight:700;
+    padding:3px 9px;
+}
+
+.forum-post-body {
+    padding:0 16px 12px;
+    font-size:.86rem; color:#374151; line-height:1.75;
+}
+
+.forum-post-foot {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:9px 16px 11px; border-top:1px solid #f8f5ff;
+    background:#fdfbff;
+}
+.forum-reply-btn {
+    display:inline-flex; align-items:center; gap:6px;
+    color:#6d28d9; font-size:.78rem; font-weight:600;
+    cursor:pointer; background:#f0e6ff;
+    border:none; padding:5px 14px; border-radius:9px;
+    transition:all .2s;
+}
+.forum-reply-btn:hover { background:#e0d4fc; }
+.forum-reply-count { font-size:.72rem; color:#c4b5fd; font-weight:600; }
+
+/* Replies zone */
+.forum-reps {
+    background:#f9f7ff; border-top:1px solid #ede9fe;
+    padding:13px 16px; display:none;
+}
+.forum-rep-item { display:flex; gap:9px; padding:8px 0; border-bottom:1px solid #ede9fe; }
+.forum-rep-item:last-of-type { border-bottom:none; }
+.forum-rep-av {
+    width:30px; height:30px; border-radius:50%; flex-shrink:0;
+    background:linear-gradient(135deg,#7c3aed,#4f46e5);
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size:11px; font-weight:800;
+}
+.forum-rep-av.psy { background:linear-gradient(135deg,#059669,#10b981); }
+.forum-rep-bubble {
+    flex:1; background:#fff; border-radius:10px;
+    padding:9px 12px; border:1px solid #ede9fe;
+}
+.forum-rep-bubble.psy { background:#f0fdf4; border-color:#a7f3d0; }
+.forum-rep-author { font-size:.76rem; font-weight:700; color:#1e1b4b; margin-bottom:3px; }
+.forum-psy-badge {
+    background:linear-gradient(135deg,#059669,#10b981); color:#fff;
+    font-size:.6rem; font-weight:700; padding:1px 7px;
+    border-radius:50px; margin-left:5px; vertical-align:middle;
+}
+.forum-rep-text { font-size:.8rem; color:#374151; line-height:1.6; }
+.forum-rep-date { font-size:.67rem; color:#9ca3af; margin-top:3px; }
+
+/* Quick reply */
+.forum-quick-reply { display:flex; gap:8px; margin-top:11px; }
+.forum-quick-inp {
+    flex:1; padding:9px 13px; border:1.5px solid #ddd6fe;
+    border-radius:10px; font-size:.8rem; outline:none;
+    font-family:inherit; transition:border .2s; background:#fff;
+}
+.forum-quick-inp:focus { border-color:#7c3aed; }
+.forum-quick-send {
+    background:linear-gradient(135deg,#7c3aed,#4f46e5);
+    color:#fff; border:none; border-radius:10px;
+    padding:9px 16px; cursor:pointer; font-size:.8rem; font-weight:700;
+    transition:all .2s; white-space:nowrap;
+}
+.forum-quick-send:hover { opacity:.9; }
+
+/* Empty + toast */
+.forum-empty { text-align:center; padding:48px 20px; color:#9ca3af; }
+.forum-empty-icon { font-size:2.5rem; margin-bottom:12px; opacity:.5; }
+.forum-toast-f {
+    position:fixed; bottom:28px; left:50%; transform:translateX(-50%);
+    background:#1e1b4b; color:#fff; border-radius:50px;
+    padding:11px 24px; font-size:.84rem; font-weight:600;
+    z-index:9999; box-shadow:0 8px 28px rgba(0,0,0,.2);
+    opacity:0; transition:opacity .3s; white-space:nowrap; pointer-events:none;
+}
+.forum-toast-f.show { opacity:1; }
+@keyframes fSlideIn { from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);} }
+</style>
+
+<div class="forum-toast-f" id="forumToastF"></div>
+<div class="forum-wrap">
+
+{# Hero #}
+<div class="forum-hero">
+    <div class="forum-hero-title">💬 Forum de la communauté</div>
+    <div class="forum-hero-desc">Partagez vos expériences avec d'autres familles AutiCare</div>
+    <div class="forum-hero-stats">
+        <div class="forum-hero-stat" id="forumTotalStat"><i class="fas fa-comments"></i> Chargement...</div>
+        <div class="forum-hero-stat"><i class="fas fa-lock"></i> Espace sécurisé</div>
+        <div class="forum-hero-stat"><i class="fas fa-heart"></i> Communauté bienveillante</div>
+    </div>
+</div>
+
+{# Composer #}
+<div class="forum-compose">
+    <div class="forum-compose-header">
+        <i class="fas fa-pen-to-square" style="color:#7c3aed;font-size:1rem;"></i>
+        <span class="forum-compose-title">Partager avec la communauté</span>
+    </div>
+    <div class="forum-compose-body">
+        <div class="forum-form-row">
+            {# Auteur auto-rempli depuis le prénom de l'enfant sélectionné #}
+            <input type="text" id="fAuteur" class="forum-inp"
+                   placeholder="Votre prénom (parent de …)"
+                   style="flex:2;" readonly
+                   title="Rempli automatiquement depuis votre sélection">
+            <select id="fCategorie" class="forum-sel">
+                <option value="Général" selected>Général</option>
+                <option value="Conseils">Conseils</option>
+                <option value="Questions">Questions</option>
+                <option value="Témoignages">Témoignages</option>
+                <option value="Activités">Activités</option>
+            </select>
+        </div>
+        <textarea id="fContenu" class="forum-ta"
+            placeholder="Partagez votre expérience, posez une question, donnez un conseil… (max 1000 caractères)"
+            maxlength="1000"
+            oninput="document.getElementById('fCharCount').textContent=this.value.length"></textarea>
+        <div class="forum-ta-footer">
+            <span class="forum-char"><span id="fCharCount">0</span>/1000 caractères</span>
+            <button class="forum-submit" id="fSubmitBtn" onclick="forumPublier()">
+                <i class="fas fa-paper-plane"></i> Publier
+            </button>
+        </div>
+    </div>
+</div>
+
+{# Filters #}
+<div class="forum-filters">
+    <span class="forum-filters-label">Filtrer :</span>
+    <button class="forum-cat-btn active" onclick="forumFiltrer('tous',this)">Tous</button>
+    <button class="forum-cat-btn" onclick="forumFiltrer('Conseils',this)">💡 Conseils</button>
+    <button class="forum-cat-btn" onclick="forumFiltrer('Questions',this)">❓ Questions</button>
+    <button class="forum-cat-btn" onclick="forumFiltrer('Témoignages',this)">💬 Témoignages</button>
+    <button class="forum-cat-btn" onclick="forumFiltrer('Activités',this)">🎯 Activités</button>
+    <button class="forum-cat-btn" onclick="forumFiltrer('Général',this)">🌐 Général</button>
+</div>
+
+{# Posts list #}
+<div id="forumPostsList">
+    <div class="forum-empty">
+        <div class="forum-empty-icon">💬</div>
+        <i class="fas fa-spinner fa-spin fa-2x" style="color:#c4b5fd;display:block;margin-bottom:10px;"></i>
+        Chargement...
+    </div>
+</div>
+
+</div>{# /forum-wrap #}
+
+<script>
+(function() {
+
+// ── Auto-fill auteur depuis l'enfant sélectionné dans la page ──
+(function initAuteur() {
+    const sel = document.getElementById('enfantSelect');
+    function fill() {
+        const nom = sel ? sel.value : '';
+        const inp = document.getElementById('fAuteur');
+        if (!inp) return;
+        inp.value = nom ? 'Parent de ' + nom : '';
+        inp.placeholder = nom ? '' : 'Sélectionnez un enfant pour continuer';
+    }
+    if (sel) sel.addEventListener('change', fill);
+    fill();
+})();
+
+function toastF(msg, color) {
+    const t = document.getElementById('forumToastF');
+    t.textContent = msg; t.style.background = color || '#1e1b4b';
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+async function chargerPosts(cat) {
+    const url = '/forum/posts' + (cat && cat !== 'tous' ? '?categorie=' + encodeURIComponent(cat) : '');
+    try {
+        const resp = await fetch(url);
+        const data = await resp.json();
+        if (data.success) renderPosts(data.posts);
+    } catch {
+        document.getElementById('forumPostsList').innerHTML =
+            '<div class="forum-empty"><div class="forum-empty-icon">⚠️</div>Erreur de chargement.</div>';
+    }
+}
+
+function renderPosts(posts) {
+    const list = document.getElementById('forumPostsList');
+    const stat = document.getElementById('forumTotalStat');
+    if (stat) stat.innerHTML = `<i class="fas fa-comments"></i> ${posts.length} discussion${posts.length > 1 ? 's' : ''}`;
+
+    if (!posts.length) {
+        list.innerHTML = `<div class="forum-empty">
+            <div class="forum-empty-icon">💬</div>
+            <div style="font-weight:700;color:#5b21b6;margin-bottom:6px;">Aucune discussion pour le moment</div>
+            <div style="font-size:.82rem;">Soyez le premier à partager votre expérience !</div>
+        </div>`;
+        return;
+    }
+
+    list.innerHTML = posts.map(p => `
+    <div class="forum-post" id="fpost-${p.id}" style="animation:fSlideIn .3s ease;">
+        <div class="forum-post-head">
+            <div class="forum-avatar-wrap">
+                <div class="forum-avatar">${esc(p.auteur).charAt(0).toUpperCase()}</div>
+                <div>
+                    <div class="forum-author">${esc(p.auteur)}</div>
+                    <div class="forum-meta">${p.createdAt}</div>
+                </div>
+            </div>
+            <div class="forum-badges">
+                ${p.nbMotsCensures > 0 ? `<span class="forum-censure-badge"><i class="fas fa-shield-alt"></i> Modéré</span>` : ''}
+                <span class="forum-cat-tag">${esc(p.categorie)}</span>
+            </div>
+        </div>
+        <div class="forum-post-body">${esc(p.contenu)}</div>
+        <div class="forum-post-foot">
+            <button class="forum-reply-btn" onclick="forumToggleRep(${p.id},this)">
+                <i class="fas fa-comment-dots"></i>
+                <span id="frepcount-${p.id}">${p.nbReponses}</span> réponse${p.nbReponses !== 1 ? 's' : ''}
+            </button>
+            <span class="forum-reply-count"><i class="fas fa-clock me-1"></i>${p.createdAt.slice(0,5)}</span>
+        </div>
+        <div class="forum-reps" id="frep-${p.id}">
+            <div id="freplist-${p.id}"></div>
+            <div class="forum-quick-reply">
+                <input type="text" class="forum-quick-inp" id="frepinp-${p.id}"
+                    placeholder="Votre réponse… (Prénom : message)"
+                    onkeydown="if(event.key==='Enter'){event.preventDefault();forumEnvoyerRep(${p.id});}">
+                <button class="forum-quick-send" onclick="forumEnvoyerRep(${p.id})">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>`).join('');
+}
+
+window.forumPublier = async function() {
+    const auteur  = document.getElementById('fAuteur').value.trim() || 'Parent anonyme';
+    const contenu = document.getElementById('fContenu').value.trim();
+    const cat     = document.getElementById('fCategorie').value;
+    const btn     = document.getElementById('fSubmitBtn');
+
+    if (!contenu) { toastF('⚠️ Le message ne peut pas être vide.','#d97706'); return; }
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publication...';
+
+    try {
+        const resp = await fetch('/forum/post', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ auteur, nomEnfant: null, contenu, categorie: cat })
+        });
+        const data = await resp.json();
+        if (data.success) {
+            document.getElementById('fContenu').value = '';
+            document.getElementById('fCharCount').textContent = '0';
+            const p = data.post;
+            const list = document.getElementById('forumPostsList');
+            const emptyEl = list.querySelector('.forum-empty');
+            if (emptyEl) emptyEl.remove();
+            list.insertAdjacentHTML('afterbegin', `
+            <div class="forum-post" id="fpost-${p.id}" style="animation:fSlideIn .3s ease;">
+                <div class="forum-post-head">
+                    <div class="forum-avatar-wrap">
+                        <div class="forum-avatar">${esc(p.auteur).charAt(0).toUpperCase()}</div>
+                        <div>
+                            <div class="forum-author">${esc(p.auteur)}</div>
+                            <div class="forum-meta">${p.createdAt}</div>
+                        </div>
+                    </div>
+                    <div class="forum-badges">
+                        ${p.nbMotsCensures > 0 ? '<span class="forum-censure-badge"><i class="fas fa-shield-alt"></i> Modéré</span>' : ''}
+                        <span class="forum-cat-tag">${esc(p.categorie)}</span>
+                    </div>
+                </div>
+                <div class="forum-post-body">${esc(p.contenu)}</div>
+                <div class="forum-post-foot">
+                    <button class="forum-reply-btn" onclick="forumToggleRep(${p.id},this)">
+                        <i class="fas fa-comment-dots"></i>
+                        <span id="frepcount-${p.id}">0</span> réponse
+                    </button>
+                    <span class="forum-reply-count"><i class="fas fa-clock me-1"></i>À l'instant</span>
+                </div>
+                <div class="forum-reps" id="frep-${p.id}">
+                    <div id="freplist-${p.id}"></div>
+                    <div class="forum-quick-reply">
+                        <input type="text" class="forum-quick-inp" id="frepinp-${p.id}"
+                            placeholder="Votre réponse…"
+                            onkeydown="if(event.key==='Enter'){event.preventDefault();forumEnvoyerRep(${p.id});}">
+                        <button class="forum-quick-send" onclick="forumEnvoyerRep(${p.id})"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>`);
+            toastF(p.nbMotsCensures > 0 ? `✅ Publié — contenu modéré` : '✅ Message publié !',
+                   p.nbMotsCensures > 0 ? '#d97706' : '#059669');
+        } else { toastF('❌ ' + data.message, '#dc2626'); }
+    } catch { toastF('❌ Erreur de connexion.', '#dc2626'); }
+    finally { btn.disabled=false; btn.innerHTML='<i class="fas fa-paper-plane"></i> Publier'; }
+};
+
+window.forumToggleRep = async function(postId) {
+    const zone = document.getElementById('frep-' + postId);
+    const open = zone.style.display === 'block';
+    zone.style.display = open ? 'none' : 'block';
+    if (!open) {
+        try {
+            const resp = await fetch(`/forum/post/${postId}/reponses`);
+            const data = await resp.json();
+            if (data.success) {
+                document.getElementById('freplist-'+postId).innerHTML = data.reponses.map(r => `
+                <div class="forum-rep-item">
+                    <div class="forum-rep-av ${r.auteurType==='psy'?'psy':''}">${esc(r.auteur).charAt(0).toUpperCase()}</div>
+                    <div class="forum-rep-bubble ${r.auteurType==='psy'?'psy':''}">
+                        <div class="forum-rep-author">
+                            ${esc(r.auteur)}${r.auteurType==='psy'?'<span class="forum-psy-badge">Psy AutiCare</span>':''}
+                        </div>
+                        <div class="forum-rep-text">${esc(r.contenu)}</div>
+                        <div class="forum-rep-date">${r.createdAt}</div>
+                    </div>
+                </div>`).join('');
+            }
+        } catch {}
+        document.getElementById('frepinp-'+postId)?.focus();
+    }
+};
+
+window.forumEnvoyerRep = async function(postId) {
+    const inp = document.getElementById('frepinp-'+postId);
+    const texte = inp.value.trim();
+    if (!texte) return;
+    let auteur = document.getElementById('fAuteur').value.trim() || 'Parent anonyme';
+    let contenu = texte;
+    if (texte.includes(':')) {
+        const idx = texte.indexOf(':');
+        auteur  = texte.slice(0,idx).trim() || auteur;
+        contenu = texte.slice(idx+1).trim();
+    }
+    inp.value = '';
+    try {
+        const resp = await fetch(`/forum/post/${postId}/reponse`, {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ auteur, contenu, auteurType:'parent' })
+        });
+        const data = await resp.json();
+        if (data.success) {
+            const r = data.reponse;
+            document.getElementById('freplist-'+postId).insertAdjacentHTML('beforeend',`
+            <div class="forum-rep-item" style="animation:fSlideIn .25s ease;">
+                <div class="forum-rep-av">${esc(r.auteur).charAt(0).toUpperCase()}</div>
+                <div class="forum-rep-bubble">
+                    <div class="forum-rep-author">${esc(r.auteur)}</div>
+                    <div class="forum-rep-text">${esc(r.contenu)}</div>
+                    <div class="forum-rep-date">À l'instant</div>
+                </div>
+            </div>`);
+            const counter = document.getElementById('frepcount-'+postId);
+            if (counter) counter.textContent = parseInt(counter.textContent||'0')+1;
+            toastF('✅ Réponse publiée !','#059669');
+        } else { toastF('❌ '+data.message,'#dc2626'); }
+    } catch { toastF('❌ Erreur.','#dc2626'); }
+};
+
+window.forumFiltrer = async function(cat, btn) {
+    document.querySelectorAll('.forum-cat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    await chargerPosts(cat);
+};
+
+function esc(str) {
+    const d = document.createElement('div');
+    d.appendChild(document.createTextNode(String(str||'')));
+    return d.innerHTML;
+}
+
+chargerPosts('tous');
+})();
+</script>

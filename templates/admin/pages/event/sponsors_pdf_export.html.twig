@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Liste des Sponsors - Auticare</title>
+    <style>
+        @page { margin: 2cm; }
+        body { font-family: Arial, sans-serif; }
+        h1 { color: #b87ef5; text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background: #fce4ec; padding: 10px; text-align: left; }
+        td { padding: 8px; border-bottom: 1px solid #ccc; }
+        .amount { color: green; font-weight: bold; }
+        .footer { text-align: center; margin-top: 30px; font-size: 12px; }
+        .badge {
+            background: #f0e4ff;
+            padding: 3px 8px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Liste des Sponsors</h1>
+<p style="text-align: center;">Auticare - Partenaires officiels</p>
+<p style="text-align: right;">Date: {{ "now"|date("d/m/Y") }}</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Nom</th>
+            <th>Type</th>
+            <th>Email</th>
+            <th>Telephone</th>
+            <th>Montant</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for sponsor in sponsors %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ sponsor.nom }}</td>
+            <td><span class="badge">{{ sponsor.TypeSponsor }}</span></td>
+            <td>{{ sponsor.email }}</td>
+            <td>{{ sponsor.telephone }}</td>
+            <td class="amount">{{ sponsor.montant|number_format(0, ',', ' ') }} TND</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="footer">
+    <p>Total sponsors: {{ sponsors|length }} | Montant total: {{ total_montant|number_format(0, ',', ' ') }} TND</p>
+    <p>Document genere automatiquement</p>
+</div>
+
+</body>
+</html>

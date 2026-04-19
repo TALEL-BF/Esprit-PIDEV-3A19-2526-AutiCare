@@ -206,11 +206,62 @@
             box-shadow: 0 8px 25px rgba(0,0,0,0.06);
             border: 2px solid rgba(155,107,255,0.12);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
         }
         .mot-item-design:hover {
             transform: translateY(-5px);
             box-shadow: 0 15px 35px rgba(155,107,255,0.15);
             border-color: rgba(155,107,255,0.25);
+        }
+
+        /* Styles pour le bouton TTS */
+        .tts-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: linear-gradient(135deg, #9b6bff, #c77dff);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 2px 8px rgba(155,107,255,0.3);
+            z-index: 10;
+        }
+        
+        .tts-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(155,107,255,0.5);
+        }
+        
+        .tts-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .tts-btn svg {
+            width: 22px;
+            height: 22px;
+            fill: white;
+        }
+        
+        .tts-btn.playing {
+            animation: tts-pulse 1s ease-in-out infinite;
+            background: linear-gradient(135deg, #ff6b6b, #ff9a3c);
+        }
+        
+        @keyframes tts-pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 2px 8px rgba(255,107,107,0.3);
+            }
+            50% {
+                transform: scale(1.08);
+                box-shadow: 0 4px 20px rgba(255,107,107,0.6);
+            }
         }
 
         /* ── Carousel image mot ── */
@@ -377,6 +428,15 @@
             opacity: 0.7;
         }
 
+        /* Bouton Lire tous les mots */
+        .tts-read-all {
+            background: linear-gradient(135deg, #FF6B6B, #C77DFF) !important;
+            margin-bottom: 2rem;
+        }
+        .tts-read-all.playing {
+            animation: tts-pulse 1s ease-in-out infinite;
+        }
+
         /* Empty state */
         .empty-state {
             background: white;
@@ -508,6 +568,19 @@
             to   { transform: rotate(360deg); }
         }
 
+        /* Sliders TTS */
+        .tts-slider {
+            width: 100%;
+            margin: 5px 0;
+        }
+        .tts-slider-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #888;
+            margin-top: 5px;
+        }
+
         @media (max-width: 768px) {
             .mots-grid-design {
                 grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -519,6 +592,16 @@
             .btn-quiz, .btn-quiz-disabled {
                 font-size: 1rem;
                 padding: 12px 30px;
+            }
+            .tts-btn {
+                width: 32px;
+                height: 32px;
+                top: 8px;
+                right: 8px;
+            }
+            .tts-btn svg {
+                width: 18px;
+                height: 18px;
             }
         }
         @media (max-width: 480px) {
@@ -608,6 +691,15 @@
                     </h2>
                 </div>
 
+                <!-- Bouton Lire tous les mots -->
+                <div class="text-center mb-4">
+                    <button id="tts-read-all" class="btn-quiz tts-read-all">
+                        <span>🔊</span>
+                        Lire tous les mots
+                        <span>📢</span>
+                    </button>
+                </div>
+
                 {% set wordEmojis = ['🐶', '🦁', '🦒', '🐘', '🐒', '🦓', '🐪', '🐅', '🐳', '🐋'] %}
 
                 <!-- Grille des mots avec images associées -->
@@ -618,7 +710,14 @@
                             {% set images = entry.toutes_images %}
                             {% set imgCount = images|length %}
 
-                            <div class="mot-item-design">
+                            <div class="mot-item-design" data-mot="{{ mot }}">
+                                
+                                {# Bouton Text-to-Speech #}
+                                <button class="tts-btn" data-mot="{{ mot }}" aria-label="Lire le mot {{ mot }}">
+                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                                    </svg>
+                                </button>
 
                                 {# ── Carousel ── #}
                                 <div class="mot-carousel" data-index="{{ loop.index0 }}">
@@ -747,10 +846,38 @@
                                     border-radius: 20px;
                                     border: 1.5px solid rgba(155,107,255,0.3);
                                     transition: all 0.2s;
-                                    cursor: default;
-                                ">{{ mot|upper }}</span>
+                                    cursor: pointer;
+                                " class="tts-word-chip" data-mot="{{ mot }}">{{ mot|upper }}</span>
                                 {% endif %}
                             {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="sidebar-card">
+                        <div class="sidebar-card-title">🔊 Options de lecture</div>
+                        <div style="margin-bottom: 0.8rem;">
+                            <label style="font-size: 0.75rem; color: #666; display: block; margin-bottom: 3px;">
+                                ⚡ Vitesse de lecture
+                            </label>
+                            <input type="range" id="tts-rate" class="tts-slider" min="0.5" max="1.5" step="0.1" value="0.9">
+                            <div class="tts-slider-label">
+                                <span>Lent</span>
+                                <span>Normal</span>
+                                <span>Rapide</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label style="font-size: 0.75rem; color: #666; display: block; margin-bottom: 3px;">
+                                🎵 Hauteur de voix
+                            </label>
+                            <input type="range" id="tts-pitch" class="tts-slider" min="0.5" max="1.5" step="0.1" value="1.1">
+                            <div class="tts-slider-label">
+                                <span>Grave</span>
+                                <span>Normal</span>
+                                <span>Aigu</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -819,6 +946,18 @@
             transition: transform 0.2s;
         }
         .lb-close:hover { transform: scale(1.15); }
+        
+        /* Animation pour les notifications TTS */
+        @keyframes tts-notification-slide {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
     </style>
     <script>
     (function() {
@@ -883,6 +1022,302 @@
         initLightbox();
     })();
     </script>
+    
+    <script>
+    /* ══════════════════════════════════════════════════
+       TEXT-TO-SPEECH FUNCTIONALITY
+    ══════════════════════════════════════════════════ */
+    (function() {
+        // Vérifier si le navigateur supporte la synthèse vocale
+        const speechSupported = 'speechSynthesis' in window;
+        
+        if (!speechSupported) {
+            console.warn('Text-to-Speech n\'est pas supporté par ce navigateur');
+            // Afficher un message discret
+            const style = document.createElement('style');
+            style.textContent = '.tts-btn, #tts-read-all, .tts-word-chip { opacity: 0.5; pointer-events: none; }';
+            document.head.appendChild(style);
+            return;
+        }
+        
+        let currentUtterance = null;
+        let currentPlayingButton = null;
+        
+        // Récupérer les sliders
+        const rateSlider = document.getElementById('tts-rate');
+        const pitchSlider = document.getElementById('tts-pitch');
+        
+        function getTTSSettings() {
+            return {
+                rate: rateSlider ? parseFloat(rateSlider.value) : 0.9,
+                pitch: pitchSlider ? parseFloat(pitchSlider.value) : 1.1
+            };
+        }
+        
+        // Fonction pour arrêter la lecture en cours
+        function stopCurrentSpeech() {
+            if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+                window.speechSynthesis.cancel();
+            }
+            if (currentPlayingButton) {
+                currentPlayingButton.classList.remove('playing');
+                currentPlayingButton = null;
+            }
+            if (currentUtterance) {
+                currentUtterance = null;
+            }
+        }
+        
+        // Fonction pour afficher une notification TTS
+        function showTTSNotification(message, type = 'info') {
+            // Créer une notification temporaire
+            const notification = document.createElement('div');
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: ${type === 'error' ? '#FF6B6B' : '#6BCB77'};
+                color: white;
+                padding: 10px 20px;
+                border-radius: 25px;
+                font-family: 'Baloo 2', cursive;
+                font-size: 0.9rem;
+                font-weight: bold;
+                z-index: 10000;
+                animation: tts-notification-slide 0.3s ease-out;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            `;
+            document.body.appendChild(notification);
+            
+            // Supprimer après 3 secondes
+            setTimeout(() => {
+                notification.style.animation = 'tts-notification-slide 0.3s ease-out reverse';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+        
+        // Fonction pour lire un texte
+        function speakText(text, buttonElement) {
+            // Arrêter toute lecture en cours
+            stopCurrentSpeech();
+            
+            // Créer un nouvel utterance
+            const utterance = new SpeechSynthesisUtterance(text);
+            currentUtterance = utterance;
+            
+            // Configurer la voix (français de préférence)
+            const settings = getTTSSettings();
+            utterance.lang = 'fr-FR';
+            utterance.rate = settings.rate;
+            utterance.pitch = settings.pitch;
+            utterance.volume = 1;
+            
+            // Essayer de trouver une voix française
+            function setFrenchVoice() {
+                const voices = window.speechSynthesis.getVoices();
+                const frenchVoice = voices.find(voice => 
+                    voice.lang === 'fr-FR' || 
+                    voice.lang === 'fr' || 
+                    voice.lang.startsWith('fr-')
+                );
+                if (frenchVoice) {
+                    utterance.voice = frenchVoice;
+                }
+            }
+            
+            // Les voix sont chargées asynchronement
+            if (window.speechSynthesis.getVoices().length > 0) {
+                setFrenchVoice();
+            } else {
+                window.speechSynthesis.addEventListener('voiceschanged', setFrenchVoice, { once: true });
+            }
+            
+            // Ajouter les événements
+            utterance.onstart = function() {
+                if (buttonElement) {
+                    buttonElement.classList.add('playing');
+                    currentPlayingButton = buttonElement;
+                }
+            };
+            
+            utterance.onend = function() {
+                if (buttonElement) {
+                    buttonElement.classList.remove('playing');
+                }
+                if (currentPlayingButton === buttonElement) {
+                    currentPlayingButton = null;
+                }
+                currentUtterance = null;
+            };
+            
+            utterance.onerror = function(event) {
+                console.error('Erreur TTS:', event);
+                if (buttonElement) {
+                    buttonElement.classList.remove('playing');
+                }
+                currentUtterance = null;
+                currentPlayingButton = null;
+                
+                showTTSNotification('Impossible de lire le mot', 'error');
+            };
+            
+            // Lire le texte
+            window.speechSynthesis.speak(utterance);
+        }
+        
+        // Initialiser les boutons TTS sur chaque carte
+        function initTTSButtons() {
+            const ttsButtons = document.querySelectorAll('.tts-btn');
+            
+            ttsButtons.forEach(button => {
+                button.removeEventListener('click', ttsClickHandler);
+                button.addEventListener('click', ttsClickHandler);
+            });
+            
+            // Initialiser les chips dans la sidebar
+            const ttsChips = document.querySelectorAll('.tts-word-chip');
+            ttsChips.forEach(chip => {
+                chip.removeEventListener('click', chipClickHandler);
+                chip.addEventListener('click', chipClickHandler);
+            });
+        }
+        
+        // Handler pour le clic sur un bouton TTS
+        function ttsClickHandler(event) {
+            event.stopPropagation();
+            const button = event.currentTarget;
+            const mot = button.getAttribute('data-mot');
+            
+            if (mot) {
+                // Ajouter un petit effet de feedback haptique (vibration) si supporté
+                if (navigator.vibrate) {
+                    navigator.vibrate(50);
+                }
+                
+                speakText(mot, button);
+            }
+        }
+        
+        // Handler pour les chips dans la sidebar
+        function chipClickHandler(event) {
+            event.stopPropagation();
+            const chip = event.currentTarget;
+            const mot = chip.getAttribute('data-mot');
+            
+            if (mot) {
+                if (navigator.vibrate) {
+                    navigator.vibrate(50);
+                }
+                speakText(mot, chip);
+            }
+        }
+        
+        // Bouton "Lire tous les mots"
+        const readAllButton = document.getElementById('tts-read-all');
+        if (readAllButton) {
+            readAllButton.addEventListener('click', function() {
+                const mots = document.querySelectorAll('.mot-item-design');
+                if (mots.length === 0) {
+                    showTTSNotification('Aucun mot à lire', 'error');
+                    return;
+                }
+                
+                // Arrêter la lecture en cours
+                stopCurrentSpeech();
+                
+                // Récupérer tous les mots dans l'ordre
+                const motsList = Array.from(mots).map(card => {
+                    const motElement = card.querySelector('h3');
+                    return motElement ? motElement.textContent.trim() : null;
+                }).filter(mot => mot);
+                
+                if (motsList.length === 0) {
+                    showTTSNotification('Aucun mot trouvé', 'error');
+                    return;
+                }
+                
+                // Fonction pour lire les mots séquentiellement
+                let index = 0;
+                
+                function readNext() {
+                    if (index >= motsList.length) {
+                        showTTSNotification('Lecture terminée ! 🎉', 'info');
+                        if (readAllButton) {
+                            readAllButton.classList.remove('playing');
+                        }
+                        return;
+                    }
+                    
+                    const settings = getTTSSettings();
+                    const utterance = new SpeechSynthesisUtterance(motsList[index]);
+                    utterance.lang = 'fr-FR';
+                    utterance.rate = settings.rate;
+                    utterance.pitch = settings.pitch;
+                    
+                    // Configurer la voix française
+                    const voices = window.speechSynthesis.getVoices();
+                    const frenchVoice = voices.find(voice => 
+                        voice.lang === 'fr-FR' || voice.lang.startsWith('fr-')
+                    );
+                    if (frenchVoice) {
+                        utterance.voice = frenchVoice;
+                    }
+                    
+                    utterance.onend = function() {
+                        index++;
+                        readNext();
+                    };
+                    
+                    utterance.onerror = function() {
+                        index++;
+                        readNext();
+                    };
+                    
+                    window.speechSynthesis.speak(utterance);
+                }
+                
+                // Ajouter un indicateur visuel sur le bouton
+                if (readAllButton) {
+                    readAllButton.classList.add('playing');
+                }
+                
+                showTTSNotification(`Lecture de ${motsList.length} mots...`, 'info');
+                
+                // Petit délai pour laisser le temps au navigateur de se préparer
+                setTimeout(() => {
+                    readNext();
+                }, 100);
+            });
+        }
+        
+        // Observer les changements dans le DOM pour réinitialiser les boutons
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.addedNodes.length > 0) {
+                    initTTSButtons();
+                }
+            });
+        });
+        
+        observer.observe(document.body, { childList: true, subtree: true });
+        
+        // Initialiser au chargement
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initTTSButtons);
+        } else {
+            initTTSButtons();
+        }
+        
+        // Nettoyer la synthèse vocale lors de la navigation
+        window.addEventListener('beforeunload', function() {
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+        });
+    })();
+    </script>
+    
     <script>
     /* ══════════════════════════════════════════════════
        PDF EXPORT - VERSION AMÉLIORÉE AVEC IMAGES
@@ -1514,9 +1949,5 @@
             btn.querySelector('.pdf-label').textContent='Exporter en PDF';
         }
     }
-
-
-
     </script>
 {% endblock %}
-

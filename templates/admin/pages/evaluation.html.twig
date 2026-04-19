@@ -7,7 +7,7 @@
 {% block stylesheets %}
 {{ parent() }}
 <style>
-    /* Vos styles CSS (gardez-les identiques) */
+    /* Vos styles CSS */
     :root {
         --pastel-sky: #dbeafe;
         --pastel-sky-b: #9fc8f7;
@@ -19,6 +19,10 @@
         --pastel-yellow-b: #fde68a;
         --txt-soft: #475569;
         --txt-label: #334155;
+        --rose-pastel: #FFE4E9;
+        --rose-fonce: #FF69B4;
+        --mauve-pastel: #E8D5FF;
+        --mauve-fonce: #9B59B6;
     }
 
     /* Validation states */
@@ -188,7 +192,7 @@
         position: absolute;
         top: 0; left: 0; right: 0;
         height: 4px;
-        background: linear-gradient(90deg, #916ff7, #a793f7, #d2aff7);
+        background: linear-gradient(90deg, #ff69b4, #9b59b6, #c4b5fd);
         border-radius: 20px 20px 0 0;
     }
     .form-card-header {
@@ -206,14 +210,14 @@
         align-items: center;
         gap: 8px;
     }
-    .form-card-header h5 i { color: #9b7afb; }
+    .form-card-header h5 i { color: #ff69b4; }
     .mode-pill {
         font-size: 0.72rem;
         font-weight: 700;
         padding: 4px 14px;
         border-radius: 20px;
-        background: var(--pastel-lavender);
-        color: #601bd0;
+        background: linear-gradient(135deg, #FFE4E9, #E8D5FF);
+        color: #9b59b6;
         letter-spacing: .4px;
         text-transform: uppercase;
     }
@@ -223,47 +227,67 @@
     .eval-form-label {
         font-size: 0.78rem;
         font-weight: 700;
-        color: #6f26ec;
+        background: linear-gradient(135deg, #FF69B4, #9B59B6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
         text-transform: uppercase;
         letter-spacing: .5px;
         margin-bottom: 8px;
         display: block;
     }
     .eval-form-control {
-        border: 1.5px solid #e9d5ff;
+        border: 2px solid #FFE4E9;
         border-radius: 12px;
         padding: 10px 14px;
         font-size: 0.88rem;
         color: #1f2937;
-        background: #fefbff;
+        background: linear-gradient(135deg, #FFF9FC, #FDF8FF);
         width: 100%;
-        transition: all .2s;
+        transition: all 0.3s ease;
         outline: none;
     }
     .eval-form-control:focus {
-        border-color: #8762f5;
+        border-color: #FF69B4;
         background: white;
-        box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.12);
+        box-shadow: 0 0 0 4px rgba(255, 105, 180, 0.1), 0 0 0 4px rgba(155, 89, 182, 0.05);
     }
     textarea.eval-form-control {
         resize: vertical;
         min-height: 72px;
-        background: #fefbff;
     }
-    select.eval-form-control { cursor: pointer; }
+    select.eval-form-control { 
+        cursor: pointer;
+    }
 
     /* Choice groups */
     .choice-group {
-        background: linear-gradient(135deg, #fefbff, #faf7ff);
+        background: linear-gradient(135deg, #FFF9FC, #FDF8FF);
         border-radius: 14px;
         padding: 16px 18px;
-        border: 1.5px solid var(--pastel-lavender);
-        transition: all .25s ease;
+        border: 2px solid #FFE4E9;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    .choice-group::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #FF69B4, #9B59B6);
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    .choice-group:hover::before {
+        transform: translateX(0);
     }
     .choice-group:hover {
-        border-color: #a28ef2;
+        border-color: #FF69B4;
         background: white;
-        box-shadow: 0 4px 12px rgba(167, 139, 250, 0.12);
+        box-shadow: 0 4px 15px rgba(255, 105, 180, 0.15);
         transform: translateY(-2px);
     }
     .choice-number {
@@ -273,7 +297,7 @@
         width: 24px;
         height: 24px;
         border-radius: 12px;
-        background: linear-gradient(135deg, #a78bfa, #c4b5fd);
+        background: linear-gradient(135deg, #FF69B4, #9B59B6);
         color: white;
         font-size: 0.7rem;
         font-weight: 700;
@@ -282,7 +306,7 @@
 
     /* Buttons */
     .btn-save {
-        background: linear-gradient(135deg, #818cf8, #a78bfa);
+        background: linear-gradient(135deg, #FF69B4, #9B59B6);
         color: white;
         border: none;
         border-radius: 14px;
@@ -294,18 +318,18 @@
         align-items: center;
         gap: 8px;
         transition: all 0.2s ease;
-        box-shadow: 0 4px 12px rgba(129, 140, 248, 0.3);
+        box-shadow: 0 4px 12px rgba(255, 105, 180, 0.3);
     }
     .btn-save:hover {
         transform: translateY(-2px);
-        background: linear-gradient(135deg, #6366f1, #8b5cf6);
-        box-shadow: 0 6px 18px rgba(99, 102, 241, 0.35);
+        background: linear-gradient(135deg, #FF1493, #8E44AD);
+        box-shadow: 0 6px 18px rgba(255, 105, 180, 0.4);
     }
     .btn-save:active { transform: translateY(0); }
     .btn-cancel-eval {
-        background: var(--pastel-rose);
-        color: #9d174d;
-        border: 1.5px solid var(--pastel-rose-b);
+        background: linear-gradient(135deg, #FFE4E9, #E8D5FF);
+        color: #9B59B6;
+        border: 1.5px solid #FF69B4;
         border-radius: 14px;
         padding: 10px 24px;
         font-size: 0.85rem;
@@ -317,17 +341,73 @@
         transition: all 0.2s ease;
     }
     .btn-cancel-eval:hover {
-        background: #fce7f3;
+        background: linear-gradient(135deg, #FFD6E3, #DDC8FF);
         transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(255, 105, 180, 0.15);
     }
 
-    /* Table card */
+    /* ===== BOUTON GÉNÉRER PAR IA — PREMIUM ===== */
+    .btn-generate-ia {
+        background: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #ec4899 100%);
+        color: white;
+        border: none;
+        border-radius: 14px;
+        padding: 11px 22px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s cubic-bezier(.22,.68,0,1.2);
+        box-shadow: 0 4px 18px rgba(124, 58, 237, 0.45), 0 0 0 0 rgba(168,85,247,0);
+        position: relative;
+        overflow: hidden;
+        letter-spacing: 0.2px;
+    }
+    .btn-generate-ia::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, transparent 60%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        border-radius: inherit;
+    }
+    .btn-generate-ia:hover::after { opacity: 1; }
+    .btn-generate-ia:hover {
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 8px 28px rgba(124, 58, 237, 0.55), 0 0 0 4px rgba(168,85,247,0.15);
+    }
+    .btn-generate-ia:active { transform: translateY(0) scale(0.99); }
+    .btn-generate-ia:disabled {
+        opacity: 0.55;
+        transform: none;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+    .btn-generate-ia .ia-sparkle {
+        font-size: 0.95rem;
+        animation: sparkle 2s ease-in-out infinite;
+        filter: drop-shadow(0 0 4px rgba(255,255,255,0.6));
+    }
+    .btn-generate-ia .ia-label { position: relative; z-index: 1; }
+    @keyframes sparkle {
+        0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        40%       { transform: scale(1.3) rotate(20deg); opacity: 0.85; }
+        70%       { transform: scale(0.9) rotate(-10deg); opacity: 1; }
+    }
+
+    /* Table card - Version scrollable */
     .table-card {
         background: white;
         border-radius: 20px;
         border: 1.5px solid var(--pastel-lavender);
         box-shadow: 0 4px 20px rgba(167, 139, 250, 0.06);
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        max-height: 500px;
     }
     .table-card-header {
         display: flex;
@@ -338,6 +418,7 @@
         background: linear-gradient(135deg, #fefbff, #faf7ff);
         flex-wrap: wrap;
         gap: 12px;
+        flex-shrink: 0;
     }
     .table-card-title {
         font-size: 0.92rem;
@@ -347,36 +428,52 @@
         align-items: center;
         gap: 8px;
     }
-    .table-card-title i { color: #a78bfa; }
+    .table-card-title i { color: #ff69b4; }
     .filter-input {
         border: 1.5px solid var(--pastel-lavender);
         border-radius: 12px;
         padding: 7px 14px 7px 36px;
         font-size: 0.82rem;
         color: #4c1d95;
-        background: #fefbff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23a78bfa' stroke-width='2.5'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 12px center;
+        background: #fefbff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23ff69b4' stroke-width='2.5'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") no-repeat 12px center;
         outline: none;
         width: 200px;
         transition: all .2s;
     }
     .filter-input:focus {
-        border-color: #c4b5fd;
+        border-color: #ff69b4;
         background-color: white;
-        box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.1);
+        box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.1);
+    }
+
+    /* Table scrollable */
+    .table-responsive {
+        overflow-y: auto;
+        flex: 1;
+        min-height: 0;
     }
 
     /* Table */
-    .eval-table { width: 100%; border-collapse: collapse; }
-    .eval-table thead tr { background: linear-gradient(135deg, #fefbff, #faf7ff); }
+    .eval-table { 
+        width: 100%; 
+        border-collapse: collapse;
+    }
+    .eval-table thead tr { 
+        background: linear-gradient(135deg, #fefbff, #faf7ff);
+    }
     .eval-table th {
         padding: 12px 16px;
         font-size: 0.72rem;
         font-weight: 700;
-        color: #7c3aed;
+        color: #9b59b6;
         text-transform: uppercase;
         letter-spacing: .5px;
         border-bottom: 1.5px solid var(--pastel-lavender);
         white-space: nowrap;
+        background: linear-gradient(135deg, #fefbff, #faf7ff);
+        position: sticky;
+        top: 0;
+        z-index: 10;
     }
     .eval-table td {
         padding: 14px 16px;
@@ -386,11 +483,11 @@
         vertical-align: middle;
     }
     .eval-table tbody tr { transition: all .15s ease; }
-    .eval-table tbody tr:hover { background: linear-gradient(135deg, #fefbff, #faf7ff); }
+    .eval-table tbody tr:hover { background: linear-gradient(135deg, #FFF9FC, #FDF8FF); }
     .eval-table tbody tr:last-child td { border-bottom: none; }
 
     .cours-cell { font-weight: 600; color: #4c1d95; }
-    .cours-cell small { font-weight: 400; color: #a78bfa; font-size: 0.75rem; }
+    .cours-cell small { font-weight: 400; color: #ff69b4; font-size: 0.75rem; }
 
     .score-pill {
         display: inline-flex;
@@ -399,8 +496,8 @@
         width: 34px;
         height: 34px;
         border-radius: 12px;
-        background: linear-gradient(135deg, var(--pastel-lavender), var(--pastel-lavender-b));
-        color: #6d28d9;
+        background: linear-gradient(135deg, #FFE4E9, #E8D5FF);
+        color: #9b59b6;
         font-weight: 700;
         font-size: 0.85rem;
     }
@@ -408,17 +505,17 @@
         display: inline-flex;
         align-items: center;
         gap: 5px;
-        background: rgba(167, 139, 250, 0.12);
-        color: #7c3aed;
+        background: linear-gradient(135deg, #FFE4E9, #E8D5FF);
+        color: #9b59b6;
         padding: 4px 12px;
         border-radius: 20px;
         font-size: 0.75rem;
         font-weight: 700;
-        border: 1px solid rgba(167, 139, 250, 0.25);
+        border: 1px solid rgba(255, 105, 180, 0.25);
     }
     .btn-edit-eval {
-        background: var(--pastel-lavender);
-        color: #601dcb;
+        background: linear-gradient(135deg, #FFE4E9, #E8D5FF);
+        color: #9b59b6;
         border: none;
         border-radius: 10px;
         padding: 6px 14px;
@@ -431,12 +528,12 @@
         transition: all .15s ease;
     }
     .btn-edit-eval:hover {
-        background: #ddd6fe;
+        background: linear-gradient(135deg, #FFD6E3, #DDC8FF);
         transform: translateY(-2px);
-        box-shadow: 0 2px 8px rgba(167, 139, 250, 0.2);
+        box-shadow: 0 2px 8px rgba(255, 105, 180, 0.2);
     }
     .btn-del-eval {
-        background: var(--pastel-rose);
+        background: #fce7f3;
         color: #be185d;
         border: none;
         border-radius: 10px;
@@ -461,13 +558,411 @@
     }
     .empty-state i {
         font-size: 2.5rem;
-        color: var(--pastel-lavender);
+        color: #ff69b4;
         margin-bottom: 12px;
         display: block;
     }
     .empty-state p { font-size: 0.9rem; margin: 0; }
-    .choice-group, .btn-save, .btn-cancel-eval {
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* ===== MODAL IA — DESIGN PREMIUM ===== */
+    .modal-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(9, 3, 30, 0.72);
+        backdrop-filter: blur(12px) saturate(1.4);
+        -webkit-backdrop-filter: blur(12px) saturate(1.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        animation: fadeIn 0.2s ease;
+        padding: 16px;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from { transform: translateY(48px) scale(0.96); opacity: 0; }
+        to   { transform: translateY(0)    scale(1);    opacity: 1; }
+    }
+
+    .modal-container {
+        background: #ffffff;
+        border-radius: 28px;
+        width: 100%;
+        max-width: 880px;
+        max-height: 90vh;
+        overflow: hidden;
+        box-shadow:
+            0 40px 100px rgba(88, 28, 135, 0.3),
+            0 0 0 1px rgba(167,139,250,0.2),
+            inset 0 1px 0 rgba(255,255,255,0.9);
+        animation: slideUp 0.38s cubic-bezier(.22,.68,0,1.15);
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* ── Header ── */
+    .modal-header {
+        padding: 0;
+        background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 35%, #a855f7 68%, #ec4899 100%);
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: stretch;
+        flex-shrink: 0;
+        position: relative;
+        overflow: hidden;
+    }
+    .modal-header::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(circle at 15% 50%, rgba(255,255,255,0.08) 0%, transparent 40%),
+            radial-gradient(circle at 85% 20%, rgba(255,255,255,0.06) 0%, transparent 35%);
+        pointer-events: none;
+    }
+    .modal-header::after {
+        content: '✦  ✧  ✦  ✧  ✦';
+        position: absolute;
+        bottom: 8px;
+        right: 60px;
+        font-size: 0.5rem;
+        color: rgba(255,255,255,0.2);
+        letter-spacing: 8px;
+        pointer-events: none;
+    }
+    .modal-header-content {
+        flex: 1;
+        padding: 22px 28px 18px;
+        position: relative;
+        z-index: 1;
+    }
+    .modal-header h3 {
+        margin: 0 0 6px 0;
+        font-size: 1.18rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        letter-spacing: -0.3px;
+        text-shadow: 0 1px 8px rgba(0,0,0,0.15);
+    }
+    .modal-header h3 .ia-badge {
+        background: rgba(255,255,255,0.22);
+        border: 1px solid rgba(255,255,255,0.35);
+        font-size: 0.62rem;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 20px;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        backdrop-filter: blur(4px);
+    }
+    .modal-header-sub {
+        font-size: 0.79rem;
+        color: rgba(255,255,255,0.82);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .modal-header-sub strong { color: white; font-weight: 700; }
+    .modal-close {
+        background: rgba(255,255,255,0.14);
+        border: 1px solid rgba(255,255,255,0.22);
+        color: rgba(255,255,255,0.9);
+        font-size: 0.9rem;
+        cursor: pointer;
+        width: 34px; height: 34px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.22s ease;
+        flex-shrink: 0;
+        margin: 18px 22px 0 0;
+        position: relative;
+        z-index: 1;
+        align-self: flex-start;
+    }
+    .modal-close:hover {
+        background: rgba(255,255,255,0.28);
+        border-color: rgba(255,255,255,0.5);
+        color: white;
+        transform: rotate(90deg) scale(1.1);
+    }
+
+    /* ── Barre sélection ── */
+    .select-all-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 6px;
+        margin-bottom: 18px;
+        border-bottom: 1.5px solid #ede9fe;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    .select-all-bar-left { display: flex; align-items: center; gap: 10px; }
+    .select-all-btn {
+        background: linear-gradient(135deg, #6d28d9, #a855f7);
+        color: white;
+        border: none;
+        padding: 7px 16px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.22s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        box-shadow: 0 3px 10px rgba(109,40,217,0.35);
+    }
+    .select-all-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 5px 16px rgba(109,40,217,0.45);
+        background: linear-gradient(135deg, #5b21b6, #9333ea);
+    }
+    .selected-count {
+        font-size: 0.81rem;
+        font-weight: 700;
+        color: #6d28d9;
+        background: linear-gradient(135deg, #ede9fe, #f3e8ff);
+        padding: 4px 13px;
+        border-radius: 20px;
+        border: 1px solid #ddd6fe;
+    }
+    .questions-total-info {
+        font-size: 0.77rem;
+        color: #9ca3af;
+        font-style: italic;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    /* ── Body ── */
+    .modal-body {
+        padding: 22px 28px 10px;
+        overflow-y: auto;
+        flex: 1;
+        scrollbar-width: thin;
+        scrollbar-color: #c4b5fd #f5f3ff;
+    }
+    .modal-body::-webkit-scrollbar { width: 5px; }
+    .modal-body::-webkit-scrollbar-track { background: #f5f3ff; border-radius: 10px; }
+    .modal-body::-webkit-scrollbar-thumb { background: linear-gradient(#c4b5fd, #a78bfa); border-radius: 10px; }
+
+    /* ── Carte de question ── */
+    .question-preview-item {
+        background: #faf8ff;
+        border: 2px solid #ede9fe;
+        border-radius: 18px;
+        padding: 16px 18px 14px;
+        margin-bottom: 12px;
+        transition: all 0.22s cubic-bezier(.22,.68,0,1.2);
+        position: relative;
+        cursor: pointer;
+        overflow: hidden;
+    }
+    .question-preview-item::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; bottom: 0;
+        width: 4px;
+        background: linear-gradient(180deg, #a855f7, #7c3aed);
+        border-radius: 4px 0 0 4px;
+        transition: width 0.2s ease;
+    }
+    .question-preview-item:hover {
+        border-color: #a855f7;
+        background: #fdf8ff;
+        box-shadow: 0 6px 22px rgba(168,85,247,0.14);
+        transform: translateX(2px);
+    }
+    .question-preview-item.selected {
+        background: linear-gradient(135deg, #f0fdf4 0%, #faf5ff 100%);
+        border-color: #22c55e;
+        box-shadow: 0 4px 18px rgba(34,197,94,0.12);
+        transform: translateX(2px);
+    }
+    .question-preview-item.selected::before {
+        background: linear-gradient(180deg, #22c55e, #16a34a);
+        width: 5px;
+    }
+
+    .q-index-badge {
+        display: none;
+    }
+
+    .question-text-preview {
+        font-weight: 700;
+        color: #3b0764;
+        margin-bottom: 12px;
+        padding-right: 36px;
+        font-size: 0.92rem;
+        line-height: 1.55;
+        display: flex;
+        align-items: flex-start;
+    }
+    .question-text-preview span { flex: 1; }
+
+    .choices-preview {
+        display: flex;
+        gap: 7px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+    }
+    .choice-preview {
+        background: white;
+        padding: 5px 13px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        border: 1.5px solid #ede9fe;
+        color: #4c1d95;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        transition: all 0.15s;
+        box-shadow: 0 1px 4px rgba(124,58,237,0.05);
+    }
+    .choice-preview.correct {
+        background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+        border-color: #22c55e;
+        color: #15803d;
+        font-weight: 700;
+        box-shadow: 0 2px 10px rgba(34,197,94,0.18);
+    }
+    .choice-label {
+        width: 17px; height: 17px;
+        background: #ede9fe;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.6rem;
+        font-weight: 800;
+        color: #6d28d9;
+        flex-shrink: 0;
+    }
+    .choice-preview.correct .choice-label {
+        background: #22c55e;
+        color: white;
+    }
+
+    .score-badge-preview {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+        padding: 3px 11px;
+        border-radius: 20px;
+        font-size: 0.71rem;
+        font-weight: 700;
+        color: #6d28d9;
+        margin-top: 11px;
+        border: 1px solid #c4b5fd;
+    }
+
+    /* ── Footer ── */
+    .modal-footer {
+        padding: 15px 28px;
+        border-top: 1.5px solid #ede9fe;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: linear-gradient(135deg, #fefbff, #f8f5ff);
+        flex-shrink: 0;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    .modal-footer-info {
+        font-size: 0.77rem;
+        color: #a78bfa;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(167,139,250,0.1);
+        padding: 5px 12px;
+        border-radius: 20px;
+        border: 1px solid rgba(167,139,250,0.2);
+    }
+    .modal-footer-info i { color: #7c3aed; }
+
+    .btn-save-selected {
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        color: white;
+        border: none;
+        border-radius: 14px;
+        padding: 11px 28px;
+        font-size: 0.85rem;
+        font-weight: 800;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.22s cubic-bezier(.22,.68,0,1.2);
+        box-shadow: 0 4px 16px rgba(34,197,94,0.4);
+        letter-spacing: 0.2px;
+        position: relative;
+        overflow: hidden;
+    }
+    .btn-save-selected::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+        border-radius: inherit;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+    .btn-save-selected:hover::after { opacity: 1; }
+    .btn-save-selected:hover {
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 8px 24px rgba(34,197,94,0.5);
+    }
+    .btn-save-selected:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+    .btn-cancel-modal {
+        background: white;
+        color: #6b7280;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 14px;
+        padding: 11px 22px;
+        font-size: 0.84rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        transition: all 0.2s;
+    }
+    .btn-cancel-modal:hover {
+        background: #f3f4f6;
+        border-color: #d1d5db;
+        color: #374151;
+        transform: translateY(-1px);
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
     }
 </style>
 {% endblock %}
@@ -616,12 +1111,16 @@
                 <button type="button" class="btn-cancel-eval" id="cancelBtn">
                     <i class="fas fa-times"></i> Annuler
                 </button>
+                <button type="button" id="generateIABtn" class="btn-generate-ia">
+                    <i class="fas fa-magic ia-sparkle"></i>
+                    <span class="ia-label">Générer par IA</span>
+                </button>
             </div>
         </div>
     </form>
 </div>
 
-<!-- Liste des questions -->
+<!-- Liste des questions scrollable -->
 <div class="table-card">
     <div class="table-card-header">
         <span class="table-card-title"><i class="fas fa-list"></i> Liste des questions</span>
@@ -707,7 +1206,6 @@
 {{ parent() }}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Vos scripts JS identiques (gardez-les)
     function setValid(fieldId, message, groupId) {
         const el = document.getElementById(fieldId);
         const fb = document.getElementById('feedback-' + fieldId);
@@ -939,6 +1437,278 @@ document.addEventListener('DOMContentLoaded', function () {
         const scoreEl = document.getElementById('f_score');
         if (scoreEl) scoreEl.value = '1';
     });
+
+    // ========== GÉNÉRATION PAR IA AVEC MODAL ==========
+    const generateIABtn = document.getElementById('generateIABtn');
+    if (generateIABtn) {
+        generateIABtn.addEventListener('click', async function() {
+            const coursSelect = document.getElementById('f_cours_id');
+            const coursId = coursSelect.value;
+            
+            if (!coursId) {
+                showNotification('Veuillez d\'abord sélectionner un cours', 'error');
+                return;
+            }
+            
+            const coursNom = coursSelect.options[coursSelect.selectedIndex]?.text || '';
+            
+            if (!confirm(`🤖 Générer 5 questions pour le cours : "${coursNom}" ?\n\nL'IA va créer automatiquement des questions adaptées.`)) {
+                return;
+            }
+            
+            const originalText = generateIABtn.innerHTML;
+            generateIABtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Génération...';
+            generateIABtn.disabled = true;
+            
+            try {
+                const formData = new FormData();
+                formData.append('cours_id', coursId);
+                formData.append('nb_questions', 5);
+                
+                const response = await fetch('{{ path('admin_evaluation_generate_ia') }}', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    openQuestionsModal(data.questions, data.cours_id, data.cours_titre);
+                } else {
+                    showNotification(data.error || 'Erreur lors de la génération', 'error');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showNotification('Erreur de connexion au service IA', 'error');
+            } finally {
+                generateIABtn.innerHTML = originalText;
+                generateIABtn.disabled = false;
+            }
+        });
+    }
+
+    function openQuestionsModal(questions, coursId, coursTitre) {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.id = 'questionsModal';
+        
+        modal.innerHTML = `
+            <div class="modal-container">
+                <div class="modal-header">
+                    <div class="modal-header-content">
+                        <h3>
+                            <i class="fas fa-magic"></i>
+                            Questions générées par l'IA
+                            <span class="ia-badge">IA</span>
+                        </h3>
+                        <p class="modal-header-sub">
+                            <i class="fas fa-book-open"></i>
+                            Cours : <strong>${escapeHtml(coursTitre)}</strong>
+                        </p>
+                    </div>
+                    <button class="modal-close" onclick="closeModal()" title="Fermer">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="select-all-bar">
+                        <div class="select-all-bar-left">
+                            <button type="button" class="select-all-btn" id="selectAllBtn">
+                                <i class="fas fa-check-double"></i> Tout sélectionner
+                            </button>
+                            <span class="selected-count" id="selectedCount">0 sélectionnée(s)</span>
+                        </div>
+                        <span class="questions-total-info"><i class="fas fa-info-circle"></i> Cochez les questions à sauvegarder</span>
+                    </div>
+                    <div id="questionsList">
+                        ${generateQuestionsList(questions)}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="modal-footer-info">
+                        <i class="fas fa-robot"></i> Générées automatiquement par IA
+                    </div>
+                    <div style="display:flex;gap:10px;align-items:center;">
+                        <button type="button" class="btn-cancel-modal" onclick="closeModal()">
+                            <i class="fas fa-times"></i> Annuler
+                        </button>
+                        <button type="button" class="btn-save-selected" id="saveSelectedBtn">
+                            <i class="fas fa-save"></i> Sauvegarder la sélection
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        modal.questionsData = questions;
+        modal.coursId = coursId;
+        
+        const selectAllBtn = modal.querySelector('#selectAllBtn');
+        selectAllBtn.addEventListener('click', () => {
+            const checkboxes = modal.querySelectorAll('.question-checkbox');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            checkboxes.forEach(cb => {
+                cb.checked = !allChecked;
+                const item = cb.closest('.question-preview-item');
+                if (cb.checked) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+            updateSelectedCount(modal);
+        });
+        
+        modal.querySelectorAll('.question-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const item = this.closest('.question-preview-item');
+                if (this.checked) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+                updateSelectedCount(modal);
+            });
+        });
+        
+        const saveBtn = modal.querySelector('#saveSelectedBtn');
+        saveBtn.addEventListener('click', async () => {
+            const selectedCheckboxes = modal.querySelectorAll('.question-checkbox:checked');
+            const selectedQuestions = [];
+            
+            selectedCheckboxes.forEach(cb => {
+                const index = parseInt(cb.getAttribute('data-index'));
+                selectedQuestions.push(modal.questionsData[index]);
+            });
+            
+            if (selectedQuestions.length === 0) {
+                showNotification('Veuillez sélectionner au moins une question', 'error');
+                return;
+            }
+            
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sauvegarde...';
+            
+            try {
+                const response = await fetch('{{ path('admin_evaluation_save_selected') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        questions: selectedQuestions,
+                        cours_id: coursId
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showNotification(data.message, 'success');
+                    closeModal();
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showNotification(data.error || 'Erreur lors de la sauvegarde', 'error');
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = '<i class="fas fa-save"></i> Sauvegarder sélection';
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showNotification('Erreur lors de la sauvegarde', 'error');
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fas fa-save"></i> Sauvegarder sélection';
+            }
+        });
+        
+        updateSelectedCount(modal);
+    }
+
+    function generateQuestionsList(questions) {
+        return questions.map((q, index) => {
+            const isCorrect1 = q.bonne_reponse === 'choix1';
+            const isCorrect2 = q.bonne_reponse === 'choix2';
+            const isCorrect3 = q.bonne_reponse === 'choix3';
+
+            const makeChoice = (label, text, isCorrect) => `
+                <span class="choice-preview ${isCorrect ? 'correct' : ''}">
+                    <span class="choice-label">${isCorrect ? '✓' : label}</span>
+                    ${escapeHtml(text)}
+                </span>`;
+
+            return `
+                <div class="question-preview-item selected" onclick="toggleQuestion(this)">
+                    <input type="checkbox" class="question-checkbox" data-index="${index}" checked>
+                    <div class="question-text-preview">
+                        <span>${escapeHtml(q.question)}</span>
+                    </div>
+                    <div class="choices-preview">
+                        ${makeChoice('A', q.choix1, isCorrect1)}
+                        ${makeChoice('B', q.choix2, isCorrect2)}
+                        ${makeChoice('C', q.choix3, isCorrect3)}
+                    </div>
+                    <div class="score-badge-preview">
+                        <i class="fas fa-star"></i> ${q.score} point${q.score > 1 ? 's' : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    window.toggleQuestion = function(item) {
+        const cb = item.querySelector('.question-checkbox');
+        if (!cb) return;
+        cb.checked = !cb.checked;
+        item.classList.toggle('selected', cb.checked);
+        const modal = document.getElementById('questionsModal');
+        if (modal) updateSelectedCount(modal);
+    };
+
+    function updateSelectedCount(modal) {
+        const selectedCount = modal.querySelectorAll('.question-checkbox:checked').length;
+        const totalCount = modal.querySelectorAll('.question-checkbox').length;
+        const countSpan = modal.querySelector('#selectedCount');
+        if (countSpan) {
+            countSpan.innerHTML = `${selectedCount}/${totalCount} sélectionnée(s)`;
+        }
+    }
+
+    window.closeModal = function() {
+        const modal = document.getElementById('questionsModal');
+        if (modal) {
+            modal.remove();
+        }
+    };
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `alert-${type === 'success' ? 'success' : 'error'}`;
+        notification.style.position = 'fixed';
+        notification.style.top = '20px';
+        notification.style.right = '20px';
+        notification.style.zIndex = '10001';
+        notification.style.minWidth = '300px';
+        notification.style.animation = 'slideIn 0.3s ease';
+        notification.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i> ${message}`;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
 });
 </script>
 {% endblock %}

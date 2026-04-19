@@ -205,6 +205,28 @@ textarea.form-control.is-valid {
 }
 .btn-cancel-cours:hover { background:#fce7f3; transform:translateY(-1px); }
 
+/* ── Bouton Todo List ── */
+.btn-todo-list {
+    background: linear-gradient(135deg, #FF9F43, #FFB976);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    padding: .65rem 1.4rem;
+    font-weight: 700;
+    font-size: .9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(255, 159, 67, 0.3);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.btn-todo-list:hover {
+    background: linear-gradient(135deg, #F39C12, #FF9F43);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(255, 159, 67, 0.4);
+}
+
 /* ── Bouton danger ── */
 .btn-danger-soft {
     background:var(--pastel-rose); color:#be185d;
@@ -574,6 +596,9 @@ textarea.form-control.is-valid {
                         <button type="button" class="btn-cancel-cours" id="cancelCourseBtn">
                             <i class="fas fa-times me-1"></i> Annuler
                         </button>
+                        <button type="button" class="btn-todo-list" id="todoListBtn" onclick="location.href='{{ path('admin_todolist') }}'">
+                            <i class="fas fa-tasks me-1"></i> Todo List
+                        </button>
                     </div>
 
                 </form>
@@ -668,4 +693,594 @@ textarea.form-control.is-valid {
                             </span>
                         </td>
                         <td style="white-space:nowrap;">
-                           
+                            <button class="btn-edit-table edit-course-btn me-1" data-id="{{ item.idCours }}">
+                                <i class="fas fa-pen"></i> Modifier
+                            </button>
+                            <button class="btn-danger-soft delete-course-btn" data-id="{{ item.idCours }}">
+                                <i class="fas fa-trash-alt"></i> Supprimer
+                            </button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" style="text-align:center; padding:2.5rem; color:#94a3b8;">
+                            <i class="fas fa-book-open" style="font-size:2rem; margin-bottom:.5rem; display:block; opacity:.25;"></i>
+                            Aucun cours trouvé
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{# ── RÉPARTITION PAR NIVEAU ── #}
+{% set nbDebutant      = cours_list|default([])|filter(c => c.niveau == 'Débutant')|length %}
+{% set nbIntermediaire = cours_list|default([])|filter(c => c.niveau == 'Intermédiaire')|length %}
+{% set nbAvance        = cours_list|default([])|filter(c => c.niveau == 'Avancé')|length %}
+{% set nbTotal         = nbDebutant + nbIntermediaire + nbAvance %}
+
+<div class="card-box mb-4" style="border-radius:20px; border:1.5px solid var(--pastel-lavender-b);">
+    <div class="card-box-header"
+         style="background:var(--pastel-lavender); border-radius:18px 18px 0 0;
+                border-bottom:1.5px solid var(--pastel-lavender-b);">
+        <span class="card-box-title" style="color:#5b21b6;">
+            <i class="fas fa-layer-group" style="color:#a78bfa;"></i> Répartition par niveau
+        </span>
+        <span style="font-size:.78rem; color:#6d28d9; font-weight:600;">{{ nbTotal }} cours au total</span>
+    </div>
+    <div class="card-box-body">
+        <div class="niveau-section">
+            <div class="niveau-card">
+                <div class="niveau-icon debutant"><i class="fas fa-seedling"></i></div>
+                <div class="niveau-info">
+                    <div class="niveau-label">🌱 Débutant</div>
+                    <div class="niveau-bar-wrap">
+                        <div class="niveau-bar-fill debutant"
+                             style="width:{{ nbTotal > 0 ? ((nbDebutant/nbTotal)*100)|round : 0 }}%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="niveau-count">{{ nbDebutant }}</div>
+                    <div class="niveau-pct">{{ nbTotal > 0 ? ((nbDebutant/nbTotal)*100)|round : 0 }}%</div>
+                </div>
+            </div>
+            <div class="niveau-card">
+                <div class="niveau-icon intermediaire"><i class="fas fa-chart-line"></i></div>
+                <div class="niveau-info">
+                    <div class="niveau-label">📈 Intermédiaire</div>
+                    <div class="niveau-bar-wrap">
+                        <div class="niveau-bar-fill intermediaire"
+                             style="width:{{ nbTotal > 0 ? ((nbIntermediaire/nbTotal)*100)|round : 0 }}%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="niveau-count">{{ nbIntermediaire }}</div>
+                    <div class="niveau-pct">{{ nbTotal > 0 ? ((nbIntermediaire/nbTotal)*100)|round : 0 }}%</div>
+                </div>
+            </div>
+            <div class="niveau-card">
+                <div class="niveau-icon avance"><i class="fas fa-fire"></i></div>
+                <div class="niveau-info">
+                    <div class="niveau-label">🔥 Avancé</div>
+                    <div class="niveau-bar-wrap">
+                        <div class="niveau-bar-fill avance"
+                             style="width:{{ nbTotal > 0 ? ((nbAvance/nbTotal)*100)|round : 0 }}%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="niveau-count">{{ nbAvance }}</div>
+                    <div class="niveau-pct">{{ nbTotal > 0 ? ((nbAvance/nbTotal)*100)|round : 0 }}%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    /* ── Chart donut couleurs pastels ── */
+    new Chart(document.getElementById('coursTypeChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Académique', 'Social', 'Motricité', 'Langage'],
+            datasets: [{
+                data: [
+                    {{ cours_list|default([])|filter(c => c.typeCours == 'Académique')|length }},
+                    {{ cours_list|default([])|filter(c => c.typeCours == 'Social')|length }},
+                    {{ cours_list|default([])|filter(c => c.typeCours == 'Motricité')|length }},
+                    {{ cours_list|default([])|filter(c => c.typeCours == 'Langage')|length }}
+                ],
+                backgroundColor: ['#e76ecd', '#9333ea', '#c16996', '#c4b5fd'],
+                borderWidth: 0,
+                hoverOffset: 8
+            }]
+        },
+        options: {
+            plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, font: { family: 'DM Sans', size: 11 } } } },
+            cutout: '60%',
+            responsive: true
+        }
+    });
+
+    let motIndex = 1;
+
+    /* ── Vérifier si un mot a au moins une image (existante ou nouvelle) ── */
+    function checkWordHasImages(card) {
+        const existingImages = card.querySelectorAll('.existing-image').length;
+        const newFiles = card.querySelector('.images-file').files.length;
+        return existingImages > 0 || newFiles > 0;
+    }
+
+    /* ── Valider les images pour chaque mot ── */
+    function validateWordImages() {
+        const cards = document.querySelectorAll('.mot-image-card');
+        let allValid = true;
+        
+        cards.forEach((card, idx) => {
+            const hasImages = checkWordHasImages(card);
+            const imagesMsgSpan = card.querySelector('.images-validation-message');
+            const imagesInput = card.querySelector('.images-file');
+            
+            if (!hasImages) {
+                allValid = false;
+                if (imagesMsgSpan) {
+                    imagesMsgSpan.textContent = '✗ Ce mot doit avoir au moins une image';
+                    imagesMsgSpan.style.color = '#ef4444';
+                }
+                if (imagesInput) {
+                    imagesInput.classList.add('is-invalid');
+                    imagesInput.classList.remove('is-valid');
+                }
+            } else {
+                if (imagesMsgSpan) {
+                    imagesMsgSpan.textContent = '✓ Au moins une image';
+                    imagesMsgSpan.style.color = '#059669';
+                }
+                if (imagesInput) {
+                    imagesInput.classList.remove('is-invalid');
+                    imagesInput.classList.add('is-valid');
+                }
+            }
+        });
+        
+        const globalErrorDiv = document.getElementById('imagesValidationError');
+        if (globalErrorDiv) {
+            if (!allValid && cards.length > 0) {
+                globalErrorDiv.style.display = 'block';
+            } else {
+                globalErrorDiv.style.display = 'none';
+            }
+        }
+        
+        return allValid;
+    }
+
+    /* ── Valider les mots (non vides) ── */
+    function validateWords() {
+        const wordInputs = document.querySelectorAll('.word-input');
+        let hasValidWord = false;
+        
+        wordInputs.forEach(input => {
+            const value = input.value.trim();
+            const msgSpan = input.parentElement.parentElement.querySelector('.word-validation');
+            if (value === '') {
+                if (msgSpan) {
+                    msgSpan.textContent = '✗ Ce champ est requis';
+                    msgSpan.style.color = '#ef4444';
+                }
+                input.classList.add('is-invalid');
+                input.classList.remove('is-valid');
+            } else {
+                hasValidWord = true;
+                if (msgSpan) {
+                    msgSpan.textContent = '✓ Correct';
+                    msgSpan.style.color = '#059669';
+                }
+                input.classList.add('is-valid');
+                input.classList.remove('is-invalid');
+            }
+        });
+        
+        const errorDiv = document.getElementById('wordsValidationError');
+        if (errorDiv) {
+            if (!hasValidWord && wordInputs.length > 0) {
+                errorDiv.style.display = 'block';
+            } else {
+                errorDiv.style.display = 'none';
+            }
+        }
+        
+        return hasValidWord;
+    }
+
+    /* ── Validation globale avant soumission ── */
+    function validateAll() {
+        const titreValid = validateTitre();
+        const typeValid = validateTypeCours();
+        const niveauValid = validateNiveau();
+        const dureeValid = validateDuree();
+        const imageValid = validateImage();
+        const descriptionValid = validateDescription();
+        const wordsValid = validateWords();
+        const imagesValid = validateWordImages();
+        
+        return titreValid && typeValid && niveauValid && dureeValid && 
+               imageValid && descriptionValid && wordsValid && imagesValid;
+    }
+
+    function setFieldState(el, errMsg, msgId) {
+        const span = document.getElementById(msgId);
+        if (errMsg) {
+            el.classList.add('is-invalid');
+            el.classList.remove('is-valid');
+            if (span) { span.textContent = '✗ ' + errMsg; span.className = 'field-msg msg-error'; }
+        } else {
+            el.classList.remove('is-invalid');
+            el.classList.add('is-valid');
+            if (span) { span.textContent = '✓ Correct'; span.className = 'field-msg msg-ok'; }
+        }
+    }
+
+    /* Titre : min 3, max 255, sans caractères spéciaux */
+    function validateTitre() {
+        const el        = document.getElementById('cours_titre');
+        const val       = el.value.trim();
+        const reSpecial = /[^a-zA-ZÀ-ÿ0-9\s\-']/;
+        if (val === '')               setFieldState(el, 'Le titre est requis', 'msg_titre');
+        else if (val.length < 3)      setFieldState(el, 'Minimum 3 caractères', 'msg_titre');
+        else if (val.length > 255)    setFieldState(el, 'Maximum 255 caractères', 'msg_titre');
+        else if (reSpecial.test(val)) setFieldState(el, 'Caractères spéciaux non autorisés (@, #, !, $…)', 'msg_titre');
+        else                          setFieldState(el, null, 'msg_titre');
+        return val.length >= 3 && val.length <= 255 && !reSpecial.test(val);
+    }
+
+    /* Type de cours */
+    function validateTypeCours() {
+        const el  = document.getElementById('cours_typeCours');
+        const ok  = ['Académique', 'Social', 'Motricité', 'Langage'].includes(el.value);
+        setFieldState(el, ok ? null : 'Veuillez sélectionner un type de cours', 'msg_typeCours');
+        return ok;
+    }
+
+    /* Niveau */
+    function validateNiveau() {
+        const el  = document.getElementById('cours_niveau');
+        const ok  = ['Débutant', 'Intermédiaire', 'Avancé'].includes(el.value);
+        setFieldState(el, ok ? null : 'Veuillez sélectionner un niveau', 'msg_niveau');
+        return ok;
+    }
+
+    /* Durée : 1–300 */
+    function validateDuree() {
+        const el  = document.getElementById('cours_duree');
+        const val = parseInt(el.value, 10);
+        if (!el.value.trim())          setFieldState(el, 'La durée est requise', 'msg_duree');
+        else if (isNaN(val) || val < 1) setFieldState(el, 'Durée minimum : 1 minute', 'msg_duree');
+        else if (val > 300)             setFieldState(el, 'Durée maximum : 300 minutes', 'msg_duree');
+        else                            setFieldState(el, null, 'msg_duree');
+        return !isNaN(val) && val >= 1 && val <= 300;
+    }
+
+    /* Image : obligatoire en mode ajout (pas d'image existante) */
+    function validateImage() {
+        const el          = document.getElementById('cours_image_file');
+        const hasExisting = document.getElementById('currentImagePreview')?.style.display !== 'none';
+        const removed     = document.getElementById('removeImageField')?.value === '1';
+        const hasFile     = el.files && el.files.length > 0;
+        // Valide si : nouveau fichier sélectionné, OU image existante non supprimée
+        if (!hasFile && (!hasExisting || removed)) {
+            setFieldState(el, 'Une image est requise pour ce cours', 'msg_image');
+            return false;
+        }
+        setFieldState(el, null, 'msg_image');
+        return true;
+    }
+
+    /* Description : min 30 car., min 5 mots, pas uniquement chiffres/symboles */
+    function validateDescription() {
+        const el    = document.getElementById('cours_description');
+        const val   = el.value.trim();
+        const words = val.split(/\s+/).filter(w => w.length > 0);
+        if (val === '')         setFieldState(el, 'La description est requise', 'msg_description');
+        else if (val.length < 30)    setFieldState(el, 'Minimum 30 caractères pour une description utile', 'msg_description');
+        else if (words.length < 5)   setFieldState(el, 'Minimum 5 mots requis', 'msg_description');
+        else if (/^[\d\s\W]+$/.test(val)) setFieldState(el, 'La description doit contenir du texte significatif', 'msg_description');
+        else                         setFieldState(el, null, 'msg_description');
+        return val.length >= 30 && words.length >= 5 && !/^[\d\s\W]+$/.test(val);
+    }
+
+    /* Attacher les événements sur chaque champ */
+    document.getElementById('cours_titre')       ?.addEventListener('input',  validateTitre);
+    document.getElementById('cours_typeCours')   ?.addEventListener('change', validateTypeCours);
+    document.getElementById('cours_niveau')      ?.addEventListener('change', validateNiveau);
+    document.getElementById('cours_duree')       ?.addEventListener('input',  validateDuree);
+    document.getElementById('cours_image_file')  ?.addEventListener('change', validateImage);
+    document.getElementById('cours_description') ?.addEventListener('input',  validateDescription);
+
+    /* Bloquer le submit si un champ est invalide */
+    document.getElementById('courseForm')?.addEventListener('submit', function (e) {
+        if (!validateAll()) {
+            e.preventDefault();
+            const first = this.querySelector('.is-invalid');
+            if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    });
+
+    function attachImagePreview(fileInput, container) {
+        if (!fileInput) return;
+        fileInput.addEventListener('change', function () {
+            container.innerHTML = '';
+            Array.from(this.files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const div = document.createElement('div');
+                    div.className = 'image-item';
+                    div.innerHTML = `<img src="${e.target.result}" class="image-preview"><span class="remove-image">×</span>`;
+                    div.querySelector('.remove-image').onclick = () => div.remove();
+                    container.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+            // Valider les images après changement et mettre à jour l'apparence du champ
+            validateWordImages();
+        });
+    }
+
+    function displayExistingImages(container, images, idx) {
+        container.innerHTML = '';
+        images.forEach(image => {
+            const div = document.createElement('div');
+            div.className = 'existing-image';
+            div.innerHTML = `
+                <input type="hidden" name="existing_images_${idx}[]" value="${image}">
+                <img src="/uploads/images/${image}" alt="Image du mot">
+                <span class="remove-existing">×</span>`;
+            div.querySelector('.remove-existing').onclick = () => {
+                div.remove();
+                validateWordImages();
+            };
+            container.appendChild(div);
+        });
+        // Après avoir affiché les images existantes, valider
+        setTimeout(() => validateWordImages(), 10);
+    }
+
+    function initPreviews() {
+        document.querySelectorAll('.mot-image-card').forEach(card => {
+            const fi = card.querySelector('.images-file');
+            const nl = card.querySelector('.new-images-list');
+            if (fi && nl) attachImagePreview(fi, nl);
+        });
+    }
+
+    function updateMotNumbers() {
+        document.querySelectorAll('.mot-image-card').forEach((card, idx) => {
+            card.setAttribute('data-index', idx);
+            const n = card.querySelector('.mot-number');
+            if (n) n.textContent = idx + 1;
+            const fi = card.querySelector('.images-file');
+            if (fi) fi.name = `images_files_${idx}[]`;
+            card.querySelectorAll('input[type="hidden"][name^="existing_images_"]').forEach(h => {
+                h.name = `existing_images_${idx}[]`;
+            });
+            const rb = card.querySelector('.remove-mot');
+            if (rb) rb.style.display = idx === 0 ? 'none' : 'inline-flex';
+        });
+    }
+
+    function setupRemoveButtons() {
+        document.querySelectorAll('.remove-mot').forEach(btn => {
+            btn.onclick = function () {
+                this.closest('.mot-image-card').remove();
+                updateMotNumbers();
+                validateWords();
+                validateWordImages();
+            };
+        });
+    }
+
+    function makeMotCard(idx, motVal, imgs) {
+        const card = document.createElement('div');
+        card.className = 'mot-image-card';
+        card.setAttribute('data-index', idx);
+        card.innerHTML = `
+            <div class="row g-3 align-items-end">
+                <div class="col-md-1 d-flex justify-content-center">
+                    <div class="mot-number">${idx + 1}</div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">🔤 Mot *</label>
+                    <input type="text" class="form-control word-input" name="mots[]"
+                           value="${(motVal || '').replace(/"/g,'&quot;')}"
+                           placeholder="Ex: CHEVAL" required
+                           style="background:#fff8fb; border-color:#f9a8d4;">
+                    <span class="validation-message word-validation" style="font-size:0.75rem; color:#ef4444;"></span>
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label">📷 Images du mot *</label>
+                    <input type="file" class="form-control images-file" name="images_files_${idx}[]"
+                           accept="image/*" multiple
+                           style="background:#fff8fb; border-color:#f9a8d4;">
+                    <span class="images-validation-message" style="font-size:0.75rem; color:#ef4444; display:block; margin-top:4px;"></span>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn-danger-soft remove-mot" style="width:100%;">
+                        <i class="fas fa-trash-alt"></i> Retirer
+                    </button>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-12">
+                    <div class="existing-images-list"></div>
+                    <div class="new-images-list"></div>
+                </div>
+            </div>`;
+        
+        // Afficher les images existantes si présentes
+        if (imgs && imgs.length) {
+            displayExistingImages(card.querySelector('.existing-images-list'), imgs, idx);
+        }
+        
+        // Attacher l'aperçu des nouvelles images
+        attachImagePreview(card.querySelector('.images-file'), card.querySelector('.new-images-list'));
+        
+        // Ajouter les événements de validation
+        const wordInput = card.querySelector('.word-input');
+        wordInput.addEventListener('input', validateWords);
+        
+        return card;
+    }
+
+    /* ── Ajouter un mot ── */
+    document.getElementById('addMotBtn')?.addEventListener('click', function () {
+        const container = document.getElementById('motsImagesContainer');
+        const newCard = makeMotCard(motIndex, '', []);
+        container.appendChild(newCard);
+        motIndex++;
+        updateMotNumbers();
+        setupRemoveButtons();
+        validateWords();
+        validateWordImages();
+    });
+
+    /* ── Annuler ── */
+    document.getElementById('cancelCourseBtn')?.addEventListener('click', function () {
+        if (confirm('Voulez-vous vraiment annuler ? Les modifications non sauvegardées seront perdues.')) {
+            document.getElementById('courseForm').reset();
+            document.getElementById('formMode').textContent = 'Mode : Ajout';
+            document.getElementById('courseId').value = '';
+            document.getElementById('currentImagePreview').style.display = 'none';
+            document.getElementById('removeImageField').value = '0';
+            const c = document.getElementById('motsImagesContainer');
+            c.innerHTML = '';
+            c.appendChild(makeMotCard(0, '', []));
+            motIndex = 1;
+            updateMotNumbers();
+            setupRemoveButtons();
+            validateWords();
+            validateWordImages();
+        }
+    });
+
+    /* ── Supprimer l'image du cours ── */
+    document.getElementById('removeCourseImageBtn')?.addEventListener('click', function () {
+        if (confirm('Voulez-vous supprimer l\'image de ce cours ?')) {
+            document.getElementById('removeImageField').value = '1';
+            document.getElementById('currentImagePreview').style.display = 'none';
+            document.getElementById('course_image_file').value = '';
+            validateImage();
+        }
+    });
+
+    /* ── Filtre ── */
+    document.getElementById('courseFilterInput')?.addEventListener('input', function (e) {
+        const val = e.target.value.toLowerCase();
+        document.querySelectorAll('#coursTable tbody tr').forEach(row => {
+            if (row.querySelector('td'))
+                row.style.display = row.textContent.toLowerCase().includes(val) ? '' : 'none';
+        });
+    });
+
+    /* ── Modifier ── */
+    document.querySelectorAll('.edit-course-btn').forEach(btn => {
+        btn.addEventListener('click', async function () {
+            const id = this.getAttribute('data-id');
+            document.getElementById('formMode').textContent = 'Mode : Modification';
+            document.getElementById('courseId').value = id;
+            document.getElementById('removeImageField').value = '0';
+            try {
+                const response = await fetch(`/admin/cours/${id}/edit`);
+                if (!response.ok) throw new Error('Erreur réseau');
+                const data = await response.json();
+                
+                document.getElementById('cours_titre').value       = data.titre || '';
+                document.getElementById('cours_typeCours').value   = data.typeCours || '';
+                document.getElementById('cours_niveau').value      = data.niveau || '';
+                document.getElementById('cours_duree').value       = data.duree || '';
+                document.getElementById('cours_description').value = data.description || '';
+                
+                // Gestion de l'image du cours
+                if (data.image && data.image !== '') {
+                    document.getElementById('currentImage').src = `/uploads/images/${data.image}`;
+                    document.getElementById('currentImagePreview').style.display = 'block';
+                } else {
+                    document.getElementById('currentImagePreview').style.display = 'none';
+                }
+                
+                // Traitement des mots et images
+                const mots = (data.mots && data.mots !== '') ? data.mots.split(';') : [''];
+                const motImagesMap = {};
+                if (data.imagesMots && data.imagesMots !== '') {
+                    const items = data.imagesMots.split(';');
+                    for (const item of items) {
+                        if (item.indexOf(':') !== -1) {
+                            const colonnePos = item.indexOf(':');
+                            const k = item.substring(0, colonnePos).trim();
+                            const v = item.substring(colonnePos + 1);
+                            if (k && v) {
+                                motImagesMap[k] = v.split(',');
+                            }
+                        }
+                    }
+                }
+                
+                const container = document.getElementById('motsImagesContainer');
+                container.innerHTML = '';
+                mots.forEach((mot, idx) => {
+                    const motTrim = mot.trim();
+                    const motUpper = motTrim.toUpperCase();
+                    container.appendChild(makeMotCard(idx, motTrim, motImagesMap[motUpper] || []));
+                });
+                motIndex = mots.length;
+                updateMotNumbers();
+                setupRemoveButtons();
+                validateWords();
+                validateWordImages();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (err) {
+                console.error('Erreur:', err);
+                alert('Erreur lors du chargement du cours. Vérifiez que le cours existe.');
+            }
+        });
+    });
+
+    /* ── Supprimer ── */
+    document.querySelectorAll('.delete-course-btn').forEach(btn => {
+        btn.addEventListener('click', async function () {
+            if (confirm('Supprimer ce cours définitivement ?')) {
+                const id = this.getAttribute('data-id');
+                try {
+                    const r = await fetch(`/admin/cours/${id}/delete`, { method: 'DELETE' });
+                    if (r.ok) { window.location.reload(); }
+                    else { 
+                        const error = await r.json();
+                        alert('Erreur lors de la suppression: ' + (error.error || 'Erreur inconnue'));
+                    }
+                } catch { 
+                    alert('Erreur lors de la suppression'); 
+                }
+            }
+        });
+    });
+
+    // Attacher la validation des mots
+    document.querySelectorAll('.word-input').forEach(input => {
+        input.addEventListener('input', validateWords);
+    });
+    
+    initPreviews();
+    updateMotNumbers();
+    setupRemoveButtons();
+    validateWords();
+    validateWordImages();
+});
+</script>
+{% endblock %}

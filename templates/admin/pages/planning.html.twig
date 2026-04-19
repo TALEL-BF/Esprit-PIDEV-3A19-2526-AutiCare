@@ -1,8 +1,8 @@
 {% extends 'admin/base_admin.html.twig' %}
 
-{% block title %}Auticare — Planning des Thérapeutes{% endblock %}
+{% block title %}Auticare — Emploi du temps{% endblock %}
 
-{% block page_title %}Planning des Thérapeutes{% endblock %}
+{% block page_title %}Gestion de l'Emploi du Temps{% endblock %}
 
 {% block stylesheets %}
 {{ parent() }}
@@ -12,63 +12,220 @@
         font-size: .8rem;
         padding: 6px 12px;
     }
+
+    .planning-filters-panel {
+        width: 100%;
+        background: #faf8ff;
+        border: 1px solid #eadbff;
+        border-radius: 12px;
+        padding: 12px;
+        margin-top: 8px;
+    }
+
+    .planning-filters-main {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .planning-search-wrap {
+        position: relative;
+    }
+
+    .planning-search-wrap i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9b6be8;
+        font-size: .9rem;
+    }
+
+    .planning-search-wrap .form-control {
+        padding-left: 34px;
+    }
+
+    .planning-filters-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(160px, 1fr));
+        gap: 10px;
+    }
+
+    @media (max-width: 1200px) {
+        .planning-filters-main {
+            grid-template-columns: 1fr;
+        }
+
+        .planning-filters-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .planning-filters-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .pro-kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(180px, 1fr));
+        gap: 12px;
+    }
+
+    .pro-kpi-card {
+        background: linear-gradient(180deg, #ffffff 0%, #faf7ff 100%);
+        border: 1px solid #eadbff;
+        border-radius: 12px;
+        padding: 14px;
+    }
+
+    .pro-kpi-label {
+        font-size: .78rem;
+        color: #6b7280;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: .3px;
+    }
+
+    .pro-kpi-value {
+        font-size: 1.45rem;
+        font-weight: 700;
+        color: #5b21b6;
+        line-height: 1.1;
+    }
+
+    .pro-kpi-sub {
+        margin-top: 6px;
+        font-size: .8rem;
+        color: #7c3aed;
+    }
+
+    @media (max-width: 992px) {
+        .pro-kpi-grid {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block body %}
 
 <div class="page-header">
-    <h2><i class="fas fa-clock me-2" style="color:var(--purple-500)"></i>Planning des Thérapeutes</h2>
-    <p>Gérer les horaires et plages de disponibilité</p>
+    <h2><i class="fas fa-calendar-week me-2" style="color:var(--purple-500)"></i>Gestion de l'Emploi du Temps</h2>
+    <p>Planifier les créneaux hebdomadaires liés aux rendez-vous et aux séances</p>
 </div>
 
+{% for message in app.flashes('success') %}
+    <div class="alert alert-success">{{ message }}</div>
+{% endfor %}
+
+<div class="alert alert-info">
+  vous devez spécifier SOIT un RDV SOIT une Séance (pas les deux en même temps).
+  </div>
+
 <div class="row g-3 mb-4">
+    {% set nb_total = emplois|length %}
+    {% set nb_matin = 0 %}
+    {% set nb_apresmidi = 0 %}
+    {% set nb_soir = 0 %}
+    {% set nb_rdv_lignes = 0 %}
+    {% set nb_seance_lignes = 0 %}
+    {% set nb_non_defini = 0 %}
+    {% for item in emplois %}
+        {% if item.trancheHoraire == 'matin' %}
+            {% set nb_matin = nb_matin + 1 %}
+        {% elseif item.trancheHoraire == 'apres_midi' %}
+            {% set nb_apresmidi = nb_apresmidi + 1 %}
+        {% elseif item.trancheHoraire == 'soir' or item.trancheHoraire == 'journee' %}
+            {% set nb_soir = nb_soir + 1 %}
+        {% endif %}
+
+        {% if item.idRdv and not item.idSeance %}
+            {% set nb_rdv_lignes = nb_rdv_lignes + 1 %}
+        {% elseif item.idSeance and not item.idRdv %}
+            {% set nb_seance_lignes = nb_seance_lignes + 1 %}
+        {% else %}
+            {% set nb_non_defini = nb_non_defini + 1 %}
+        {% endif %}
+    {% endfor %}
+
+    {% set taux_rdv = nb_total > 0 ? ((nb_rdv_lignes * 100) / nb_total)|round(1) : 0 %}
+    {% set taux_seance = nb_total > 0 ? ((nb_seance_lignes * 100) / nb_total)|round(1) : 0 %}
+    {% set taux_valides = nb_total > 0 ? (((nb_rdv_lignes + nb_seance_lignes) * 100) / nb_total)|round(1) : 0 %}
+
     <div class="col-6 col-xl-3">
         <div class="stat-card">
             <div class="stat-top">
                 <div>
-                    <div class="stat-label">Thérapeutes</div>
-                    <div class="stat-value">{{ therapists|default(24) }}</div>
+                    <div class="stat-label">Total Créneaux</div>
+                    <div class="stat-value">{{ nb_total }}</div>
                 </div>
-                <div class="stat-icon purple"><i class="fas fa-user-md"></i></div>
+                <div class="stat-icon purple"><i class="fas fa-calendar-alt"></i></div>
             </div>
-            <div class="stat-change up"><i class="fas fa-arrow-up"></i> actifs</div>
+            <div class="stat-change up"><i class="fas fa-chart-line"></i> année: {{ currentSchoolYear }}</div>
         </div>
     </div>
     <div class="col-6 col-xl-3">
         <div class="stat-card">
             <div class="stat-top">
                 <div>
-                    <div class="stat-label">Séances/sem</div>
-                    <div class="stat-value">{{ sessionsPerWeek|default(186) }}</div>
+                    <div class="stat-label">Matin</div>
+                    <div class="stat-value">{{ nb_matin }}</div> 
                 </div>
-                <div class="stat-icon violet"><i class="fas fa-calendar-week"></i></div>
+                <div class="stat-icon violet"><i class="fas fa-sun"></i></div>  
             </div>
-            <div class="stat-change up"><i class="fas fa-arrow-up"></i> cette semaine</div>
+            <div class="stat-change up"><i class="fas fa-clock"></i> créneaux début</div>
         </div>
     </div>
     <div class="col-6 col-xl-3">
         <div class="stat-card">
             <div class="stat-top">
                 <div>
-                    <div class="stat-label">Taux occupation</div>
-                    <div class="stat-value">{{ occupancyRate|default(78) }}%</div>
+                    <div class="stat-label">Après-midi</div>
+                    <div class="stat-value">{{ nb_apresmidi }}</div>
                 </div>
-                <div class="stat-icon pink"><i class="fas fa-percent"></i></div>
+                <div class="stat-icon pink"><i class="fas fa-cloud-sun"></i></div>   
             </div>
-            <div class="stat-change up"><i class="fas fa-arrow-up"></i> bon niveau</div>
+            <div class="stat-change text-warning"><i class="fas fa-clock"></i> créneaux denses</div>
         </div>
     </div>
     <div class="col-6 col-xl-3">
         <div class="stat-card">
             <div class="stat-top">
                 <div>
-                    <div class="stat-label">Heures/semaine</div>
-                    <div class="stat-value">{{ hoursPerWeek|default(312) }}h</div>
+                    <div class="stat-label">Soir & Journée</div>
+                    <div class="stat-value">{{ nb_soir }}</div>
                 </div>
-                <div class="stat-icon indigo"><i class="fas fa-clock"></i></div>
+                <div class="stat-icon indigo"><i class="fas fa-moon"></i></div>
             </div>
-            <div class="stat-change up"><i class="fas fa-arrow-up"></i> planifiées</div>
+            <div class="stat-change text-info" style="color: var(--bs-info);"><i class="fas fa-clock"></i> créneaux d'appoint</div>
+        </div>
+    </div>
+</div>
+
+<div class="card-box mb-4">
+    <div class="card-box-header">
+        <span class="card-box-title"><i class="fas fa-chart-line"></i> Indicateurs de performance</span>
+    </div>
+    <div class="card-box-body">
+        <div class="pro-kpi-grid">
+            <div class="pro-kpi-card">
+                <div class="pro-kpi-label">Taux de lignes RDV</div>
+                <div class="pro-kpi-value">{{ taux_rdv }}%</div>
+                <div class="pro-kpi-sub">{{ nb_rdv_lignes }} ligne(s) RDV sur {{ nb_total }}</div>
+            </div>
+            <div class="pro-kpi-card">
+                <div class="pro-kpi-label">Taux de lignes Séance</div>
+                <div class="pro-kpi-value">{{ taux_seance }}%</div>
+                <div class="pro-kpi-sub">{{ nb_seance_lignes }} ligne(s) séance sur {{ nb_total }}</div>
+            </div>
+            <div class="pro-kpi-card">
+                <div class="pro-kpi-label">Planification Valide</div>
+                <div class="pro-kpi-value">{{ taux_valides }}%</div>
+                <div class="pro-kpi-sub">{{ nb_non_defini }} ligne(s) à compléter</div>
+            </div>
         </div>
     </div>
 </div>
@@ -77,67 +234,54 @@
     <div class="col-lg-8">
         <div class="card-box">
             <div class="card-box-header">
-                <span class="card-box-title"><i class="fas fa-plus-circle"></i> Ajouter / Modifier une Plage Horaire</span>
-                <span class="form-mode-badge" id="formMode">Mode : Ajout</span>
+                <span class="card-box-title"><i class="fas fa-plus-circle"></i> {{ isEdit ? 'Modifier la ligne de planning' : 'Nouvelle ligne de planning' }}</span>
+                <span class="form-mode-badge">Mode : {{ isEdit ? 'Modification' : 'Ajout' }}</span>
             </div>
             <div class="card-box-body">
+                {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+                {% if form.vars.submitted %}{{ form_errors(form) }}{% endif %}
                 <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label">Thérapeute</label>
-                        <select class="form-select" id="therapistName">
-                            <option>Dr. Fatma Trabelsi</option>
-                            <option>Dr. Amine Karray</option>
-                            <option>Dr. Sana Mejri</option>
-                            <option>Dr. Kamel Nasri</option>
-                        </select>
+                    <div class="col-md-4">
+                        <label class="form-label">Année scolaire</label>
+                        <input type="text" class="form-control" value="{{ currentSchoolYear }}" readonly>
+                    </div>
+                    <div class="col-md-4">
+                        {{ form_label(form.jourSemaine, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.jourSemaine, {'attr': {'class': 'form-select'}}) }}
+                        {% if form.vars.submitted %}{{ form_errors(form.jourSemaine) }}{% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        {{ form_label(form.trancheHoraire, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.trancheHoraire, {'attr': {'class': 'form-select'}}) }}
+                        {% if form.vars.submitted %}{{ form_errors(form.trancheHoraire) }}{% endif %}
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Jour</label>
-                        <select class="form-select" id="dayOfWeek">
-                            <option>Lundi</option>
-                            <option>Mardi</option>
-                            <option>Mercredi</option>
-                            <option>Jeudi</option>
-                            <option>Vendredi</option>
-                            <option>Samedi</option>
-                        </select>
+                        {{ form_label(form.rdvSelection, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.rdvSelection, {'attr': {'class': 'form-select'}}) }}
+                        {% if form.vars.submitted %}{{ form_errors(form.rdvSelection) }}{% endif %}
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Heure début</label>
-                        <input type="time" class="form-control" id="startTime">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Heure fin</label>
-                        <input type="time" class="form-control" id="endTime">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Type de séance</label>
-                        <select class="form-select" id="sessionType">
-                            <option>Individuelle</option>
-                            <option>Groupe</option>
-                            <option>Évaluation</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Récurrence</label>
-                        <select class="form-select" id="recurrence">
-                            <option>Chaque semaine</option>
-                            <option>Toutes les 2 semaines</option>
-                            <option>Unique</option>
-                        </select>
+                        {{ form_label(form.seanceSelection, null, {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_widget(form.seanceSelection, {'attr': {'class': 'form-select'}}) }}
+                        {% if form.vars.submitted %}{{ form_errors(form.seanceSelection) }}{% endif %}
                     </div>
                     <div class="col-12 d-flex gap-2">
-                        <button class="btn-purple" id="savePlanningBtn"><i class="fas fa-save"></i> Enregistrer</button>
-                        <button class="btn-outline-purple" id="cancelPlanningBtn"><i class="fas fa-times"></i> Annuler</button>
+                        <button class="btn-purple"><i class="fas fa-save"></i> {{ isEdit ? 'Mettre à jour' : 'Enregistrer' }}</button>
+                        {% if isEdit %}
+                            <a href="{{ path('admin_planning') }}" class="btn-outline-purple"><i class="fas fa-times"></i> Annuler</a>
+                        {% else %}
+                            <button type="reset" class="btn-outline-purple"><i class="fas fa-times"></i> Annuler</button>
+                        {% endif %}
                     </div>
                 </div>
+                {{ form_end(form) }}
             </div>
         </div>
     </div>
     <div class="col-lg-4">
         <div class="card-box h-100">
             <div class="card-box-header">
-                <span class="card-box-title"><i class="fas fa-chart-pie"></i> Occupation par jour</span>
+                <span class="card-box-title"><i class="fas fa-chart-pie"></i> Affectation des lignes</span>
             </div>
             <div class="card-box-body">
                 <canvas id="planningChart" height="240"></canvas>
@@ -148,43 +292,90 @@
 
 <div class="card-box">
     <div class="card-box-header">
-        <span class="card-box-title"><i class="fas fa-list"></i> Planning Hebdomadaire</span>
-        <input type="text" class="form-control filter-input" id="planningFilterInput" placeholder="Filtrer...">
+        <span class="card-box-title"><i class="fas fa-list"></i> Liste des lignes de planning</span>
+        <div class="planning-filters-panel">
+            <div class="planning-filters-main">
+                <div class="planning-search-wrap">
+                    <i class="fas fa-search"></i>
+                    <input type="text" class="form-control" id="planningSearchInput" placeholder="Rechercher par année, jour, tranche ou affectation...">
+                </div>
+                <button type="button" class="btn-outline-purple" id="resetPlanningFilters">
+                    <i class="fas fa-undo-alt me-1"></i> Réinitialiser
+                </button>
+            </div>
+
+            <div class="planning-filters-grid">
+                <select class="form-select" id="planningDayFilter">
+                    <option value="">Jour: Tous</option>
+                    <option value="lundi">Lundi</option>
+                    <option value="mardi">Mardi</option>
+                    <option value="mercredi">Mercredi</option>
+                    <option value="jeudi">Jeudi</option>
+                    <option value="vendredi">Vendredi</option>
+                    <option value="samedi">Samedi</option>
+                    <option value="dimanche">Dimanche</option>
+                </select>
+                <select class="form-select" id="planningTrancheFilter">
+                    <option value="">Tranche: Toutes</option>
+                    <option value="matin">Matin</option>
+                    <option value="apres_midi">Après-midi</option>
+                    <option value="soir">Soir</option>
+                    <option value="journee">Journée</option>
+                </select>
+                <select class="form-select" id="planningAffectationFilter">
+                    <option value="">Affectation: Toutes</option>
+                    <option value="rdv">RDV</option>
+                    <option value="séance">Séance</option>
+                    <option value="non défini">Non défini</option>
+                </select>
+                <select class="form-select" id="planningSortSelect">
+                    <option value="">Tri: défaut</option>
+                    <option value="annee_asc">Année croissante</option>
+                    <option value="annee_desc">Année décroissante</option>
+                    <option value="jour_asc">Jour (A-Z)</option>
+                    <option value="jour_desc">Jour (Z-A)</option>
+                </select>
+            </div>
+        </div>
     </div>
     <div class="card-box-body p-0">
         <div class="table-wrapper">
             <table class="custom-table" id="planningTable">
                 <thead>
                     <tr>
-                        <th>#</th>
-                        <th>Thérapeute</th>
+                        <th>Année</th>
                         <th>Jour</th>
-                        <th>Horaire</th>
-                        <th>Type</th>
-                        <th>Récurrence</th>
+                        <th>Tranche</th>
+                        <th>Affectation</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for schedule in schedules|default([
-                        {id:1, therapist:'Dr. Fatma Trabelsi', day:'Lundi', startTime:'09:00', endTime:'10:00', type:'Individuelle', recurrence:'Chaque semaine'},
-                        {id:2, therapist:'Dr. Amine Karray', day:'Mardi', startTime:'10:30', endTime:'12:00', type:'Groupe', recurrence:'Chaque semaine'},
-                        {id:3, therapist:'Dr. Sana Mejri', day:'Mercredi', startTime:'14:00', endTime:'15:00', type:'Évaluation', recurrence:'Unique'},
-                        {id:4, therapist:'Dr. Kamel Nasri', day:'Jeudi', startTime:'08:30', endTime:'09:30', type:'Individuelle', recurrence:'Toutes les 2 sem'}
-                    ]) %}
-                        <tr>
-                            <td>{{ schedule.id }}</td>
-                            <td>{{ schedule.therapist }}</td>
-                            <td>{{ schedule.day }}</td>
-                            <td>{{ schedule.startTime }} – {{ schedule.endTime }}</td>
-                            <td>{{ schedule.type }}</td>
-                            <td>{{ schedule.recurrence }}</td>
-                            <td>
-                                <button class="btn-edit-soft me-1 edit-schedule-btn" data-id="{{ schedule.id }}">Modifier</button>
-                                <button class="btn-danger-soft delete-schedule-btn" data-id="{{ schedule.id }}">Supprimer</button>
-                            </td>
-                        </tr>
-                    {% endfor %}
+                {% for emploi in emplois %}
+                    <tr>
+                        <td>{{ emploi.anneeScolaire }}</td>
+                        <td>{{ emploi.jourSemaine }}</td>
+                        <td>{{ emploi.trancheHoraire }}</td>
+                        <td>
+                            {% if emploi.idRdv and not emploi.idSeance %}
+                                <span class="badge-status badge-pending">RDV</span>
+                            {% elseif emploi.idSeance and not emploi.idRdv %}
+                                <span class="badge-status badge-active">Séance</span>
+                            {% else %}
+                                <span class="badge-status badge-inactive">Non défini</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ path('admin_planning_edit', {id: emploi.id}) }}" class="btn-edit-soft me-1">Modifier</a>
+                            <form method="post" action="{{ path('admin_planning_delete', {id: emploi.id}) }}" style="display:inline" onsubmit="return confirm('Supprimer cette ligne ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_emploi_' ~ emploi.id) }}">
+                                <button class="btn-danger-soft">Supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="5" class="text-center py-3">Aucune ligne d'emploi du temps enregistrée.</td></tr>
+                {% endfor %}
                 </tbody>
             </table>
         </div>
@@ -198,24 +389,28 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const P = { p400:'#a855f7', pink:'#f472b6', indigo:'#818cf8', accent:'#e040fb', p300:'#c084fc', p500:'#9333ea' };
+    const P = { p400: '#a855f7', pink: '#f472b6', indigo: '#818cf8', accent: '#e040fb' };
 
-    // Polar Area Chart - Occupation par jour
+    const stats = { rdv: 0, seance: 0, none: 0 };
+    {% for emploi in emplois %}
+        {% if emploi.idRdv and not emploi.idSeance %}
+            stats.rdv++;
+        {% elseif emploi.idSeance and not emploi.idRdv %}
+            stats.seance++;
+        {% else %}
+            stats.none++;
+        {% endif %}
+    {% endfor %}
+
     new Chart(document.getElementById('planningChart').getContext('2d'), {
-        type: 'polarArea',
+        type: 'doughnut',
         data: {
-            labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
+            labels: ['Lignes RDV', 'Lignes Séance', 'Autres'],
             datasets: [{
-                data: [32, 38, 28, 40, 35, 13],
-                backgroundColor: [
-                    'rgba(168,85,247,.7)',
-                    'rgba(244,114,182,.7)',
-                    'rgba(129,140,248,.7)',
-                    'rgba(192,132,252,.7)',
-                    'rgba(224,64,251,.7)',
-                    'rgba(147,51,234,.7)'
-                ],
-                borderWidth: 0
+                data: [stats.rdv, stats.seance, stats.none],
+                backgroundColor: [P.p400, P.pink, P.indigo],
+                borderWidth: 0,
+                hoverOffset: 8
             }]
         },
         options: {
@@ -228,61 +423,87 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             },
+            cutout: '60%',
             responsive: true
         }
     });
 
-    // Filter table
-    document.getElementById('planningFilterInput')?.addEventListener('input', function(e) {
-        const val = e.target.value.toLowerCase();
-        document.querySelectorAll('#planningTable tbody tr').forEach(row => {
-            row.style.display = row.textContent.toLowerCase().includes(val) ? '' : 'none';
+    const planningSearchInput = document.getElementById('planningSearchInput');
+    const planningDayFilter = document.getElementById('planningDayFilter');
+    const planningTrancheFilter = document.getElementById('planningTrancheFilter');
+    const planningAffectationFilter = document.getElementById('planningAffectationFilter');
+    const planningSortSelect = document.getElementById('planningSortSelect');
+    const resetPlanningFilters = document.getElementById('resetPlanningFilters');
+    const planningTableBody = document.querySelector('#planningTable tbody');
+    const planningDefaultSort = 'annee_desc';
+
+    function getPlanningCellText(row, index) {
+        return (row.children[index]?.textContent || '').trim();
+    }
+
+    function applyAdvancedPlanningFilters() {
+        const searchValue = (planningSearchInput?.value || '').toLowerCase();
+        const dayValue = (planningDayFilter?.value || '').toLowerCase();
+        const trancheValue = (planningTrancheFilter?.value || '').toLowerCase();
+        const affectationValue = (planningAffectationFilter?.value || '').toLowerCase();
+        const sortValue = planningSortSelect?.value || '';
+
+        const rows = Array.from(document.querySelectorAll('#planningTable tbody tr'));
+
+        rows.forEach((row) => {
+            const rowText = row.textContent.toLowerCase();
+            const dayText = getPlanningCellText(row, 1).toLowerCase();
+            const trancheText = getPlanningCellText(row, 2).toLowerCase();
+            const affectationText = getPlanningCellText(row, 3).toLowerCase();
+
+            const matchesSearch = searchValue === '' || rowText.includes(searchValue);
+            const matchesDay = dayValue === '' || dayText === dayValue;
+            const matchesTranche = trancheValue === '' || trancheText === trancheValue;
+            const matchesAffectation = affectationValue === '' || affectationText.includes(affectationValue);
+
+            row.style.display = (matchesSearch && matchesDay && matchesTranche && matchesAffectation) ? '' : 'none';
         });
-    });
 
-    // Edit button
-    document.querySelectorAll('.edit-schedule-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.getElementById('formMode').textContent = 'Mode : Modification';
-            const id = this.getAttribute('data-id');
-            console.log('Edit schedule:', id);
-        });
-    });
+        const visibleRows = rows.filter((row) => row.style.display !== 'none');
+        if (sortValue !== '' && visibleRows.length > 1) {
+            visibleRows.sort((a, b) => {
+                if (sortValue === 'annee_asc') {
+                    return getPlanningCellText(a, 0).localeCompare(getPlanningCellText(b, 0), 'fr', { sensitivity: 'base' });
+                }
+                if (sortValue === 'annee_desc') {
+                    return getPlanningCellText(b, 0).localeCompare(getPlanningCellText(a, 0), 'fr', { sensitivity: 'base' });
+                }
+                if (sortValue === 'jour_asc') {
+                    return getPlanningCellText(a, 1).localeCompare(getPlanningCellText(b, 1), 'fr', { sensitivity: 'base' });
+                }
+                if (sortValue === 'jour_desc') {
+                    return getPlanningCellText(b, 1).localeCompare(getPlanningCellText(a, 1), 'fr', { sensitivity: 'base' });
+                }
+                return 0;
+            });
 
-    // Delete button
-    document.querySelectorAll('.delete-schedule-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            if (confirm('Supprimer cette plage horaire ?')) {
-                this.closest('tr').remove();
-            }
-        });
-    });
-
-    // Cancel button
-    document.getElementById('cancelPlanningBtn')?.addEventListener('click', function() {
-        document.getElementById('formMode').textContent = 'Mode : Ajout';
-        document.getElementById('startTime').value = '';
-        document.getElementById('endTime').value = '';
-    });
-
-    // Save button
-    document.getElementById('savePlanningBtn')?.addEventListener('click', function() {
-        const therapist = document.getElementById('therapistName')?.value;
-        if (!therapist) {
-            alert('Veuillez sélectionner un thérapeute');
-            return;
+            visibleRows.forEach((row) => planningTableBody.appendChild(row));
         }
-        console.log('Save schedule:', {
-            therapist: therapist,
-            day: document.getElementById('dayOfWeek')?.value,
-            startTime: document.getElementById('startTime')?.value,
-            endTime: document.getElementById('endTime')?.value,
-            type: document.getElementById('sessionType')?.value,
-            recurrence: document.getElementById('recurrence')?.value
-        });
-        alert('Plage horaire enregistrée (démo)');
-        document.getElementById('formMode').textContent = 'Mode : Ajout';
+    }
+
+    [planningSearchInput, planningDayFilter, planningTrancheFilter, planningAffectationFilter, planningSortSelect].forEach((el) => {
+        el?.addEventListener('input', applyAdvancedPlanningFilters);
+        el?.addEventListener('change', applyAdvancedPlanningFilters);
     });
+
+    resetPlanningFilters?.addEventListener('click', function() {
+        if (planningSearchInput) planningSearchInput.value = '';
+        if (planningDayFilter) planningDayFilter.value = '';
+        if (planningTrancheFilter) planningTrancheFilter.value = '';
+        if (planningAffectationFilter) planningAffectationFilter.value = '';
+        if (planningSortSelect) planningSortSelect.value = planningDefaultSort;
+        applyAdvancedPlanningFilters();
+    });
+
+    if (planningSortSelect && !planningSortSelect.value) {
+        planningSortSelect.value = planningDefaultSort;
+    }
+    applyAdvancedPlanningFilters();
 });
 </script>
 {% endblock %}

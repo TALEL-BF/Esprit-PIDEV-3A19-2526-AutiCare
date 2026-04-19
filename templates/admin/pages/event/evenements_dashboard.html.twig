@@ -7,6 +7,74 @@
 {% block stylesheets %}
 {{ parent() }}
 <style>
+    /* ========== WELCOME BANNER ========== */
+    .welcome-banner {
+        background: linear-gradient(135deg, #8b5cf6, #c084fc, #ec4899);
+        border-radius: 28px;
+        padding: 32px 40px;
+        margin-bottom: 28px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 15px 35px rgba(139, 92, 246, 0.25);
+    }
+
+    .welcome-banner::before {
+        content: '🎪✨📊🎨🚀';
+        position: absolute;
+        bottom: 10px;
+        right: 20px;
+        font-size: 70px;
+        opacity: 0.08;
+        white-space: pre;
+        pointer-events: none;
+    }
+
+    .welcome-banner::after {
+        content: '';
+        position: absolute;
+        top: -40px;
+        right: -40px;
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255,255,255,0.15), transparent);
+    }
+
+    .welcome-banner h3 {
+        font-family: 'Baloo 2', cursive;
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: white;
+        margin: 0 0 8px 0;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+
+    .welcome-banner p {
+        color: rgba(255,255,255,0.9);
+        margin: 0;
+        font-size: 0.9rem;
+    }
+
+    .welcome-stats-row {
+        display: flex;
+        gap: 12px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+    }
+
+    .welcome-stat-chip {
+        background: rgba(255,255,255,0.2);
+        backdrop-filter: blur(10px);
+        border-radius: 50px;
+        padding: 8px 20px;
+        color: white;
+        font-weight: 600;
+        font-size: 0.8rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
     /* ========== STATS CARD STYLE ========== */
     .stats-grid {
         display: grid;
@@ -131,7 +199,6 @@
         width: 100%;
     }
 
-    /* Graphique combiné spécial */
     .combined-stats {
         display: flex;
         align-items: center;
@@ -315,9 +382,16 @@
 
 {% block body %}
 
-<div class="page-header">
-    <h2><i class="fas fa-chart-line me-2" style="color:var(--purple-500)"></i>Dashboard Global</h2>
-    <p>Aperçu des événements et sponsors</p>
+<!-- WELCOME BANNER AJOUTÉ -->
+<!-- WELCOME BANNER - Version ÉVÉNEMENTS (comme celle des cours) -->
+<div class="welcome-banner" style="background: linear-gradient(135deg, #a855f7, #c084fc, #ec4899);">
+    <h3> 🗓️Gestion des Événements  </h3>
+    <p>Plateforme de gestion des événements et du suivi des sponsors — <span id="currentDate"></span></p>
+    <div class="welcome-stats-row">
+        <span class="welcome-stat-chip"><i class="fas fa-calendar-alt"></i> {{ totalEvents|default(0) }} événements</span>
+        <span class="welcome-stat-chip"><i class="fas fa-handshake"></i> {{ totalSponsors|default(0) }} sponsors</span>
+        <span class="welcome-stat-chip"><i class="fas fa-chart-line"></i> {{ upcomingEvents|default(0) }} à venir</span>
+    </div>
 </div>
 
 <!-- 4 CARTES STATS -->
@@ -330,7 +404,7 @@
             </div>
             <div class="stat-icon purple"><i class="fas fa-calendar-alt"></i></div>
         </div>
-        <div class="stat-change up"><i class="fas fa-arrow-up"></i> +12% cette année</div>
+        <div class="stat-change up"><i class="fas fa-arrow-up"></i> Total</div>
     </div>
 
     <div class="stat-card">
@@ -374,7 +448,7 @@
         <div class="chart-title">
             <i class="fas fa-chart-line" style="color: #a855f7;"></i>
             Évolution : Événements vs Sponsors
-            <span class="insight-badge ms-auto">📈 +28%</span>
+            <span class="insight-badge ms-auto">📈 +{{ growthRate|default(0) }}%</span>
         </div>
         <div class="chart-container">
             <canvas id="combinedEvolutionChart"></canvas>
@@ -389,26 +463,26 @@
         </div>
         <div class="stats-recents">
             <div class="stat-recent-item">
-                <div class="stat-recent-number" id="eventsThisMonth">{{ totalEventsThisMonth|default(8) }}</div>
+                <div class="stat-recent-number" id="eventsThisMonth">{{ eventsThisMonth|default(0) }}</div>
                 <div class="stat-recent-label">Événements ce mois</div>
             </div>
             <div class="stat-recent-item">
-                <div class="stat-recent-number" id="newSponsorsThisMonth">{{ newSponsorsThisMonth|default(4) }}</div>
+                <div class="stat-recent-number" id="newSponsorsThisMonth">{{ newSponsorsThisMonth|default(0) }}</div>
                 <div class="stat-recent-label">Nouveaux sponsors</div>
             </div>
             <div class="stat-recent-item">
-                <div class="stat-recent-number" id="avgBudget">{{ avgBudgetPerEvent|default(42) }}K</div>
+                <div class="stat-recent-number" id="avgBudget">{{ avgBudgetPerEvent|default(0) }}K</div>
                 <div class="stat-recent-label">Budget moyen / événement</div>
             </div>
             <div class="stat-recent-item">
-                <div class="stat-recent-number" id="participationRate">{{ participationRate|default(76) }}%</div>
+                <div class="stat-recent-number" id="participationRate">{{ participationRate|default(0) }}%</div>
                 <div class="stat-recent-label">Taux de participation</div>
             </div>
         </div>
         <div class="progress-bar-custom mt-3">
-            <div class="progress-fill" id="growthFill" style="width: {{ growthRate|default(68) }}%; background: #0083ff;"></div>
+            <div class="progress-fill" id="growthFill" style="width: {{ growthRate|default(0) }}%; background: #0083ff;"></div>
         </div>
-        <div class="text-center text-muted small">Croissance globale : <span id="growthRate">{{ growthRate|default(68) }}</span>%</div>
+        <div class="text-center text-muted small">Croissance globale : <span id="growthRate">{{ growthRate|default(0) }}</span>%</div>
     </div>
 </div>
 
@@ -463,6 +537,14 @@
 {{ parent() }}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
+// Date du jour pour la bannière
+document.getElementById('currentDate').textContent = new Date().toLocaleDateString('fr-FR', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+});
+
 // Variables globales pour les graphiques
 let evolutionChart, radarChart, bubbleChart;
 
@@ -474,6 +556,25 @@ const eventColors = [
     { bg: '#e0e7ff', border: '#818cf8', icon: '💼' },
     { bg: '#fed7aa', border: '#f59e0b', icon: '🚀' }
 ];
+
+// ========== DONNÉES DYNAMIQUES DU CONTRÔLEUR ==========
+const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+
+{% set eventsByMonthJson = eventsByMonth|default({})|json_encode(constant('JSON_FORCE_OBJECT')) %}
+const eventsByMonth = {{ eventsByMonthJson|raw }};
+const sponsorGrowth = {{ sponsorGrowth|default([])|json_encode|raw }};
+
+// Données Radar DYNAMIQUES depuis le contrôleur
+const radarData = {{ radarData|default([85, 70, 92, 78, 88, 82])|json_encode|raw }};
+
+// Données Bubble Chart DYNAMIQUES depuis le contrôleur
+const bubbleData = {{ bubbleData|default([])|json_encode|raw }};
+
+// Construction des valeurs pour le graphique d'évolution
+const eventsValues = [];
+for (let i = 0; i < months.length; i++) {
+    eventsValues.push(eventsByMonth[months[i]] || 0);
+}
 
 // Fonction pour formater la date
 function formatDate(dateStr) {
@@ -506,7 +607,6 @@ function loadRecentEvents() {
         if (data.success && data.events && data.events.length > 0) {
             displayRecentEvents(data.events);
             
-            // Mettre à jour les stats si fournies
             if (data.stats) {
                 updateDashboardStats(data.stats);
             }
@@ -533,7 +633,6 @@ function loadRecentEvents() {
     });
 }
 
-// Fonction pour afficher les événements dans la liste
 function displayRecentEvents(events) {
     const eventsList = document.getElementById('recentEventsList');
     if (!eventsList) return;
@@ -564,7 +663,6 @@ function displayRecentEvents(events) {
     }).join('');
 }
 
-// Fonction pour mettre à jour les statistiques du dashboard
 function updateDashboardStats(stats) {
     if (stats.totalEvents !== undefined) {
         document.getElementById('totalEvents').textContent = stats.totalEvents;
@@ -596,7 +694,6 @@ function updateDashboardStats(stats) {
     }
 }
 
-// Fonction d'échappement HTML
 function escapeHtml(text) {
     if (!text) return '';
     const div = document.createElement('div');
@@ -608,19 +705,10 @@ function escapeHtml(text) {
 document.addEventListener('DOMContentLoaded', function() {
     const P = { p400: '#a855f7', pink: '#f472b6', indigo: '#818cf8', green: '#10b981', orange: '#f59e0b', red: '#ef4444', accent: '#e040fb', blue: '#3b82f6', teal: '#14b8a6', rose: '#f43f5e', amber: '#fbbf24' };
 
-    // Données des graphiques
-    const months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
-    const eventsByMonth = {{ eventsByMonth|default({})|json_encode|raw }};
-    const sponsorGrowth = {{ sponsorGrowth|default([2, 3, 4, 5, 6, 8, 9, 11, 12, 14, 15, 17])|json_encode|raw }};
-    
-    const eventsValues = [];
-    for (let i = 0; i < months.length; i++) {
-        eventsValues.push(eventsByMonth[months[i]] || Math.floor(Math.random() * 10) + 2);
-    }
-    
-    // GRAPHIQUE 1 : Évolution combinée (Courbe)
+    // GRAPHIQUE 1 : Évolution combinée (Courbe) - DYNAMIQUE
     const ctx1 = document.getElementById('combinedEvolutionChart');
     if (ctx1) {
+        if (evolutionChart) evolutionChart.destroy();
         evolutionChart = new Chart(ctx1, {
             type: 'line',
             data: {
@@ -669,29 +757,22 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // GRAPHIQUE 4 : Radar Performance
+    // GRAPHIQUE 2 : Radar Performance - DYNAMIQUE
     const ctx4 = document.getElementById('performanceRadarChart');
     if (ctx4) {
+        if (radarChart) radarChart.destroy();
         radarChart = new Chart(ctx4, {
             type: 'radar',
             data: {
                 labels: ['Engagement', 'Budget', 'Participation', 'Visibilité', 'Satisfaction', 'Croissance'],
                 datasets: [
                     {
-                        label: 'Événements',
-                        data: [85, 70, 92, 78, 88, 82],
+                        label: 'Performance globale',
+                        data: radarData,
                         borderColor: P.p400,
                         backgroundColor: 'rgba(168, 85, 247, 0.2)',
                         borderWidth: 2,
                         pointBackgroundColor: P.p400
-                    },
-                    {
-                        label: 'Sponsors',
-                        data: [78, 88, 65, 85, 72, 90],
-                        borderColor: P.pink,
-                        backgroundColor: 'rgba(244, 114, 182, 0.2)',
-                        borderWidth: 2,
-                        pointBackgroundColor: P.pink
                     }
                 ]
             },
@@ -704,22 +785,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // GRAPHIQUE 5 : Corrélation (Bubble Chart)
+    // GRAPHIQUE 3 : Corrélation (Bubble Chart) - DYNAMIQUE
     const ctx5 = document.getElementById('correlationBubbleChart');
-    if (ctx5) {
+    if (ctx5 && bubbleData.length > 0) {
+        if (bubbleChart) bubbleChart.destroy();
         bubbleChart = new Chart(ctx5, {
             type: 'bubble',
             data: {
                 datasets: [{
                     label: 'Événements',
-                    data: [
-                        { x: 50, y: 30, r: 15 },
-                        { x: 70, y: 55, r: 20 },
-                        { x: 85, y: 75, r: 25 },
-                        { x: 40, y: 20, r: 10 },
-                        { x: 65, y: 60, r: 18 },
-                        { x: 90, y: 85, r: 28 }
-                    ],
+                    data: bubbleData,
                     backgroundColor: 'rgba(168, 85, 247, 0.6)',
                     borderColor: P.p400,
                     borderWidth: 1
@@ -734,10 +809,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 scales: {
                     x: { title: { display: true, text: 'Budget sponsors (K TND)', font: { size: 10 } }, grid: { color: '#f3e8ff' } },
-                    y: { title: { display: true, text: 'Taux de participation (%)', font: { size: 10 } }, beginAtZero: true, grid: { color: '#f3e8ff' } }
+                    y: { title: { display: true, text: 'Taux de participation (%)', font: { size: 10 } }, beginAtZero: true, max: 100, grid: { color: '#f3e8ff' } }
                 }
             }
         });
+    } else if (ctx5) {
+        const parent = ctx5.parentElement;
+        if (parent) {
+            parent.innerHTML = '<div class="text-center text-muted py-5">📊 Données insuffisantes pour le graphique de corrélation</div>';
+        }
     }
     
     // Charger les événements récents

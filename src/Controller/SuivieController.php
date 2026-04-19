@@ -5,12 +5,16 @@ namespace App\Controller;
 use App\Entity\SuivieEntity;
 use App\Repository\SuivieEntityRepository;
 use App\Repository\TherapieEntityRepository;
+use App\Services\MailerService;
+use App\Services\SuiviePdfService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Services\GeminiService;
+
 
 #[Route('/admin/seance')]
 class SuivieController extends AbstractController
@@ -28,11 +32,11 @@ class SuivieController extends AbstractController
 
         foreach ($sessions as $s) {
             $statut = $s->getStatut();
-            if ($statut === 'normal') $planifie++;          // Normal = actif
-            elseif ($statut === 'immobile') $enCours++;     // Immobile = en observation
-            elseif ($statut === 'ne_bouge_pas') $enCours++; // Ne bouge pas = en observation
-            elseif ($statut === 'n_entend_pas') $annule++;  // N'entend pas
-            elseif ($statut === 'ne_voit_pas') $annule++;   // Ne voit pas
+            if ($statut === 'normal') $planifie++;
+            elseif ($statut === 'immobile') $enCours++;
+            elseif ($statut === 'ne_bouge_pas') $enCours++;
+            elseif ($statut === 'n_entend_pas') $annule++;
+            elseif ($statut === 'ne_voit_pas') $annule++;
             $sumH += (int) $s->getScoreHumeur();
             $sumS += (int) $s->getScoreStress();
             $sumA += (int) $s->getScoreAttention();
@@ -52,7 +56,7 @@ class SuivieController extends AbstractController
         ]);
     }
 
-    // ================= RECOMMENDATIONS (avant /{id} pour éviter conflit) =================
+    // ================= RECOMMENDATIONS =================
     #[Route('/recommendations', name: 'seance_recommendations', methods: ['POST'])]
     public function recommendations(Request $request, TherapieEntityRepository $therapieRepo): JsonResponse
     {
@@ -103,13 +107,15 @@ class SuivieController extends AbstractController
     public function show(SuivieEntity $s): JsonResponse
     {
         return $this->json([
-            'id'       => $s->getId(),
-            'patient'  => $s->getNomEnfant(),
-            'therapist'=> $s->getNomPsy(),
-            'date'     => $s->getDateSuivie()?->format('Y-m-d'),
-            'time'     => $s->getDateSuivie()?->format('H:i'),
-            'status'   => $s->getStatut(),
-            'notes'    => $s->getObservation(),
+            'id'          => $s->getId(),
+            'patient'     => $s->getNomEnfant(),
+            'therapist'   => $s->getNomPsy(),
+            'date'        => $s->getDateSuivie()?->format('Y-m-d'),
+            'time'        => $s->getDateSuivie()?->format('H:i'),
+            'status'      => $s->getStatut(),
+            'notes'       => $s->getObservation(),
+            'emailParent' => $s->getEmailParent(),
+            'age'         => $s->getAge(),
         ]);
     }
 
@@ -144,6 +150,39 @@ class SuivieController extends AbstractController
         return $this->json(['success' => true, 'message' => 'Séance supprimée']);
     }
 
+    // ================= SEND REPORT BY EMAIL =================
+    #[Route('/{id}/send-report', name: 'seance_send_report', methods: ['POST'])]
+    public function sendReport(
+        int                    $id,
+        SuivieEntityRepository $repo,
+        MailerService          $mailerService
+    ): JsonResponse {
+        // 1. Trouver la séance de référence
+        $seance = $repo->find($id);
+        if (!$seance) {
+            return $this->json(['success' => false, 'message' => 'Séance non trouvée'], 404);
+        }
+
+        // 2. Vérifier que l'email parent existe
+        if (!$seance->getEmailParent()) {
+            return $this->json([
+                'success' => false,
+                'message' => "Aucun email parent enregistré pour cet enfant. Veuillez d'abord ajouter l'email dans les coordonnées.",
+            ], 422);
+        }
+
+        // 3. Récupérer la dernière séance de l'enfant (pour le PDF)
+        $nomEnfant   = $seance->getNomEnfant();
+        $allSessions = $repo->findBy(['nomEnfant' => $nomEnfant], ['dateSuivie' => 'DESC']);
+        $lastSeance  = $allSessions[0] ?? $seance;
+
+        // 4. Envoyer
+        $result = $mailerService->sendReport($nomEnfant, $lastSeance);
+
+        $statusCode = $result['success'] ? 200 : 500;
+        return $this->json($result, $statusCode);
+    }
+
     // ── HYDRATE ──────────────────────────────────────────────────────────
     private function hydrateFromForm(SuivieEntity $s, array $d, TherapieEntityRepository $repo): void
     {
@@ -161,7 +200,6 @@ class SuivieController extends AbstractController
         $s->setComportement((string)($d['comportement'] ?? ''));
         $s->setInteractionSociale((string)($d['interactionSociale'] ?? ''));
 
-        // Date + heure
         $date = $d['date'] ?? '';
         $time = $d['time'] ?? '00:00';
         if ($date) {
@@ -169,7 +207,6 @@ class SuivieController extends AbstractController
             catch (\Exception) { $s->setDateSuivie(new \DateTime()); }
         }
 
-        // Thérapie
         $tid = $d['therapieId'] ?? null;
         $s->setTherapie($tid ? $repo->find((int)$tid) : null);
     }
@@ -181,4 +218,88 @@ class SuivieController extends AbstractController
         if ($score <= 6) return 'moyenne';
         return 'elevee';
     }
+
+
+// ================= COMPTE-RENDU IA D'UNE SÉANCE =================
+    #[Route('/{id}/compte-rendu-ia', name: 'seance_compte_rendu_ia', methods: ['POST'])]
+    public function compteRenduIa(
+        int                    $id,
+        SuivieEntityRepository $repo,
+        GeminiService          $geminiService
+    ): JsonResponse {
+        $seance = $repo->find($id);
+        if (!$seance) {
+            return $this->json(['success' => false, 'message' => 'Séance introuvable'], 404);
+        }
+ 
+        $result = $geminiService->generateCompteRendu(
+            nomEnfant:          $seance->getNomEnfant() ?? '',
+            age:                $seance->getAge() ?? 0,
+            dateSuivie:         $seance->getDateSuivie()?->format('d/m/Y à H:i') ?? '—',
+            nomPsy:             $seance->getNomPsy() ?? '',
+            scoreHumeur:        $seance->getScoreHumeur() ?? 0,
+            scoreStress:        $seance->getScoreStress() ?? 0,
+            scoreAttention:     $seance->getScoreAttention() ?? 0,
+            comportement:       $seance->getComportement() ?? '',
+            interactionSociale: $seance->getInteractionSociale() ?? '',
+            statut:             $seance->getStatut() ?? '',
+            observation:        $seance->getObservation() ?? '',
+            nomTherapie:        $seance->getTherapie()?->getNomExercice() ?? 'Aucune',
+            niveauSeance:       $seance->getNiveauSeance() ?? 1
+        );
+ 
+        if (isset($result['error'])) {
+            return $this->json(['success' => false, 'message' => $result['error']], 500);
+        }
+ 
+        return $this->json(['success' => true, 'compteRendu' => $result]);
+    }
+ 
+    // ================= ENVOYER COMPTE-RENDU PAR EMAIL =================
+    #[Route('/{id}/envoyer-compte-rendu', name: 'seance_envoyer_compte_rendu', methods: ['POST'])]
+    public function envoyerCompteRendu(
+        int                    $id,
+        Request                $request,
+        SuivieEntityRepository $repo,
+        MailerService          $mailerService
+    ): JsonResponse {
+        $seance = $repo->find($id);
+        if (!$seance) {
+            return $this->json(['success' => false, 'message' => 'Séance introuvable'], 404);
+        }
+ 
+        if (!$seance->getEmailParent()) {
+            return $this->json([
+                'success' => false,
+                'message' => 'Aucun email parent enregistré pour cette séance.'
+            ], 422);
+        }
+ 
+        $data       = json_decode($request->getContent(), true);
+        $compteRendu = $data['compteRendu'] ?? null;
+ 
+        if (!$compteRendu) {
+            return $this->json(['success' => false, 'message' => 'Données du compte-rendu manquantes.'], 400);
+        }
+ 
+        // Construire le HTML de l'email avec le compte-rendu
+        $nomEnfant   = $seance->getNomEnfant();
+        $emailParent = $seance->getEmailParent();
+        $dateSuivie  = $seance->getDateSuivie()?->format('d/m/Y à H:i') ?? '—';
+        $nomPsy      = $seance->getNomPsy();
+ 
+        $result = $mailerService->sendCompteRendu(
+            $emailParent,
+            $nomEnfant,
+            $dateSuivie,
+            $nomPsy,
+            $compteRendu
+        );
+ 
+        return $this->json($result, $result['success'] ? 200 : 500);
+    }
+
+
+
+
 }

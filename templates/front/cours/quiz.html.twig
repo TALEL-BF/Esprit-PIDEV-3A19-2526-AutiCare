@@ -438,37 +438,30 @@
             background: linear-gradient(135deg, #ede9fe, #ddd6fe);
             color: #6d28d9;
             font-family: 'Baloo 2', cursive;
-            font-size: 0.95rem; font-weight: 800;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-size: 0.85rem; font-weight: 800;
+            display: flex; align-items: center; justify-content: center;
             flex-shrink: 0;
-            transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
-        }
-
-        
-        .choice-btn.selected {
-            border-color: var(--violet);
-            background: #f5f0ff;
-            transform: translateX(6px);
-        }
-        .choice-btn.selected .choice-letter {
-            background: linear-gradient(135deg, #7c3aed, #a855f7);
-            color: white;
+            transition: all 0.22s;
         }
 
         /* Correct state */
         .choice-btn.correct {
             border-color: var(--green) !important;
-            background: rgba(16,185,129,0.07) !important;
+            background: rgba(16,185,129,0.08) !important;
             transform: none !important;
-            animation: correct-pop 0.4s cubic-bezier(0.34,1.56,0.64,1);
         }
         .choice-btn.correct .choice-letter {
             background: linear-gradient(135deg, #10b981, #34d399) !important;
             color: white !important;
             border-radius: 50%;
         }
+
+        /* Selected state */
+        .choice-btn.selected:not(.wrong):not(.correct) {
+            border-color: var(--mauve);
+            background: rgba(155,107,255,0.08);
+        }
+
         @keyframes correct-pop {
             0%   { transform: scale(0.97); }
             60%  { transform: scale(1.03); }
@@ -816,6 +809,155 @@
             transform: translateY(-2px);
         }
 
+        /* ─── IA Feedback Card — Rose & Mauve ─── */
+
+        /* Loader IA */
+        .ia-loader {
+            display: none;
+            align-items: center;
+            gap: 12px;
+            margin-top: 1.8rem;
+            background: linear-gradient(135deg, #fdf2f8, #f5f0ff);
+            border: 2.5px dashed #f9a8d4;
+            border-radius: 20px;
+            padding: 1.2rem 1.5rem;
+        }
+        .ia-loader.visible { display: flex; }
+        .ia-spinner {
+            width: 26px; height: 26px;
+            border: 3px solid #f9a8d4;
+            border-top-color: #ec4899;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            flex-shrink: 0;
+        }
+        .ia-loader-text {
+            font-family: 'Baloo 2', cursive;
+            font-size: 0.92rem; font-weight: 800;
+            color: #be185d;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Card principale */
+        .ia-feedback-card {
+            margin-top: 2rem;
+            border-radius: 28px;
+            overflow: hidden;
+            text-align: left;
+            display: none;
+            animation: slide-in 0.5s cubic-bezier(0.34,1.56,0.64,1);
+            box-shadow: 0 8px 32px rgba(236,72,153,0.13), 0 2px 8px rgba(168,85,247,0.08);
+            border: 2.5px solid #fbcfe8;
+        }
+        .ia-feedback-card.visible { display: block; }
+
+        /* Header rose → mauve */
+        .ia-feedback-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 1.1rem 1.5rem;
+            background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+        }
+        .ia-feedback-header-icon { font-size: 1.7rem; flex-shrink: 0; }
+        .ia-feedback-header-label {
+            font-family: 'Baloo 2', cursive;
+            font-size: 0.82rem; font-weight: 800;
+            color: rgba(255,255,255,0.9);
+            text-transform: uppercase;
+            letter-spacing: .6px;
+        }
+
+        /* Body */
+        .ia-feedback-body {
+            background: linear-gradient(160deg, #fdf2f8 0%, #faf5ff 100%);
+            padding: 1.4rem 1.6rem 1.6rem;
+        }
+
+        /* Badge */
+        .ia-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #ec4899, #c77dff);
+            color: #fff;
+            font-family: 'Baloo 2', cursive;
+            font-size: 0.95rem; font-weight: 800;
+            padding: 7px 22px;
+            border-radius: 50px;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 16px rgba(236,72,153,0.30);
+            letter-spacing: .3px;
+        }
+
+        /* Message */
+        .ia-message {
+            font-size: 0.97rem;
+            color: #6b21a8;
+            font-weight: 700;
+            line-height: 1.65;
+            margin-bottom: 1.2rem;
+            background: #fff;
+            border: 2px solid #f3e8ff;
+            border-radius: 18px;
+            padding: 13px 16px;
+        }
+
+        /* Titre conseils */
+        .ia-conseils-title {
+            font-family: 'Baloo 2', cursive;
+            font-size: 0.83rem; font-weight: 800;
+            color: #ec4899;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            margin-bottom: 0.65rem;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .ia-conseils-title::after {
+            content: '';
+            flex: 1;
+            height: 2px;
+            border-radius: 2px;
+            background: linear-gradient(90deg, #fbcfe8, transparent);
+        }
+
+        /* Liste conseils */
+        .ia-conseils-list {
+            list-style: none;
+            padding: 0; margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .ia-conseils-list li {
+            background: #fff;
+            border-radius: 16px;
+            padding: 10px 16px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #4b3f72;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }
+        .ia-conseils-list li:nth-child(1) { border: 2px solid #fbcfe8; }
+        .ia-conseils-list li:nth-child(2) { border: 2px solid #e9d5ff; }
+        .ia-conseils-list li:nth-child(3) { border: 2px solid #fce7f3; }
+        .ia-conseils-list li:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 14px rgba(236,72,153,0.12);
+        }
+        .ia-conseils-list li::before {
+            content: '✦';
+            font-size: 0.9rem;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, #ec4899, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
         
         @media (max-width: 576px) {
             .question-card { padding: 1.8rem 1.4rem 1.6rem; }
@@ -825,6 +967,7 @@
             .results-title { font-size: 1.7rem; }
             .quiz-progress-inner { flex-wrap: wrap; gap: 8px; }
             .progress-step-pills { order: 3; width: 100%; }
+            .ia-feedback-card { padding: 1.2rem 1rem; }
         }
     </style>
 {% endblock %}
@@ -900,7 +1043,9 @@
                 <div class="col-lg-5 col-md-6">
                     <div class="quiz-hero-img-wrap">
                         {% if cours.image %}
-                            <img src="/uploads/images/{{ cours.image }}" alt="{{ cours.titre }}">
+                            <img src="/uploads/images/{{ cours.image }}" alt="{{ cours.titre }}"
+                                 onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                            <span class="hero-img-emoji" style="display:none">{{ emoji }}</span>
                         {% else %}
                             <span class="hero-img-emoji">{{ emoji }}</span>
                         {% endif %}
@@ -917,15 +1062,15 @@
     <div class="container">
         <div class="quiz-progress-inner">
             <span class="progress-label" id="progressLabel">Question 1 / {{ evaluations|length }}</span>
-            <div class="progress-step-pills" id="stepPills">
+            <div class="progress-step-pills">
                 {% for i in 1..evaluations|length %}
-                    <div class="step-pill{% if i == 1 %} current{% endif %}" data-step="{{ i }}"></div>
+                    <div class="step-pill {% if i == 1 %}current{% endif %}"></div>
                 {% endfor %}
             </div>
-            <div class="score-gem">
+            <span class="score-gem">
                 <span class="gem-icon">💎</span>
                 <span id="scoreDisplay">0</span> pts
-            </div>
+            </span>
         </div>
     </div>
 </div>
@@ -1006,6 +1151,26 @@
             <button class="btn-retry" id="btnRetry">🔁 Réessayer</button>
             <a href="{{ path('app_cours_show', {'id': cours.idCours}) }}" class="btn-cours-back">📚 Retour au cours</a>
         </div>
+
+        {# ─── IA Feedback ─── #}
+        <div class="ia-loader" id="iaLoader">
+            <div class="ia-spinner"></div>
+            <span class="ia-loader-text">✨ L'IA prépare ton bilan personnalisé…</span>
+        </div>
+
+        <div class="ia-feedback-card" id="iaFeedbackCard">
+            <div class="ia-feedback-header">
+                <span class="ia-feedback-header-icon">🤖</span>
+                <span class="ia-feedback-header-label">Bilan personnalisé par l'IA</span>
+            </div>
+            <div class="ia-feedback-body">
+                <div class="ia-badge" id="iaBadge"></div>
+                <div class="ia-message" id="iaMessage"></div>
+                <div class="ia-conseils-title">💡 Mes conseils pour toi</div>
+                <ul class="ia-conseils-list" id="iaConseilsList"></ul>
+            </div>
+        </div>
+
     </div>
 
 </div>
@@ -1031,17 +1196,13 @@
 
     /* ─── Helper : retourne le texte de la bonne réponse ─── */
     function getCorrectAnswerText(q) {
-        // Cas 1 : bonneReponse est une clé ('choix1', 'choix2', 'choix3')
         if (q.bonneReponse === 'choix1') return q.choix1;
         if (q.bonneReponse === 'choix2') return q.choix2;
         if (q.bonneReponse === 'choix3') return q.choix3;
-        // Cas 2 : bonneReponse est directement le texte de la réponse
-        // On retrouve quel choix correspond pour confirmer
         const br = q.bonneReponse.trim().toLowerCase();
         if (q.choix1 && q.choix1.trim().toLowerCase() === br) return q.choix1;
         if (q.choix2 && q.choix2.trim().toLowerCase() === br) return q.choix2;
         if (q.choix3 && q.choix3.trim().toLowerCase() === br) return q.choix3;
-        // Fallback : retourner tel quel
         return q.bonneReponse;
     }
 
@@ -1053,6 +1214,7 @@
     let correct   = 0;
     let wrong     = 0;
     let answered  = false;
+    let wrongQuestions = []; // ← track les questions ratées
     const totalScore = questions.reduce((s, q) => s + (q.score || 1), 0);
 
     /* ─── DOM refs ─── */
@@ -1143,24 +1305,20 @@
         qText.textContent = q.question;
         qScoreVal.textContent = q.score || 1;
 
-        /* Précédent button visibility */
         if (current > 0) {
             btnPrev.classList.add('active');
         } else {
             btnPrev.classList.remove('active');
         }
 
-        /* Card entrance animation */
         qCard.style.animation = 'none';
         qCard.offsetHeight;
         qCard.style.animation = 'slide-in 0.38s cubic-bezier(0.34,1.56,0.64,1)';
 
-        /* Reset feedback */
         feedbackBox.className = 'feedback-box';
         feedbackBox.style.display = 'none';
         btnNext.classList.remove('visible');
 
-        /* Build choices */
         choicesGrid.innerHTML = '';
         choixKeys.forEach((key, i) => {
             const val = q[key];
@@ -1184,18 +1342,14 @@
         allBtns.forEach(b => b.disabled = true);
         btn.classList.add('selected');
 
-        // Déterminer si bonneReponse est une clé (choix1/2/3) ou du texte direct
         const isKeyFormat = ['choix1','choix2','choix3'].includes(q.bonneReponse);
         
-        // isCorrect : match sur la clé OU sur la valeur texte
         const isCorrect = isKeyFormat
             ? (chosenKey === q.bonneReponse)
             : (chosenValue.trim().toLowerCase() === q.bonneReponse.trim().toLowerCase());
 
-        // Obtenir le texte de la bonne réponse pour l'affichage
         const correctAnswerText = getCorrectAnswerText(q);
 
-        /* Highlight the correct answer */
         allBtns.forEach(b => {
             const matchByKey  = isKeyFormat && b.dataset.choiceKey === q.bonneReponse;
             const matchByText = !isKeyFormat && b.dataset.value.trim().toLowerCase() === q.bonneReponse.trim().toLowerCase();
@@ -1206,7 +1360,6 @@
         
         if (!isCorrect) btn.classList.add('wrong');
 
-        /* Feedback */
         if (isCorrect) {
             const pts = q.score || 1;
             score += pts;
@@ -1218,11 +1371,12 @@
             launchConfetti();
         } else {
             wrong++;
+            // ← Stocker la question ratée
+            wrongQuestions.push({ question: q.question });
             feedbackBox.className = 'feedback-box visible wrong-fb';
             feedbackIcon.textContent = '💔';
             feedbackTitle.textContent = `Pas tout à fait…`;
             feedbackDetail.textContent = `La bonne réponse était : « ${correctAnswerText} »`;
-            /* shake the card */
             qCard.style.animation = 'none';
             qCard.offsetHeight;
             qCard.style.animation = 'wrong-card-shake 0.45s ease';
@@ -1279,7 +1433,6 @@
         document.getElementById('resultsTitle').textContent = title;
         document.getElementById('resultsSubtitle').textContent = subtitle;
 
-        /* Animated SVG ring */
         const circumference = 2 * Math.PI * 55;
         const ringEl = document.getElementById('ringCircle');
         const color  = pct >= 80 ? '#10b981' : pct >= 50 ? '#f59e0b' : '#ef4444';
@@ -1296,7 +1449,6 @@
         document.getElementById('statWrong').textContent = wrong;
         document.getElementById('statPts').textContent = score;
 
-        // Animate stat numbers
         document.querySelectorAll('.stat-num').forEach((el, i) => {
             el.style.animation = 'none';
             el.style.opacity = '0';
@@ -1305,18 +1457,66 @@
                 el.style.opacity = '1';
             }, 200 + i * 120);
         });
+
+        // ─── Appel IA feedback ───
+        fetchIAFeedback(pct, correct, wrong);
     }
 
-   
+    /* ─── IA Quiz Feedback ─── */
+    function fetchIAFeedback(pct, correct, wrong) {
+        const loader = document.getElementById('iaLoader');
+        const card   = document.getElementById('iaFeedbackCard');
+        const coursTitre = {{ cours.titre | json_encode | raw }};
+
+        loader.classList.add('visible');
+        card.classList.remove('visible');
+
+        fetch('{{ path("evaluation_quiz_feedback") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                cours_titre:     coursTitre,
+                pct:             pct,
+                correct:         correct,
+                wrong:           wrong,
+                wrong_questions: wrongQuestions.slice(0, 3)
+            })
+        })
+        .then(r => r.json())
+        .then(data => {
+            loader.classList.remove('visible');
+
+            document.getElementById('iaBadge').textContent   = data.badge   || '🌟 Bien joué';
+            document.getElementById('iaMessage').textContent = data.message  || '';
+
+            const ul = document.getElementById('iaConseilsList');
+            ul.innerHTML = '';
+            (data.conseils || []).forEach(c => {
+                const li = document.createElement('li');
+                li.textContent = c;
+                ul.appendChild(li);
+            });
+
+            card.classList.add('visible');
+        })
+        .catch(() => {
+            loader.classList.remove('visible');
+        });
+    }
+
+    /* ─── Retry ─── */
     document.getElementById('btnRetry').addEventListener('click', () => {
         current = 0;
         score = 0;
         correct = 0;
         wrong = 0;
         answered = false;
+        wrongQuestions = [];
         scoreDsp.textContent = 0;
         btnPrev.classList.remove('active');
         resultsCard.style.display = 'none';
+        document.getElementById('iaFeedbackCard').classList.remove('visible');
+        document.getElementById('iaLoader').classList.remove('visible');
         qCard.style.display = 'block';
         renderQuestion();
     });

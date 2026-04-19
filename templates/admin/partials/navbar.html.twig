@@ -1,31 +1,605 @@
+{# templates/admin/partials/navbar.html.twig #}
+
 <div id="navbar">
     <button class="navbar-toggle" onclick="toggleSidebar()">
         <i class="fas fa-bars"></i>
     </button>
-    
+
     <div class="navbar-page-title">
         {% block page_title %}Dashboard{% endblock %}
     </div>
-    
+
     <div class="navbar-search">
         <i class="fas fa-search"></i>
         <input type="text" placeholder="Rechercher...">
     </div>
-    
+
     <div class="navbar-actions">
-        <button class="nav-action-btn">
-            <i class="fas fa-bell"></i>
-            <span class="nav-badge">3</span>
-        </button>
+
+        {# ══ BELL — Active UNIQUEMENT sur /admin/seance ══ #}
+        {% set isSeancePage = app.request.attributes.get('_route') starts with 'admin_seance' %}
+
+        <div class="notif-bell-wrap {% if not isSeancePage %}bell-disabled{% endif %}"
+             id="notifBellWrap">
+            <button class="nav-action-btn {% if not isSeancePage %}nav-action-btn--locked{% endif %}"
+                    id="notifBellBtn"
+                    {% if isSeancePage %}
+                        onclick="toggleNotifDropdown(event)"
+                        title="Documents envoyés par les parents"
+                    {% else %}
+                        onclick="return false;"
+                        title="Notifications disponibles uniquement sur la page Séance"
+                        style="cursor:not-allowed; opacity:.45; filter:grayscale(60%);"
+                    {% endif %}>
+                <i class="fas fa-bell"></i>
+                <span class="nav-badge" id="notifBadge" style="display:none;">0</span>
+            </button>
+
+            {# Tooltip affiché sur les autres pages #}
+            {% if not isSeancePage %}
+            <div class="bell-locked-tooltip">
+                <i class="fas fa-lock" style="font-size:10px;"></i>
+                Accessible sur la page <strong>Séance</strong>
+            </div>
+            {% endif %}
+
+            {% if isSeancePage %}
+            <div class="notif-dropdown" id="notifDropdown" style="display:none;">
+
+                {# Header #}
+                <div class="notif-dropdown-header">
+                    <div class="notif-dropdown-title">
+                        <i class="fas fa-inbox"></i>
+                        Documents parents
+                    </div>
+                    <button class="notif-mark-all-btn" onclick="markAllSeen()">
+                        <i class="fas fa-check-double"></i> Tout lire
+                    </button>
+                </div>
+
+                {# Liste #}
+                <div class="notif-list" id="notifList">
+                    <div class="notif-empty" id="notifEmpty">
+                        <i class="fas fa-inbox"></i>
+                        <span>Aucun document reçu</span>
+                    </div>
+                </div>
+
+                {# Footer #}
+                <div class="notif-dropdown-footer">
+                    <span id="notifFooterCount" class="notif-footer-count"></span>
+                    <button class="notif-refresh-btn" onclick="loadNotifications()">
+                        <i class="fas fa-sync-alt"></i> Actualiser
+                    </button>
+                </div>
+            </div>
+            {% endif %}{# fin isSeancePage dropdown #}
+        </div>
+        {# fin notif-bell-wrap #}
+
+        {# ══ Envelope ══ #}
         <button class="nav-action-btn">
             <i class="fas fa-envelope"></i>
             <span class="nav-badge">5</span>
         </button>
     </div>
-    
+
     <div class="navbar-user">
         <div class="navbar-user-avatar">A</div>
         <span class="navbar-user-name">Admin</span>
         <i class="fas fa-chevron-down" style="font-size: 0.7rem; color: #999;"></i>
     </div>
 </div>
+
+{# ══════════════════════════════════════════════════════
+   STYLES NOTIFICATION DROPDOWN
+══════════════════════════════════════════════════════ #}
+<style>
+/* Wrapper relatif pour positionner le dropdown */
+.notif-bell-wrap {
+    position: relative;
+    display: inline-flex;
+}
+
+/* Bell désactivée — visible mais non interactive */
+.bell-disabled {
+    position: relative;
+}
+.bell-disabled .nav-action-btn--locked {
+    cursor: not-allowed !important;
+    pointer-events: none;
+    opacity: .42;
+    filter: grayscale(55%);
+    transition: none;
+}
+
+/* Tooltip "Accessible sur Séance" */
+.bell-locked-tooltip {
+    display: none;
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    background: #1e1b4b;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 7px 13px;
+    border-radius: 10px;
+    white-space: nowrap;
+    z-index: 9999;
+    box-shadow: 0 4px 16px rgba(0,0,0,.25);
+    pointer-events: none;
+}
+.bell-locked-tooltip::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    right: 14px;
+    width: 10px; height: 10px;
+    background: #1e1b4b;
+    transform: rotate(45deg);
+    border-radius: 2px;
+}
+.bell-disabled:hover .bell-locked-tooltip {
+    display: block;
+    animation: tooltipFadeIn .18s ease;
+}
+@keyframes tooltipFadeIn {
+    from { opacity:0; transform:translateY(-4px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+
+/* Dropdown container */
+.notif-dropdown {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    width: 400px;
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 12px 48px rgba(124, 58, 237, .22), 0 2px 8px rgba(0,0,0,.08);
+    border: 1.5px solid #ede9fe;
+    z-index: 99999;
+    overflow: hidden;
+    animation: notifSlideIn .22s cubic-bezier(.22,1,.36,1);
+}
+@keyframes notifSlideIn {
+    from { opacity: 0; transform: translateY(-10px) scale(.97); }
+    to   { opacity: 1; transform: translateY(0)     scale(1);   }
+}
+
+/* Header */
+.notif-dropdown-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 18px;
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+}
+.notif-dropdown-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+}
+.notif-mark-all-btn {
+    background: rgba(255,255,255,.18);
+    border: 1px solid rgba(255,255,255,.3);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background .2s;
+}
+.notif-mark-all-btn:hover { background: rgba(255,255,255,.32); }
+
+/* List */
+.notif-list {
+    max-height: 370px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #c4b5fd #f9f5ff;
+}
+.notif-list::-webkit-scrollbar { width: 5px; }
+.notif-list::-webkit-scrollbar-track { background: #f9f5ff; }
+.notif-list::-webkit-scrollbar-thumb { background: #c4b5fd; border-radius: 99px; }
+
+/* Empty state */
+.notif-empty {
+    padding: 36px 20px;
+    text-align: center;
+    color: #9ca3af;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+}
+.notif-empty i { font-size: 32px; color: #ddd6fe; }
+
+/* Item */
+.notif-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 18px;
+    border-bottom: 1px solid #f3f0ff;
+    transition: background .15s;
+    position: relative;
+}
+.notif-item:last-child { border-bottom: none; }
+.notif-item.unseen { background: #faf5ff; }
+.notif-item.unseen::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, #7c3aed, #a855f7);
+    border-radius: 0 4px 4px 0;
+}
+.notif-item:hover { background: #f5f3ff; }
+
+/* Avatar */
+.notif-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7c3aed, #f43f5e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 800;
+    font-size: 15px;
+    flex-shrink: 0;
+    box-shadow: 0 3px 10px rgba(124,58,237,.25);
+}
+
+/* Body */
+.notif-body { flex: 1; min-width: 0; }
+.notif-child-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e1b4b;
+    margin-bottom: 2px;
+}
+.notif-subject {
+    font-size: 12px;
+    color: #5b21b6;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 4px;
+}
+.notif-meta {
+    font-size: 11px;
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+.notif-meta i { font-size: 10px; }
+.notif-file-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #ede9fe;
+    color: #5b21b6;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 99px;
+    margin-top: 5px;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Actions */
+.notif-item-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+}
+.notif-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #7c3aed;
+    box-shadow: 0 0 0 2px rgba(124,58,237,.25);
+}
+.notif-download-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    color: #fff;
+    text-decoration: none;
+    border: none;
+    border-radius: 9px;
+    padding: 6px 13px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity .2s, transform .1s;
+    white-space: nowrap;
+}
+.notif-download-btn:hover {
+    opacity: .88;
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+/* Footer */
+.notif-dropdown-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 18px;
+    background: #f9f5ff;
+    border-top: 1px solid #ede9fe;
+}
+.notif-footer-count {
+    font-size: 11px;
+    color: #7c3aed;
+    font-weight: 600;
+}
+.notif-refresh-btn {
+    background: none;
+    border: none;
+    font-size: 11px;
+    color: #7c3aed;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0;
+}
+.notif-refresh-btn:hover { color: #5b21b6; }
+
+/* Loading skeleton */
+.notif-skeleton {
+    padding: 14px 18px;
+    display: flex;
+    gap: 12px;
+    border-bottom: 1px solid #f3f0ff;
+}
+.skel-circle {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(90deg, #f3f0ff 25%, #e8e2ff 50%, #f3f0ff 75%);
+    background-size: 200% 100%;
+    animation: skelShimmer 1.2s infinite;
+    flex-shrink: 0;
+}
+.skel-lines { flex: 1; display: flex; flex-direction: column; gap: 6px; justify-content: center; }
+.skel-line {
+    height: 10px;
+    border-radius: 99px;
+    background: linear-gradient(90deg, #f3f0ff 25%, #e8e2ff 50%, #f3f0ff 75%);
+    background-size: 200% 100%;
+    animation: skelShimmer 1.2s infinite;
+}
+.skel-line.short { width: 55%; }
+@keyframes skelShimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+</style>
+
+{# ══════════════════════════════════════════════════════
+   SCRIPT NOTIFICATION DROPDOWN
+══════════════════════════════════════════════════════ #}
+<script>
+(function () {
+    'use strict';
+
+    /* ── Fermer si clic en dehors ───────────────────── */
+    document.addEventListener('click', function (e) {
+        const wrap = document.getElementById('notifBellWrap');
+        const dd   = document.getElementById('notifDropdown');
+        if (wrap && !wrap.contains(e.target) && dd) {
+            dd.style.display = 'none';
+        }
+    });
+
+    /* ── Toggle dropdown ────────────────────────────── */
+    window.toggleNotifDropdown = function (e) {
+        e.stopPropagation();
+        const dd = document.getElementById('notifDropdown');
+        if (!dd) return;
+        if (dd.style.display === 'none') {
+            dd.style.display = 'block';
+            loadNotifications();
+        } else {
+            dd.style.display = 'none';
+        }
+    };
+
+    /* ── Charger les notifications ──────────────────── */
+    window.loadNotifications = async function () {
+        const list = document.getElementById('notifList');
+        if (!list) return;
+
+        // Skeleton loading
+        list.innerHTML = [1,2,3].map(() => `
+            <div class="notif-skeleton">
+                <div class="skel-circle"></div>
+                <div class="skel-lines">
+                    <div class="skel-line"></div>
+                    <div class="skel-line short"></div>
+                </div>
+            </div>`).join('');
+
+        try {
+            const resp = await fetch('/admin/parent-uploads/notifications');
+            if (!resp.ok) throw new Error('HTTP ' + resp.status);
+            const data = await resp.json();
+
+            updateBadge(data.count);
+            renderList(data.uploads || [], data.count);
+
+        } catch (err) {
+            list.innerHTML = `
+                <div class="notif-empty">
+                    <i class="fas fa-exclamation-triangle" style="color:#fca5a5;"></i>
+                    <span>Erreur de chargement</span>
+                </div>`;
+        }
+    };
+
+    /* ── Mettre à jour le badge ─────────────────────── */
+    function updateBadge(count) {
+        const badge = document.getElementById('notifBadge');
+        if (!badge) return;
+        if (count > 0) {
+            badge.textContent   = count > 99 ? '99+' : count;
+            badge.style.display = 'flex';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+
+    /* ── Rendre la liste ────────────────────────────── */
+    function renderList(uploads, total) {
+        const list      = document.getElementById('notifList');
+        const footerEl  = document.getElementById('notifFooterCount');
+
+        if (footerEl) {
+            footerEl.textContent = total > 0
+                ? total + ' document' + (total > 1 ? 's' : '') + ' non lu' + (total > 1 ? 's' : '')
+                : 'Tout est lu';
+        }
+
+        if (!uploads.length) {
+            list.innerHTML = `
+                <div class="notif-empty" id="notifEmpty">
+                    <i class="fas fa-inbox"></i>
+                    <span>Aucun document reçu</span>
+                </div>`;
+            return;
+        }
+
+        list.innerHTML = uploads.map(u => {
+            const initial = (u.nomEnfant || '?')[0].toUpperCase();
+            const ext     = u.fileName ? u.fileName.split('.').pop().toUpperCase() : 'DOC';
+            const unseen  = !u.seen;
+            return `
+            <div class="notif-item ${unseen ? 'unseen' : ''}" id="notif-item-${u.id}">
+                <div class="notif-avatar">${initial}</div>
+                <div class="notif-body">
+                    <div class="notif-child-name">
+                        ${escHtml(u.nomEnfant || 'Inconnu')}
+                    </div>
+                    <div class="notif-subject">${escHtml(u.subject || '(sans sujet)')}</div>
+                    <div class="notif-meta">
+                        <i class="fas fa-user-clock"></i>
+                        ${escHtml(u.emailParent || '')}
+                        &nbsp;·&nbsp;
+                        <i class="fas fa-clock"></i>
+                        ${escHtml(u.uploadedAt || '')}
+                    </div>
+                    <div class="notif-file-chip">
+                        <i class="fas fa-paperclip"></i>
+                        <span>${ext} — ${escHtml(u.fileName || 'fichier')}</span>
+                    </div>
+                </div>
+                <div class="notif-item-actions">
+                    ${unseen ? `<div class="notif-dot" title="Non lu"></div>` : ''}
+                    <a  href="${escHtml(u.downloadUrl)}"
+                        class="notif-download-btn"
+                        onclick="markOneSeen(${u.id}, event)"
+                        title="Télécharger et marquer comme lu">
+                        <i class="fas fa-download"></i> DL
+                    </a>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    /* ── Marquer un item comme lu ───────────────────── */
+    window.markOneSeen = async function (id, e) {
+        // Laisser le navigateur suivre le lien (téléchargement)
+        // puis marquer en background
+        try {
+            await fetch('/admin/parent-uploads/' + id + '/seen', { method: 'POST' });
+            const item = document.getElementById('notif-item-' + id);
+            if (item) {
+                item.classList.remove('unseen');
+                const dot = item.querySelector('.notif-dot');
+                if (dot) dot.remove();
+            }
+            // Recharger le badge
+            const resp = await fetch('/admin/parent-uploads/notifications');
+            const data = await resp.json();
+            updateBadge(data.count);
+            const fc = document.getElementById('notifFooterCount');
+            if (fc) fc.textContent = data.count > 0
+                ? data.count + ' document' + (data.count > 1 ? 's' : '') + ' non lu' + (data.count > 1 ? 's' : '')
+                : 'Tout est lu';
+        } catch (err) { /* silencieux */ }
+    };
+
+    /* ── Tout marquer comme lu ──────────────────────── */
+    window.markAllSeen = async function () {
+        try {
+            await fetch('/admin/parent-uploads/mark-all-seen', { method: 'POST' });
+            document.querySelectorAll('.notif-item.unseen').forEach(el => {
+                el.classList.remove('unseen');
+                const dot = el.querySelector('.notif-dot');
+                if (dot) dot.remove();
+            });
+            updateBadge(0);
+            const fc = document.getElementById('notifFooterCount');
+            if (fc) fc.textContent = 'Tout est lu';
+        } catch (err) { /* silencieux */ }
+    };
+
+    /* ── Échapper HTML ──────────────────────────────── */
+    function escHtml(str) {
+        const d = document.createElement('div');
+        d.appendChild(document.createTextNode(String(str)));
+        return d.innerHTML;
+    }
+
+    /* ── Init au chargement de page (uniquement si la bell est présente) ── */
+    async function initBadge() {
+        // Si la bell n'est pas dans le DOM (autre page), on ne fait rien
+        if (!document.getElementById('notifBellWrap')) return;
+        try {
+            const resp = await fetch('/admin/parent-uploads/notifications');
+            if (!resp.ok) return;
+            const data = await resp.json();
+            updateBadge(data.count);
+        } catch (e) { /* silencieux */ }
+    }
+
+    // Lancer init
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initBadge);
+    } else {
+        initBadge();
+    }
+
+    // Rafraîchir toutes les 60 secondes UNIQUEMENT si la bell est présente
+    setInterval(function () {
+        if (document.getElementById('notifBellWrap')) {
+            initBadge();
+        }
+    }, 60000);
+
+})();
+</script>

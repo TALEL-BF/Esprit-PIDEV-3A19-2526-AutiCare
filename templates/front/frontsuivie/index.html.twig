@@ -1,0 +1,1013 @@
+{# templates/front/frontsuivie/index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}AutiCare — Suivi Thérapeutique{% endblock %}
+
+{% block body %}
+
+{# ── Page Header ─────────────────────────────────────── #}
+<div class="container-fluid page-header-suivie py-5">
+    <div class="container text-center py-5">
+        <h1 class="display-3 text-white wow fadeInDown">🧠 Suivi Thérapeutique</h1>
+        <p class="text-white opacity-75 fs-5 mb-3">
+            Suivez l'évolution de votre enfant séance après séance
+        </p>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb justify-content-center mb-0">
+                <li class="breadcrumb-item"><a href="{{ path('app_home') }}" class="text-white">Accueil</a></li>
+                <li class="breadcrumb-item active" style="color:rgba(255,255,255,.8);">Suivi Thérapeutique</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+{# ── Sélecteur enfant ─────────────────────────────────── #}
+<div class="container-fluid py-5" style="background:#f8f9ff;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-7">
+                <div class="selector-card wow fadeInUp">
+                    <div class="selector-icon">👶</div>
+                    <h4 class="selector-title">Sélectionnez le nom de votre enfant</h4>
+                    <p class="selector-sub">Toutes les séances et l'évolution seront affichées ci-dessous</p>
+                    <div class="selector-wrap">
+                        <select id="enfantSelect" class="selector-input">
+                            <option value="">-- Choisir un enfant --</option>
+                            {% for nom in enfants %}
+                            <option value="{{ nom }}">{{ nom }}</option>
+                            {% endfor %}
+                        </select>
+                        <button id="voirBtn" class="selector-btn" disabled>
+                            <i class="fas fa-search me-2"></i> Voir le suivi
+                        </button>
+                    </div>
+                    {% if enfants|length == 0 %}
+                    <p class="text-muted text-center mt-3" style="font-size:.85rem;">
+                        <i class="fas fa-info-circle me-1"></i> Aucune séance enregistrée pour le moment.
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ── Résultats ──────────────────────────────────────────── #}
+<div id="resultSection" style="display:none;">
+
+    <div id="loadingState" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <div class="text-muted mt-3">Chargement du suivi...</div>
+    </div>
+
+    <div id="resultContent" style="display:none;">
+
+        {# ── Profil enfant ────────────────────────────── #}
+        <div class="container-fluid py-4" style="background:linear-gradient(135deg,#4d65f9,#a855f7);">
+            <div class="container">
+                <div class="row align-items-center g-3">
+                    <div class="col-auto">
+                        <div class="child-avatar" id="childAvatar">?</div>
+                    </div>
+                    <div class="col">
+                        <div class="text-white opacity-60 small">Suivi de</div>
+                        <h3 class="text-white fw-900 mb-1" id="childName">—</h3>
+                        <div class="text-white opacity-75 small" id="childInfo">—</div>
+                    </div>
+                    <div class="col-auto d-flex gap-2 flex-wrap">
+                        <button id="downloadPdfBtn" class="pdf-btn">
+                            <i class="fas fa-file-pdf me-2"></i>Télécharger rapport PDF
+                        </button>
+                        <button id="aiConseilsBtn" class="ai-btn">
+                            <i class="fas fa-robot me-2"></i>Conseils IA personnalisés
+                        </button>
+                        {# ══ BOUTON ENVOYER DOCUMENT ══ #}
+                        <button id="uploadDocBtn" class="upload-toggle-btn" onclick="toggleUploadSection()">
+                            <i class="fas fa-paper-plane me-2"></i>Envoyer un document
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# ── Stats rapides ────────────────────────────── #}
+        <div class="container-fluid py-4" style="background:#fff;border-bottom:1px solid #f0f0f8;">
+            <div class="container">
+                <div class="row g-3" id="statsRow">
+                    <div class="col-6 col-md-3">
+                        <div class="quick-stat">
+                            <div class="quick-stat-icon" style="background:#f0f3ff;">📅</div>
+                            <div>
+                                <div class="quick-stat-val" id="statSeances">—</div>
+                                <div class="quick-stat-label">Séances</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="quick-stat">
+                            <div class="quick-stat-icon" style="background:#fdf4ff;">😊</div>
+                            <div>
+                                <div class="quick-stat-val" style="color:#a855f7;" id="statHumeur">—</div>
+                                <div class="quick-stat-label">Humeur moy.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="quick-stat">
+                            <div class="quick-stat-icon" style="background:#fff5f5;">⚡</div>
+                            <div>
+                                <div class="quick-stat-val" style="color:#ef4444;" id="statStress">—</div>
+                                <div class="quick-stat-label">Stress moy.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="quick-stat">
+                            <div class="quick-stat-icon" style="background:#eef2ff;">🧠</div>
+                            <div>
+                                <div class="quick-stat-val" style="color:#4f46e5;" id="statAttention">—</div>
+                                <div class="quick-stat-label">Attention moy.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# ══════════════════════════════════════════════
+           SECTION UPLOAD DOCUMENT PARENT
+        ══════════════════════════════════════════════ #}
+        <div id="uploadSection" style="display:none;">
+            <div class="container py-4">
+                <div class="upload-card">
+                    <div class="upload-card-header">
+                        <div class="upload-icon-circle">
+                            <i class="fas fa-paper-plane"></i>
+                        </div>
+                        <div>
+                            <h5 class="upload-card-title">Envoyer un document au psychologue</h5>
+                            <p class="upload-card-sub">
+                                Partagez un fichier concernant
+                                <strong id="uploadChildNameDisplay">votre enfant</strong>
+                            </p>
+                        </div>
+                        <button class="upload-close-btn" onclick="toggleUploadSection()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <form id="uploadDocForm" enctype="multipart/form-data">
+                        <input type="hidden" id="uploadNomEnfant" name="nom_enfant" value="">
+
+                        <div class="upload-form-grid">
+                            <div class="upload-field">
+                                <label class="upload-label">
+                                    <i class="fas fa-envelope me-1"></i>
+                                    Votre email <span class="upload-req">*</span>
+                                </label>
+                                <input type="email"
+                                       name="email_parent"
+                                       id="uploadEmail"
+                                       class="upload-input"
+                                       placeholder="votre@email.com"
+                                       required>
+                            </div>
+
+                            <div class="upload-field">
+                                <label class="upload-label">
+                                    <i class="fas fa-comment-alt me-1"></i>
+                                    Message / Sujet <span class="upload-req">*</span>
+                                </label>
+                                <input type="text"
+                                       name="subject"
+                                       id="uploadSubject"
+                                       class="upload-input"
+                                       placeholder="Ex : Résultats de la semaine, question sur l'exercice..."
+                                       required>
+                            </div>
+                        </div>
+
+                        <div class="upload-field upload-field-full">
+                            <label class="upload-label">
+                                <i class="fas fa-paperclip me-1"></i>
+                                Document <span class="upload-req">*</span>
+                            </label>
+
+                            <div class="upload-dropzone" id="uploadDropzone">
+                                <input type="file"
+                                       name="document"
+                                       id="uploadFileInput"
+                                       accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                                       style="display:none;"
+                                       required>
+
+                                {# Zone de dépôt #}
+                                <div class="upload-drop-area" id="uploadDropArea"
+                                     onclick="document.getElementById('uploadFileInput').click()">
+                                    <i class="fas fa-cloud-upload-alt upload-drop-icon"></i>
+                                    <div class="upload-drop-title">Cliquez ou glissez votre fichier ici</div>
+                                    <div class="upload-drop-hint">PDF, JPG, PNG, DOC, DOCX — max 5 Mo</div>
+                                </div>
+
+                                {# Prévisualisation fichier sélectionné #}
+                                <div class="upload-file-selected" id="uploadFileSelected" style="display:none;">
+                                    <i class="fas fa-file-alt upload-file-icon" id="uploadFileIconType"></i>
+                                    <div class="upload-file-info">
+                                        <div class="upload-file-name" id="uploadSelectedName">—</div>
+                                        <div class="upload-file-size" id="uploadSelectedSize">—</div>
+                                    </div>
+                                    <button type="button" class="upload-file-clear"
+                                            onclick="clearUploadFile()" title="Supprimer">
+                                        <i class="fas fa-times-circle"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="upload-actions">
+                            <button type="button" class="upload-cancel-btn" onclick="toggleUploadSection()">
+                                Annuler
+                            </button>
+                            <button type="submit" class="upload-submit-btn" id="uploadSubmitBtn">
+                                <i class="fas fa-paper-plane me-2"></i>
+                                Envoyer au psychologue
+                            </button>
+                        </div>
+
+                        <div class="upload-feedback" id="uploadFeedback" style="display:none;"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {# ── FIN SECTION UPLOAD ── #}
+
+        {# ── IA Conseils (caché jusqu'au clic) ─────────── #}
+        <div id="aiSection" style="display:none;" class="container-fluid py-4" style="background:#faf5ff;">
+            <div class="container">
+
+                <div id="aiLoading" class="text-center py-4" style="display:none;">
+                    <div class="ai-loading-box">
+                        <div class="ai-loading-icon">🤖</div>
+                        <div class="ai-loading-title">AutiCare AI génère vos conseils...</div>
+                        <div class="ai-loading-sub">Analyse du profil de votre enfant en cours</div>
+                        <div class="ai-dots">
+                            <span></span><span></span><span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="aiContent" style="display:none;">
+                    <div class="ai-header-bar">
+                        <div class="ai-header-left">
+                            <div class="ai-robot-icon">🤖</div>
+                            <div>
+                                <div class="ai-header-title">Conseils personnalisés — AutiCare AI</div>
+                                <div class="ai-header-sub" id="aiHeaderSub">Basé sur le profil de votre enfant</div>
+                            </div>
+                        </div>
+                        <div class="ai-powered-badge">
+                            <i class="fas fa-sparkles me-1"></i> Powered by Gemini AI
+                        </div>
+                    </div>
+
+                    <div class="ai-resume-box" id="aiResume"></div>
+
+                    <div class="row g-4 mt-1">
+                        <div class="col-lg-5">
+                            <div class="ai-card">
+                                <div class="ai-card-header">
+                                    <i class="fas fa-lightbulb me-2"></i>
+                                    Recommandations pour les parents
+                                </div>
+                                <div class="ai-card-body" id="aiConseils"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-7">
+                            <div class="ai-card">
+                                <div class="ai-card-header" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);">
+                                    <i class="fas fa-calendar-week me-2"></i>
+                                    Planning hebdomadaire suggéré
+                                </div>
+                                <div class="ai-card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="ai-planning-table" id="aiPlanning">
+                                            <thead>
+                                                <tr>
+                                                    <th>Jour</th>
+                                                    <th>🌅 Matin</th>
+                                                    <th>☀️ Après-midi</th>
+                                                    <th>🌙 Soir</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="aiPlanningBody"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button id="regenBtn" class="regen-btn">
+                            <i class="fas fa-sync-alt me-2"></i> Régénérer les conseils
+                        </button>
+                        <div class="text-muted small mt-2">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Ces conseils seront inclus dans le PDF si vous téléchargez le rapport.
+                        </div>
+                    </div>
+                </div>
+
+                <div id="aiError" style="display:none;" class="ai-error-box">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span id="aiErrorMsg">Une erreur est survenue lors de la génération des conseils.</span>
+                    <button onclick="generateAiConseils()" class="btn btn-sm btn-outline-danger ms-3">Réessayer</button>
+                </div>
+
+            </div>
+        </div>
+
+        {# ── Courbe + dernière séance ─────────────────── #}
+        <div class="container py-5">
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div class="result-card">
+                        <div class="result-card-header">
+                            <i class="fas fa-chart-line me-2"></i> Courbe d'évolution
+                        </div>
+                        <div class="result-card-body">
+                            <canvas id="evolutionChart" height="280"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="result-card mb-4" id="therapieCard" style="display:none;">
+                        <div class="result-card-header" style="background:linear-gradient(135deg,#10b981,#059669);">
+                            <i class="fas fa-dumbbell me-2"></i> Dernier exercice recommandé
+                        </div>
+                        <div class="result-card-body">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <div style="width:48px;height:48px;border-radius:12px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;">🏋️</div>
+                                <div>
+                                    <div class="fw-bold text-primary" id="therapieNom">—</div>
+                                    <div class="text-muted small" id="therapieDate">—</div>
+                                </div>
+                            </div>
+                            <div id="therapieDetails"></div>
+                        </div>
+                    </div>
+
+                    <div class="result-card">
+                        <div class="result-card-header" style="background:linear-gradient(135deg,#f59e0b,#d97706);">
+                            <i class="fas fa-clipboard-check me-2"></i> Dernière séance
+                        </div>
+                        <div class="result-card-body">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <div style="font-size:2rem;" id="statutEmoji">—</div>
+                                <div>
+                                    <div class="fw-bold" id="statutLabel">—</div>
+                                    <div class="text-muted small" id="lastDate">—</div>
+                                </div>
+                            </div>
+                            <div class="progress-wrap">
+                                <div class="prog-label">😊 Humeur <span id="lastH">—</span>/10</div>
+                                <div class="progress-track"><div class="progress-fill fill-humeur" id="barH"></div></div>
+                            </div>
+                            <div class="progress-wrap">
+                                <div class="prog-label">⚡ Stress <span id="lastS">—</span>/10</div>
+                                <div class="progress-track"><div class="progress-fill fill-stress" id="barS"></div></div>
+                            </div>
+                            <div class="progress-wrap">
+                                <div class="prog-label">🧠 Attention <span id="lastA">—</span>/10</div>
+                                <div class="progress-track"><div class="progress-fill fill-attention" id="barA"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# ── Articles ──────────────────────────────────── #}
+        <div class="container-fluid py-5" style="background:#f8f9ff;">
+            <div class="container">
+                <div class="text-center mb-4">
+                    <h4 class="fw-bold text-primary">📰 Articles adaptés à ce profil</h4>
+                    <p class="text-muted small">Ressources sélectionnées pour accompagner le suivi</p>
+                </div>
+                <div class="row g-3" id="articlesRow"></div>
+            </div>
+        </div>
+
+                <div class="container-fluid py-5" style="background:#fff;border-top:1px solid #f0f0f8;">
+            <div class="container">
+                {% include 'front/forum/_section.html.twig' %}
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+.page-header-suivie { background: linear-gradient(135deg, #4d65f9 0%, #a855f7 50%, #ff4880 100%); }
+
+/* Selector */
+.selector-card { background:#fff;border-radius:24px;padding:40px;text-align:center;box-shadow:0 8px 40px rgba(77,101,249,.12);border:1px solid #e8e8f8; }
+.selector-icon { font-size:3rem;margin-bottom:12px; }
+.selector-title { font-weight:800;color:#1e1b4b;margin-bottom:6px; }
+.selector-sub { color:#6b7280;font-size:.88rem;margin-bottom:24px; }
+.selector-wrap { display:flex;gap:12px;max-width:480px;margin:0 auto; }
+.selector-input { flex:1;padding:12px 18px;border-radius:50px;border:2px solid #e5e7eb;font-size:.9rem;outline:none;transition:border-color .2s; }
+.selector-input:focus { border-color:#4d65f9; }
+.selector-btn { padding:12px 24px;border-radius:50px;background:linear-gradient(135deg,#4d65f9,#a855f7);color:#fff;border:none;font-weight:700;font-size:.88rem;cursor:pointer;transition:all .2s;white-space:nowrap; }
+.selector-btn:disabled { opacity:.5;cursor:not-allowed; }
+.selector-btn:not(:disabled):hover { transform:translateY(-2px);box-shadow:0 8px 24px rgba(77,101,249,.35); }
+
+/* Profil header */
+.child-avatar { width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.2);border:3px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:800;color:#fff; }
+.pdf-btn { background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;border:none;border-radius:50px;padding:10px 22px;font-weight:700;font-size:.85rem;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px rgba(239,68,68,.3); }
+.pdf-btn:hover { transform:translateY(-2px);box-shadow:0 8px 24px rgba(239,68,68,.45); }
+.ai-btn { background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border:none;border-radius:50px;padding:10px 22px;font-weight:700;font-size:.85rem;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px rgba(124,58,237,.3); }
+.ai-btn:hover { transform:translateY(-2px);box-shadow:0 8px 24px rgba(124,58,237,.45); }
+
+/* Bouton upload */
+.upload-toggle-btn {
+    background: rgba(255,255,255,.18);
+    border: 1.5px solid rgba(255,255,255,.5);
+    color: #fff;
+    border-radius: 50px;
+    padding: 10px 22px;
+    font-weight: 700;
+    font-size: .85rem;
+    cursor: pointer;
+    transition: all .2s;
+    display: flex;
+    align-items: center;
+}
+.upload-toggle-btn:hover { background: rgba(255,255,255,.3); transform: translateY(-2px); }
+
+/* ══ UPLOAD CARD ══ */
+.upload-card {
+    background: #fff;
+    border-radius: 20px;
+    border: 1.5px solid #ede9fe;
+    box-shadow: 0 6px 32px rgba(124,58,237,.1);
+    overflow: hidden;
+    animation: slideDown .3s cubic-bezier(.22,1,.36,1);
+}
+@keyframes slideDown {
+    from { opacity:0; transform:translateY(-16px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+.upload-card-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 28px;
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    color: #fff;
+}
+.upload-icon-circle {
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.2);
+    border: 2px solid rgba(255,255,255,.4);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+}
+.upload-card-title { font-size: 15px; font-weight: 800; margin: 0 0 3px; }
+.upload-card-sub   { font-size: 12px; opacity: .8; margin: 0; }
+.upload-close-btn {
+    margin-left: auto;
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.3);
+    border-radius: 8px; color: #fff;
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: background .2s; flex-shrink: 0;
+}
+.upload-close-btn:hover { background: rgba(255,255,255,.3); }
+
+/* Form */
+form#uploadDocForm { padding: 24px 28px; }
+.upload-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
+.upload-field { display: flex; flex-direction: column; gap: 6px; }
+.upload-field-full { margin-bottom: 20px; }
+.upload-label { font-size: 11px; font-weight: 700; color: #5b21b6; text-transform: uppercase; letter-spacing: .5px; display: flex; align-items: center; }
+.upload-req { color: #ef4444; margin-left: 2px; }
+.upload-input {
+    padding: 11px 15px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 13px; color: #1e1b4b;
+    outline: none; transition: border-color .2s, box-shadow .2s;
+}
+.upload-input:focus { border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124,58,237,.12); }
+
+/* Dropzone */
+.upload-dropzone {
+    border: 2px dashed #c4b5fd;
+    border-radius: 14px;
+    background: #faf5ff;
+    overflow: hidden;
+    transition: border-color .2s, background .2s;
+}
+.upload-dropzone.drag-over { border-color: #7c3aed; background: #f0e6ff; }
+.upload-drop-area {
+    padding: 32px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: background .2s;
+}
+.upload-drop-area:hover { background: #f5f0ff; }
+.upload-drop-icon { font-size: 36px; color: #7c3aed; display: block; margin-bottom: 10px; }
+.upload-drop-title { font-size: 14px; font-weight: 700; color: #5b21b6; margin-bottom: 4px; }
+.upload-drop-hint  { font-size: 11px; color: #9ca3af; }
+
+/* Fichier sélectionné */
+.upload-file-selected {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    background: #f0fdf4;
+    border-top: 1px solid #d1fae5;
+}
+.upload-file-icon { font-size: 24px; color: #10b981; flex-shrink: 0; }
+.upload-file-info { flex: 1; min-width: 0; }
+.upload-file-name { font-size: 13px; font-weight: 600; color: #065f46; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.upload-file-size { font-size: 11px; color: #6b7280; }
+.upload-file-clear {
+    background: none; border: none; color: #ef4444;
+    font-size: 18px; cursor: pointer; flex-shrink: 0;
+    transition: transform .15s;
+}
+.upload-file-clear:hover { transform: scale(1.2); }
+
+/* Actions */
+.upload-actions { display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
+.upload-cancel-btn {
+    background: none; border: 1.5px solid #e5e7eb;
+    border-radius: 10px; color: #6b7280;
+    padding: 10px 22px; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all .2s;
+}
+.upload-cancel-btn:hover { border-color: #9ca3af; color: #374151; }
+.upload-submit-btn {
+    display: flex; align-items: center;
+    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    color: #fff; border: none; border-radius: 10px;
+    padding: 11px 26px; font-size: 13px; font-weight: 700;
+    cursor: pointer; transition: opacity .2s, transform .1s;
+    box-shadow: 0 4px 16px rgba(124,58,237,.3);
+}
+.upload-submit-btn:hover { opacity: .9; transform: translateY(-1px); }
+.upload-submit-btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+/* Feedback */
+.upload-feedback {
+    margin-top: 14px; padding: 12px 16px; border-radius: 10px;
+    font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 8px;
+}
+.upload-feedback.success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+.upload-feedback.error   { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+
+/* Stats */
+.quick-stat { display:flex;align-items:center;gap:14px;background:#f8f9ff;border-radius:16px;padding:14px 18px; }
+.quick-stat-icon { width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0; }
+.quick-stat-val { font-size:1.3rem;font-weight:900;color:#1e1b4b;line-height:1; }
+.quick-stat-label { font-size:.72rem;color:#9ca3af;font-weight:600;margin-top:2px; }
+
+/* AI Section */
+.ai-loading-box { background:#fff;border-radius:20px;padding:40px;max-width:480px;margin:0 auto;box-shadow:0 8px 40px rgba(124,58,237,.12);border:1px solid #ede9fe; }
+.ai-loading-icon { font-size:3rem;margin-bottom:12px; }
+.ai-loading-title { font-size:1.1rem;font-weight:800;color:#5b21b6;margin-bottom:6px; }
+.ai-loading-sub { font-size:.85rem;color:#9ca3af;margin-bottom:20px; }
+.ai-dots { display:flex;justify-content:center;gap:8px; }
+.ai-dots span { width:10px;height:10px;border-radius:50%;background:#7c3aed;animation:aiDot 1.4s ease-in-out infinite; }
+.ai-dots span:nth-child(2) { animation-delay:.2s; }
+.ai-dots span:nth-child(3) { animation-delay:.4s; }
+@keyframes aiDot { 0%,80%,100%{transform:scale(.6);opacity:.4;}40%{transform:scale(1);opacity:1;} }
+.ai-header-bar { display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:16px;padding:16px 22px;border:1px solid #ede9fe;box-shadow:0 4px 16px rgba(124,58,237,.08);margin-bottom:20px;gap:12px;flex-wrap:wrap; }
+.ai-header-left { display:flex;align-items:center;gap:14px; }
+.ai-robot-icon { font-size:2rem; }
+.ai-header-title { font-size:.95rem;font-weight:800;color:#5b21b6; }
+.ai-header-sub { font-size:.78rem;color:#9ca3af; }
+.ai-powered-badge { background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border-radius:50px;padding:6px 16px;font-size:.72rem;font-weight:700;letter-spacing:.3px;white-space:nowrap; }
+.ai-resume-box { background:#f5f3ff;border:1px solid #ede9fe;border-left:4px solid #7c3aed;border-radius:12px;padding:14px 18px;margin-bottom:20px;font-size:.85rem;color:#374151;line-height:1.7; }
+.ai-card { border-radius:16px;overflow:hidden;border:1px solid #ede9fe;box-shadow:0 4px 16px rgba(0,0,0,.05); }
+.ai-card-header { background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;padding:12px 18px;font-weight:700;font-size:.85rem; }
+.ai-card-body { padding:16px;background:#fff; }
+.ai-conseil-item { display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid #f3f4f6; }
+.ai-conseil-item:last-child { border-bottom:none; }
+.ai-conseil-num { width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;font-size:.72rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.ai-conseil-text { font-size:.82rem;color:#374151;line-height:1.6; }
+.ai-planning-table { width:100%;border-collapse:collapse;font-size:.78rem; }
+.ai-planning-table thead th { background:#4f46e5;color:#fff;padding:10px 12px;text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.4px; }
+.ai-planning-table tbody td { padding:9px 12px;border-bottom:1px solid #f3f4f6;vertical-align:top;line-height:1.5; }
+.ai-planning-table tbody tr:nth-child(even) td { background:#f8f7ff; }
+.ai-planning-table .jour-cell { font-weight:800;color:#5b21b6;white-space:nowrap;background:#f0e6ff !important; }
+.regen-btn { background:#fff;border:2px solid #7c3aed;color:#7c3aed;border-radius:50px;padding:10px 28px;font-weight:700;font-size:.85rem;cursor:pointer;transition:all .2s; }
+.regen-btn:hover { background:#7c3aed;color:#fff;transform:translateY(-1px); }
+.ai-error-box { background:#fee2e2;border:1px solid #fca5a5;border-radius:12px;padding:14px 18px;color:#dc2626;font-size:.85rem;display:flex;align-items:center; }
+
+/* Cards résultats */
+.result-card { border-radius:20px;overflow:hidden;border:1px solid #f0f0f8;box-shadow:0 4px 20px rgba(0,0,0,.06);background:#fff; }
+.result-card-header { background:linear-gradient(135deg,#4d65f9,#a855f7);color:#fff;padding:14px 20px;font-weight:700;font-size:.88rem; }
+.result-card-body { padding:20px; }
+.progress-wrap { margin-bottom:14px; }
+.prog-label { font-size:.78rem;font-weight:600;color:#374151;margin-bottom:6px; }
+.progress-track { height:10px;background:#f3f4f6;border-radius:99px;overflow:hidden; }
+.progress-fill { height:100%;border-radius:99px;transition:width 1s cubic-bezier(.22,1,.36,1);min-width:4px; }
+.fill-humeur    { background:linear-gradient(90deg,#f472b6,#a855f7); }
+.fill-stress    { background:linear-gradient(90deg,#fb7185,#ef4444); }
+.fill-attention { background:linear-gradient(90deg,#818cf8,#4f46e5); }
+
+/* Articles */
+.art-card { background:#fff;border-radius:18px;border:1px solid #eee;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.05);transition:transform .2s,box-shadow .2s; }
+.art-card:hover { transform:translateY(-4px);box-shadow:0 12px 32px rgba(77,101,249,.12); }
+.art-card-header { background:linear-gradient(135deg,#4d65f9,#a855f7);padding:16px 18px; }
+.art-cat { display:inline-block;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:50px;font-size:.65rem;font-weight:800;padding:2px 10px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px; }
+.art-title { color:#fff;font-weight:800;font-size:.88rem;line-height:1.3; }
+.art-body { padding:14px 18px; }
+.art-excerpt { font-size:.78rem;color:#6b7280;line-height:1.6;margin-bottom:10px; }
+.art-footer { display:flex;align-items:center;justify-content:space-between; }
+.art-likes { font-size:.75rem;color:#ef4444;font-weight:700; }
+.therapie-detail { display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid #f0fdf4;font-size:.8rem; }
+.therapie-detail:last-child { border-bottom:none; }
+.therapie-detail-label { font-size:.68rem;font-weight:700;color:#10b981;text-transform:uppercase;letter-spacing:.4px;flex-shrink:0;min-width:80px; }
+
+@media (max-width: 640px) {
+    .upload-form-grid { grid-template-columns: 1fr; }
+    .upload-card-header { flex-wrap: wrap; }
+}
+</style>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    /* ── Variables globales ──────────────────────────── */
+    let evolutionChart = null;
+    let currentNom     = '';
+    let currentAiData  = null;
+
+    const enfantSelect  = document.getElementById('enfantSelect');
+    const voirBtn       = document.getElementById('voirBtn');
+    const resultSection = document.getElementById('resultSection');
+    const loadingState  = document.getElementById('loadingState');
+    const resultContent = document.getElementById('resultContent');
+    const downloadBtn   = document.getElementById('downloadPdfBtn');
+    const aiBtn         = document.getElementById('aiConseilsBtn');
+    const regenBtn      = document.getElementById('regenBtn');
+
+    /* ── Sélection enfant ────────────────────────────── */
+    enfantSelect.addEventListener('change', function () {
+        voirBtn.disabled = !this.value;
+    });
+
+    /* ── Chargement données ──────────────────────────── */
+    voirBtn.addEventListener('click', async function () {
+        const nom = enfantSelect.value;
+        if (!nom) return;
+        currentNom    = nom;
+        currentAiData = null;
+
+        document.getElementById('aiSection').style.display  = 'none';
+        document.getElementById('aiContent').style.display  = 'none';
+        document.getElementById('aiLoading').style.display  = 'none';
+        document.getElementById('aiError').style.display    = 'none';
+        document.getElementById('uploadSection').style.display = 'none';
+
+        resultSection.style.display = 'block';
+        loadingState.style.display  = 'block';
+        resultContent.style.display = 'none';
+        resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        try {
+            const res  = await fetch(`/suivie/enfant?nom=${encodeURIComponent(nom)}`);
+            const data = await res.json();
+            if (data.error) {
+                loadingState.innerHTML = `<div class="text-danger py-4"><i class="fas fa-exclamation-circle me-2"></i>${data.error}</div>`;
+                return;
+            }
+            fillData(data);
+            loadingState.style.display  = 'none';
+            resultContent.style.display = 'block';
+        } catch (e) {
+            loadingState.innerHTML = '<div class="text-danger py-4">Erreur de chargement</div>';
+        }
+    });
+
+    /* ── Remplir données ─────────────────────────────── */
+    function fillData(d) {
+        document.getElementById('childAvatar').textContent = d.nom.charAt(0).toUpperCase();
+        document.getElementById('childName').textContent   = d.nom;
+        document.getElementById('childInfo').textContent   =
+            `${d.age ? d.age + ' ans' : ''} · Psy: ${d.psy || '—'} · ${d.email || ''}`;
+
+        document.getElementById('statSeances').textContent   = d.nbSeances;
+        document.getElementById('statHumeur').textContent    = d.avgHumeur + '/10';
+        document.getElementById('statStress').textContent    = d.avgStress + '/10';
+        document.getElementById('statAttention').textContent = d.avgAttention + '/10';
+
+        const last = d.chartData[d.chartData.length - 1];
+        const lastH = last?.humeur    ?? 0;
+        const lastS = last?.stress    ?? 0;
+        const lastA = last?.attention ?? 0;
+
+        document.getElementById('lastDate').textContent = d.lastDate ? '📅 ' + d.lastDate : '';
+        document.getElementById('lastH').textContent    = lastH;
+        document.getElementById('lastS').textContent    = lastS;
+        document.getElementById('lastA').textContent    = lastA;
+        document.getElementById('barH').style.width     = (lastH * 10) + '%';
+        document.getElementById('barS').style.width     = (lastS * 10) + '%';
+        document.getElementById('barA').style.width     = (lastA * 10) + '%';
+
+        const statutMap = {
+            normal:       { emoji: '✅', label: 'Normal' },
+            immobile:     { emoji: '🧍', label: 'Immobile' },
+            ne_bouge_pas: { emoji: '🛑', label: 'Ne bouge pas' },
+            n_entend_pas: { emoji: '🔇', label: "N'entend pas" },
+            ne_voit_pas:  { emoji: '👁️', label: 'Ne voit pas' },
+        };
+        const st = statutMap[last?.statut] || { emoji: '❓', label: last?.statut || '—' };
+        document.getElementById('statutEmoji').textContent = st.emoji;
+        document.getElementById('statutLabel').textContent = st.label;
+
+        if (d.therapie) {
+            const th = d.therapie;
+            document.getElementById('therapieCard').style.display = '';
+            document.getElementById('therapieNom').textContent    = th.nom || '—';
+            document.getElementById('therapieDate').textContent   = d.lastDate ? 'Séance du ' + d.lastDate : '';
+            let detailsHtml = '';
+            if (th.type)        detailsHtml += `<div class="therapie-detail"><span class="therapie-detail-label">Type</span><span>${th.type}</span></div>`;
+            if (th.duree)       detailsHtml += `<div class="therapie-detail"><span class="therapie-detail-label">Durée</span><span>${th.duree} min</span></div>`;
+            if (th.cible)       detailsHtml += `<div class="therapie-detail"><span class="therapie-detail-label">Cible</span><span>${th.cible}</span></div>`;
+            if (th.objectif)    detailsHtml += `<div class="therapie-detail"><span class="therapie-detail-label">Objectif</span><span>${th.objectif}</span></div>`;
+            if (th.description) detailsHtml += `<div class="therapie-detail"><span class="therapie-detail-label">Description</span><span>${th.description}</span></div>`;
+            document.getElementById('therapieDetails').innerHTML = detailsHtml;
+        }
+
+        buildChart(d.chartData);
+        buildArticles(d.articles);
+    }
+
+    /* ── Chart ───────────────────────────────────────── */
+    function buildChart(data) {
+        if (evolutionChart) { evolutionChart.destroy(); evolutionChart = null; }
+        evolutionChart = new Chart(document.getElementById('evolutionChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels:   data.map(d => d.date),
+                datasets: [
+                    { label:'😊 Humeur',    data:data.map(d => d.humeur),    borderColor:'#a855f7', backgroundColor:'rgba(168,85,247,.1)',  fill:true, tension:0.4, pointBackgroundColor:'#a855f7', pointRadius:5, borderWidth:2.5 },
+                    { label:'⚡ Stress',    data:data.map(d => d.stress),    borderColor:'#ef4444', backgroundColor:'rgba(239,68,68,.08)',   fill:true, tension:0.4, pointBackgroundColor:'#ef4444', pointRadius:5, borderWidth:2.5 },
+                    { label:'🧠 Attention', data:data.map(d => d.attention), borderColor:'#4f46e5', backgroundColor:'rgba(79,70,229,.08)',   fill:true, tension:0.4, pointBackgroundColor:'#4f46e5', pointRadius:5, borderWidth:2.5 },
+                ]
+            },
+            options: {
+                responsive:true, interaction:{mode:'index',intersect:false},
+                plugins:{
+                    legend:{position:'bottom',labels:{usePointStyle:true,font:{size:11},padding:16}},
+                    tooltip:{callbacks:{title:ctx=>'📅 '+ctx[0].label,label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y}/10`}}
+                },
+                scales:{
+                    y:{min:0,max:10,grid:{color:'#f3e8ff'},ticks:{font:{size:10}}},
+                    x:{grid:{display:false},ticks:{font:{size:10},maxRotation:30}}
+                }
+            }
+        });
+    }
+
+    /* ── Articles ────────────────────────────────────── */
+    function buildArticles(articles) {
+        const row = document.getElementById('articlesRow');
+        row.innerHTML = '';
+        if (!articles || !articles.length) {
+            row.innerHTML = '<div class="col-12 text-center text-muted py-4">Aucun article disponible</div>';
+            return;
+        }
+        articles.forEach(a => {
+            row.innerHTML += `
+            <div class="col-md-6 col-lg-3">
+                <div class="art-card h-100">
+                    <div class="art-card-header">
+                        <div class="art-cat">${a.categorie}</div>
+                        <div class="art-title">${a.titre}</div>
+                    </div>
+                    <div class="art-body">
+                        <p class="art-excerpt">${a.extrait}</p>
+                        <div class="art-footer">
+                            <span class="art-likes"><i class="fas fa-heart me-1"></i>${a.likes}</span>
+                            <a href="/articles" class="btn btn-sm btn-outline-primary" style="border-radius:50px;font-size:.75rem;padding:4px 14px;">Lire</a>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        });
+    }
+
+    /* ── Générer conseils IA ─────────────────────────── */
+    window.generateAiConseils = async function () {
+        if (!currentNom) return;
+        const aiSection = document.getElementById('aiSection');
+        const aiLoading = document.getElementById('aiLoading');
+        const aiContent = document.getElementById('aiContent');
+        const aiError   = document.getElementById('aiError');
+
+        aiSection.style.display = 'block';
+        aiLoading.style.display = 'block';
+        aiContent.style.display = 'none';
+        aiError.style.display   = 'none';
+        aiSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        try {
+            const res  = await fetch('/suivie/conseils-ia', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nom: currentNom }),
+            });
+            const data = await res.json();
+            if (data.error) {
+                aiLoading.style.display = 'none';
+                aiError.style.display   = 'flex';
+                document.getElementById('aiErrorMsg').textContent = data.error;
+                return;
+            }
+            currentAiData = data;
+            renderAiContent(data);
+            aiLoading.style.display = 'none';
+            aiContent.style.display = 'block';
+        } catch (e) {
+            aiLoading.style.display = 'none';
+            aiError.style.display   = 'flex';
+            document.getElementById('aiErrorMsg').textContent = 'Erreur de connexion au service IA.';
+        }
+    };
+
+    function renderAiContent(data) {
+        const resumeEl = document.getElementById('aiResume');
+        if (resumeEl) resumeEl.textContent = data.resume || '';
+        document.getElementById('aiHeaderSub').textContent =
+            `Analyse personnalisée pour ${currentNom} · ${new Date().toLocaleDateString('fr-FR')}`;
+        const conseilsEl = document.getElementById('aiConseils');
+        if (conseilsEl && data.conseils) {
+            conseilsEl.innerHTML = data.conseils.map((c, i) => `
+                <div class="ai-conseil-item">
+                    <div class="ai-conseil-num">${i + 1}</div>
+                    <div class="ai-conseil-text">${c}</div>
+                </div>`).join('');
+        }
+        const jours = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+        const tbody = document.getElementById('aiPlanningBody');
+        if (tbody && data.planning) {
+            tbody.innerHTML = jours.map(jour => {
+                const j = data.planning[jour] || {};
+                return `<tr>
+                    <td class="jour-cell">${jour}</td>
+                    <td>${j.matin      || '—'}</td>
+                    <td>${j.apres_midi || '—'}</td>
+                    <td>${j.soir       || '—'}</td>
+                </tr>`;
+            }).join('');
+        }
+    }
+
+    aiBtn?.addEventListener('click',    generateAiConseils);
+    regenBtn?.addEventListener('click', generateAiConseils);
+
+    downloadBtn?.addEventListener('click', function () {
+        if (!currentNom) return;
+        let url = `/suivie/pdf/${encodeURIComponent(currentNom)}`;
+        if (currentAiData) {
+            const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(currentAiData))));
+            url += `?ai=${encodeURIComponent(encoded)}`;
+        }
+        window.location.href = url;
+    });
+
+    /* ══════════════════════════════════════════════════
+       UPLOAD DOCUMENT PARENT
+    ══════════════════════════════════════════════════ */
+
+    /* ── Toggle section upload ──────────────────────── */
+    window.toggleUploadSection = function () {
+        const section = document.getElementById('uploadSection');
+        if (section.style.display === 'none') {
+            // Pré-remplir le nom de l'enfant
+            document.getElementById('uploadNomEnfant').value = currentNom;
+            document.getElementById('uploadChildNameDisplay').textContent = currentNom || 'votre enfant';
+            section.style.display = 'block';
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+            section.style.display = 'none';
+        }
+    };
+
+    /* ── Prévisualisation fichier ───────────────────── */
+    const fileInput = document.getElementById('uploadFileInput');
+    if (fileInput) {
+        fileInput.addEventListener('change', function () {
+            if (this.files.length > 0) {
+                const file = this.files[0];
+                const ext  = file.name.split('.').pop().toLowerCase();
+                const iconMap = { pdf: 'fa-file-pdf', doc: 'fa-file-word', docx: 'fa-file-word', jpg: 'fa-file-image', jpeg: 'fa-file-image', png: 'fa-file-image' };
+                const icon = iconMap[ext] || 'fa-file-alt';
+                const size = file.size < 1024 * 1024
+                    ? (file.size / 1024).toFixed(1) + ' Ko'
+                    : (file.size / 1024 / 1024).toFixed(1) + ' Mo';
+
+                document.getElementById('uploadDropArea').style.display   = 'none';
+                document.getElementById('uploadFileSelected').style.display = 'flex';
+                document.getElementById('uploadSelectedName').textContent  = file.name;
+                document.getElementById('uploadSelectedSize').textContent  = size;
+                document.getElementById('uploadFileIconType').className    = `fas ${icon} upload-file-icon`;
+            }
+        });
+    }
+
+    window.clearUploadFile = function () {
+        if (fileInput) fileInput.value = '';
+        document.getElementById('uploadDropArea').style.display    = 'block';
+        document.getElementById('uploadFileSelected').style.display = 'none';
+    };
+
+    /* ── Drag & Drop ────────────────────────────────── */
+    const dropzone = document.getElementById('uploadDropzone');
+    if (dropzone) {
+        dropzone.addEventListener('dragover', e => {
+            e.preventDefault();
+            dropzone.classList.add('drag-over');
+        });
+        dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+        dropzone.addEventListener('drop', e => {
+            e.preventDefault();
+            dropzone.classList.remove('drag-over');
+            if (e.dataTransfer.files.length > 0 && fileInput) {
+                // Créer un DataTransfer pour assigner les fichiers
+                const dt = new DataTransfer();
+                dt.items.add(e.dataTransfer.files[0]);
+                fileInput.files = dt.files;
+                fileInput.dispatchEvent(new Event('change'));
+            }
+        });
+    }
+
+    /* ── Soumission formulaire upload ───────────────── */
+    const uploadForm = document.getElementById('uploadDocForm');
+    if (uploadForm) {
+        uploadForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const btn      = document.getElementById('uploadSubmitBtn');
+            const feedback = document.getElementById('uploadFeedback');
+            const formData = new FormData(this);
+
+            btn.disabled  = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Envoi en cours...';
+            feedback.style.display = 'none';
+
+            try {
+                const resp = await fetch('/suivie/upload-document', {
+                    method: 'POST',
+                    body:   formData
+                });
+                const data = await resp.json();
+
+                feedback.style.display = 'flex';
+                if (data.success) {
+                    feedback.className = 'upload-feedback success';
+                    feedback.innerHTML = '<i class="fas fa-check-circle"></i> ' + data.message;
+                    this.reset();
+                    clearUploadFile();
+                    // Fermer après 3 secondes
+                    setTimeout(() => {
+                        document.getElementById('uploadSection').style.display = 'none';
+                        feedback.style.display = 'none';
+                    }, 3000);
+                } else {
+                    feedback.className = 'upload-feedback error';
+                    feedback.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + data.message;
+                }
+            } catch (err) {
+                feedback.style.display = 'flex';
+                feedback.className     = 'upload-feedback error';
+                feedback.innerHTML     = '<i class="fas fa-exclamation-circle"></i> Erreur de connexion. Veuillez réessayer.';
+            } finally {
+                btn.disabled  = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Envoyer au psychologue';
+            }
+        });
+    }
+
+});
+</script>
+{% endblock %}

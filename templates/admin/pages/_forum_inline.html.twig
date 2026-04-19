@@ -1,0 +1,233 @@
+{# templates/admin/pages/_forum_inline.html.twig #}
+<style>
+/* ── Forum inline admin — responsive sidebar ── */
+.fi-wrap { width:100%; }
+
+.fi-stats-row { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; align-items:center; }
+.fi-stat-pill {
+    display:inline-flex; align-items:center; gap:7px;
+    background:#f5f3ff; border:1px solid #ede9fe;
+    border-radius:50px; padding:7px 16px;
+    font-size:.78rem; font-weight:700; color:#5b21b6;
+}
+.fi-view-btn {
+    display:inline-flex; align-items:center; gap:6px;
+    background:linear-gradient(135deg,#7c3aed,#4f46e5);
+    color:#fff; border-radius:50px; padding:7px 18px;
+    font-size:.78rem; font-weight:700; text-decoration:none;
+    box-shadow:0 3px 10px rgba(124,58,237,.25);
+    transition:all .2s; margin-left:auto;
+}
+.fi-view-btn:hover { opacity:.9; transform:translateY(-1px); color:#fff; }
+
+/* Grid posts — s'adapte à l'espace disponible */
+.fi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+}
+.fi-post {
+    background:#faf5ff; border-radius:14px;
+    border:1.5px solid #ede9fe; padding:14px 15px;
+    transition:box-shadow .2s, border-color .2s;
+    display:flex; flex-direction:column; gap:9px;
+}
+.fi-post:hover { box-shadow:0 4px 18px rgba(124,58,237,.1); border-color:#c4b5fd; }
+
+.fi-post-top { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
+.fi-av-row   { display:flex; align-items:center; gap:8px; }
+.fi-av {
+    width:32px; height:32px; border-radius:50%; flex-shrink:0;
+    background:linear-gradient(135deg,#7c3aed,#4f46e5);
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size:12px; font-weight:800;
+}
+.fi-name { font-size:.82rem; font-weight:700; color:#1e1b4b; }
+.fi-time { font-size:.68rem; color:#9ca3af; }
+.fi-tags { display:flex; gap:5px; flex-wrap:wrap; flex-shrink:0; }
+.fi-tag  { border-radius:50px; font-size:.64rem; font-weight:700; padding:2px 8px; }
+.fi-tag-cat     { background:#ede9fe; color:#5b21b6; }
+.fi-tag-censure { background:#fef9ec; color:#92400e; border:1px solid #fde68a; }
+.fi-tag-masque  { background:#fee2e2; color:#dc2626; }
+
+.fi-body { font-size:.82rem; color:#374151; line-height:1.65; flex:1; }
+
+.fi-actions { display:flex; gap:6px; flex-wrap:wrap; }
+.fi-btn {
+    display:inline-flex; align-items:center; gap:4px;
+    padding:5px 12px; border-radius:8px;
+    font-size:.72rem; font-weight:600; cursor:pointer; border:none;
+    transition:all .2s;
+}
+.fi-btn-reply  { background:#f0fdf4; color:#059669; border:1px solid #a7f3d0; }
+.fi-btn-reply:hover  { background:#d1fae5; }
+.fi-btn-toggle { background:#fef9ec; color:#92400e; border:1px solid #fde68a; }
+.fi-btn-toggle:hover { background:#fef3c7; }
+.fi-btn-del    { background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; }
+.fi-btn-del:hover { background:#fecaca; }
+.fi-rep-count  { margin-left:auto; font-size:.7rem; color:#a78bfa; align-self:center; font-weight:600; }
+
+/* Reply zone */
+.fi-reply-zone {
+    display:none; background:#f0fdf4;
+    border:1.5px solid #a7f3d0; border-radius:10px;
+    padding:11px 13px;
+}
+.fi-reply-zone.open { display:block; }
+.fi-rep-label { font-size:.73rem; font-weight:700; color:#059669; margin-bottom:7px; display:flex; align-items:center; gap:5px; }
+.fi-rep-ta {
+    width:100%; min-height:60px; padding:8px 11px;
+    border:1.5px solid #a7f3d0; border-radius:8px;
+    font-size:.8rem; color:#374151; outline:none;
+    resize:vertical; font-family:inherit;
+    transition:border .2s;
+}
+.fi-rep-ta:focus { border-color:#059669; }
+.fi-rep-btns { display:flex; justify-content:flex-end; gap:7px; margin-top:7px; }
+.fi-send-btn { background:linear-gradient(135deg,#059669,#10b981); color:#fff; border:none; border-radius:8px; padding:7px 18px; font-size:.78rem; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:5px; }
+.fi-cancel-btn { background:#f5f5f5; color:#6b7280; border:1px solid #e5e7eb; border-radius:8px; padding:7px 13px; font-size:.78rem; cursor:pointer; }
+
+.fi-empty { text-align:center; padding:36px 20px; color:#9ca3af; font-size:.85rem; }
+.fi-toast { position:fixed;top:76px;right:22px;z-index:99999;background:#1e1b4b;color:#fff;border-radius:12px;padding:10px 20px;font-size:.82rem;font-weight:600;opacity:0;transition:opacity .3s;pointer-events:none;box-shadow:0 6px 22px rgba(0,0,0,.2); }
+.fi-toast.show { opacity:1; }
+</style>
+
+<div class="fi-wrap">
+<div class="fi-toast" id="fiToast"></div>
+
+<div class="fi-stats-row">
+    <div class="fi-stat-pill" id="fiTotalStat">
+        <i class="fas fa-comments"></i> Chargement...
+    </div>
+    <a href="{{ path('admin_forum') }}" class="fi-view-btn">
+        <i class="fas fa-external-link-alt"></i> Forum complet
+    </a>
+</div>
+
+<div class="fi-grid" id="fiPostsList">
+    <div class="fi-empty"><i class="fas fa-spinner fa-spin"></i> Chargement...</div>
+</div>
+</div>
+
+<script>
+(function() {
+
+function fiToast(msg, color) {
+    const t = document.getElementById('fiToast');
+    t.textContent = msg; t.style.background = color || '#1e1b4b';
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3200);
+}
+function fiEsc(str) {
+    const d = document.createElement('div');
+    d.appendChild(document.createTextNode(String(str||'')));
+    return d.innerHTML;
+}
+
+async function fiCharger() {
+    try {
+        const resp = await fetch('/forum/posts');
+        const data = await resp.json();
+        if (!data.success) return;
+        const posts = data.posts.slice(0, 6);
+        document.getElementById('fiTotalStat').innerHTML =
+            `<i class="fas fa-comments"></i> ${data.posts.length} post${data.posts.length>1?'s':''} au total`;
+        const list = document.getElementById('fiPostsList');
+        if (!posts.length) {
+            list.innerHTML = '<div class="fi-empty"><i class="fas fa-comments fa-2x" style="color:#c4b5fd;display:block;margin-bottom:8px;"></i>Aucun post pour le moment.</div>';
+            return;
+        }
+        list.innerHTML = posts.map(p => `
+        <div class="fi-post" id="fipost-${p.id}">
+            <div class="fi-post-top">
+                <div class="fi-av-row">
+                    <div class="fi-av">${fiEsc(p.auteur).charAt(0).toUpperCase()}</div>
+                    <div>
+                        <div class="fi-name">${fiEsc(p.auteur)}</div>
+                        <div class="fi-time">${p.createdAt}</div>
+                    </div>
+                </div>
+                <div class="fi-tags">
+                    ${p.nbMotsCensures > 0 ? `<span class="fi-tag fi-tag-censure"><i class="fas fa-shield-alt"></i> ${p.nbMotsCensures}</span>` : ''}
+                    ${p.statut === 'masque' ? '<span class="fi-tag fi-tag-masque">Masqué</span>' : ''}
+                    <span class="fi-tag fi-tag-cat">${fiEsc(p.categorie)}</span>
+                </div>
+            </div>
+            <div class="fi-body">${fiEsc(p.contenu)}</div>
+            <div class="fi-actions">
+                <button class="fi-btn fi-btn-reply" onclick="fiReply(${p.id})"><i class="fas fa-reply"></i> Répondre</button>
+                <button class="fi-btn fi-btn-toggle" id="fitoggle-${p.id}" onclick="fiToggle(${p.id})">
+                    <i class="fas fa-${p.statut==='masque'?'eye':'eye-slash'}"></i>
+                    ${p.statut==='masque'?'Restaurer':'Masquer'}
+                </button>
+                <button class="fi-btn fi-btn-del" onclick="fiDel(${p.id})"><i class="fas fa-trash"></i></button>
+                <span class="fi-rep-count"><i class="fas fa-comment-dots"></i> ${p.nbReponses}</span>
+            </div>
+            <div class="fi-reply-zone" id="fireply-${p.id}">
+                <div class="fi-rep-label"><i class="fas fa-user-md"></i> Réponse professionnelle</div>
+                <textarea class="fi-rep-ta" id="fita-${p.id}" placeholder="Rédigez votre réponse..."></textarea>
+                <div class="fi-rep-btns">
+                    <button class="fi-cancel-btn" onclick="fiReply(${p.id})">Annuler</button>
+                    <button class="fi-send-btn" onclick="fiSend(${p.id})"><i class="fas fa-paper-plane"></i> Publier</button>
+                </div>
+            </div>
+        </div>`).join('');
+    } catch {
+        document.getElementById('fiPostsList').innerHTML = '<div class="fi-empty">Erreur de chargement.</div>';
+    }
+}
+
+window.fiReply = function(id) {
+    const z = document.getElementById('fireply-'+id);
+    z.classList.toggle('open');
+    if (z.classList.contains('open')) document.getElementById('fita-'+id).focus();
+};
+
+window.fiSend = async function(id) {
+    const texte = document.getElementById('fita-'+id).value.trim();
+    if (!texte) { fiToast('⚠️ Réponse vide.','#d97706'); return; }
+    try {
+        const resp = await fetch(`/admin/forum/post/${id}/reponse`, {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ contenu: texte, auteur: 'Équipe AutiCare' })
+        });
+        const data = await resp.json();
+        if (data.success) {
+            document.getElementById('fita-'+id).value = '';
+            document.getElementById('fireply-'+id).classList.remove('open');
+            fiToast('✅ Réponse publiée.','#059669');
+        } else fiToast('❌ '+data.message,'#dc2626');
+    } catch { fiToast('❌ Erreur.','#dc2626'); }
+};
+
+window.fiToggle = async function(id) {
+    try {
+        const resp = await fetch(`/admin/forum/post/${id}/toggle-statut`, {method:'POST'});
+        const data = await resp.json();
+        if (data.success) {
+            const btn = document.getElementById('fitoggle-'+id);
+            btn.innerHTML = data.statut==='masque'
+                ? '<i class="fas fa-eye"></i> Restaurer'
+                : '<i class="fas fa-eye-slash"></i> Masquer';
+            fiToast(data.statut==='masque'?'🔴 Post masqué.':'✅ Post restauré.',
+                    data.statut==='masque'?'#d97706':'#059669');
+        }
+    } catch { fiToast('❌ Erreur.','#dc2626'); }
+};
+
+window.fiDel = async function(id) {
+    if (!confirm('Supprimer ce post ?')) return;
+    try {
+        const resp = await fetch(`/admin/forum/post/${id}/delete`,{method:'POST'});
+        const data = await resp.json();
+        if (data.success) {
+            const el = document.getElementById('fipost-'+id);
+            if (el) { el.style.opacity='0'; el.style.transform='scale(.95)'; el.style.transition='all .2s'; setTimeout(()=>el.remove(),200); }
+            fiToast('✅ Supprimé.','#059669');
+        }
+    } catch { fiToast('❌ Erreur.','#dc2626'); }
+};
+
+fiCharger();
+})();
+</script>

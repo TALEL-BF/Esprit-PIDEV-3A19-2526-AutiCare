@@ -1,0 +1,475 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Auticare — Forum Parents{% endblock %}
+{% block page_title %}Forum des Parents{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+/* ══ FORUM ADMIN ══════════════════════════════════════════════════════════ */
+
+/* Stat cards forum */
+.forum-stat-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px; }
+.forum-stat-card {
+    background: #fff; border-radius: 16px;
+    border: 1.5px solid #ede9fe; padding: 16px 18px;
+    display: flex; align-items: center; gap: 14px;
+}
+.forum-stat-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+}
+.fsi-purple { background: linear-gradient(135deg,#7c3aed,#4f46e5); color:#fff; }
+.fsi-green  { background: linear-gradient(135deg,#059669,#10b981); color:#fff; }
+.fsi-orange { background: linear-gradient(135deg,#d97706,#f59e0b); color:#fff; }
+.fsi-red    { background: linear-gradient(135deg,#dc2626,#ef4444); color:#fff; }
+.forum-stat-val   { font-size: 1.4rem; font-weight: 900; color: #1e1b4b; line-height: 1; }
+.forum-stat-label { font-size: .72rem; color: #9ca3af; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; margin-top: 2px; }
+
+/* Filtres */
+.forum-admin-filters { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px; }
+.forum-filter-btn {
+    padding: 6px 14px; border-radius: 50px;
+    border: 1.5px solid #ede9fe; background: #fff;
+    color: #5b21b6; font-size: .8rem; font-weight: 600;
+    cursor: pointer; transition: all .2s;
+}
+.forum-filter-btn:hover, .forum-filter-btn.active { background:#7c3aed; color:#fff; border-color:#7c3aed; }
+
+/* Posts admin */
+.forum-admin-post {
+    background: #fff; border-radius: 16px;
+    border: 1.5px solid #ede9fe; margin-bottom: 14px;
+    overflow: hidden; transition: box-shadow .2s;
+}
+.forum-admin-post:hover { box-shadow: 0 4px 20px rgba(124,58,237,.1); }
+.forum-admin-post.masque { opacity: .6; border-color: #e5e7eb; }
+
+.fap-header {
+    padding: 14px 18px 10px;
+    display: flex; align-items: flex-start;
+    justify-content: space-between; gap: 12px;
+}
+.fap-author {
+    display: flex; align-items: center; gap: 10px;
+}
+.fap-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg,#7c3aed,#4f46e5);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 13px; font-weight: 800; flex-shrink: 0;
+}
+.fap-name  { font-size: .88rem; font-weight: 700; color: #1e1b4b; }
+.fap-meta  { font-size: .72rem; color: #9ca3af; margin-top: 1px; }
+.fap-badges { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+.fap-cat    { background:#f5f3ff; color:#5b21b6; border-radius:50px; font-size:.68rem; font-weight:700; padding:2px 9px; }
+.fap-censure{ background:#fef3c7; color:#92400e; border-radius:50px; font-size:.68rem; font-weight:700; padding:2px 9px; }
+.fap-masque { background:#fee2e2; color:#dc2626; border-radius:50px; font-size:.68rem; font-weight:700; padding:2px 9px; }
+
+.fap-body {
+    padding: 0 18px 12px;
+    font-size: .88rem; color: #374151; line-height: 1.7;
+}
+.fap-original {
+    font-size: .78rem; color: #9ca3af;
+    background: #fff8f0; border-left: 3px solid #fcd34d;
+    padding: 6px 10px; border-radius: 0 6px 6px 0;
+    margin: 0 18px 10px; display: none;
+}
+.fap-original.visible { display: block; }
+
+.fap-actions {
+    display: flex; gap: 8px; padding: 10px 18px 14px;
+    border-top: 1px solid #f5f3ff; flex-wrap: wrap;
+    align-items: center;
+}
+.fap-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 6px 14px; border-radius: 10px;
+    font-size: .78rem; font-weight: 600;
+    cursor: pointer; border: none; transition: all .2s;
+}
+.fap-btn-reply  { background:#f0fdf4; color:#059669; border:1px solid #a7f3d0; }
+.fap-btn-reply:hover  { background:#d1fae5; }
+.fap-btn-toggle { background:#fef3c7; color:#92400e; border:1px solid #fcd34d; }
+.fap-btn-toggle:hover { background:#fde68a; }
+.fap-btn-delete { background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; }
+.fap-btn-delete:hover { background:#fecaca; }
+.fap-btn-original { background:#f5f5f5; color:#6b7280; border:1px solid #e5e7eb; }
+.fap-btn-original:hover { background:#e5e7eb; }
+
+/* Zone réponses admin */
+.fap-reponses-zone {
+    background: #faf5ff;
+    border-top: 1px solid #ede9fe;
+    padding: 14px 18px;
+    display: none;
+}
+.fap-rep-item {
+    display: flex; gap: 10px;
+    padding: 8px 0; border-bottom: 1px solid #ede9fe;
+}
+.fap-rep-item:last-of-type { border-bottom: none; }
+.fap-rep-bubble {
+    flex: 1; background: #fff;
+    border-radius: 10px; padding: 10px 12px;
+    border: 1px solid #ede9fe;
+}
+.fap-rep-bubble.psy { background: #f0fdf4; border-color: #a7f3d0; }
+.fap-rep-author { font-size: .78rem; font-weight: 700; color: #1e1b4b; margin-bottom: 3px; }
+.fap-rep-text   { font-size: .83rem; color: #374151; line-height: 1.6; }
+.fap-rep-date   { font-size: .7rem; color: #9ca3af; margin-top: 3px; }
+.psy-badge { background:linear-gradient(135deg,#059669,#10b981); color:#fff; font-size:.62rem; font-weight:700; padding:1px 7px; border-radius:50px; margin-left:5px; vertical-align:middle; }
+
+/* Zone réponse psy */
+.psy-reply-zone {
+    background: #f0fdf4;
+    border: 1.5px solid #a7f3d0;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-top: 12px;
+    display: none;
+}
+.psy-reply-zone.open { display: block; }
+.psy-reply-header { font-size: .78rem; font-weight: 700; color: #059669; margin-bottom: 8px; display:flex;align-items:center;gap:6px; }
+.psy-reply-textarea {
+    width: 100%; min-height: 70px; padding: 9px 12px;
+    border: 1.5px solid #a7f3d0; border-radius: 8px;
+    font-size: .83rem; color: #374151; outline: none; resize: vertical;
+    font-family: inherit; transition: border .2s;
+}
+.psy-reply-textarea:focus { border-color: #059669; }
+.psy-reply-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:8px; }
+.psy-send-btn { background:linear-gradient(135deg,#059669,#10b981); color:#fff; border:none; border-radius:8px; padding:8px 18px; font-size:.82rem; font-weight:700; cursor:pointer; display:inline-flex;align-items:center;gap:6px; }
+.psy-cancel-btn { background:#f5f5f5; color:#6b7280; border:1px solid #e5e7eb; border-radius:8px; padding:8px 14px; font-size:.82rem; cursor:pointer; }
+
+/* Toast */
+#forumAdminToast {
+    position:fixed;top:80px;right:24px;z-index:9999;
+    background:#1e1b4b;color:#fff;border-radius:12px;
+    padding:12px 20px;font-size:.85rem;font-weight:600;
+    box-shadow:0 8px 24px rgba(0,0,0,.2);
+    opacity:0;transition:opacity .3s;pointer-events:none;
+}
+#forumAdminToast.show { opacity:1; }
+
+/* Spinner */
+.admin-spinner { width:12px;height:12px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:aSpin .6s linear infinite;display:inline-block;vertical-align:middle;margin-right:5px; }
+@keyframes aSpin { to{transform:rotate(360deg);} }
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div id="forumAdminToast"></div>
+
+{# ── Page header ── #}
+<div class="page-header">
+    <h2><i class="fas fa-comments me-2" style="color:var(--purple-500)"></i>Forum des Parents</h2>
+    <p>Consultez et répondez aux messages de la communauté parentale</p>
+</div>
+
+{# ── Stats ── #}
+<div class="forum-stat-row">
+    <div class="forum-stat-card">
+        <div class="forum-stat-icon fsi-purple"><i class="fas fa-comments"></i></div>
+        <div><div class="forum-stat-val">{{ totalPosts }}</div><div class="forum-stat-label">Total posts</div></div>
+    </div>
+    <div class="forum-stat-card">
+        <div class="forum-stat-icon fsi-green"><i class="fas fa-check-circle"></i></div>
+        <div><div class="forum-stat-val">{{ totalActifs }}</div><div class="forum-stat-label">Actifs</div></div>
+    </div>
+    <div class="forum-stat-card">
+        <div class="forum-stat-icon fsi-orange"><i class="fas fa-reply"></i></div>
+        <div><div class="forum-stat-val">{{ totalReponses }}</div><div class="forum-stat-label">Réponses</div></div>
+    </div>
+    <div class="forum-stat-card">
+        <div class="forum-stat-icon fsi-red"><i class="fas fa-flag"></i></div>
+        <div><div class="forum-stat-val">{{ totalSignales }}</div><div class="forum-stat-label">Masqués</div></div>
+    </div>
+</div>
+
+{# ── Filtres ── #}
+<div class="forum-admin-filters">
+    <button class="forum-filter-btn active" onclick="filtreAdmin('tous', this)">Tous</button>
+    <button class="forum-filter-btn" onclick="filtreAdmin('actif', this)">✅ Actifs</button>
+    <button class="forum-filter-btn" onclick="filtreAdmin('masque', this)">🔴 Masqués</button>
+    <button class="forum-filter-btn" onclick="filtreAdmin('censure', this)">⚠️ Censurés</button>
+</div>
+
+{# ── Liste posts ── #}
+<div id="adminForumList">
+{% if posts is empty %}
+    <div style="text-align:center;padding:50px 20px;color:#9ca3af;">
+        <i class="fas fa-comments fa-3x" style="color:#c4b5fd;display:block;margin-bottom:12px;"></i>
+        Aucun post pour le moment.
+    </div>
+{% else %}
+{% for post in posts %}
+<div class="forum-admin-post {% if post.statut == 'masque' %}masque{% endif %}"
+     id="admin-post-{{ post.id }}"
+     data-statut="{{ post.statut }}"
+     data-censure="{{ post.nbMotsCensures > 0 ? '1' : '0' }}">
+
+    <div class="fap-header">
+        <div class="fap-author">
+            <div class="fap-avatar">{{ post.auteur|slice(0,1)|upper }}</div>
+            <div>
+                <div class="fap-name">{{ post.auteur }}</div>
+                <div class="fap-meta">
+                    {{ post.createdAt|date('d/m/Y à H:i') }}
+                    {% if post.nomEnfant %} · 👶 {{ post.nomEnfant }}{% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="fap-badges">
+            <span class="fap-cat">{{ post.categorie ?? 'Général' }}</span>
+            {% if post.nbMotsCensures > 0 %}
+            <span class="fap-censure"><i class="fas fa-shield-alt me-1"></i>{{ post.nbMotsCensures }} mot(s) censuré(s)</span>
+            {% endif %}
+            {% if post.statut == 'masque' %}
+            <span class="fap-masque"><i class="fas fa-eye-slash me-1"></i>Masqué</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="fap-body">{{ post.contenu }}</div>
+
+    {% if post.nbMotsCensures > 0 %}
+    <div class="fap-original" id="original-{{ post.id }}">
+        <strong style="font-size:.7rem;color:#d97706;">Texte original :</strong><br>
+        {{ post.contenuOriginal }}
+    </div>
+    {% endif %}
+
+    <div class="fap-actions">
+        <button class="fap-btn fap-btn-reply" onclick="togglePsyReply({{ post.id }})">
+            <i class="fas fa-reply"></i> Répondre
+        </button>
+        {% if post.nbMotsCensures > 0 %}
+        <button class="fap-btn fap-btn-original" onclick="toggleOriginal({{ post.id }})">
+            <i class="fas fa-eye"></i> Voir original
+        </button>
+        {% endif %}
+        <button class="fap-btn fap-btn-toggle" id="toggle-btn-{{ post.id }}"
+                onclick="toggleStatut({{ post.id }})">
+            <i class="fas fa-{% if post.statut == 'masque' %}eye{% else %}eye-slash{% endif %}"></i>
+            {% if post.statut == 'masque' %}Restaurer{% else %}Masquer{% endif %}
+        </button>
+        <button class="fap-btn fap-btn-delete" onclick="supprimerPost({{ post.id }})">
+            <i class="fas fa-trash"></i> Supprimer
+        </button>
+        <button class="forum-reponses-toggle fap-btn" style="background:#f5f3ff;color:#5b21b6;border:1px solid #ede9fe;"
+                onclick="toggleReponsesAdmin({{ post.id }})">
+            <i class="fas fa-comment-dots"></i>
+            {{ post.reponses|length }} réponse{{ post.reponses|length > 1 ? 's' : '' }}
+        </button>
+    </div>
+
+    {# Zone réponse psy #}
+    <div class="psy-reply-zone" id="psy-reply-{{ post.id }}">
+        <div class="psy-reply-header">
+            <i class="fas fa-user-md"></i> Votre réponse (visible par tous les parents)
+        </div>
+        <textarea class="psy-reply-textarea" id="psy-text-{{ post.id }}"
+            placeholder="Rédigez votre réponse professionnelle..."></textarea>
+        <div class="psy-reply-actions">
+            <button class="psy-cancel-btn" onclick="togglePsyReply({{ post.id }})">Annuler</button>
+            <button class="psy-send-btn" onclick="envoyerReponsePsy({{ post.id }})">
+                <i class="fas fa-paper-plane"></i> Publier la réponse
+            </button>
+        </div>
+    </div>
+
+    {# Zone réponses #}
+    <div class="fap-reponses-zone" id="admin-reponses-{{ post.id }}">
+        <div id="admin-rep-list-{{ post.id }}">
+            {% for rep in post.reponses %}
+            <div class="fap-rep-item" id="admin-rep-{{ rep.id }}">
+                <div class="fap-avatar {% if rep.auteurType == 'psy' %}psy{% endif %}" style="width:30px;height:30px;font-size:11px;background:{% if rep.auteurType == 'psy' %}linear-gradient(135deg,#059669,#10b981){% else %}linear-gradient(135deg,#7c3aed,#4f46e5){% endif %};">
+                    {{ rep.auteur|slice(0,1)|upper }}
+                </div>
+                <div class="fap-rep-bubble {% if rep.auteurType == 'psy' %}psy{% endif %}" style="flex:1;">
+                    <div class="fap-rep-author">
+                        {{ rep.auteur }}
+                        {% if rep.auteurType == 'psy' %}<span class="psy-badge">Psy AutiCare</span>{% endif %}
+                        <button onclick="supprimerReponse({{ rep.id }})" style="float:right;background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:2px 8px;font-size:.7rem;cursor:pointer;">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="fap-rep-text">{{ rep.contenu }}</div>
+                    <div class="fap-rep-date">{{ rep.createdAt|date('d/m/Y à H:i') }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+{% endfor %}
+{% endif %}
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+// ── Toast ────────────────────────────────────────────────────────────────
+function showAdminToast(msg, color) {
+    const t = document.getElementById('forumAdminToast');
+    t.textContent = msg;
+    t.style.background = color || '#1e1b4b';
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ── Filtrer les posts ────────────────────────────────────────────────────
+function filtreAdmin(filtre, btn) {
+    document.querySelectorAll('.forum-filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    document.querySelectorAll('.forum-admin-post').forEach(post => {
+        const statut   = post.dataset.statut;
+        const censure  = post.dataset.censure;
+        let show = true;
+        if (filtre === 'actif'   && statut !== 'actif') show = false;
+        if (filtre === 'masque'  && statut !== 'masque') show = false;
+        if (filtre === 'censure' && censure !== '1') show = false;
+        post.style.display = show ? '' : 'none';
+    });
+}
+
+// ── Toggle zone réponse psy ─────────────────────────────────────────────
+function togglePsyReply(postId) {
+    const zone = document.getElementById('psy-reply-' + postId);
+    zone.classList.toggle('open');
+    if (zone.classList.contains('open')) {
+        document.getElementById('psy-text-' + postId).focus();
+        // Ouvrir aussi les réponses
+        document.getElementById('admin-reponses-' + postId).style.display = 'block';
+    }
+}
+
+// ── Envoyer réponse psy ─────────────────────────────────────────────────
+async function envoyerReponsePsy(postId) {
+    const texte = document.getElementById('psy-text-' + postId).value.trim();
+    if (!texte) { showAdminToast('⚠️ La réponse ne peut pas être vide.', '#d97706'); return; }
+
+    try {
+        const resp = await fetch(`/admin/forum/post/${postId}/reponse`, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ contenu: texte, auteur: 'Équipe AutiCare' })
+        });
+        const data = await resp.json();
+
+        if (data.success) {
+            document.getElementById('psy-text-' + postId).value = '';
+            document.getElementById('psy-reply-' + postId).classList.remove('open');
+            appendAdminReponse(postId, data.reponse);
+            showAdminToast('✅ Réponse publiée avec succès.', '#059669');
+        } else {
+            showAdminToast('❌ ' + data.message, '#dc2626');
+        }
+    } catch {
+        showAdminToast('❌ Erreur de connexion.', '#dc2626');
+    }
+}
+
+// ── Ajouter réponse dans le DOM ─────────────────────────────────────────
+function appendAdminReponse(postId, rep) {
+    const list  = document.getElementById('admin-rep-list-' + postId);
+    const isPsy = rep.auteurType === 'psy';
+    const bg    = isPsy ? 'linear-gradient(135deg,#059669,#10b981)' : 'linear-gradient(135deg,#7c3aed,#4f46e5)';
+
+    list.insertAdjacentHTML('beforeend', `
+    <div class="fap-rep-item" id="admin-rep-${rep.id}" style="animation:modalIn .25s ease;">
+        <div class="fap-avatar" style="width:30px;height:30px;font-size:11px;background:${bg};">
+            ${rep.auteur.charAt(0).toUpperCase()}
+        </div>
+        <div class="fap-rep-bubble ${isPsy ? 'psy' : ''}" style="flex:1;">
+            <div class="fap-rep-author">
+                ${escHtml(rep.auteur)}
+                ${isPsy ? '<span class="psy-badge">Psy AutiCare</span>' : ''}
+                <button onclick="supprimerReponse(${rep.id})" style="float:right;background:#fee2e2;color:#dc2626;border:none;border-radius:6px;padding:2px 8px;font-size:.7rem;cursor:pointer;">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            <div class="fap-rep-text">${escHtml(rep.contenu)}</div>
+            <div class="fap-rep-date">${rep.createdAt}</div>
+        </div>
+    </div>`);
+}
+
+// ── Toggle réponses ─────────────────────────────────────────────────────
+function toggleReponsesAdmin(postId) {
+    const zone    = document.getElementById('admin-reponses-' + postId);
+    zone.style.display = zone.style.display === 'block' ? 'none' : 'block';
+}
+
+// ── Voir texte original ─────────────────────────────────────────────────
+function toggleOriginal(postId) {
+    const el = document.getElementById('original-' + postId);
+    if (el) el.classList.toggle('visible');
+}
+
+// ── Masquer / Restaurer post ────────────────────────────────────────────
+async function toggleStatut(postId) {
+    try {
+        const resp = await fetch(`/admin/forum/post/${postId}/toggle-statut`, { method: 'POST' });
+        const data = await resp.json();
+        if (data.success) {
+            const post = document.getElementById('admin-post-' + postId);
+            const btn  = document.getElementById('toggle-btn-' + postId);
+            if (data.statut === 'masque') {
+                post.classList.add('masque');
+                post.dataset.statut = 'masque';
+                btn.innerHTML = '<i class="fas fa-eye"></i> Restaurer';
+            } else {
+                post.classList.remove('masque');
+                post.dataset.statut = 'actif';
+                btn.innerHTML = '<i class="fas fa-eye-slash"></i> Masquer';
+            }
+            showAdminToast(data.statut === 'masque' ? '🔴 Post masqué.' : '✅ Post restauré.', data.statut === 'masque' ? '#d97706' : '#059669');
+        }
+    } catch { showAdminToast('❌ Erreur.', '#dc2626'); }
+}
+
+// ── Supprimer post ──────────────────────────────────────────────────────
+async function supprimerPost(postId) {
+    if (!confirm('Supprimer ce post et toutes ses réponses ?')) return;
+    try {
+        const resp = await fetch(`/admin/forum/post/${postId}/delete`, { method: 'POST' });
+        const data = await resp.json();
+        if (data.success) {
+            const el = document.getElementById('admin-post-' + postId);
+            el.style.animation = 'toastOut .3s ease forwards';
+            setTimeout(() => el.remove(), 300);
+            showAdminToast('✅ Post supprimé.', '#059669');
+        }
+    } catch { showAdminToast('❌ Erreur.', '#dc2626'); }
+}
+
+// ── Supprimer réponse ───────────────────────────────────────────────────
+async function supprimerReponse(repId) {
+    if (!confirm('Supprimer cette réponse ?')) return;
+    try {
+        const resp = await fetch(`/admin/forum/reponse/${repId}/delete`, { method: 'POST' });
+        const data = await resp.json();
+        if (data.success) {
+            const el = document.getElementById('admin-rep-' + repId);
+            if (el) { el.style.opacity='0'; setTimeout(()=>el.remove(), 200); }
+            showAdminToast('✅ Réponse supprimée.', '#059669');
+        }
+    } catch { showAdminToast('❌ Erreur.', '#dc2626'); }
+}
+
+function escHtml(str) {
+    const d = document.createElement('div');
+    d.appendChild(document.createTextNode(String(str || '')));
+    return d.innerHTML;
+}
+</script>
+{% endblock %}

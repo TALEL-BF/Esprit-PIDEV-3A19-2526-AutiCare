@@ -1,0 +1,1662 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}The Mirror - {{ event.titre }} ✨🪞{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800;900&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 50%, #fae8ff 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        /* Grandes étoiles animées en arrière-plan */
+        /* Hero mascot bubble - style comme voice_recommendation */
+
+
+.hero-mascot-bubble {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0px;  /* ← Met à 0px */
+    text-decoration: none;
+}
+
+.hero-mascot-label {
+    background: rgba(255,255,255,0.18);
+    backdrop-filter: blur(8px);
+    border: 1.5px solid rgba(255,255,255,0.28);
+    color: #fff;
+    font-family: 'Baloo 2', cursive;
+    font-size: 0.8rem;  /* ← Réduit un peu la taille */
+    font-weight: 700;
+    padding: 5px 15px;  /* ← Réduit le padding */
+    border-radius: 30px;
+    white-space: nowrap;
+    margin-top: -5px;  /* ← Remonte la bulle vers l'image */
+}
+
+.hero-mascot-icon {
+    font-size: 6rem;
+    animation: float-mascot 3s ease-in-out infinite;
+    filter: drop-shadow(0 8px 24px rgba(0,0,0,0.25));
+}
+
+@keyframes float-mascot {
+    0%,100% { transform: translateY(0) rotate(-6deg) scale(1); }
+    50%      { transform: translateY(-18px) rotate(6deg) scale(1.05); }
+}
+
+.hero-mascot-label {
+    background: rgba(255,255,255,0.18);
+    backdrop-filter: blur(8px);
+    border: 1.5px solid rgba(255,255,255,0.28);
+    color: #fff;
+    font-family: 'Baloo 2', cursive;
+    font-size: 0.88rem;
+    font-weight: 700;
+    padding: 7px 20px;
+    border-radius: 30px;
+    white-space: nowrap;
+   
+}
+.hero-stars {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.big-star {
+    position: absolute;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 3rem;
+    animation: starFloat 6s ease-in-out infinite;
+    text-shadow: 0 0 10px rgba(255,255,255,0.5);
+}
+
+.big-star:nth-child(1) { top: 10%; left: 5%; animation-delay: 0s; font-size: 4rem; }
+.big-star:nth-child(2) { top: 60%; left: 15%; animation-delay: 1s; font-size: 3rem; }
+.big-star:nth-child(3) { top: 20%; right: 10%; animation-delay: 2s; font-size: 5rem; }
+.big-star:nth-child(4) { bottom: 15%; right: 20%; animation-delay: 0.5s; font-size: 3.5rem; }
+.big-star:nth-child(5) { top: 45%; left: 25%; animation-delay: 1.5s; font-size: 2.5rem; }
+.big-star:nth-child(6) { bottom: 40%; left: 60%; animation-delay: 2.5s; font-size: 4rem; }
+.big-star:nth-child(7) { top: 75%; right: 40%; animation-delay: 0.8s; font-size: 3rem; }
+.big-star:nth-child(8) { top: 15%; left: 45%; animation-delay: 1.8s; font-size: 2rem; }
+.big-star:nth-child(9) { bottom: 10%; left: 35%; animation-delay: 3s; font-size: 3.5rem; }
+.big-star:nth-child(10) { top: 50%; right: 50%; animation-delay: 2.2s; font-size: 2.8rem; }
+
+@keyframes starFloat {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0.7;
+    }
+    50% {
+        transform: translateY(-25px) rotate(10deg);
+        opacity: 1;
+    }
+}
+        /* Breadcrumb (bc) - comme dans show */
+.bc {
+    margin-bottom: 1rem;
+}
+.bc a {
+    color: rgba(76, 29, 149, 0.7);
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+.bc a:hover {
+    color: #6d28d9;
+    transform: translateX(3px);
+    display: inline-block;
+}
+.bc .sep {
+    color: rgba(76, 29, 149, 0.5);
+    margin: 0 8px;
+}
+.bc .cur {
+    color: #6d28d9;
+    font-size: 0.85rem;
+    font-weight: 800;
+}
+
+/* Hero title - comme dans show */
+.hero-title {
+    font-family: 'Baloo 2', cursive;
+    font-size: clamp(2.2rem, 6vw, 3.8rem);
+    font-weight: 800;
+    color: white;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+    animation: fadeInUp 0.8s ease;
+    text-shadow: 0 3px 18px rgba(0,0,0,0.35);
+}
+
+.hero-title .accent {
+    background: linear-gradient(135deg, #ff69b4, #ff9ecf);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Hero sub - comme dans show */
+.hero-sub {
+    font-size: 1.1rem;
+    color: rgba(255,255,255,0.85);
+    font-weight: 600;
+    max-width: 550px;
+    line-height: 1.5;
+    margin-bottom: 2rem;
+    animation: fadeInUp 0.8s ease 0.1s backwards;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.2);
+}
+
+/* Animation fadeInUp */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Hero pills - comme dans show */
+.hero-pills {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    animation: fadeInUp 0.8s ease 0.2s backwards;
+}
+
+.hpill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: white;
+    padding: 5px 15px;
+    border-radius: 999px;
+    font-family: 'Baloo 2', cursive;
+    font-size: .75rem;
+    font-weight: 700;
+}
+
+.hpill .n {
+    color: #ffc0db;
+    font-size: 0.9rem;
+    font-weight: 900;
+}
+
+/* Hero bear - comme dans show */
+.hero-bear {
+    text-align: center;
+    animation: fadeInUp 0.8s ease 0.3s backwards;
+}
+
+.bear-image {
+    width: 160px;
+    height: auto;
+    filter: drop-shadow(0 0 15px rgba(255,255,255,0.3));
+    animation: bearFloat 3s ease-in-out infinite;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.bear-image:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 25px rgba(255,255,255,0.5));
+}
+
+@keyframes bearFloat {
+    0%, 100% {
+        transform: translateY(0) rotate(-2deg);
+    }
+    50% {
+        transform: translateY(-10px) rotate(2deg);
+    }
+}
+
+.bear-label {
+    display: inline-block;
+    margin-top: 8px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: white;
+    font-family: 'Baloo 2', cursive;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 4px 14px;
+    border-radius: 30px;
+}
+
+/* Hero wave - comme dans show */
+.hero-wave {
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    line-height: 0;
+}
+
+.hero-wave svg {
+    display: block;
+    width: 100%;
+}
+
+        /* ========== SHOOTING STARS BACKGROUND ========== */
+        .shooting-stars-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .shooting-star-bg {
+            position: absolute;
+            width: 80px;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(139,92,246,0.5), rgba(192,132,252,0.2), transparent);
+            border-radius: 999px;
+            opacity: 0;
+            animation: shootStarBg 4s linear infinite;
+        }
+        @keyframes shootStarBg {
+            0% { transform: translateX(0) translateY(0) rotate(35deg); opacity: 0; width: 0px; }
+            10% { opacity: 0.5; width: 80px; }
+            70% { opacity: 0.5; width: 80px; }
+            100% { transform: translateX(-300px) translateY(200px) rotate(35deg); opacity: 0; width: 0px; }
+        }
+
+        /* Floating elements */
+        .float-cosmos {
+            position: fixed; inset: 0;
+            pointer-events: none; z-index: 0; overflow: hidden;
+        }
+        .fc { position: absolute; font-size: 1.3rem; opacity: 0.15; animation: fcFloat 12s ease-in-out infinite; }
+        @keyframes fcFloat {
+            0%,100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        /* Side mascots */
+        .mascot {
+            position: fixed; top: 50%;
+            font-size: 2rem; line-height: 1;
+            z-index: 2; pointer-events: none;
+            filter: drop-shadow(0 0 8px rgba(139,92,246,0.2));
+            opacity: 0.6;
+        }
+        .mascot-l { left: 14px; animation: mascotL 5s ease-in-out infinite; transform: translateY(-50%); }
+        .mascot-r { right: 14px; animation: mascotR 5s ease-in-out infinite; transform: translateY(-50%); }
+        @keyframes mascotL { 0%,100% { transform: translateY(-50%) rotate(-3deg); } 50% { transform: translateY(-55%) rotate(3deg); } }
+        @keyframes mascotR { 0%,100% { transform: translateY(-50%) rotate(3deg); } 50% { transform: translateY(-55%) rotate(-3deg); } }
+
+        /* Hero banner */
+        /* Hero banner avec effet parallax */
+.hero {
+    position: relative;
+    z-index: 10;
+    padding: 2rem 0 0;
+    overflow: hidden;
+   
+    background-size: cover;
+    background-position: 1%  1%;
+    background-attachment: fixed;  /* ← Effet parallax */
+}
+       .hero {
+    position: relative; z-index: 10;
+    padding: 2rem 0 0;
+    overflow: hidden;
+}
+.hero {
+    position: relative;
+    z-index: 10;
+    padding: 2rem 0 0;
+    overflow: hidden;
+}
+
+.hero-bg-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    z-index: 0;
+}
+
+.hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        105deg,
+        rgba(198, 137, 255, 0.69) 0%,
+        rgba(143, 69, 239, 0.55) 55%,
+        rgba(183, 151, 247, 0.45) 100%
+    );
+    z-index: 1;
+    pointer-events: none;
+}
+
+.hero-inner {
+    position: relative;
+    z-index: 2;
+}
+
+.hero-wave {
+    line-height: 0;
+    position: relative;
+    z-index: 2;
+}
+
+.hero-bg-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    z-index: 0;
+}
+
+.hero::before {
+    content: '✨🪞✨';
+    position: absolute;
+    font-size: 120px;
+    bottom: -30px;
+    right: -20px;
+    opacity: 0.08;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.hero-inner {
+    position: relative;
+    z-index: 2;
+}
+
+        .hero-title {
+            font-family: 'Baloo 2', cursive;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            margin-bottom: .5rem;
+        }
+
+        .hero-sub {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.85);
+            font-weight: 600;
+            max-width: 450px;
+            margin-bottom: 1.2rem;
+        }
+
+        .hero-pills { display: flex; gap: 10px; flex-wrap: wrap; }
+        .hpill {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.25);
+            color: white;
+            padding: 5px 15px; border-radius: 999px;
+            font-family: 'Baloo 2', cursive;
+            font-size: .75rem; font-weight: 700;
+        }
+        .hpill .n { color: #ffc0db; font-size: 0.9rem; font-weight: 900; }
+
+        /* Bear image in hero */
+        .hero-bear {
+            text-align: center;
+        }
+        .bear-image {
+            width: 160px;
+            height: auto;
+            filter: drop-shadow(0 0 15px rgba(255,255,255,0.3));
+            animation: bearFloat 3s ease-in-out infinite;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .bear-image:hover {
+            transform: scale(1.05);
+            filter: drop-shadow(0 0 25px rgba(255,255,255,0.5));
+        }
+        @keyframes bearFloat {
+            0%, 100% { transform: translateY(0) rotate(-2deg); }
+            50% { transform: translateY(-10px) rotate(2deg); }
+        }
+        .bear-label {
+            display: inline-block; margin-top: 8px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.25);
+            color: white;
+            font-family: 'Baloo 2', cursive;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 4px 14px;
+            border-radius: 30px;
+        }
+
+        .hero-wave { line-height: 0; margin-top: 1.5rem; }
+        .hero-wave svg { display: block; width: 100%; }
+
+        /* Main container */
+        .main { max-width: 1200px; margin: 0 auto; padding: 35px 24px 60px; position: relative; z-index: 5; }
+
+        /* 4 STATS BOXES - all same size */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 24px;
+            padding: 15px 12px;
+            text-align: center;
+            border: 1px solid #e9d5ff;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(139,92,246,0.05);
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(139,92,246,0.1);
+        }
+
+        /* 🔥 ONLY TIMER CARD HAS GLOW 🔥 */
+        .stat-card.timer-glow {
+            animation: timerPulse 1.5s ease-in-out infinite;
+            border-color: #ec4899;
+            background: linear-gradient(135deg, white, #fdf2f8);
+            position: relative;
+        }
+        @keyframes timerPulse {
+            0%, 100% { 
+                border-color: #c084fc; 
+                box-shadow: 0 0 0 0 rgba(236,72,153,0.2);
+                transform: scale(1);
+            }
+            50% { 
+                border-color: #ec4899; 
+                box-shadow: 0 0 0 8px rgba(236,72,153,0.15);
+                transform: scale(1.01);
+            }
+        }
+
+        .stat-icon {
+            font-size: 1.8rem;
+            display: block;
+            margin-bottom: 6px;
+        }
+        .stat-label {
+            font-family: 'Baloo 2', cursive;
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: #a78bfa;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .stat-value {
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: #7c3aed;
+            line-height: 1.2;
+        }
+        .stat-sub {
+            font-size: 0.65rem;
+            color: #c084fc;
+            font-weight: 700;
+        }
+        .emo-circle.fear      { border-color:#a855f7; }
+.emo-circle.disgust   { border-color:#6b7280; }
+
+        /* Progress bar inside first card */
+        .progress-bar-small {
+            background: #f3e8ff;
+            border-radius: 20px;
+            height: 6px;
+            margin: 8px 0;
+            overflow: hidden;
+        }
+        .progress-fill-small {
+            background: linear-gradient(90deg, #8b5cf6, #ec4899);
+            height: 100%;
+            border-radius: 20px;
+            transition: width 0.4s ease;
+            width: 0%;
+        }
+
+        /* Timer display */
+        .timer-display-small {
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: #7c3aed;
+        }
+
+        /* Game panels */
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 25px; }
+        @media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }
+
+        .panel {
+            background: white;
+            border: 1px solid #e9d5ff;
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(139,92,246,0.05);
+            transition: all 0.3s ease;
+        }
+        .panel:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(139,92,246,0.1); }
+
+        .panel-head {
+            padding: 12px 18px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .ph-cam   { background: linear-gradient(135deg, #7c3aed, #a855f7); color: white; border-radius: 26px 26px 0 0; }
+        .ph-story { background: linear-gradient(135deg, #db2777, #f472b6); color: white; border-radius: 26px 26px 0 0; }
+        .ph-icon  { font-size: 16px; }
+        .ph-title { font-family:'Baloo 2',cursive; font-size:.85rem; font-weight:800; }
+
+        /* Camera */
+        .cam-vp {
+            background: linear-gradient(135deg, #1e1b4b, #2d1b69);
+            min-height: 250px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        #cameraView { width:100%; height:auto; transform:scaleX(-1); display:block; }
+        #canvas { display:none; }
+
+        .face-box {
+            position: absolute;
+            border: 2px solid #10b981;
+            border-radius: 10px;
+            box-shadow: 0 0 12px rgba(16,185,129,0.4);
+            background: rgba(16,185,129,0.05);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .live-badge {
+            position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+            background: rgba(139,92,246,0.85);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.25);
+            color: white;
+            font-family:'Baloo 2',cursive;
+            font-size:.75rem;
+            font-weight:800;
+            padding: 6px 16px;
+            border-radius: 999px;
+            white-space: nowrap;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .live-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #4ade80;
+            animation: dotPulse 1.2s ease infinite;
+        }
+        @keyframes dotPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.2)} }
+
+       /* Buttons */
+.cam-btns { display:flex; gap:8px; padding:12px; background: white; }
+.cam-btns .btn {
+    flex:1; border:none; border-radius:40px; padding:8px 6px;
+    font-family:'Baloo 2',cursive; font-size:.75rem; font-weight:800;
+    cursor:pointer; transition:all .2s;
+    display:flex; align-items:center; justify-content:center; gap:5px;
+}
+.cam-btns .btn:hover:not(:disabled) { transform:translateY(-1px); filter:brightness(1.05); }
+.cam-btns .btn:disabled { opacity:.5; cursor:not-allowed; }
+.cam-btns .btn-start   { background:linear-gradient(135deg,#10b981,#34d399); color:white; }
+.cam-btns .btn-stop    { background:linear-gradient(135deg,#ef4444,#f97316); color:white; }
+.cam-btns .btn-capture { background:linear-gradient(135deg,#8b5cf6,#ec4899); color:white; }
+
+        /* Story panel */
+        .story-body { padding: 18px; display:flex; flex-direction:column; gap: 12px; background: white; border-radius: 0 0 26px 26px; }
+        .story-meta { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; }
+        .badge { font-family:'Baloo 2',cursive; font-size:.7rem; font-weight:800; padding: 4px 12px; border-radius: 999px; }
+        .badge-v { background:linear-gradient(135deg,#8b5cf6,#c084fc); color:white; }
+        .badge-r { background:#ede9fe; color:#5b21b6; }
+        .story-text { background:#faf5ff; border:1px solid #e9d5ff; border-radius:18px; padding:12px; font-size:.85rem; line-height:1.5; color:#374151; font-style:italic; min-height:80px; }
+        .target-box { background:linear-gradient(135deg,#fdf4ff,#ede9fe); border:1.5px dashed #c084fc; border-radius:18px; padding:12px; text-align:center; }
+        .target-lbl { font-family:'Baloo 2',cursive; font-size:.7rem; font-weight:800; color:#7c3aed; }
+        .target-emo { font-family:'Baloo 2',cursive; font-size:1.3rem; font-weight:900; color:#7c3aed; }
+        .detected-box { background:#f0fdf4; border:1px solid #86efac; border-radius:14px; padding:10px; display:flex; align-items:center; justify-content:space-between; }
+        .det-lbl { font-family:'Baloo 2',cursive; font-size:.65rem; font-weight:800; color:#15803d; }
+        .det-val { font-family:'Baloo 2',cursive; font-size:1rem; font-weight:800; color:#15803d; }
+        .status-txt { text-align:center; font-size:.75rem; color:#9ca3af; font-weight:700; }
+
+        /* Emotion row */
+        .emo-row { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; background:white; border:1px solid #e9d5ff; border-radius:24px; padding:15px; margin-bottom:18px; }
+        .emo-item { display:flex; flex-direction:column; align-items:center; gap:6px; cursor:pointer; transition:all .2s; }
+        .emo-item:hover { transform:translateY(-4px); }
+        .emo-circle { width:55px; height:55px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:26px; border:2px solid; background:white; transition:all .2s; box-shadow:0 2px 8px rgba(0,0,0,0.05); }
+        .emo-circle.joy      { border-color:#fbbf24; }
+        .emo-circle.sad      { border-color:#60a5fa; }
+        .emo-circle.anger    { border-color:#f87171; }
+        .emo-circle.surprise { border-color:#c084fc; }
+        .emo-name { font-family:'Baloo 2',cursive; font-size:.7rem; font-weight:800; color:#6b7280; }
+
+        /* Nav buttons */
+        .nav-row { display:flex; justify-content:center; gap:12px; margin-bottom: 20px; }
+        .nav-btn { border-radius:999px; padding:8px 28px; font-family:'Baloo 2',cursive; font-size:.85rem; font-weight:800; cursor:pointer; border:none; transition:all .2s; }
+        .nav-btn:hover:not(:disabled) { transform:translateY(-1px); }
+        .nav-btn:disabled { opacity:.4; cursor:not-allowed; }
+        .nav-outline { background:transparent; color:#7c3aed; border:1.5px solid #7c3aed !important; }
+        .nav-outline:hover:not(:disabled) { background:#7c3aed; color:white; }
+        .nav-primary { background:linear-gradient(135deg,#8b5cf6,#ec4899); color:white; }
+
+        /* New story button row */
+        .new-story-row {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .btn-new-story {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 30px;
+            font-family: 'Baloo 2', cursive;
+            font-size: 0.9rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(245,158,11,0.3);
+        }
+        .btn-new-story:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(245,158,11,0.4);
+        }
+
+        /* READY CARD (appears after 8 seconds) */
+        .ready-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        .ready-overlay.show {
+            visibility: visible;
+            opacity: 1;
+        }
+        .ready-card {
+            background: white;
+            border-radius: 60px;
+            padding: 35px 45px;
+            text-align: center;
+            max-width: 420px;
+            width: 90%;
+            border: 4px solid #c084fc;
+            box-shadow: 0 25px 50px rgba(139,92,246,0.3);
+            animation: cardPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes cardPop {
+            from { transform: scale(0.7); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .ready-emoji { font-size: 4rem; display: block; margin-bottom: 15px; }
+        .ready-title { font-family: 'Baloo 2', cursive; font-size: 2rem; font-weight: 900; color: #7c3aed; margin-bottom: 10px; }
+        .ready-text { font-size: 1rem; color: #6b7280; margin-bottom: 25px; }
+        .ready-btn {
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 40px;
+            font-family: 'Baloo 2', cursive;
+            font-size: 1.1rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .ready-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(139,92,246,0.4);
+        }
+
+        /* Countdown overlay (3 seconds before game) */
+        .game-countdown {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255,255,255,0.95);
+            border-radius: 80px;
+            padding: 30px 50px;
+            text-align: center;
+            z-index: 1001;
+            visibility: hidden;
+            opacity: 0;
+            transition: all 0.2s;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            border: 3px solid #c084fc;
+        }
+        .game-countdown.show {
+            visibility: visible;
+            opacity: 1;
+        }
+        .game-countdown-number {
+            font-family: 'Baloo 2', cursive;
+            font-size: 5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .game-countdown-text {
+            font-family: 'Baloo 2', cursive;
+            font-size: 1rem;
+            color: #7c3aed;
+        }
+
+        /* Success popup */
+        .popup-wrap { position:fixed; inset:0; background:rgba(0,0,0,0.4); backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center; z-index:1100; opacity:0; visibility:hidden; transition:all .3s; }
+        .popup-wrap.show { opacity:1; visibility:visible; }
+        .popup { background:white; border-radius:40px; padding:25px; max-width:350px; width:90%; text-align:center; transform:scale(.9); transition:transform .3s; border:1px solid #e9d5ff; }
+        .popup-wrap.show .popup { transform:scale(1); animation:popBounce 0.3s ease-out; }
+        @keyframes popBounce { 0% { transform: scale(0.8); opacity: 0; } 50% { transform: scale(1.02); } 100% { transform: scale(1); opacity: 1; } }
+        .popup-icon { font-size:50px; margin-bottom:10px; }
+        .popup-title { font-family:'Baloo 2',cursive; font-size:1.6rem; font-weight:900; color:#7c3aed; }
+        .popup-stars { font-size:1.2rem; letter-spacing:4px; margin:8px 0; color:#fbbf24; }
+        .popup-desc { font-size:.85rem; color:#4b5563; background:#faf5ff; border-radius:18px; padding:12px; margin:12px 0; }
+        .popup-btn { background:linear-gradient(135deg,#8b5cf6,#ec4899); color:white; border:none; border-radius:999px; padding:10px 35px; font-family:'Baloo 2',cursive; font-size:.9rem; font-weight:800; cursor:pointer; }
+
+        /* Wrong toast */
+        .wrong-toast { position:fixed; bottom:25px; left:50%; transform:translateX(-50%); background:#fef2f2; border:1px solid #fca5a5; color:#dc2626; padding:8px 20px; border-radius:50px; font-family:'Baloo 2',cursive; font-size:.8rem; font-weight:800; z-index:2000; animation:toastFade 2.5s ease forwards; }
+        @keyframes toastFade { 0%{opacity:0;transform:translateX(-50%) translateY(10px)} 15%{opacity:1;transform:translateX(-50%) translateY(0)} 80%{opacity:1} 100%{opacity:0;transform:translateX(-50%) translateY(-10px)} }
+
+        @media (max-width: 768px) {
+            .main { padding: 20px 16px 60px; }
+            .mascot { display: none; }
+            .stats-grid { gap: 10px; }
+            .stat-value { font-size: 1.3rem; }
+            .timer-display-small { font-size: 1.3rem; }
+            .ready-card { padding: 25px 30px; }
+            .ready-title { font-size: 1.5rem; }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+
+<!-- Shooting Stars Background -->
+<div class="shooting-stars-bg" id="shootingStarsBg"></div>
+
+<!-- Floating elements -->
+<div class="float-cosmos">
+    <span class="fc" style="top:5%;left:4%;--d:8s">🌟</span>
+    <span class="fc" style="top:12%;right:6%;--d:6s">✨</span>
+    <span class="fc" style="bottom:12%;left:8%;--d:10s">⭐</span>
+    <span class="fc" style="bottom:22%;right:9%;--d:7s">🌙</span>
+    <span class="fc" style="top:45%;left:2%;--d:11s">💫</span>
+    <span class="fc" style="bottom:40%;right:3%;--d:6s"></span>
+</div>
+
+<!-- Side mascots -->
+<div class="mascot mascot-l">🐻‍❄️</div>
+<div class="mascot mascot-r">🌝</div>
+
+<!-- READY CARD (appears after 8 seconds) -->
+<div id="readyOverlay" class="ready-overlay">
+    <div class="ready-card">
+        <span class="ready-emoji">🪞✨</span>
+        <h2 class="ready-title">Prêt à jouer ?</h2>
+        <p class="ready-text">Prépare-toi à montrer tes plus belles expressions !</p>
+        <button id="readyBtn" class="ready-btn">🎮 OUI, JE SUIS PRÊT !</button>
+    </div>
+</div>
+
+<!-- Game Countdown (3 seconds before game starts) -->
+<div id="gameCountdown" class="game-countdown">
+    <div id="gameCountdownNumber" class="game-countdown-number">3</div>
+    <div class="game-countdown-text">Prépare-toi...</div>
+</div>
+
+<!-- Hero Banner -->
+<div class="hero">
+ <div class="hero-stars">
+        <div class="big-star">⭐</div>
+        <div class="big-star">✨</div>
+        <div class="big-star">🌟</div>
+        <div class="big-star">⭐</div>
+        <div class="big-star">🌕</div>
+        <div class="big-star">🌟</div>
+        <div class="big-star">⭐</div>
+        <div class="big-star">🌕</div>
+        <div class="big-star">🌟</div>
+        <div class="big-star">⭐</div>
+    </div>
+ 
+    <div class="hero-inner">
+        <div class="container">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-7 col-md-8">
+                    <div class="bc">
+                        <a href="{{ path('app_home') }}">🏠 Accueil</a>
+                        <span class="sep">›</span>
+                        <a href="{{ path('app_event_show', {'id': event.idEvent}) }}">📅 {{ event.titre }}</a>
+                        <span class="sep">›</span>
+                        <span class="cur">✨ The Mirror ✨</span>
+                    </div>
+                    <h1 class="hero-title">The Mirror 🪞</h1>
+                    <p class="hero-sub">Explore ton monde intérieur ! Chaque émotion est une étoile qui brille en toi...</p>
+                    <div class="hero-pills">
+                        <div class="hpill">🎭 <span class="n">7</span> émotions</div>
+                        <div class="hpill">📖 <span class="n">1</span> histoire</div>
+                        <div class="hpill">⭐ <span class="n" id="heroScore">0</span> points</div>
+                    </div>
+                </div>
+                <div class="col-lg-5 col-md-4 text-center d-none d-md-block">
+                    <div class="hero-mascot-wrap">
+    <div class="hero-mascot-bubble">
+        <img src="{{ asset('uploads/images/hihi.png') }}" alt="Ours Magique" class="bear-image" onerror="this.src='https://via.placeholder.com/150?text=🐻'; this.onerror=null;">
+        <span class="hero-mascot-label">✨ Prêt pour les aventures des émotions ? ✨</span>
+    </div>
+</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="hero-wave">
+    <svg viewBox="0 0 1440 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+        <path d="M0,60 
+                 C80,90 160,20 240,50 
+                 C320,80 400,30 480,55 
+                 C560,80 640,20 720,45 
+                 C800,70 880,25 960,50 
+                 C1040,75 1120,20 1200,45 
+                 C1280,70 1360,90 1440,60 
+                 L1440,120 L0,120 Z" 
+              fill="#faf5ff"/>
+    </svg>
+</div>
+</div>
+
+<!-- Main content -->
+<div class="main">
+
+    <!-- 4 STATS BOXES (all same size, only timer glows) -->
+    <div class="stats-grid" id="statsGrid">
+        <div class="stat-card" id="progressCard">
+            <span class="stat-icon">📊</span>
+            <div class="stat-label">Progression</div>
+            <div class="progress-bar-small">
+                <div id="progressFillSmall" class="progress-fill-small"></div>
+            </div>
+            <div class="stat-value" id="progressPercent">0%</div>
+            <div class="stat-sub" id="stepText">Défi 1/{{ total_etapes }}</div>
+        </div>
+
+        <div class="stat-card" id="scoreCard">
+            <span class="stat-icon">⭐</span>
+            <div class="stat-label">Points</div>
+            <div class="stat-value" id="statScore">0</div>
+            <div class="stat-sub">étoiles gagnées</div>
+        </div>
+
+        <!-- 🔥 ONLY THIS CARD HAS GLOW 🔥 -->
+        <div class="stat-card timer-glow" id="timerCard">
+            <span class="stat-icon">⏱️</span>
+            <div class="stat-label">Temps restant</div>
+            <div class="timer-display-small" id="statTimer">05:00</div>
+            <div class="stat-sub">minutes</div>
+        </div>
+
+        <div class="stat-card" id="emotionCard">
+            <span class="stat-icon">🎭</span>
+            <div class="stat-label">Émotions</div>
+            <div class="stat-value" id="emotionsDone">0</div>
+            <div class="stat-sub">sur {{ total_etapes }}</div>
+        </div>
+    </div>
+
+    <!-- Grid -->
+    <div class="grid">
+
+        <!-- Camera panel -->
+        <div class="panel">
+            <div class="panel-head ph-cam">
+                <span class="ph-icon">🪄</span>
+                <span class="ph-title">Miroir Magique</span>
+            </div>
+            <div class="cam-vp">
+                <video id="cameraView" autoplay playsinline></video>
+                <canvas id="canvas"></canvas>
+                <div id="liveBadge" class="live-badge">
+                    <span class="live-dot"></span>😐 En attente...
+                </div>
+            </div>
+            <div class="cam-btns">
+                <button id="startBtn" class="btn btn-start">▶ Démarrer</button>
+                <button id="stopBtn" class="btn btn-stop" disabled>⏹ Arrêter</button>
+                <button id="captureBtn" class="btn btn-capture" disabled>📸 Capturer</button>
+            </div>
+        </div>
+
+        <!-- Story panel -->
+        <div class="panel">
+            <div class="panel-head ph-story">
+                <span class="ph-icon">📖</span>
+                <span class="ph-title">L'aventure magique</span>
+            </div>
+            <div class="story-body">
+                <div class="story-meta">
+                    <span id="storyNum" class="badge badge-v">📖 Chapitre 1/1</span>
+                    <span id="stepInd" class="badge badge-r">🎯 Défi 1/{{ total_etapes }}</span>
+                </div>
+                <div id="storyText" class="story-text">{{ etapes[0].texte }}</div>
+                <div class="target-box">
+                    <span class="target-lbl">🎯 Émotion à capturer :</span>
+                    <div id="targetEmotion" class="target-emo">{{ etapes[0].emotion }}</div>
+                </div>
+                <div class="detected-box">
+                    <span class="det-lbl">🔍 Le miroir voit...</span>
+                    <span id="detectedLabel" class="det-val">En attente...</span>
+                </div>
+                <p id="statusLabel" class="status-txt">✨ Prêt — révèle ton émotion ! ✨</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Emotion icons -->
+    <div class="emo-row">
+    <div class="emo-item"><div class="emo-circle joy">😊</div><span class="emo-name">Joie</span></div>
+    <div class="emo-item"><div class="emo-circle sad">😢</div><span class="emo-name">Tristesse</span></div>
+    <div class="emo-item"><div class="emo-circle anger">😠</div><span class="emo-name">Colère</span></div>
+    <div class="emo-item"><div class="emo-circle surprise">😲</div><span class="emo-name">Surprise</span></div>
+    <div class="emo-item"><div class="emo-circle fear">😨</div><span class="emo-name">Peur</span></div>
+    <div class="emo-item"><div class="emo-circle disgust">🤢</div><span class="emo-name">Dégoût</span></div>
+</div>
+
+    <!-- Nav buttons -->
+    <div class="nav-row">
+        <button id="prevStepBtn" class="nav-btn nav-outline" disabled>← Précédent</button>
+        <button id="nextStepBtn" class="nav-btn nav-primary">Suivant →</button>
+    </div>
+
+    <!-- New Story Button (appears after game completion) -->
+    <div class="new-story-row" id="newStoryRow" style="display: none;">
+        <button id="newStoryBtn" class="btn-new-story">✨ Nouvelle histoire magique ✨</button>
+    </div>
+
+</div>
+
+<!-- Success popup -->
+<div id="emotionPopup" class="popup-wrap">
+    <div class="popup">
+        <span id="popupIcon" class="popup-icon">😊</span>
+        <div id="popupTitle" class="popup-title">La joie !</div>
+        <div class="popup-stars">⭐⭐⭐</div>
+        <p id="popupDescription" class="popup-desc"></p>
+        <button id="closePopupBtn" class="popup-btn">SUPER ! 🎉</button>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1"></script>
+<script>
+// ========== SHOOTING STARS BACKGROUND ==========
+function createShootingStarsBg() {
+    const container = document.getElementById('shootingStarsBg');
+    for (let i = 0; i < 10; i++) {
+        const star = document.createElement('div');
+        star.className = 'shooting-star-bg';
+        star.style.top = Math.random() * 80 + 10 + '%';
+        star.style.left = Math.random() * 70 + 20 + '%';
+        star.style.animationDelay = Math.random() * 10 + 's';
+        star.style.animationDuration = Math.random() * 3 + 3 + 's';
+        container.appendChild(star);
+    }
+}
+createShootingStarsBg();
+
+// ========== SOUND EFFECTS ==========
+function playBeep(frequency, duration, volume = 0.25) {
+    try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        oscillator.frequency.value = frequency;
+        gainNode.gain.value = volume;
+        oscillator.start();
+        gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + duration);
+        oscillator.stop(audioContext.currentTime + duration);
+        setTimeout(() => audioContext.close(), duration * 1000);
+    } catch(e) { console.log('Audio not supported'); }
+}
+
+function playCountdownSound(number) {
+    switch(number) {
+        case 3: playBeep(440, 0.25, 0.25); break;
+        case 2: playBeep(523.25, 0.25, 0.3); break;
+        case 1: playBeep(659.25, 0.25, 0.35); break;
+        case 'go': playBeep(880, 0.5, 0.4); setTimeout(() => playBeep(1046.5, 0.3, 0.35), 150); break;
+    }
+}
+
+// ========== GAME STATE ==========
+let histoireActuelle = {{ histoire_actuelle }};
+let etapeActuelle    = {{ etape_actuelle }};
+let score            = {{ score }};
+let totalEtapes      = {{ total_etapes }};
+let totalHistoires   = {{ total_histoires }};
+let etapes           = {{ etapes|json_encode|raw }};
+
+let gameTimerInterval = null;
+let gameTimeSeconds = 300;
+let isGameActive = false;
+let isGameStarted = false;
+
+let stream = null;
+let isRunning = false;
+let detectionInterval = null;
+
+// DOM elements
+const video = document.getElementById('cameraView');
+const canvas = document.getElementById('canvas');
+const startBtn = document.getElementById('startBtn');
+const stopBtn = document.getElementById('stopBtn');
+const captureBtn = document.getElementById('captureBtn');
+const prevStepBtn = document.getElementById('prevStepBtn');
+const nextStepBtn = document.getElementById('nextStepBtn');
+const statusLabel = document.getElementById('statusLabel');
+const detectedLabel = document.getElementById('detectedLabel');
+const liveBadge = document.getElementById('liveBadge');
+const storyText = document.getElementById('storyText');
+const targetEmoDiv = document.getElementById('targetEmotion');
+const stepInd = document.getElementById('stepInd');
+const storyNum = document.getElementById('storyNum');
+const heroScore = document.getElementById('heroScore');
+const emotionPopup = document.getElementById('emotionPopup');
+const popupIcon = document.getElementById('popupIcon');
+const popupTitle = document.getElementById('popupTitle');
+const popupDesc = document.getElementById('popupDescription');
+const closePopupBtn = document.getElementById('closePopupBtn');
+
+// Stats elements
+const progressFillSmall = document.getElementById('progressFillSmall');
+const progressPercent = document.getElementById('progressPercent');
+const stepText = document.getElementById('stepText');
+const statScore = document.getElementById('statScore');
+const statTimer = document.getElementById('statTimer');
+const emotionsDone = document.getElementById('emotionsDone');
+
+// Ready card elements
+const readyOverlay = document.getElementById('readyOverlay');
+const readyBtn = document.getElementById('readyBtn');
+
+// Game countdown elements
+const gameCountdown = document.getElementById('gameCountdown');
+const gameCountdownNumber = document.getElementById('gameCountdownNumber');
+
+// New story elements
+const newStoryRow = document.getElementById('newStoryRow');
+const newStoryBtn = document.getElementById('newStoryBtn');
+
+const emotionIcons = { 
+    'Joie':'😊',
+    'Tristesse':'😢', 
+    'Colère':'😠',
+    'Surprise':'😲',
+    'Peur':'😨',
+    'Dégout':'🤢'
+};
+
+// ========== UI FUNCTIONS ==========
+function updateUI() {
+    if (etapeActuelle < etapes.length) {
+        storyText.innerHTML = etapes[etapeActuelle].texte;
+        targetEmoDiv.innerHTML = etapes[etapeActuelle].emotion;
+        stepInd.innerHTML = `🎯 Défi ${etapeActuelle+1}/${etapes.length}`;
+        prevStepBtn.disabled = (etapeActuelle === 0);
+        nextStepBtn.disabled = false;
+    }
+    const max = totalEtapes;
+    const progressPercentValue = Math.round((score / max) * 100);
+    progressFillSmall.style.width = `${progressPercentValue}%`;
+    progressPercent.innerHTML = `${progressPercentValue}%`;
+    stepText.innerHTML = `Défi ${etapeActuelle+1}/${etapes.length}`;
+    statScore.innerHTML = score;
+    emotionsDone.innerHTML = score;
+    heroScore.innerHTML = score;
+}
+
+function confettiBlast() {
+    if (typeof confetti === 'undefined') return;
+    confetti({ particleCount:120, spread:60, origin:{y:.6}, colors:['#8b5cf6','#c084fc','#fbbf24','#ec4899'] });
+    setTimeout(() => {
+        confetti({ particleCount:40, spread:90, origin:{y:.5,x:.2}, shapes:['star'] });
+        confetti({ particleCount:40, spread:90, origin:{y:.5,x:.8}, shapes:['star'] });
+    }, 150);
+}
+
+function toast(msg) {
+    const el = document.createElement('div');
+    el.className = 'wrong-toast';
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 2300);
+}
+
+function updateLive(emotion, faceRect) {
+    detectedLabel.innerHTML = emotion;
+    liveBadge.innerHTML = `<span class="live-dot"></span>${emotion}`;
+    if (faceRect && faceRect.width > 0) drawFaceBox(faceRect);
+    else clearFaceBox();
+}
+
+function drawFaceBox(rect) {
+    clearFaceBox();
+    const vr = video.getBoundingClientRect();
+    const wrap = document.querySelector('.cam-vp');
+    if (!wrap || !vr.width) return;
+    const sx = vr.width / video.videoWidth;
+    const sy = vr.height / video.videoHeight;
+    const el = document.createElement('div');
+    el.className = 'face-box';
+    el.style.cssText = `left:${rect.x*sx}px;top:${rect.y*sy}px;width:${rect.width*sx}px;height:${rect.height*sy}px;`;
+    wrap.appendChild(el);
+}
+
+function clearFaceBox() {
+    document.querySelectorAll('.face-box').forEach(e => e.remove());
+}
+
+function showPopup(emotion, explication) {
+    popupIcon.innerHTML = emotionIcons[emotion] || '😊';
+    popupTitle.innerHTML = emotion + ' !';
+    popupDesc.innerHTML = explication;
+    emotionPopup.classList.add('show');
+    confettiBlast();
+}
+
+function closePopup() {
+    emotionPopup.classList.remove('show');
+}
+
+function startGameTimer() {
+    if (gameTimerInterval) clearInterval(gameTimerInterval);
+    gameTimeSeconds = 300;
+    updateTimerDisplay();
+    
+    gameTimerInterval = setInterval(() => {
+        if (!isGameActive) return;
+        if (gameTimeSeconds <= 0) {
+            clearInterval(gameTimerInterval);
+            gameTimerInterval = null;
+            isGameActive = false;
+            isGameStarted = false;
+            statusLabel.innerHTML = '⏰ Temps écoulé ! Bravo ! ⏰';
+            toast('🎉 Félicitations ! Tu as terminé ! 🎉');
+            captureBtn.disabled = true;
+        } else {
+            gameTimeSeconds--;
+            updateTimerDisplay();
+        }
+    }, 1000);
+}
+
+function updateTimerDisplay() {
+    const minutes = Math.floor(gameTimeSeconds / 60);
+    const seconds = gameTimeSeconds % 60;
+    statTimer.innerHTML = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    
+    const timerCard = document.getElementById('timerCard');
+    if (gameTimeSeconds <= 60) {
+        timerCard.style.background = 'linear-gradient(135deg, #fee2e2, #fecaca)';
+    } else {
+        timerCard.style.background = 'white';
+    }
+}
+
+// ========== COMPLETION SUMMARY ==========
+// ========== COMPLETION SUMMARY (smaller + new emotions) ==========
+function showCompletionSummary() {
+    const finalScore = score;
+    const totalPossible = totalEtapes;
+    const percentage = Math.round((finalScore / totalPossible) * 100);
+    const emotionsLearned = [...new Set(etapes.map(e => e.emotion))];
+    
+    // Message de félicitations personnalisé
+    let growthMessage = "";
+    if (percentage === 100) {
+        growthMessage = "🎉 Tu es devenu un véritable champion des émotions ! 🎉";
+    } else if (percentage >= 70) {
+        growthMessage = "🌟 Tu as beaucoup grandi ! Continue comme ça ! 🌟";
+    } else {
+        growthMessage = "💪 Tu progresses chaque jour ! Tu deviens plus grand(e) ! 💪";
+    }
+    
+    const summaryHTML = `
+        <div id="completionModal" class="completion-modal">
+            <div class="completion-content">
+                <div class="completion-emoji">🏆✨🪞</div>
+                <h2 class="completion-title">Félicitations !</h2>
+                <p class="completion-subtitle">Tu as terminé ton aventure magique !</p>
+                
+                <div class="completion-stats">
+                    <div class="completion-stat">
+                        <span class="stat-emoji">⭐</span>
+                        <span class="stat-value">${finalScore}</span>
+                        <span class="stat-label">étoiles</span>
+                    </div>
+                    <div class="completion-stat">
+                        <span class="stat-emoji">📊</span>
+                        <span class="stat-value">${percentage}%</span>
+                        <span class="stat-label">progression</span>
+                    </div>
+                    <div class="completion-stat">
+                        <span class="stat-emoji">🎭</span>
+                        <span class="stat-value">${emotionsLearned.length}</span>
+                        <span class="stat-label">émotions</span>
+                    </div>
+                </div>
+                
+                <div class="completion-emotions">
+                    <h3>🎨 Tu as appris ces émotions :</h3>
+                    <div class="emotions-summary">
+                        ${emotionsLearned.map(e => {
+                            let emoji = '😊';
+                            if (e === 'Joie') emoji = '😊';
+                            else if (e === 'Tristesse') emoji = '😢';
+                            else if (e === 'Colère') emoji = '😠';
+                            else if (e === 'Surprise') emoji = '😲';
+                            else if (e === 'Peur') emoji = '😨';
+                            else if (e === 'Dégout') emoji = '🤢';
+                            else emoji = '😊';
+                            return `<div class="emotion-badge">${emoji} ${e}</div>`;
+                        }).join('')}
+                    </div>
+                </div>
+                
+                <div class="completion-message">
+                    <p>${growthMessage}</p>
+                    <p>✨ Le miroir magique est fier de toi ! ✨</p>
+                </div>
+                
+                <button id="closeCompletionBtn" class="completion-close-btn">✨ Continuer ✨</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', summaryHTML);
+    
+    // Styles plus compacts
+    const modalStyle = document.createElement('style');
+    modalStyle.textContent = `
+        .completion-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(6px);
+            z-index: 2000; display: flex; align-items: center; justify-content: center;
+            animation: fadeInModal 0.3s ease;
+        }
+        @keyframes fadeInModal { from { opacity: 0; } to { opacity: 1; } }
+        .completion-content {
+            background: linear-gradient(135deg, #fff, #faf5ff);
+            border-radius: 40px; padding: 20px 25px;
+            max-width: 420px; width: 90%; text-align: center;
+            border: 3px solid #c084fc;
+            box-shadow: 0 20px 40px rgba(139,92,246,0.25);
+            animation: slideUpModal 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes slideUpModal { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .completion-emoji { font-size: 2.8rem; margin-bottom: 5px; }
+        .completion-title { font-family: 'Baloo 2', cursive; font-size: 1.6rem; font-weight: 900; color: #7c3aed; margin-bottom: 2px; }
+        .completion-subtitle { font-size: 0.75rem; color: #6b7280; margin-bottom: 15px; }
+        .completion-stats { display: flex; justify-content: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+        .completion-stat { background: linear-gradient(135deg, #f3e8ff, #ede9fe); border-radius: 18px; padding: 8px 12px; min-width: 70px; text-align: center; }
+        .stat-emoji { font-size: 1.2rem; display: block; margin-bottom: 2px; }
+        .stat-value { font-family: 'Baloo 2', cursive; font-size: 1.3rem; font-weight: 900; color: #7c3aed; display: block; }
+        .stat-label { font-size: 0.6rem; color: #a78bfa; font-weight: 800; }
+        .completion-emotions { background: #faf5ff; border-radius: 18px; padding: 10px 12px; margin-bottom: 15px; }
+        .completion-emotions h3 { font-family: 'Baloo 2', cursive; font-size: 0.75rem; color: #7c3aed; margin-bottom: 8px; }
+        .emotions-summary { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+        .emotion-badge { background: white; border: 2px solid #c084fc; border-radius: 30px; padding: 4px 10px; font-family: 'Baloo 2', cursive; font-weight: 800; color: #7c3aed; font-size: 0.7rem; }
+        .completion-message { background: linear-gradient(135deg, #fdf4ff, #fae8ff); border-radius: 16px; padding: 10px; margin-bottom: 15px; }
+        .completion-message p { font-size: 0.7rem; color: #4b5563; margin: 3px 0; }
+        .completion-close-btn { background: linear-gradient(135deg, #8b5cf6, #ec4899); color: white; border: none; border-radius: 40px; padding: 8px 25px; font-family: 'Baloo 2', cursive; font-size: 0.85rem; font-weight: 800; cursor: pointer; width: 100%; }
+        .completion-close-btn:hover { transform: scale(1.02); }
+    `;
+    document.head.appendChild(modalStyle);
+    
+    document.getElementById('closeCompletionBtn').addEventListener('click', () => {
+        const modal = document.getElementById('completionModal');
+        modal.remove();
+    });
+    
+    confettiBlast();
+    setTimeout(() => confettiBlast(), 400);
+    setTimeout(() => confettiBlast(), 800);
+}
+// ========== NEW STORY ==========
+async function loadNewStory() {
+    toast('📖 Génération d\'une nouvelle histoire magique...');
+    try {
+        const response = await fetch('/api/emotion/new-story', { method: 'POST' });
+        const data = await response.json();
+        
+        if (data.success) {
+            etapes = data.etapes;
+            totalEtapes = data.total_etapes;
+            etapeActuelle = 0;
+            score = 0;
+            
+            const step = data.premiere_etape;
+            storyText.innerHTML = step.texte;
+            targetEmoDiv.innerHTML = step.emotion;
+            stepInd.innerHTML = `🎯 Défi 1/${totalEtapes}`;
+            statScore.innerHTML = '0';
+            emotionsDone.innerHTML = '0';
+            heroScore.innerHTML = '0';
+            progressFillSmall.style.width = '0%';
+            progressPercent.innerHTML = '0%';
+            stepText.innerHTML = `Défi 1/${totalEtapes}`;
+            
+            isGameActive = true;
+            captureBtn.disabled = false;
+            nextStepBtn.disabled = false;
+            newStoryRow.style.display = 'none';
+            
+            statusLabel.innerHTML = '✨ Nouvelle aventure ! Capture les émotions ! ✨';
+            toast('🌟 Nouvelle histoire générée ! Bonne chance ! 🌟');
+        }
+    } catch (error) {
+        toast('❌ Erreur lors de la génération de la nouvelle histoire');
+    }
+}
+
+// ========== CAPTURE ==========
+async function captureAndAnalyze() {
+    if (!isRunning) { toast('Active d\'abord la caméra !'); return; }
+    if (!isGameActive) { toast('Le jeu n\'est pas encore commencé !'); return; }
+    if (etapeActuelle >= etapes.length) { toast('🎉 Tu as terminé l\'aventure !'); return; }
+    
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+    const base64 = canvas.toDataURL('image/jpeg').split(',')[1];
+    statusLabel.innerHTML = '🔍 Analyse...';
+    
+    try {
+        const res = await fetch('/api/emotion/capture', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: base64 })
+        });
+        const data = await res.json();
+        
+        if (data.success === false) { statusLabel.innerHTML = data.message; return; }
+        
+        if (data.correct) {
+            score = data.score;
+            updateUI();
+            showPopup(data.emotion_attendue, data.explication);
+            statusLabel.innerHTML = '🎉 Magique ! Tu as réussi ! 🎉';
+            
+            setTimeout(async () => {
+                const nd = await (await fetch('/api/emotion/next', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nouvelle_histoire: false })
+                })).json();
+                
+                if (nd.game_finished) {
+                    statusLabel.innerHTML = '🏆 BRAVO ! Tu as terminé l\'aventure !';
+                    captureBtn.disabled = true;
+                    nextStepBtn.disabled = true;
+                    isGameActive = false;
+                    if (gameTimerInterval) clearInterval(gameTimerInterval);
+                    showCompletionSummary();
+                    newStoryRow.style.display = 'flex';
+                } else if (nd.histoire_terminee) {
+                    const sd = await (await fetch('/api/emotion/next', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ nouvelle_histoire: true })
+                    })).json();
+                    if (sd.game_finished) {
+                        statusLabel.innerHTML = '🏆 Félicitations ! Aventure terminée !';
+                        captureBtn.disabled = true;
+                        isGameActive = false;
+                        if (gameTimerInterval) clearInterval(gameTimerInterval);
+                        showCompletionSummary();
+                        newStoryRow.style.display = 'flex';
+                    } else if (sd.success) {
+                        histoireActuelle = sd.histoire_actuelle;
+                        etapeActuelle = sd.etape_actuelle;
+                        etapes = sd.etapes;
+                        updateUI();
+                        statusLabel.innerHTML = `📖 Nouveau chapitre !`;
+                    }
+                } else if (nd.success) {
+                    etapeActuelle = nd.etape_actuelle;
+                    storyText.innerHTML = nd.texte;
+                    targetEmoDiv.innerHTML = nd.emotion_attendue;
+                    stepInd.innerHTML = `🎯 Défi ${etapeActuelle+1}/${etapes.length}`;
+                    prevStepBtn.disabled = false;
+                    statusLabel.innerHTML = '✅ Prêt pour le prochain défi !';
+                }
+            }, 1800);
+        } else if (data.already_validated) {
+            statusLabel.innerHTML = data.message;
+        } else {
+            toast("Ce n'est pas la bonne émotion ! Essaie encore !");
+            statusLabel.innerHTML = data.message;
+        }
+    } catch (err) {
+        statusLabel.innerHTML = '❌ Problème technique... Réessaie !';
+    }
+}
+
+// ========== CAMERA ==========
+async function startCamera() {
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+        isRunning = true;
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
+        captureBtn.disabled = false;
+        statusLabel.innerHTML = '✅ Caméra activée ! 🌟';
+        await video.play();
+        startRealTimeDetection();
+        
+        // Show ready card IMMEDIATELY
+        if (isRunning && !readyOverlay.classList.contains('show')) {
+            readyOverlay.classList.add('show');
+        }
+        
+    } catch {
+        statusLabel.innerHTML = '❌ Impossible d\'accéder à la caméra';
+    }
+}
+
+function stopCamera() {
+    if (detectionInterval) { clearInterval(detectionInterval); detectionInterval = null; }
+    if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+    video.srcObject = null;
+    isRunning = false;
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+    captureBtn.disabled = true;
+    statusLabel.innerHTML = '✅ Caméra arrêtée';
+    clearFaceBox();
+    detectedLabel.innerHTML = 'En attente...';
+    liveBadge.innerHTML = '<span class="live-dot"></span>😐 En attente...';
+}
+
+async function startRealTimeDetection() {
+    if (detectionInterval) clearInterval(detectionInterval);
+    detectionInterval = setInterval(async () => {
+        if (!isRunning || !video.videoWidth) return;
+        try {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            const base64 = canvas.toDataURL('image/jpeg').split(',')[1];
+            const res = await fetch('/api/emotion/detect-live', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: base64 })
+            });
+            const data = await res.json();
+            if (data.success && data.face_detected) {
+                updateLive(data.emotion, data.face_rect);
+            } else {
+                clearFaceBox();
+                detectedLabel.innerHTML = '👤 Aucun visage';
+                liveBadge.innerHTML = '<span class="live-dot"></span>👤 Aucun visage';
+            }
+        } catch(e) { console.error(e); }
+    }, 500);
+}
+
+// ========== READY CARD & COUNTDOWN ==========
+readyBtn.addEventListener('click', () => {
+    readyOverlay.classList.remove('show');
+    startGameCountdown();
+});
+
+function startGameCountdown() {
+    let count = 3;
+    gameCountdown.classList.add('show');
+    gameCountdownNumber.textContent = count;
+    playCountdownSound(3);
+    
+    const countdownInterval = setInterval(() => {
+        count--;
+        if (count >= 1) {
+            gameCountdownNumber.textContent = count;
+            playCountdownSound(count);
+        } else if (count === 0) {
+            gameCountdownNumber.textContent = 'GO!';
+            playCountdownSound('go');
+        } else {
+            clearInterval(countdownInterval);
+            gameCountdown.classList.remove('show');
+            isGameActive = true;
+            isGameStarted = true;
+            startGameTimer();
+            statusLabel.innerHTML = '🎮 C\'EST PARTI ! Capture les émotions ! 🎮';
+            toast('🎮 Le jeu commence ! Amuse-toi bien ! 🎮');
+        }
+    }, 1000);
+}
+
+// ========== NAVIGATION ==========
+async function previousStep() {
+    if (!isGameActive && isGameStarted) { toast('Le jeu n\'est pas actif !'); return; }
+    if (etapeActuelle <= 0) return;
+    const d = await (await fetch('/api/emotion/previous', { method: 'POST', headers: { 'Content-Type': 'application/json' } })).json();
+    if (d.success) {
+        etapeActuelle = d.etape_actuelle;
+        storyText.innerHTML = d.texte;
+        targetEmoDiv.innerHTML = d.emotion_attendue;
+        stepInd.innerHTML = `🎯 Défi ${etapeActuelle+1}/${etapes.length}`;
+        prevStepBtn.disabled = (etapeActuelle === 0);
+        statusLabel.innerHTML = '✅ Retour à l\'étape précédente';
+        updateUI();
+    }
+}
+
+async function nextStep() {
+    if (!isGameActive && isGameStarted) { toast('Le jeu n\'est pas actif !'); return; }
+    if (etapeActuelle >= etapes.length - 1) return;
+    const d = await (await fetch('/api/emotion/next', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nouvelle_histoire: false })
+    })).json();
+    if (d.success && !d.histoire_terminee) {
+        etapeActuelle = d.etape_actuelle;
+        storyText.innerHTML = d.texte;
+        targetEmoDiv.innerHTML = d.emotion_attendue;
+        stepInd.innerHTML = `🎯 Défi ${etapeActuelle+1}/${etapes.length}`;
+        prevStepBtn.disabled = false;
+        if (etapeActuelle === etapes.length - 1) nextStepBtn.disabled = true;
+        statusLabel.innerHTML = '✅ Étape suivante';
+        updateUI();
+    } else if (d.histoire_terminee) {
+        statusLabel.innerHTML = '📖 Fin du chapitre ! Capture l\'émotion pour continuer';
+    }
+}
+
+// ========== EVENT LISTENERS ==========
+startBtn.addEventListener('click', startCamera);
+stopBtn.addEventListener('click', stopCamera);
+captureBtn.addEventListener('click', captureAndAnalyze);
+prevStepBtn.addEventListener('click', previousStep);
+nextStepBtn.addEventListener('click', nextStep);
+closePopupBtn.addEventListener('click', closePopup);
+if (newStoryBtn) newStoryBtn.addEventListener('click', loadNewStory);
+
+updateUI();
+
+window.addEventListener('beforeunload', () => {
+    if (stream) stream.getTracks().forEach(t => t.stop());
+    if (detectionInterval) clearInterval(detectionInterval);
+    if (gameTimerInterval) clearInterval(gameTimerInterval);
+});
+</script>
+{% endblock %}

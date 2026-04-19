@@ -4,12 +4,18 @@ namespace App\Controller\event;
 
 use App\Entity\Sponsor;
 use App\Entity\Event;
+ use League\Csv\Writer;
+ use Nucleos\DompdfBundle\Factory\DompdfFactoryInterface;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use App\Repository\SponsorRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
+
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use App\Form\SponsorType;
+use Dompdf\Options;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
@@ -40,7 +46,7 @@ class SponsorController extends AbstractController
         
         $averageAmount = $totalSponsors > 0 ? round($totalBudget / $totalSponsors / 1000, 1) : 0;
         
-        return $this->render('admin/pages/events/sponsors.html.twig', [
+        return $this->render('admin/pages/event/sponsors.html.twig', [
             'sponsors' => $sponsors,
             'events' => $events,
             'totalSponsors' => $totalSponsors,
@@ -50,6 +56,47 @@ class SponsorController extends AbstractController
             'typeStats' => $typeStats,
         ]);
     }
+   
+
+#[Route('/admin/sponsors/export/csv', name: 'admin_sponsors_export_csv', methods: ['GET'])]
+public function exportSponsorsCsv(
+    Request $request, 
+    SponsorRepository $sponsorRepository
+): Response {
+    $searchTerm = $request->query->get('search', '');
+    $type = $request->query->get('type', 'tous');
+    $sortBy = $request->query->get('sortBy', 'montant_desc');
+    
+    $sponsors = $sponsorRepository->findByFiltersForExport($searchTerm, $type, $sortBy);
+    
+    $csv = Writer::createFromString('');
+    $csv->setDelimiter(';');
+    $csv->setEnclosure('"');
+    
+    // ✅ Utiliser les bons caractères UTF-8
+    $csv->insertOne(['Nom', 'Type', 'Email', 'Téléphone', 'Montant (TND)', 'Description']);
+    
+    foreach ($sponsors as $sponsor) {
+        $csv->insertOne([
+            $sponsor->getNom(),
+            $sponsor->getTypeSponsor() ?? 'Non défini',
+            $sponsor->getEmail() ?? '-',
+            $sponsor->getTelephone() ?? '-',
+            number_format($sponsor->getMontant(), 2, ',', ' '),
+            $sponsor->getDescription()
+        ]);
+    }
+    
+    
+    $bom = "\xEF\xBB\xBF";
+    $content = $bom . $csv->toString();
+    
+    $response = new Response($content);
+    $response->headers->set('Content-Type', 'text/csv; charset=utf-8');
+    $response->headers->set('Content-Disposition', 'attachment; filename="sponsors_' . date('Y-m-d_H-i-s') . '.csv"');
+    
+    return $response;
+}
 
     #[Route('/admin/sponsors/add', name: 'admin_sponsors_add', methods: ['POST'])]
     public function addSponsor(
@@ -111,7 +158,7 @@ class SponsorController extends AbstractController
             }
             $averageAmount = $totalSponsors > 0 ? round($totalBudget / $totalSponsors / 1000, 1) : 0;
             
-            return $this->render('admin/pages/events/sponsors.html.twig', [
+            return $this->render('admin/pages/event/sponsors.html.twig', [
                 'sponsors' => $sponsors,
                 'events' => $events,
                 'totalSponsors' => $totalSponsors,
@@ -314,7 +361,7 @@ class SponsorController extends AbstractController
             }
             $averageAmount = $totalSponsors > 0 ? round($totalBudget / $totalSponsors / 1000, 1) : 0;
             
-            return $this->render('admin/pages/events/sponsors.html.twig', [
+            return $this->render('admin/pages/event/sponsors.html.twig', [
                 'sponsors' => $sponsors,
                 'events' => $events,
                 'totalSponsors' => $totalSponsors,
@@ -572,6 +619,123 @@ public function validateField(Request $request, ValidatorInterface $validator): 
         'valid' => empty($errors),
         'errors' => $errors
     ]);
+}
+
+#[Route('/admin/sponsors/export/pdf', name: 'admin_sponsors_export_pdf', methods: ['GET'])]
+public function exportPdf(
+    Request $request,
+    SponsorRepository $sponsorRepository,
+    DompdfFactoryInterface $dompdfFactory
+): Response {
+    $searchTerm = $request->query->get('search', '');
+    $type = $request->query->get('type', 'tous');
+    $sortBy = $request->query->get('sortBy', 'montant_desc');
+    
+    $sponsors = $sponsorRepository->findByFiltersForExport($searchTerm, $type, $sortBy);
+    
+    // 🔧 NETTOYAGE RADICAL
+    $cleanSponsors = [];
+    $total_montant = 0;
+    
+    foreach ($sponsors as $sponsor) {
+        $total_montant += $sponsor->getMontant();
+        
+        $cleanSponsors[] = [
+            'nom' => $this->cleanForDompdf($sponsor->getNom()),
+            'description' => $this->cleanForDompdf(substr($sponsor->getDescription() ?? '', 0, 80)),
+            'TypeSponsor' => $this->cleanForDompdf($sponsor->getTypeSponsor() ?? 'Non defini'),
+            'email' => $this->cleanForDompdf($sponsor->getEmail() ?? '-'),
+            'telephone' => $this->cleanForDompdf($sponsor->getTelephone() ?? '-'),
+            'montant' => $sponsor->getMontant(),
+        ];
+    }
+    
+    // Logo - avec chemin Windows corrigé
+    $projectDir = str_replace('\\', '/', $this->getParameter('kernel.project_dir'));
+    $logoFile = $projectDir . '/public/uploads/images/logo.png';
+    $logoPath = file_exists($logoFile) ? 'file://' . $logoFile : null;
+    
+    // Template
+    $html = $this->renderView('admin/pages/event/sponsors_pdf_export.html.twig', [
+        'sponsors' => $cleanSponsors,
+        'total_montant' => $total_montant,
+        'logo_path' => $logoPath,
+    ]);
+    
+    // Options Dompdf
+    $options = new Options();
+    $options->set('defaultFont', 'Helvetica');
+    $options->set('isHtml5ParserEnabled', false);
+    $options->set('isRemoteEnabled', true);
+    
+    $dompdf = $dompdfFactory->create();
+    $dompdf->setOptions($options);
+    $dompdf->loadHtml('<meta charset="UTF-8">' . $html);
+    $dompdf->setPaper('A4', 'portrait');
+    $dompdf->render();
+    
+    return new Response($dompdf->output(), 200, [
+        'Content-Type' => 'application/pdf',
+        'Content-Disposition' => 'attachment; filename="sponsors_' . date('Y-m-d_H-i-s') . '.pdf"',
+    ]);
+}
+/**
+ * Nettoie une chaîne pour éviter les erreurs iconv
+ */
+private function cleanString(string $string): string
+{
+    if (empty($string)) {
+        return '';
+    }
+    
+    // Supprimer les caractères invalides UTF-8
+    $string = mb_convert_encoding($string, 'UTF-8', 'UTF-8');
+    
+    // Remplacer les caractères problématiques
+    $string = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $string);
+    
+    // Retourner la chaîne nettoyée
+    return $string;
+}
+/**
+ * Nettoie complètement une chaîne pour Dompdf
+ * Remplace tous les caractères spéciaux par leur équivalent simple
+ */
+/**
+ * Nettoie radicalement une chaîne pour Dompdf
+ */
+private function cleanForDompdf(string $text): string
+{
+    if (empty($text)) {
+        return '';
+    }
+    
+    // Convertir en UTF-8 et supprimer les caractères invalides
+    $text = @iconv('UTF-8', 'UTF-8//IGNORE', $text);
+    if ($text === false) {
+        $text = '';
+    }
+    
+    // Remplacer tous les accents et caractères spéciaux
+    $replacements = [
+        'é' => 'e', 'è' => 'e', 'ê' => 'e', 'ë' => 'e',
+        'à' => 'a', 'â' => 'a', 'ä' => 'a', 'á' => 'a',
+        'ô' => 'o', 'ö' => 'o', 'ò' => 'o', 'ó' => 'o',
+        'ù' => 'u', 'û' => 'u', 'ü' => 'u', 'ú' => 'u',
+        'ç' => 'c',
+        'î' => 'i', 'ï' => 'i', 'í' => 'i',
+        'ÿ' => 'y',
+        '€' => 'EUR',
+        '…' => '...',
+        '"' => '"', '"' => '"', '«' => '"', '»' => '"',
+        '‘' => "'", '’' => "'", '“' => '"', '”' => '"',
+    ];
+    $text = strtr($text, $replacements);
+    
+    // Garder uniquement les caractères ASCII imprimables
+    $text = preg_replace('/[^\x20-\x7E]/', '', $text);
+    
+    return trim($text);
 }
     
 }

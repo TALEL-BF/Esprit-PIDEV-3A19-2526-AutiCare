@@ -212,7 +212,7 @@
                 </div>
                 <div class="position-relative">
                     <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-                    <input type="text" id="searchSession" class="form-control ps-5 pe-4" placeholder="Rechercher un intervenant..." style="border-radius: 40px; border: 1px solid #e0e0e0; min-width: 220px;">
+                    <input type="text" id="searchSession" class="form-control ps-5 pe-4" placeholder="Rechercher un professeur..." style="border-radius: 40px; border: 1px solid #e0e0e0; min-width: 220px;">
                 </div>
             </div>
         </div>
@@ -279,7 +279,7 @@
                             </div>
                             <div>
                                 <h6 class="fw-bold mb-1">3. Rejoignez la visioconférence</h6>
-                                <p class="text-muted small mb-0">Recevez le lien de connexion par email et rejoignez votre intervenant</p>
+                                <p class="text-muted small mb-0">Recevez le lien de connexion par email et rejoignez votre professeur</p>
                             </div>
                         </div>
                     </div>
@@ -385,7 +385,7 @@
             renderSchedule(currentDay, currentSearch);
         });
 
-        // Initialisation : activer le jour actuel
+     // Initialisation : activer le jour actuel
         const today = getCurrentDay();
         currentDay = (today !== 'Dimanche') ? today : 'Lundi';
         document.querySelectorAll('.day-btn').forEach(btn => {
@@ -393,4 +393,4 @@
         });
         renderSchedule(currentDay);
     </script>
-{% endblock %}
+{% endblock %}   
