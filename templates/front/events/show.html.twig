@@ -13,6 +13,7 @@
             padding: 0;
             box-sizing: border-box;
         }
+<<<<<<< HEAD
         /* ===== POPUP TICKET DESIGN AMÉLIORÉ ===== */
         /* Styles pour la popup de confirmation */
 #confirmModal .ticket-modal-content {
@@ -293,6 +294,30 @@
     box-shadow: 0 2px 8px rgba(139, 92, 246, 0.05);
 }
 
+=======
+        
+        /* Description cachée par défaut */
+.planning-description {
+    display: none;
+    margin-bottom: 12px;
+    animation: slideDownDesc 0.3s ease;
+}
+/* Style de la description - corrigé */
+.planning-desc-content {
+    background: linear-gradient(135deg, #faf5ff, #ffffff);
+    border-radius: 20px;
+    padding: 14px 18px;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 12px;
+    border: 1px solid #e9d5ff;
+    font-size: 0.95rem;
+    color: #4b5563;
+    line-height: 1.5;
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.05);
+}
+
+>>>>>>> gestion_evenement
 .planning-desc-icon {
     font-size: 1.2rem;
     min-width: 30px;
@@ -1604,8 +1629,19 @@
     <div class="hero-banner">
         <!-- EMOJI QUI SAUTE EN HAUT À DROITE -->
     
+<<<<<<< HEAD
        
        
+=======
+        <div class="magical-float float-1">⭐</div>
+        <div class="magical-float float-2">✨</div>
+        <div class="magical-float float-3 float-spin">🌟</div>
+        <div class="magical-float float-4">💫</div>
+        <div class="magical-float float-5 float-pulse">🌙</div>
+        <div class="magical-float float-6">🌙</div>
+        <div class="magical-float float-7 float-spin">🌈</div>
+        <div class="magical-float float-8">🎀</div>
+>>>>>>> gestion_evenement
 
         <div class="hero-inner">
             <div class="container">
@@ -1764,6 +1800,7 @@
         </div>
 
     
+<<<<<<< HEAD
 
 <!-- ANALYSIS BAR - AVEC STATS DYNAMIQUES -->
 <div class="analysis-bar">
@@ -1774,6 +1811,17 @@
 </div>
 <span class="analysis-sep">•</span>
       
+=======
+<!-- ANALYSIS BAR - AVEC STATS DYNAMIQUES -->
+<!-- ANALYSIS BAR - AVEC STATS DYNAMIQUES -->
+<div class="analysis-bar">
+    <div class="analysis-items">
+        <div class="analysis-item">
+            <span class="analysis-emoji">🧠</span>
+            <span class="analysis-text" id="iaScore">Chargement...</span>
+        </div>
+        <span class="analysis-sep">•</span>
+>>>>>>> gestion_evenement
         
         <div class="analysis-item">
             <span class="analysis-emoji" id="noiseEmoji">🔇</span>
@@ -1808,7 +1856,10 @@
 
 
        <!-- 2 BOXES -->
+<<<<<<< HEAD
        
+=======
+>>>>>>> gestion_evenement
 <div class="two-boxes-grid">
     <div class="bring-card">
         <div class="section-title">🎒 À apporter</div>
@@ -1860,9 +1911,13 @@
 
         <!-- 3 ACTION BUTTONS -->
         <div class="action-buttons">
+<<<<<<< HEAD
          <button class="btn-participate" onclick="showSimpleAlert()">
     ✨ Participer à l'aventure ✨
 </button>
+=======
+            <button class="btn-participate" id="registerBtn">✨ Participer à l'aventure ✨</button>
+>>>>>>> gestion_evenement
            
             <button class="btn-participants" id="viewParticipantsBtn">👥 Voir les participations</button>
         </div>
@@ -2030,6 +2085,7 @@
         setInterval(updateBoxedTimer, 1000);
 
         // CHARGER LE SCORE IA UNIQUEMENT
+<<<<<<< HEAD
      function loadIaScore() {
     fetch('/event/score/' + eventId)
         .then(response => response.json())
@@ -2047,6 +2103,17 @@
         })
         .catch(error => console.error('Score error:', error));
 }
+=======
+        function loadIaScore() {
+            fetch('/event/score/' + eventId)
+                .then(response => response.json())
+                .then(data => {
+                    const iaScoreEl = document.getElementById('iaScore');
+                    if (iaScoreEl) iaScoreEl.innerHTML = data.score + '% ' + data.level;
+                })
+                .catch(error => console.error('Score error:', error));
+        }
+>>>>>>> gestion_evenement
 
         // CHARGER LES STATS ET METTRE À JOUR LA BARRE UNIQUEMENT
         function loadStatsAndUpdateBar() {
@@ -2140,13 +2207,24 @@
             loadBringList();    // À apporter
             loadWeather();      // Météo
             // Les stats (🔇, 🧘, 🪑, ⭐⭐⭐) restent sur "Chargement..." jusqu'au clic
+<<<<<<< HEAD
+=======
+        });
+
+        // BOUTONS
+        document.getElementById('joinBtnHero')?.addEventListener('click', function() {
+            if (!this.disabled) alert('🎉✨ Félicitations ! ✨🎉\n\nTu es inscrit(e) à cette aventure magique !\nTu recevras bientôt un email de confirmation.\n\n🌟 On a hâte de te voir ! 🌟');
+>>>>>>> gestion_evenement
         });
 
         // BOUTONS
        
 
+<<<<<<< HEAD
        
 
+=======
+>>>>>>> gestion_evenement
         document.getElementById('viewParticipantsBtn')?.addEventListener('click', function() {
             alert('👥 LISTE DES PARTICIPANTS 👥\n\n📊 Statistiques :\n• 15 personnes inscrites\n• 8 enfants\n• 7 accompagnateurs\n\n✨ Une belle communauté bienveillante !');
         });
@@ -2178,6 +2256,7 @@ function initPlanningClic() {
 document.addEventListener('DOMContentLoaded', function() {
     setTimeout(initPlanningClic, 100);
 });
+<<<<<<< HEAD
 // Ouvrir la modale de confirmation
 function openConfirmModal() {
     document.getElementById('confirmModal').style.display = 'flex';
@@ -2189,6 +2268,8 @@ function showSimpleAlert() {
 }
 
 
+=======
+>>>>>>> gestion_evenement
 
         // BOUTON ANALYSER - Met à jour la barre uniquement (pas de modale)
         document.getElementById('analyzeStatsBtn')?.addEventListener('click', loadStatsAndUpdateBar);

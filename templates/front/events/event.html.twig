@@ -25,6 +25,7 @@
 
         * { box-sizing: border-box; }
         body { background: var(--bg); font-family: 'Nunito', sans-serif; }
+<<<<<<< HEAD
         /* ===== MAP SPLIT LAYOUT ===== */
         /* Weather Animations on Pins */
         /* Smart Event Card - Modern Design */
@@ -1682,6 +1683,20 @@
     border: 1.5px solid #86efac;
 }
 
+=======
+/* Badges dynamiques pour les cartes */
+.badge-ia, .badge-group, .badge-ambiance {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 30px;
+}
+
+>>>>>>> gestion_evenement
 .badge-ia {
     background: #dcfce7;
     color: #15803d;
@@ -1689,12 +1704,26 @@
 }
 
 .badge-group {
+<<<<<<< HEAD
     background: linear-gradient(135deg, #fef3c7, #fde68a);
     color: #ee8638;
     border: 1.5px solid #fcd34d;
 }
 
        /* HERO BANNER */
+=======
+    background: #f3e8ff;
+    color: #7c3aed;
+    border: 1.5px solid #e9d5ff;
+}
+
+.badge-ambiance {
+    background: #e0f2fe;
+    color: #0284c7;
+    border: 1.5px solid #bae6fd;
+}
+        /* HERO BANNER */
+>>>>>>> gestion_evenement
         .hero-banner {
             position: relative;
             min-height: 440px;
@@ -2168,7 +2197,13 @@
                                     <h3 class="card-title">{{ event.titre }}</h3>
                                     <p class="card-desc">{{ event.description|slice(0,100) }}{% if event.description|length > 100 %}...{% endif %}</p>
                                    <div class="card-badges">
+<<<<<<< HEAD
    
+=======
+    <span class="badge-ia">
+        🧠 Calcul...
+    </span>
+>>>>>>> gestion_evenement
     <span class="badge-group">
         👥 {{ event.maxParticipant <= 15 ? 'Très petit' : (event.maxParticipant <= 30 ? 'Petit' : (event.maxParticipant <= 60 ? 'Moyen' : (event.maxParticipant <= 100 ? 'Grand' : 'Très grand'))) }}
     </span>
@@ -3394,6 +3429,7 @@ function selectAndDrawRoute(type) {
                 profile: 'fast'
             })
         });
+<<<<<<< HEAD
         const carData = await carResponse.json();
         
         // 2. Récupérer l'itinéraire piéton
@@ -3893,3 +3929,37 @@ function loadSavedLocation() {
  
 </script>
 {% endblock %}
+=======
+        // Charger les scores IA pour chaque carte
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.event-card').forEach((card, index) => {
+        const eventId = card.dataset.eventId;
+        const badgeIa = card.querySelector('.badge-ia');
+        
+        if (eventId && badgeIa) {
+            fetch('/event/score/' + eventId)
+                .then(response => response.json())
+                .then(data => {
+                    badgeIa.innerHTML = `🧠 ${data.score}%`;
+                    
+                    // Changer la couleur selon le score
+                    if (data.score >= 70) {
+                        badgeIa.style.background = '#dcfce7';
+                        badgeIa.style.color = '#15803d';
+                    } else if (data.score >= 40) {
+                        badgeIa.style.background = '#ffedd5';
+                        badgeIa.style.color = '#b45309';
+                    } else {
+                        badgeIa.style.background = '#fee2e2';
+                        badgeIa.style.color = '#b91c1c';
+                    }
+                })
+                .catch(error => {
+                    badgeIa.innerHTML = '🧠 --%';
+                });
+        }
+    });
+});
+    </script>
+{% endblock %}
+>>>>>>> gestion_evenement

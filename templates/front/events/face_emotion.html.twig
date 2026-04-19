@@ -1518,6 +1518,7 @@ async function startCamera() {
         startBtn.disabled = true;
         stopBtn.disabled = false;
         captureBtn.disabled = false;
+<<<<<<< HEAD
         statusLabel.innerHTML = '✅ Caméra activée ! 🌟';
         await video.play();
         startRealTimeDetection();
@@ -1526,6 +1527,18 @@ async function startCamera() {
         if (isRunning && !readyOverlay.classList.contains('show')) {
             readyOverlay.classList.add('show');
         }
+=======
+        statusLabel.innerHTML = '✅ Caméra activée — attends le signal ! 🌟';
+        await video.play();
+        startRealTimeDetection();
+        
+        // Show ready card after 8 seconds of camera being ready
+        setTimeout(() => {
+            if (isRunning && !readyOverlay.classList.contains('show')) {
+                readyOverlay.classList.add('show');
+            }
+        }, 8000);
+>>>>>>> gestion_evenement
         
     } catch {
         statusLabel.innerHTML = '❌ Impossible d\'accéder à la caméra';

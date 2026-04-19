@@ -1,0 +1,1423 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Planning IA - {{ event.titre }}{% endblock %}
+
+{% block page_title %}📅 Planning : {{ event.titre }}{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    /* ========== PASTEL DASHBOARD STYLE ========== */
+    :root {
+        --pastel-purple: #f3e8ff;
+        --pastel-purple-dark: #a855f7;
+        --pastel-purple-light: #e879f9;
+        --pastel-green: #dcfce7;
+        --pastel-green-dark: #22c55e;
+        --pastel-orange: #ffedd5;
+        --pastel-orange-dark: #f97316;
+        --pastel-red: #fee2e2;
+        --pastel-red-dark: #ef4444;
+        --pastel-pink: #fce7f3;
+        --pastel-blue: #e0f2fe;
+        --pastel-mint: #d1fae5;
+        --pastel-yellow: #fef3c7;
+        --text-main: #1f2937;
+        --text-soft: #6b7280;
+    }
+
+    body {
+        background: linear-gradient(135deg, #faf5ff 0%, #fdf4ff 100%);
+        min-height: 100vh;
+    }
+    /* Couleurs pour les émojis dans les stats */
+.recap-stat i, .recap-stat .emoji {
+    font-size: 1.1rem;
+}
+/* ========== POPUP DE CONFIRMATION SUPPRESSION ========== */
+.delete-popup-wrap {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2001;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+/* ========== POPUP DE CONFIRMATION IA ========== */
+.ia-popup-wrap {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2002;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.ia-popup-wrap.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.ia-popup {
+    background: linear-gradient(135deg, #ffffff, #faf5ff);
+    border-radius: 40px;
+    padding: 30px 35px;
+    max-width: 380px;
+    width: 90%;
+    text-align: center;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+    border: 2px solid #f59e0b;
+}
+
+.ia-popup-wrap.show .ia-popup {
+    transform: scale(1);
+}
+
+.ia-popup-icon {
+    font-size: 4rem;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.ia-popup-title {
+    font-family: 'Baloo 2', cursive;
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: #d97706;
+    margin-bottom: 8px;
+}
+
+.ia-popup-stars {
+    font-size: 1.2rem;
+    letter-spacing: 4px;
+    color: #f59e0b;
+    margin-bottom: 12px;
+}
+
+.ia-popup-desc {
+    font-size: 0.9rem;
+    color: #4b5563;
+    background: #fffbeb;
+    border-radius: 20px;
+    padding: 12px;
+    margin: 12px 0;
+}
+
+.ia-popup-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.ia-popup-btn {
+    border: none;
+    border-radius: 50px;
+    padding: 10px 20px;
+    font-family: 'Baloo 2', cursive;
+    font-size: 0.9rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex: 1;
+}
+
+.ia-popup-btn.confirm {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    color: white;
+}
+
+.ia-popup-btn.confirm:hover {
+    transform: scale(1.02);
+}
+
+.ia-popup-btn.cancel {
+    background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+    color: #4b5563;
+}
+
+.ia-popup-btn.cancel:hover {
+    transform: scale(1.02);
+}
+
+.delete-popup-wrap.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.delete-popup {
+    background: linear-gradient(135deg, #ffffff, #faf5ff);
+    border-radius: 40px;
+    padding: 30px 35px;
+    max-width: 380px;
+    width: 90%;
+    text-align: center;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+    border: 2px solid #ef4444;
+}
+
+.delete-popup-wrap.show .delete-popup {
+    transform: scale(1);
+}
+
+.delete-popup-icon {
+    font-size: 4rem;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.delete-popup-title {
+    font-family: 'Baloo 2', cursive;
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: #dc2626;
+    margin-bottom: 8px;
+}
+
+.delete-popup-stars {
+    font-size: 1.2rem;
+    letter-spacing: 4px;
+    color: #ef4444;
+    margin-bottom: 12px;
+}
+
+.delete-popup-desc {
+    font-size: 0.9rem;
+    color: #4b5563;
+    background: #fef2f2;
+    border-radius: 20px;
+    padding: 12px;
+    margin: 12px 0;
+}
+
+.delete-popup-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.delete-popup-btn {
+    border: none;
+    border-radius: 50px;
+    padding: 10px 20px;
+    font-family: 'Baloo 2', cursive;
+    font-size: 0.9rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex: 1;
+}
+
+.delete-popup-btn.confirm {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+}
+
+.delete-popup-btn.confirm:hover {
+    transform: scale(1.02);
+}
+
+.delete-popup-btn.cancel {
+    background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+    color: #4b5563;
+}
+
+.delete-popup-btn.cancel:hover {
+    transform: scale(1.02);
+}
+
+.delete-popup-btn.confirm {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+}
+
+.delete-popup-btn.confirm:hover {
+    transform: scale(1.02);
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+}
+
+.delete-popup-btn.cancel {
+    background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+    color: #4b5563;
+}
+
+.delete-popup-btn.cancel:hover {
+    transform: scale(1.02);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+/* ========== POPUP DE CONFIRMATION SAUVEGARDE ========== */
+.save-popup-wrap {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.save-popup-wrap.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.save-popup {
+    background: linear-gradient(135deg, #ffffff, #faf5ff);
+    border-radius: 40px;
+    padding: 30px 35px;
+    max-width: 380px;
+    width: 90%;
+    text-align: center;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+    border: 3px solid #c084fc;
+    box-shadow: 0 25px 50px rgba(139, 92, 246, 0.3);
+}
+
+.save-popup-wrap.show .save-popup {
+    transform: scale(1);
+    animation: popBounceSave 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes popBounceSave {
+    0% {
+        transform: scale(0.7);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.save-popup-icon {
+    font-size: 4rem;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.save-popup-title {
+    font-family: 'Baloo 2', cursive;
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: #7c3aed;
+    margin-bottom: 8px;
+}
+
+.save-popup-stars {
+    font-size: 1.2rem;
+    letter-spacing: 4px;
+    color: #fbbf24;
+    margin-bottom: 12px;
+}
+
+.save-popup-desc {
+    font-size: 0.9rem;
+    color: #4b5563;
+    background: #faf5ff;
+    border-radius: 20px;
+    padding: 12px;
+    margin: 12px 0;
+}
+
+.save-popup-btn {
+    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 10px 30px;
+    font-family: 'Baloo 2', cursive;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+}
+
+.save-popup-btn:hover {
+    transform: scale(1.02);
+    box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
+}
+
+/* Forcer les couleurs des émojis */
+.recap-stat .fa-hourglass-half { color: #8b5cf6; }
+.recap-stat .fa-leaf { color: #22c55e; }
+.recap-stat .fa-bolt { color: #f97316; }
+.recap-stat .fa-feather-alt { color: #a855f7; }
+
+/* Ou si tu utilises des émojis Unicode */
+.recap-stat strong + i, .recap-stat span {
+    display: inline-flex;
+    align-items: center;
+}
+
+    /* Welcome Banner - Pastel */
+    .welcome-banner {
+        background: linear-gradient(135deg, #c084fc, #e879f9, #f0abfc);
+        border-radius: 24px;
+        padding: 28px 32px;
+        color: white;
+        margin-bottom: 28px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .welcome-banner::after {
+        content: '✨';
+        position: absolute;
+        right: 30px;
+        top: 20px;
+        font-size: 80px;
+        opacity: 0.1;
+        pointer-events: none;
+    }
+    .welcome-banner h3 {
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin-bottom: 8px;
+    }
+    .welcome-banner p {
+        opacity: 0.9;
+        font-size: 0.9rem;
+    }
+
+    /* Récap créatif pastel */
+    .creative-recap {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        padding: 20px 28px;
+        margin-bottom: 28px;
+        border: 1px solid rgba(168, 85, 247, 0.2);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    }
+    .recap-title {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: var(--pastel-purple-dark);
+        font-weight: 700;
+        margin-bottom: 12px;
+    }
+    .recap-timeline {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+    }
+    .timeline-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+    }
+    .step-icon {
+        width: 48px;
+        height: 48px;
+        background: var(--pastel-purple);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        transition: all 0.2s;
+    }
+    .step-icon:hover {
+        transform: scale(1.1);
+        background: var(--pastel-purple);
+    }
+    .step-label {
+        font-size: 0.65rem;
+        font-weight: 600;
+        color: var(--text-soft);
+    }
+    .recap-arrow {
+        font-size: 1.2rem;
+        color: var(--pastel-purple-dark);
+        margin: 0 4px;
+    }
+    .recap-stats {
+        display: flex;
+        gap: 24px;
+        flex-wrap: wrap;
+        padding-top: 12px;
+        border-top: 1px solid #f0e6ff;
+    }
+    .recap-stat {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+    }
+    .recap-stat i { font-size: 1.1rem; }
+    .recap-stat strong { color: var(--pastel-purple-dark); font-size: 1rem; }
+    .rhythm-badge {
+        background: linear-gradient(135deg, var(--pastel-purple), #fae8ff);
+        padding: 6px 14px;
+        border-radius: 30px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--pastel-purple-dark);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    /* Timeline container */
+    .timeline-container {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        overflow: hidden;
+    }
+
+    .timeline-items {
+        padding: 30px 40px;
+        position: relative;
+    }
+
+    /* Current time line */
+    .now-line {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--pastel-red-dark), #f87171, var(--pastel-red-dark), transparent);
+        z-index: 20;
+        pointer-events: none;
+        transition: top 0.5s ease;
+    }
+    .now-line::before {
+        content: '🔴 NOW';
+        position: absolute;
+        right: 10px;
+        top: -10px;
+        font-size: 0.65rem;
+        font-weight: 700;
+        color: var(--pastel-red-dark);
+        background: white;
+        padding: 2px 6px;
+        border-radius: 20px;
+    }
+
+    /* Timeline item */
+    .timeline-item {
+        display: flex;
+        gap: 30px;
+        margin-bottom: 0;
+        position: relative;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .timeline-item:hover {
+        transform: translateX(5px);
+    }
+
+    /* Heure - grande et pastel */
+    .timeline-time-col {
+        min-width: 120px;
+        text-align: right;
+        font-weight: 800;
+        font-family: monospace;
+        font-size: 1.8rem;
+        color: var(--pastel-purple-dark);
+        letter-spacing: -0.5px;
+        padding-top: 4px;
+    }
+    .timeline-time-col small {
+        font-size: 0.8rem;
+        font-weight: 400;
+        color: var(--text-soft);
+        display: block;
+        margin-top: 4px;
+    }
+
+    /* Contenu */
+    .timeline-content-col {
+        flex: 1;
+        position: relative;
+        padding-left: 30px;
+    }
+
+    /* Ligne verticale pastel */
+    .timeline-content-col::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 12px;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(180deg, var(--pastel-purple-dark), var(--pastel-purple-light), var(--pastel-pink));
+        opacity: 0.3;
+        border-radius: 2px;
+    }
+
+    /* Point pastel */
+    .timeline-dot {
+        position: absolute;
+        left: -8px;
+        top: 8px;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: white;
+        border: 2px solid var(--pastel-purple-dark);
+        z-index: 5;
+        transition: all 0.2s ease;
+    }
+    .timeline-item:hover .timeline-dot {
+        transform: scale(1.3);
+        border-color: var(--pastel-purple-light);
+        box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.15);
+    }
+
+    /* Carte pastel */
+    .timeline-card {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(4px);
+        border-radius: 20px;
+        padding: 14px 20px;
+        transition: all 0.2s ease;
+        border: 1px solid rgba(168, 85, 247, 0.15);
+        cursor: grab;
+        position: relative;
+    }
+    .timeline-card:active { cursor: grabbing; }
+    .timeline-card:hover {
+        background: white;
+        border-color: var(--pastel-purple-dark);
+        transform: translateX(4px);
+        box-shadow: 0 4px 12px rgba(168, 85, 247, 0.1);
+    }
+
+    .drag-handle {
+        position: absolute;
+        left: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-soft);
+        opacity: 0.3;
+        font-size: 1rem;
+        cursor: grab;
+    }
+    .timeline-card:hover .drag-handle { opacity: 0.7; }
+
+    .timeline-title {
+        font-weight: 800;
+        font-size: 1rem;
+        color: var(--text-main);
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-left: 20px;
+    }
+    .timeline-icon { font-size: 1.2rem; }
+
+    .timeline-badges {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 6px;
+        padding-left: 20px;
+    }
+    .badge-sm {
+        padding: 3px 12px;
+        border-radius: 30px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+    .badge-type-accueil { background: var(--pastel-purple); color: #7c3aed; }
+    .badge-type-activite { background: var(--pastel-green); color: #15803d; }
+    .badge-type-pause { background: var(--pastel-orange); color: #b45309; }
+    .badge-type-transition { background: var(--pastel-pink); color: #be185d; }
+    .badge-type-cloture { background: var(--pastel-blue); color: #1d4ed8; }
+
+    .timeline-desc {
+        font-size: 0.75rem;
+        color: var(--text-soft);
+        margin-top: 4px;
+        line-height: 1.4;
+        padding-left: 20px;
+    }
+
+    /* Actions */
+    .timeline-actions {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+    .timeline-card:hover .timeline-actions { opacity: 1; }
+    .timeline-actions button {
+        background: white;
+        border: 1px solid var(--pastel-red);
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        cursor: pointer;
+        color: var(--pastel-red-dark);
+        transition: all 0.2s;
+    }
+    .timeline-actions button:hover {
+        background: var(--pastel-red);
+        transform: scale(1.05);
+    }
+
+    /* Édition */
+    .timeline-edit {
+        margin-top: 12px;
+        margin-left: 20px;
+        padding: 16px;
+        background: white;
+        border-radius: 20px;
+        display: none;
+        border: 1px solid var(--pastel-purple);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    .timeline-edit.show { display: block; animation: slideDown 0.2s ease; }
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .edit-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+    .edit-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .edit-field label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--pastel-purple-dark);
+    }
+    .edit-field input, .edit-field select, .edit-field textarea {
+        padding: 8px 12px;
+        border: 1px solid #e9d5ff;
+        border-radius: 12px;
+        font-family: inherit;
+        background: #faf9fe;
+        font-size: 0.85rem;
+    }
+    .edit-field textarea {
+        resize: vertical;
+        min-height: 70px;
+    }
+    .edit-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        margin-top: 15px;
+    }
+    .btn-edit-save {
+        background: linear-gradient(135deg, var(--pastel-green-dark), #4ade80);
+        color: white;
+        border: none;
+        padding: 6px 18px;
+        border-radius: 30px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .btn-edit-delete {
+        background: linear-gradient(135deg, var(--pastel-red-dark), #f87171);
+        color: white;
+        border: none;
+        padding: 6px 18px;
+        border-radius: 30px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    /* Bouton ajouter */
+    .btn-add-timeline {
+        display: block;
+        width: 260px;
+        margin: 20px auto 40px;
+        background: linear-gradient(135deg, var(--pastel-purple-dark), var(--pastel-purple-light));
+        color: white;
+        border: none;
+        padding: 12px 28px;
+        border-radius: 40px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+    }
+    .btn-add-timeline:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(168, 85, 247, 0.4);
+    }
+
+    .empty-timeline {
+        text-align: center;
+        padding: 60px 40px;
+        background: linear-gradient(135deg, rgba(255,255,255,0.5), rgba(243,232,255,0.3));
+        border-radius: 24px;
+        margin: 20px;
+    }
+    .loader-creative {
+        text-align: center;
+        padding: 60px;
+    }
+    .spinner-creative {
+        width: 40px;
+        height: 40px;
+        border: 3px solid var(--pastel-purple);
+        border-top-color: var(--pastel-purple-dark);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin: 0 auto 15px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .multi-day-warning {
+        background: linear-gradient(135deg, var(--pastel-yellow), #fffbeb);
+        border-left: 4px solid #f59e0b;
+        border-radius: 16px;
+        padding: 12px 20px;
+        margin: 0 20px 20px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 0.85rem;
+    }
+
+    .toast-creative {
+        position: fixed;
+        bottom: 25px;
+        right: 25px;
+        background: white;
+        border-radius: 50px;
+        padding: 10px 20px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        z-index: 1000;
+        animation: slideInRight 0.3s ease;
+        border-left: 4px solid;
+        font-size: 0.85rem;
+    }
+    .toast-success { border-left-color: var(--pastel-green-dark); }
+    .toast-error { border-left-color: var(--pastel-red-dark); }
+    @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
+    .floating-buttons {
+        position: fixed;
+        bottom: 25px;
+        right: 25px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        z-index: 999;
+    }
+    .floating-btn {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+        color: white;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+    .floating-btn:hover { transform: translateY(-3px) scale(1.05); }
+    .btn-sync { background: linear-gradient(135deg, #6366f1, #818cf8); }
+    .btn-ia { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
+    .btn-save { background: linear-gradient(135deg, var(--pastel-green-dark), #4ade80); }
+    .btn-back { background: linear-gradient(135deg, var(--pastel-purple-dark), var(--pastel-purple-light)); text-decoration: none; color: white; }
+
+    @media (max-width: 700px) {
+        .timeline-item { flex-direction: column; gap: 10px; }
+        .timeline-time-col { text-align: left; font-size: 1.3rem; min-width: auto; }
+        .timeline-content-col { padding-left: 20px; }
+        .timeline-content-col::before { left: -5px; }
+        .timeline-dot { left: -12px; }
+        .edit-row { grid-template-columns: 1fr; }
+        .floating-buttons { flex-direction: row; bottom: 15px; right: 15px; gap: 8px; }
+        .recap-timeline { flex-direction: column; align-items: flex-start; }
+        .recap-arrow { transform: rotate(90deg); }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div class="welcome-banner">
+    <h3><i class="fas fa-chart-line"></i> Planning de la journée</h3>
+    <p><i class="fas fa-calendar-alt"></i> {{ event.dateDebut|date('d/m/Y') }} • 
+       <i class="fas fa-clock"></i> <span id="heroHours">{{ event.heureDebut|date('H:i') }} - {{ event.heureFin|date('H:i') }}</span></p>
+    <p><i class="fas fa-map-marker-alt"></i> {{ event.lieu }}</p>
+</div>
+
+<div id="creativeRecap" class="creative-recap" style="display: none;">
+    <div class="recap-title">🧠 RYTHME DE LA JOURNÉE</div>
+    <div id="recapTimeline" class="recap-timeline"></div>
+    <div id="recapStats" class="recap-stats"></div>
+    <div id="recapRhythm" class="mt-3"></div>
+</div>
+
+{% if event.dateFin and event.dateDebut < event.dateFin %}
+<div class="multi-day-warning">
+    <i class="fas fa-calendar-week"></i>
+    <span>⚠️ Événement multi-jours (du {{ event.dateDebut|date('d/m/Y') }} au {{ event.dateFin|date('d/m/Y') }}). Planning pour la <strong>première journée</strong> uniquement.</span>
+</div>
+{% endif %}
+
+<div class="timeline-container">
+    <div id="timelineItems" class="timeline-items" style="position: relative;">
+        <div id="nowLine" class="now-line" style="display: none;"></div>
+        <div class="loader-creative">
+            <div class="spinner-creative"></div>
+            <p>🌟 Chargement du planning...</p>
+        </div>
+    </div>
+
+    <button class="btn-add-timeline" onclick="ajouterCreneau()">
+        <i class="fas fa-plus-circle"></i> ✨ Ajouter un moment
+    </button>
+</div>
+
+<div class="floating-buttons">
+    <button class="floating-btn btn-sync" onclick="syncEventHours()" title="Synchroniser les heures">
+        <i class="fas fa-sync-alt"></i>
+    </button>
+    <button class="floating-btn btn-ia" onclick="generatePlanning()" title="Générer avec IA">
+        <i class="fas fa-robot"></i>
+    </button>
+    <button class="floating-btn btn-save" onclick="saveAllCreneaux()" title="Sauvegarder tout">
+        <i class="fas fa-save"></i>
+    </button>
+    <a href="{{ path('admin_evenements') }}" class="floating-btn btn-back" title="Retour">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+</div>
+<!-- Popup de confirmation suppression -->
+<div id="deletePopup" class="delete-popup-wrap">
+    <div class="delete-popup">
+        <span class="delete-popup-icon">🗑️⚠️</span>
+        <h3 class="delete-popup-title">Supprimer ?</h3>
+        <div class="delete-popup-stars">❌❌❌</div>
+        <p class="delete-popup-desc">Es-tu sûr de vouloir supprimer ce créneau ?</p>
+        <div class="delete-popup-buttons">
+            <button id="confirmDeleteBtn" class="delete-popup-btn confirm">Oui, supprimer</button>
+            <button id="cancelDeleteBtn" class="delete-popup-btn cancel">Annuler</button>
+        </div>
+    </div>
+</div>
+<!-- Popup de confirmation génération IA -->
+<div id="iaPopup" class="ia-popup-wrap">
+    <div class="ia-popup">
+        <span class="ia-popup-icon">🤖✨</span>
+        <h3 class="ia-popup-title">Génération IA</h3>
+        <div class="ia-popup-stars">⚡⚡⚡</div>
+        <p class="ia-popup-desc">Générer un planning avec IA ? Le planning actuel sera remplacé.</p>
+        <div class="ia-popup-buttons">
+            <button id="confirmIaBtn" class="ia-popup-btn confirm">Oui, générer</button>
+            <button id="cancelIaBtn" class="ia-popup-btn cancel">Annuler</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+<script>
+    let eventId = {{ event.idEvent }};
+    let creneaux = [];
+    let sortable = null;
+    let pendingDeleteIndex = null;
+
+    const typeIcons = {
+        'accueil': '🏠',
+        'activite': '🎨',
+        'pause': '🌿',
+        'transition': '🔄',
+        'cloture': '🏁'
+    };
+    const typeLabels = {
+        'accueil': 'Accueil', 'activite': 'Activité', 'pause': 'Pause', 'transition': 'Transition', 'cloture': 'Fin'
+    };
+
+    // Trier les créneaux par heure de début
+    function sortCreneaux() {
+        creneaux.sort((a, b) => {
+            return (a.heure_debut || '00:00').localeCompare(b.heure_debut || '00:00');
+        });
+    }
+
+    function getDurationInMinutes(debut, fin) {
+        if (!debut || !fin) return 20;
+        const [h1, m1] = debut.split(':').map(Number);
+        const [h2, m2] = fin.split(':').map(Number);
+        return (h2 * 60 + m2) - (h1 * 60 + m1);
+    }
+
+    function getHeightFromDuration(debut, fin) {
+        const minutes = getDurationInMinutes(debut, fin);
+        return Math.max(50, minutes * 1.2);
+    }
+
+    function updateCreativeRecap() {
+        if (!creneaux || creneaux.length === 0) {
+            document.getElementById('creativeRecap').style.display = 'none';
+            return;
+        }
+
+        let totalMinutes = 0;
+        let pauseCount = 0;
+        let actifCount = 0;
+        let calmeCount = 0;
+        let types = [];
+
+        creneaux.forEach(creneau => {
+            const minutes = getDurationInMinutes(creneau.heure_debut, creneau.heure_fin);
+            totalMinutes += minutes;
+            if (creneau.type === 'pause') pauseCount++;
+            if (creneau.sensoriel === 'actif') actifCount++;
+            if (creneau.sensoriel === 'calme') calmeCount++;
+            types.push(creneau.type);
+        });
+
+        const totalHours = Math.floor(totalMinutes / 60);
+        const totalMins = totalMinutes % 60;
+        const durationText = totalHours > 0 ? `${totalHours}h${totalMins > 0 ? totalMins : ''}` : `${totalMins}min`;
+
+        const timelineHtml = types.map((type, index) => {
+            const icon = typeIcons[type] || '📌';
+            const label = typeLabels[type] || type;
+            return `
+                <div class="timeline-step">
+                    <div class="step-icon">${icon}</div>
+                    <div class="step-label">${label}</div>
+                </div>
+                ${index < types.length - 1 ? '<span class="recap-arrow">→</span>' : ''}
+            `;
+        }).join('');
+
+        document.getElementById('recapTimeline').innerHTML = timelineHtml;
+        document.getElementById('recapStats').innerHTML = `
+            <div class="recap-stat"><i class="fas fa-hourglass-half"></i> ⏱️ <strong>${durationText}</strong> total</div>
+            <div class="recap-stat"><i class="fas fa-leaf"></i> 🌿 <strong>${pauseCount}</strong> pause(s)</div>
+            <div class="recap-stat"><i class="fas fa-bolt"></i> ⚡ <strong>${actifCount}</strong> pic(s) d'énergie</div>
+            <div class="recap-stat"><i class="fas fa-feather-alt"></i> 🧘 <strong>${calmeCount}</strong> moment(s) calme(s)</div>
+        `;
+
+        const rhythmAdvice = actifCount > pauseCount ? 
+            '<span class="rhythm-badge"><i class="fas fa-charging-station"></i> Rythme dynamique : pensez aux pauses régulières</span>' :
+            '<span class="rhythm-badge"><i class="fas fa-feather-alt"></i> Rythme équilibré : parfaitement adapté</span>';
+        
+        document.getElementById('recapRhythm').innerHTML = rhythmAdvice;
+        document.getElementById('creativeRecap').style.display = 'block';
+    }
+
+    function updateHeroHours() {
+        if (!creneaux || creneaux.length === 0) return;
+        sortCreneaux();
+        const firstSlot = creneaux[0];
+        const lastSlot = creneaux[creneaux.length - 1];
+        const heroHours = document.getElementById('heroHours');
+        if (heroHours) {
+            heroHours.innerHTML = `${firstSlot.heure_debut || '09:00'} - ${lastSlot.heure_fin || '17:00'}`;
+        }
+    }
+
+    function updateNowLine() {
+        const now = new Date();
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes();
+        const currentTimeInMinutes = currentHour * 60 + currentMinute;
+        
+        const items = document.querySelectorAll('.timeline-item');
+        let found = false;
+        
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            const timeCol = item.querySelector('.timeline-time-col');
+            if (!timeCol) continue;
+            const timeText = timeCol.querySelector('span')?.textContent || '';
+            const [hour, minute] = timeText.split(':').map(Number);
+            if (isNaN(hour)) continue;
+            const itemTimeInMinutes = hour * 60 + minute;
+            if (currentTimeInMinutes >= itemTimeInMinutes) {
+                const rect = item.getBoundingClientRect();
+                const containerRect = document.querySelector('.timeline-items').getBoundingClientRect();
+                const topOffset = rect.top - containerRect.top + 30;
+                const nowLine = document.getElementById('nowLine');
+                if (nowLine) {
+                    nowLine.style.top = topOffset + 'px';
+                    nowLine.style.display = 'block';
+                    found = true;
+                }
+            }
+        }
+        if (!found) {
+            const nowLine = document.getElementById('nowLine');
+            if (nowLine) nowLine.style.display = 'none';
+        }
+    }
+
+    function loadPlanning() {
+        fetch('/admin/event-schedule/get/' + eventId)
+            .then(response => response.json())
+            .then(data => {
+                creneaux = data.success ? (data.planning.creneaux || []) : [];
+                sortCreneaux();
+                renderTimeline();
+                initSortable();
+                updateHeroHours();
+                updateCreativeRecap();
+                setTimeout(updateNowLine, 100);
+            })
+            .catch(() => { creneaux = []; renderTimeline(); });
+    }
+
+    function renderTimeline() {
+        const container = document.getElementById('timelineItems');
+        
+        if (!creneaux || creneaux.length === 0) {
+            container.innerHTML = `<div class="empty-timeline">✨ Aucun créneau pour le moment. Cliquez sur "Ajouter un moment" ✨</div>`;
+            return;
+        }
+
+        let html = '<div style="position: relative;">';
+        creneaux.forEach((creneau, index) => {
+            const typeClass = creneau.type || 'activite';
+            const typeIcon = typeIcons[typeClass] || '📌';
+            const height = getHeightFromDuration(creneau.heure_debut, creneau.heure_fin);
+            
+            html += `
+                <div class="timeline-item" data-index="${index}" style="min-height: ${height}px;">
+                    <div class="timeline-time-col">
+                        <span>${creneau.heure_debut || '09:00'}</span>
+                        <small>→ ${creneau.heure_fin || '09:20'}</small>
+                    </div>
+                    <div class="timeline-content-col" style="min-height: ${height}px;">
+                        <div class="timeline-dot"></div>
+                        <div class="timeline-card" onclick="toggleEdit(${index})">
+                            <div class="drag-handle">⋮⋮</div>
+                            <div class="timeline-title">
+                                <span class="timeline-icon">${typeIcon}</span>
+                                ${escapeHtml(creneau.titre || 'Sans titre')}
+                            </div>
+                            <div class="timeline-badges">
+                                <span class="badge-sm badge-type-${typeClass}">${typeIcon} ${typeClass}</span>
+                            </div>
+                            <div class="timeline-desc">${escapeHtml((creneau.description || '').substring(0, 80))}</div>
+                        </div>
+                        <div class="timeline-actions">
+                            <button onclick="event.stopPropagation(); showDeletePopup(${index})" title="Supprimer">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                        <div class="timeline-edit" id="edit-${index}">
+                            <div class="edit-row">
+                                <div class="edit-field"><label>Titre</label><input type="text" id="titre-${index}" value="${escapeHtml(creneau.titre || '')}"></div>
+                                <div class="edit-field"><label>Heure début</label><input type="time" id="debut-${index}" value="${creneau.heure_debut || '09:00'}"></div>
+                                <div class="edit-field"><label>Heure fin</label><input type="time" id="fin-${index}" value="${creneau.heure_fin || '09:20'}"></div>
+                            </div>
+                            <div class="edit-row">
+                                <div class="edit-field"><label>Type</label><select id="type-${index}">
+                                    <option value="accueil" ${creneau.type === 'accueil' ? 'selected' : ''}>🏠 Accueil</option>
+                                    <option value="activite" ${creneau.type === 'activite' ? 'selected' : ''}>🎨 Activité</option>
+                                    <option value="pause" ${creneau.type === 'pause' ? 'selected' : ''}>🧘 Pause</option>
+                                    <option value="transition" ${creneau.type === 'transition' ? 'selected' : ''}>🔄 Transition</option>
+                                    <option value="cloture" ${creneau.type === 'cloture' ? 'selected' : ''}>🏁 Clôture</option>
+                                </select></div>
+                                <div class="edit-field"><label>Description</label><textarea id="desc-${index}">${escapeHtml(creneau.description || '')}</textarea></div>
+                            </div>
+                            <div class="edit-actions">
+                                <button class="btn-edit-save" onclick="saveCreneau(${index})">
+                                    <i class="fas fa-save"></i> Sauvegarder
+                                </button>
+                                <button class="btn-edit-delete" onclick="showDeletePopup(${index})">
+                                    <i class="fas fa-trash"></i> Supprimer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+    }
+
+    function initSortable() {
+        const container = document.querySelector('.timeline-items > div');
+        if (!container) return;
+        if (sortable) sortable.destroy();
+        sortable = new Sortable(container, {
+            animation: 200,
+            handle: '.timeline-card',
+            onEnd: function() {
+                const items = document.querySelectorAll('.timeline-item');
+                const newOrder = [];
+                items.forEach(item => { const idx = parseInt(item.dataset.index); if (!isNaN(idx)) newOrder.push(creneaux[idx]); });
+                if (newOrder.length === creneaux.length) { creneaux = newOrder; sortCreneaux(); renderTimeline(); saveAllCreneaux(); showToast('📌 Ordre mis à jour', 'success'); }
+            }
+        });
+    }
+
+    function toggleEdit(index) { 
+        document.getElementById(`edit-${index}`)?.classList.toggle('show');
+        setTimeout(updateNowLine, 100);
+    }
+
+    function saveCreneau(index) {
+        creneaux[index] = {
+            ...creneaux[index],
+            titre: document.getElementById(`titre-${index}`)?.value || '',
+            heure_debut: document.getElementById(`debut-${index}`)?.value || '09:00',
+            heure_fin: document.getElementById(`fin-${index}`)?.value || '09:20',
+            description: document.getElementById(`desc-${index}`)?.value || '',
+            type: document.getElementById(`type-${index}`)?.value || 'activite'
+        };
+        sortCreneaux();
+        renderTimeline();
+        saveAllCreneaux();
+        updateHeroHours();
+        updateCreativeRecap();
+        showToast('💾 Sauvegardé', 'success');
+    }
+
+    // ========== POPUP SUPPRESSION ==========
+    function showDeletePopup(index) {
+        pendingDeleteIndex = index;
+        const popup = document.getElementById('deletePopup');
+        if (popup) {
+            popup.classList.add('show');
+        }
+    }
+
+    function confirmDelete() {
+        if (pendingDeleteIndex !== null) {
+            creneaux.splice(pendingDeleteIndex, 1);
+            sortCreneaux();
+            renderTimeline();
+            saveAllCreneaux();
+            updateHeroHours();
+            updateCreativeRecap();
+            showToast('🗑️ Supprimé', 'success');
+            pendingDeleteIndex = null;
+        }
+        hideDeletePopup();
+    }
+
+    function cancelDelete() {
+        pendingDeleteIndex = null;
+        hideDeletePopup();
+    }
+
+    function hideDeletePopup() {
+        const popup = document.getElementById('deletePopup');
+        if (popup) {
+            popup.classList.remove('show');
+        }
+    }
+
+    // ========== POPUP GÉNÉRATION IA ==========
+    function generatePlanning() {
+        showIaPopup();
+    }
+
+    function confirmGenerate() {
+        hideIaPopup();
+        showLoading(true);
+        fetch('/admin/event-schedule/generate/' + eventId, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                showLoading(false);
+                if (data.success) {
+                    creneaux = data.planning.creneaux || [];
+                    sortCreneaux();
+                    renderTimeline();
+                    updateHeroHours();
+                    updateCreativeRecap();
+                    showToast('🎉 Planning généré par IA !', 'success');
+                } else {
+                    showToast('❌ Erreur: ' + (data.error || 'Génération échouée'), 'error');
+                }
+            }).catch(() => { showLoading(false); showToast('❌ Erreur', 'error'); });
+    }
+
+    function cancelGenerate() {
+        hideIaPopup();
+    }
+
+    function showIaPopup() {
+        const popup = document.getElementById('iaPopup');
+        if (popup) {
+            popup.classList.add('show');
+        }
+    }
+
+    function hideIaPopup() {
+        const popup = document.getElementById('iaPopup');
+        if (popup) {
+            popup.classList.remove('show');
+        }
+    }
+
+    // ========== POPUP SAUVEGARDE ==========
+    function showSavePopup() {
+        const popup = document.getElementById('savePopup');
+        if (popup) {
+            popup.classList.add('show');
+            setTimeout(() => {
+                popup.classList.remove('show');
+            }, 2500);
+        }
+    }
+
+    function ajouterCreneau() {
+        creneaux.push({ heure_debut: '09:00', heure_fin: '09:20', titre: 'Nouveau moment', description: '', type: 'activite', sensoriel: 'modere' });
+        sortCreneaux();
+        renderTimeline();
+        saveAllCreneaux();
+        updateHeroHours();
+        updateCreativeRecap();
+        showToast('✨ Nouveau moment ajouté', 'success');
+        setTimeout(() => {
+            const newIndex = creneaux.length - 1;
+            toggleEdit(newIndex);
+        }, 100);
+    }
+
+    function saveAllCreneaux() {
+        console.log("💾 Sauvegarde de tous les créneaux...", creneaux);
+        
+        fetch('/admin/event-schedule/save/' + eventId, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ planning: { creneaux: creneaux } })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log("✅ Sauvegarde réussie");
+                showSavePopup();
+                showToast('✅ Tous les créneaux sauvegardés', 'success');
+            } else {
+                console.error("❌ Erreur backend:", data);
+                showToast('❌ Erreur: ' + (data.error || 'Sauvegarde échouée'), 'error');
+            }
+        })
+        .catch(error => {
+            console.error("❌ Erreur réseau:", error);
+            showToast('❌ Erreur réseau - Vérifie la console', 'error');
+        });
+    }
+
+    function syncEventHours() {
+        if (!creneaux || creneaux.length === 0) {
+            showToast('⚠️ Aucun créneau à synchroniser', 'error');
+            return;
+        }
+        
+        sortCreneaux();
+        const firstSlot = creneaux[0];
+        const lastSlot = creneaux[creneaux.length - 1];
+        
+        fetch('/admin/event-schedule/update-hours/' + eventId, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ heure_debut: firstSlot.heure_debut, heure_fin: lastSlot.heure_fin })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateHeroHours();
+                showToast('✅ Heures synchronisées', 'success');
+            } else showToast('❌ Erreur', 'error');
+        }).catch(() => showToast('❌ Erreur', 'error'));
+    }
+
+    function showLoading(show) {
+        const container = document.getElementById('timelineItems');
+        if (show) container.innerHTML = `<div class="loader-creative"><div class="spinner-creative"></div><p>🤖 IA génère le planning...</p></div>`;
+    }
+
+    function showToast(msg, type) {
+        const toast = document.createElement('div');
+        toast.className = `toast-creative toast-${type}`;
+        toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> ${msg}`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // ========== INITIALISATION ==========
+    document.addEventListener('DOMContentLoaded', function() {
+        loadPlanning();
+        
+        // Fermeture popup sauvegarde
+        const closeSavePopupBtn = document.getElementById('closeSavePopupBtn');
+        if (closeSavePopupBtn) {
+            closeSavePopupBtn.addEventListener('click', () => {
+                document.getElementById('savePopup')?.classList.remove('show');
+            });
+        }
+        
+        // Popup suppression
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+        
+        if (confirmDeleteBtn) {
+            confirmDeleteBtn.addEventListener('click', confirmDelete);
+        }
+        if (cancelDeleteBtn) {
+            cancelDeleteBtn.addEventListener('click', cancelDelete);
+        }
+        
+        // Popup IA
+        const confirmIaBtn = document.getElementById('confirmIaBtn');
+        const cancelIaBtn = document.getElementById('cancelIaBtn');
+        
+        if (confirmIaBtn) {
+            confirmIaBtn.addEventListener('click', confirmGenerate);
+        }
+        if (cancelIaBtn) {
+            cancelIaBtn.addEventListener('click', cancelGenerate);
+        }
+    });
+</script>
+{% endblock %}

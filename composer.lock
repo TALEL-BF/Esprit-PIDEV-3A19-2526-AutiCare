@@ -6,6 +6,7 @@
     ],
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     "content-hash": "70aa5e481608b03afe259fce3d3e6a85",
 =======
     "content-hash": "34c7c6db494892f2377a0938a482850a",
@@ -13,6 +14,9 @@
 =======
     "content-hash": "70aa5e481608b03afe259fce3d3e6a85",
 >>>>>>> Consultation
+=======
+    "content-hash": "8fcb20eb1dab73f026126e0d0849d470",
+>>>>>>> gestion_evenement
     "packages": [
         {
             "name": "composer/semver",
@@ -1605,6 +1609,7 @@
         {
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> Consultation
             "name": "myclabs/deep-copy",
@@ -1640,12 +1645,42 @@
                 ],
                 "psr-4": {
                     "DeepCopy\\": "src/DeepCopy/"
+=======
+            "name": "php-ai/php-ml",
+            "version": "0.10.0",
+            "source": {
+                "type": "git",
+                "url": "git@gitlab.com:php-ai/php-ml.git",
+                "reference": "543f11158c57bf64ef8ddecd5bab51d396d39f50"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://gitlab.com/api/v4/projects/php-ai%2Fphp-ml/repository/archive.zip?sha=543f11158c57bf64ef8ddecd5bab51d396d39f50",
+                "reference": "543f11158c57bf64ef8ddecd5bab51d396d39f50",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.0"
+            },
+            "require-dev": {
+                "phpbench/phpbench": "^1.2",
+                "phpstan/phpstan": "^0.12",
+                "phpstan/phpstan-phpunit": "^0.12",
+                "phpstan/phpstan-strict-rules": "^0.12",
+                "phpunit/phpunit": "^8.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Phpml\\": "src/"
+>>>>>>> gestion_evenement
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
+<<<<<<< HEAD
             "description": "Create deep copies (clones) of your objects",
             "keywords": [
                 "clone",
@@ -1848,6 +1883,28 @@
 >>>>>>> gestion_evenement
 =======
 >>>>>>> Consultation
+=======
+            "authors": [
+                {
+                    "name": "Arkadiusz Kondas",
+                    "email": "arkadiusz.kondas@gmail.com"
+                }
+            ],
+            "description": "PHP-ML - Machine Learning library for PHP",
+            "homepage": "https://gitlab.com/php-ai/php-ml",
+            "keywords": [
+                "Neural network",
+                "artificial intelligence",
+                "computational learning theory",
+                "data science",
+                "feature extraction",
+                "machine learning",
+                "pattern recognition"
+            ],
+            "time": "2022-11-09T09:25:29+00:00"
+        },
+        {
+>>>>>>> gestion_evenement
             "name": "phpdocumentor/reflection-common",
             "version": "2.2.0",
             "source": {

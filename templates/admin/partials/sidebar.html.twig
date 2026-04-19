@@ -60,6 +60,7 @@
             </div>
         </div>
 
+<<<<<<< HEAD
         {# ==================== ÉVÉNEMENTS ==================== #}
         <div class="nav-item-wrap {% if app.request.get('_route') starts with 'admin_evenements' or app.request.get('_route') starts with 'admin_sponsors' %}open{% endif %}">
             <div class="nav-link-item" onclick="toggleSection('evenement', event)">
@@ -73,6 +74,19 @@
                 <a class="nav-sub-link {% if app.request.get('_route') == 'admin_evenements' %}active{% endif %}" 
                    href="{{ path('admin_evenements') }}">
                     <i class="fas fa-calendar-alt"></i> Événements
+=======
+        {# ==================== ÉVÉNEMENT ==================== #}
+        <div class="nav-item-wrap">
+            <a class="nav-link-item {% if app.request.get('_route') == 'admin_evenements_dashboard' %}active{% endif %}" 
+               href="{{ path('admin_evenements_dashboard') }}">
+                <span class="nav-icon"><i class="fas fa-calendar-alt"></i></span>
+                Événement
+            </a>
+            <div class="nav-sub">
+                <a class="nav-sub-link {% if app.request.get('_route') == 'admin_evenements' %}active{% endif %}" 
+                   href="{{ path('admin_evenements') }}">
+                        <i class="fas fa-calendar-alt"></i> Événements
+>>>>>>> gestion_evenement
                 </a>
                 <a class="nav-sub-link {% if app.request.get('_route') == 'admin_sponsors' %}active{% endif %}" 
                    href="{{ path('admin_sponsors') }}">
