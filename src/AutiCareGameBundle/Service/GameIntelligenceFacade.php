@@ -3,13 +3,15 @@
 namespace App\AutiCareGameBundle\Service;
 
 use App\Service\AiTherapeuticSummaryService;
+use App\Service\AdaptiveGamePlanService;
 use App\Service\TherapeuticInsightsService;
 
 class GameIntelligenceFacade
 {
     public function __construct(
         private readonly TherapeuticInsightsService $therapeuticInsightsService,
-        private readonly AiTherapeuticSummaryService $aiTherapeuticSummaryService
+        private readonly AiTherapeuticSummaryService $aiTherapeuticSummaryService,
+        private readonly AdaptiveGamePlanService $adaptiveGamePlanService
     ) {
     }
 
@@ -25,6 +27,7 @@ class GameIntelligenceFacade
         bool $generateAi = false
     ): array {
         $insights = $this->therapeuticInsightsService->buildWeeklyInsights($enfantId);
+        $adaptivePlan = $this->adaptiveGamePlanService->buildWeeklyPlan($insights);
 
         $aiSummary = null;
         if ($generateAi) {
@@ -38,6 +41,7 @@ class GameIntelligenceFacade
 
         return [
             'insights' => $insights,
+            'adaptive_plan' => $adaptivePlan,
             'ai_summary' => $aiSummary,
         ];
     }

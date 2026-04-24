@@ -51,6 +51,46 @@
 </div>
 {% endif %}
 
+{% if adaptive_plan %}
+<div class="card-box mb-4">
+    <div class="card-box-header">
+        <span class="card-box-title">
+            <i class="fas fa-wand-magic-sparkles"></i>
+            Plan hebdo adaptatif
+            <span class="badge bg-info ms-2">IA locale</span>
+        </span>
+    </div>
+    <div class="card-box-body">
+        <p class="mb-1"><strong>Niveau cible:</strong> {{ adaptive_plan.target_level }}</p>
+        <p class="mb-2"><strong>Competences prioritaires:</strong> {{ adaptive_plan.focus_skills|join(', ') }}</p>
+        <p class="mb-3"><strong>Objectif de la semaine:</strong> {{ adaptive_plan.weekly_objective }}</p>
+
+        <div class="table-wrapper">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Jeu recommande</th>
+                        <th>Categorie</th>
+                        <th>Justification</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for game in adaptive_plan.recommended_games %}
+                    <tr>
+                        <td>{{ game.title }}</td>
+                        <td>{{ game.category }}</td>
+                        <td>{{ game.justification }}</td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="3" class="text-center">Aucune recommandation disponible</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <div class="row g-4 mb-4">
     <div class="col-md-3">
         <div class="card-box h-100">

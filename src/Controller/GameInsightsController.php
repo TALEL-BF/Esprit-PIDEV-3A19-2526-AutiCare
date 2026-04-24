@@ -47,6 +47,7 @@ class GameInsightsController extends AbstractController
         $recentSessions = [];
         $recentNotes = [];
         $aiSummary = null;
+        $adaptivePlan = null;
 
         if ($enfantId > 0) {
             $recentSessions = $gameSessionRepository->findRecentByEnfant($enfantId, 12);
@@ -55,6 +56,7 @@ class GameInsightsController extends AbstractController
             $payload = $gameIntelligenceFacade->buildInsightPayload($enfantId, $recentSessions, $recentNotes, $generateAi);
             $insights = $payload['insights'];
             $aiSummary = $payload['ai_summary'];
+            $adaptivePlan = $payload['adaptive_plan'];
 
             if ($generateAi && is_array($aiSummary) && !empty($aiSummary['error'])) {
                 $this->addFlash('danger', 'Generation IA indisponible: fallback local applique.');
@@ -85,6 +87,7 @@ class GameInsightsController extends AbstractController
             'enfant_id' => $enfantId > 0 ? $enfantId : null,
             'insights' => $insights,
             'ai_summary' => $aiSummary,
+            'adaptive_plan' => $adaptivePlan,
             'recent_sessions' => $recentSessions,
             'recent_notes' => $recentNotes,
             'game_session_form' => $gameSessionForm->createView(),

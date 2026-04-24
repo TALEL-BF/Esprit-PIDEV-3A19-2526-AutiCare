@@ -36,7 +36,7 @@ final class SuiviTotalController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             // La moyenne est calculée automatiquement dans l'entité
-            $suiviTotal->updateMoyenne();
+            $suiviTotal->calculerMoyenneGenerale();
             $niveau = $niveauResolverService->findByMoyenne((float) $suiviTotal->getMoyenne());
 
             if ($niveau !== null) {

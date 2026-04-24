@@ -1,0 +1,31 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Property App\\Entity\\ClinicalNote\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/ClinicalNote.php
+
+		-
+			message: '#^Property App\\Entity\\GameSession\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/GameSession.php
+
+		-
+			message: '#^Property App\\Entity\\GameSession\:\:\$maxScore \(float\|null\) is never assigned null so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/GameSession.php
+
+		-
+			message: '#^Property App\\Entity\\NiveauJeu\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/NiveauJeu.php
+
+		-
+			message: '#^Property App\\Entity\\SuiviTotal\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/SuiviTotal.php
