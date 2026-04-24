@@ -91,6 +91,10 @@
                    href="{{ path('admin_seance') }}">
                     <i class="fas fa-clock"></i> Séance
                 </a>
+                 <a class="nav-sub-link {% if app.request.get('_route') == 'admin_article' %}active{% endif %}" 
+                   href="{{ path('admin_article') }}">
+                    <i class="fas fa-clock"></i> Article
+                </a>
             </div>
         </div>
 

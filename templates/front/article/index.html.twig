@@ -1,0 +1,853 @@
+{# templates/front/article/index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}AutiCare — Articles & Conseils{% endblock %}
+
+{% block body %}
+
+    {# ── Page Header ─────────────────────────────────────── #}
+    <div class="container-fluid page-header-article py-5">
+        <div class="container text-center py-5">
+            <h1 class="display-3 text-white wow fadeInDown">
+                <i class="fas fa-newspaper me-3"></i>Articles & Conseils
+            </h1>
+            <p class="text-white opacity-75 fs-5 mb-3">Ressources et conseils pour accompagner les enfants TSA</p>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb justify-content-center mb-0">
+                    <li class="breadcrumb-item"><a href="{{ path('app_home') }}" class="text-white fw-600">Accueil</a></li>
+                    <li class="breadcrumb-item active" style="color:rgba(255,255,255,.8);">Articles & Conseils</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    {# ── Stats bar ────────────────────────────────────────── #}
+    <div class="stats-bar">
+        <div class="container">
+            <div class="d-flex align-items-center justify-content-center flex-wrap">
+                <div class="stat-item">
+                    <div class="stat-number">{{ articles|length }}</div>
+                    <div class="stat-label">📰 Articles publiés</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ totalLikes }}</div>
+                    <div class="stat-label">❤️ Likes au total</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ categories|length }}</div>
+                    <div class="stat-label">🗂️ Catégories</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# ── Trending article ─────────────────────────────────── #}
+    {% if trendingList|length > 0 %}
+    <div class="trending-section">
+        <div class="container position-relative">
+
+            {# Label co-tendance #}
+            <div class="text-center mb-3">
+                <div class="trending-badge">
+                    <i class="fas fa-fire"></i>
+                    {% if trendingList|length > 1 %}
+                        {{ trendingList|length }} articles en co-tendance — {{ trendingList[0].likesCount }} ❤️ chacun
+                    {% else %}
+                        Article Tendance — {{ trendingList[0].likesCount }} ❤️
+                    {% endif %}
+                </div>
+            </div>
+
+            {# Grille des articles tendance #}
+            <div class="trending-grid">
+                {% for t in trendingList %}
+                <div class="trending-card-compact wow fadeInUp" data-wow-delay="0.{{ loop.index }}s">
+                    <div class="trending-card-left">
+                        <span class="trending-cat-pill">{{ t.categorie }}</span>
+                        <h3 class="trending-title-compact">{{ t.titre }}</h3>
+                        <p class="trending-excerpt-compact">
+                            {{ t.contenu|slice(0, 120) }}{% if t.contenu|length > 120 %}...{% endif %}
+                        </p>
+                    </div>
+                    <div class="trending-card-right">
+                        <div class="trending-author-row">
+                            {% if t.auteurImage %}
+                                <img src="{{ t.auteurImage }}" alt="{{ t.auteur }}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.3);">
+                            {% else %}
+                                <div class="trending-author-avatar" style="width:32px;height:32px;font-size:.72rem;">{{ t.auteur|slice(0,1)|upper }}</div>
+                            {% endif %}
+                            <span class="text-white" style="font-size:.78rem;font-weight:700;">{{ t.auteur }}</span>
+                        </div>
+                        <div class="trending-likes-compact" id="trendingLikes_{{ t.id }}" data-id="{{ t.id }}">
+                            <i class="fas fa-heart"></i>
+                            <span class="trendingLikeCount">{{ t.likesCount }}</span>
+                        </div>
+                        <button class="trending-btn-compact read-more-btn"
+                                data-id="{{ t.id }}"
+                                data-titre="{{ t.titre|e('html_attr') }}"
+                                data-contenu="{{ t.contenu|e('html_attr') }}"
+                                data-auteur="{{ t.auteur|e('html_attr') }}"
+                                data-categorie="{{ t.categorie|e('html_attr') }}"
+                                data-date="{{ t.dateCreation is not null ? t.dateCreation|date('d/m/Y') : '' }}"
+                                data-likes="{{ t.likesCount }}"
+                                data-auteur-image="{{ t.auteurImage|default('')|e('html_attr') }}">
+                            <i class="fas fa-book-open me-1"></i> Lire
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+        </div>
+    </div>
+    {% endif %}
+
+    {# ── Filtres catégories ───────────────────────────────── #}
+    <div class="filter-bar-sticky">
+        <div class="container">
+            <div class="d-flex align-items-center gap-3 flex-wrap justify-content-between">
+                <div class="d-flex gap-2 flex-wrap align-items-center" id="catFilters">
+                    <span class="text-muted small fw-600 me-1" style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;">Filtrer :</span>
+                    <button class="cat-filter-btn active" data-cat="">🗂️ Tous</button>
+                    {% for cat in categories %}
+                    <button class="cat-filter-btn" data-cat="{{ cat }}">{{ cat }}</button>
+                    {% endfor %}
+                </div>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Rechercher un article...">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# ── Grille d'articles ────────────────────────────────── #}
+    <div class="container-fluid py-5">
+        <div class="container">
+
+            {# Tri tendance #}
+            <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+                <div>
+                    <span style="font-size:1.5rem;font-weight:900;background:linear-gradient(135deg,#4d65f9,#ff4880);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;" id="articleCount">{{ articles|length }}</span>
+                    <span class="text-muted fw-600"> article(s) trouvé(s)</span>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="sort-btn active" data-sort="recent"><i class="fas fa-clock me-1"></i>Plus récents</button>
+                    <button class="sort-btn" data-sort="likes"><i class="fas fa-fire me-1"></i>Tendances</button>
+                </div>
+            </div>
+
+            <div class="row g-4" id="articleGrid">
+                {% for a in articles %}
+                <div class="col-md-6 col-lg-4 article-item wow fadeInUp"
+                     data-wow-delay="0.{{ loop.index % 3 + 1 }}s"
+                     data-id="{{ a.id }}"
+                     data-cat="{{ a.categorie }}"
+                     data-titre="{{ a.titre|lower }}"
+                     data-likes="{{ a.likesCount|default(0) }}"
+                     data-date="{{ a.dateCreation is not null ? a.dateCreation|date('Y-m-d') : '0000-00-00' }}">
+                    <div class="front-article-card h-100">
+
+                        {# Header coloré #}
+                        <div class="front-article-header">
+                            <span class="front-cat-badge">{{ a.categorie }}</span>
+                            <h5 class="front-article-title read-more-btn"
+                                data-id="{{ a.id }}"
+                                data-titre="{{ a.titre|e('html_attr') }}"
+                                data-contenu="{{ a.contenu|e('html_attr') }}"
+                                data-auteur="{{ a.auteur|e('html_attr') }}"
+                                data-categorie="{{ a.categorie|e('html_attr') }}"
+                                data-date="{{ a.dateCreation is not null ? a.dateCreation|date('d/m/Y') : '' }}"
+                                data-likes="{{ a.likesCount|default(0) }}"
+                                data-auteur-image="{{ a.auteurImage|default('')|e('html_attr') }}">
+                                {{ a.titre }}
+                            </h5>
+                        </div>
+
+                        {# Body #}
+                        <div class="front-article-body">
+                            <p class="front-article-excerpt">
+                                {{ a.contenu|slice(0, 140) }}{% if a.contenu|length > 140 %}...{% endif %}
+                            </p>
+
+                            {# Meta auteur #}
+                            <div class="front-article-meta">
+                                {% if a.auteurImage %}
+                                    <img src="{{ a.auteurImage }}" alt="{{ a.auteur }}"
+                                         class="front-avatar-img"
+                                         onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                                    <div class="front-avatar-fallback" style="display:none;">{{ a.auteur|slice(0,1)|upper }}</div>
+                                {% else %}
+                                    <div class="front-avatar-fallback">{{ a.auteur|slice(0,1)|upper }}</div>
+                                {% endif %}
+                                <div>
+                                    <div class="fw-bold small">{{ a.auteur }}</div>
+                                    <div class="text-muted" style="font-size:.72rem;">
+                                        {{ a.dateCreation is not null ? a.dateCreation|date('d/m/Y') : '—' }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {# Footer likes #}
+                        <div class="front-article-footer">
+                            <button class="like-btn {% if likedIds[a.id] is defined %}liked{% endif %}"
+                                    data-id="{{ a.id }}"
+                                    title="J'aime cet article">
+                                <i class="fas fa-heart"></i>
+                                <span class="like-count">{{ a.likesCount|default(0) }}</span>
+                            </button>
+                            <button class="read-btn read-more-btn"
+                                    data-id="{{ a.id }}"
+                                    data-titre="{{ a.titre|e('html_attr') }}"
+                                    data-contenu="{{ a.contenu|e('html_attr') }}"
+                                    data-auteur="{{ a.auteur|e('html_attr') }}"
+                                    data-categorie="{{ a.categorie|e('html_attr') }}"
+                                    data-date="{{ a.dateCreation is not null ? a.dateCreation|date('d/m/Y') : '' }}"
+                                    data-likes="{{ a.likesCount|default(0) }}"
+                                    data-auteur-image="{{ a.auteurImage|default('')|e('html_attr') }}">
+                                Lire <i class="fas fa-arrow-right ms-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="col-12">
+                    <div class="empty-state">
+                        <i class="fas fa-newspaper fa-4x mb-3" style="color:#c4b5fd;"></i>
+                        <div class="fs-5 fw-bold text-primary mb-2">Aucun article publié pour le moment</div>
+                        <div class="text-muted">Les articles apparaîtront ici dès leur publication</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {# ── Modal lecture article ─────────────────────────────── #}
+    <div class="modal fade" id="articleModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content" style="border-radius:20px;overflow:hidden;border:none;">
+                <div class="modal-header-custom" id="modalHeader">
+                    <div style="flex:1">
+                        <span class="modal-cat-badge" id="modalCategorie"></span>
+                        <h4 class="modal-titre" id="modalTitre"></h4>
+                        <div class="modal-meta" id="modalMeta"></div>
+                    </div>
+                    <button type="button" class="modal-close-btn" data-bs-dismiss="modal">
+                        <i class="fas fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="modal-body p-4" style="line-height:1.8;font-size:.95rem;color:#374151;white-space:pre-wrap;" id="modalContenu">
+                </div>
+                <div class="modal-footer border-0 px-4 pb-4 pt-0 justify-content-between">
+                    <button class="like-btn-modal" id="modalLikeBtn">
+                        <i class="fas fa-heart"></i>
+                        <span id="modalLikeCount">0</span> like(s)
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-border-radius" data-bs-dismiss="modal">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+/* ══════════════════════════════════════════════════════════
+   PAGE HEADER
+══════════════════════════════════════════════════════════ */
+.page-header-article {
+    background: linear-gradient(135deg, #4d65f9 0%, #a855f7 50%, #ff4880 100%);
+    position: relative; overflow: hidden;
+}
+
+/* ══════════════════════════════════════════════════════════
+   STATS BAR
+══════════════════════════════════════════════════════════ */
+.stats-bar { background: #fff; border-bottom: 1px solid #f0f0f8; }
+.stat-item {
+    padding: 20px 40px;
+    border-right: 1px solid #f0f0f8;
+    text-align: center;
+}
+.stat-item:last-child { border-right: none; }
+.stat-number {
+    font-size: 2rem; font-weight: 900;
+    background: linear-gradient(135deg, #4d65f9, #ff4880);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+}
+.stat-label { font-size: .8rem; color: #9ca3af; font-weight: 600; margin-top: 4px; }
+
+/* ══════════════════════════════════════════════════════════
+   TRENDING
+══════════════════════════════════════════════════════════ */
+.trending-section {
+    background: linear-gradient(135deg, #1a1a4e 0%, #2d1b69 50%, #4d1a3e 100%);
+    padding: 28px 0;
+}
+.trending-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+}
+.trending-grid .trending-card-compact {
+    flex: 0 1 420px;
+    max-width: 480px;
+}
+.trending-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    color: #fff; border-radius: 50px;
+    font-size: .72rem; font-weight: 800;
+    padding: 5px 14px;
+    box-shadow: 0 4px 16px rgba(245,158,11,.4);
+    animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{transform:scale(1);}50%{transform:scale(1.04);} }
+
+.trending-card-compact {
+    background: rgba(255,255,255,.06);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 20px;
+    padding: 24px 30px;
+    display: flex; align-items: center; gap: 30px;
+    position: relative; overflow: hidden;
+}
+.trending-card-compact::before {
+    content: ''; position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, #f59e0b, #ef4444, transparent);
+}
+.trending-card-left { flex: 1; }
+.trending-card-right {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 10px;
+    flex-shrink: 0; min-width: 150px;
+}
+.trending-cat-pill {
+    display: inline-block;
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgba(255,255,255,.25);
+    color: #fff; border-radius: 50px;
+    font-size: .65rem; font-weight: 800;
+    padding: 3px 12px; margin-bottom: 8px;
+    letter-spacing: 1px; text-transform: uppercase;
+}
+.trending-title-compact {
+    font-size: 1.1rem; font-weight: 900; color: #fff;
+    line-height: 1.35; margin-bottom: 8px;
+}
+.trending-excerpt-compact {
+    color: rgba(255,255,255,.65); line-height: 1.6;
+    font-size: .82rem; margin: 0;
+}
+.trending-author-row {
+    display: flex; align-items: center; gap: 8px;
+}
+.trending-author-avatar {
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; color: #fff; border-radius: 50%;
+    flex-shrink: 0;
+}
+.trending-likes-compact {
+    display: flex; align-items: center; gap: 5px;
+    color: #fca5a5; font-weight: 800; font-size: .9rem;
+    transition: transform .2s;
+}
+.trending-likes-compact.bump { animation: likeBump .4s cubic-bezier(.34,1.56,.64,1); }
+@keyframes likeBump { 0%,100%{transform:scale(1);}50%{transform:scale(1.3);} }
+.trending-btn-compact {
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    color: #fff; border: none; border-radius: 50px;
+    padding: 8px 22px; font-weight: 700; font-size: .8rem;
+    cursor: pointer; transition: all .2s;
+    box-shadow: 0 4px 16px rgba(239,68,68,.3);
+    white-space: nowrap;
+}
+.trending-btn-compact:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(239,68,68,.45); }
+
+/* ══════════════════════════════════════════════════════════
+   FILTER BAR
+══════════════════════════════════════════════════════════ */
+.filter-bar-sticky {
+    position: sticky; top: 0; z-index: 100;
+    background: #fff;
+    border-bottom: 1px solid #f0f0f8;
+    box-shadow: 0 4px 20px rgba(0,0,0,.06);
+    padding: 14px 0;
+}
+.cat-filter-btn {
+    padding: 7px 18px; border-radius: 50px;
+    font-size: .78rem; font-weight: 700;
+    border: 1.5px solid #e5e7eb;
+    background: #fff; color: #6b7280;
+    cursor: pointer; transition: all .2s; white-space: nowrap;
+}
+.cat-filter-btn:hover { border-color: #4d65f9; color: #4d65f9; background: #f0f3ff; }
+.cat-filter-btn.active {
+    background: linear-gradient(135deg, #4d65f9, #a855f7);
+    color: #fff; border-color: transparent;
+    box-shadow: 0 4px 14px rgba(77,101,249,.35);
+}
+.search-box {
+    display: flex; align-items: center; gap: 8px;
+    background: #f8f9ff; border: 1.5px solid #e5e7eb;
+    border-radius: 50px; padding: 8px 16px;
+    max-width: 280px;
+}
+.search-box input {
+    border: none; background: none; outline: none;
+    font-size: .82rem; color: #374151; width: 100%;
+}
+.search-box i { color: #9ca3af; }
+
+/* ══════════════════════════════════════════════════════════
+   SORT BUTTONS
+══════════════════════════════════════════════════════════ */
+.sort-btn {
+    padding: 7px 16px; border-radius: 50px;
+    font-size: .78rem; font-weight: 700;
+    border: 1.5px solid #e5e7eb;
+    background: #fff; color: #6b7280;
+    cursor: pointer; transition: all .2s;
+}
+.sort-btn.active {
+    background: linear-gradient(135deg, #ff4880, #ef4444);
+    color: #fff; border-color: transparent;
+    box-shadow: 0 4px 14px rgba(255,72,128,.3);
+}
+
+/* ══════════════════════════════════════════════════════════
+   ARTICLE CARDS  
+══════════════════════════════════════════════════════════ */
+.front-article-card {
+    border-radius: 22px; overflow: hidden;
+    border: 1px solid #f0f0f8;
+    box-shadow: 0 4px 24px rgba(77,101,249,.07);
+    transition: all .3s cubic-bezier(.34,1.56,.64,1);
+    display: flex; flex-direction: column;
+    background: #fff; height: 100%;
+}
+.front-article-card:hover {
+    transform: translateY(-8px) scale(1.01);
+    box-shadow: 0 20px 60px rgba(77,101,249,.18);
+    border-color: #c4b5fd;
+}
+.front-article-header {
+    background: linear-gradient(135deg, #4d65f9 0%, #a855f7 100%);
+    padding: 22px 24px 18px; position: relative; overflow: hidden;
+    min-height: 110px; display: flex; flex-direction: column; justify-content: flex-end;
+}
+.front-article-header::before {
+    content: ''; position: absolute;
+    top: -20px; right: -20px;
+    width: 100px; height: 100px;
+    background: rgba(255,255,255,.07);
+    border-radius: 50%;
+}
+.front-article-header::after {
+    content: ''; position: absolute;
+    bottom: -30px; right: 20px;
+    width: 60px; height: 60px;
+    background: rgba(255,255,255,.05);
+    border-radius: 50%;
+}
+.front-cat-badge {
+    display: inline-block;
+    background: rgba(255,255,255,.2);
+    border: 1px solid rgba(255,255,255,.3);
+    color: #fff; border-radius: 50px;
+    font-size: .65rem; font-weight: 800;
+    padding: 3px 10px; margin-bottom: 8px;
+    letter-spacing: .8px; text-transform: uppercase;
+    position: relative; z-index: 1;
+}
+.front-article-title {
+    color: #fff; font-weight: 800;
+    font-size: .95rem; line-height: 1.4;
+    margin: 0; cursor: pointer;
+    transition: opacity .15s;
+    position: relative; z-index: 1;
+    display: block;
+}
+.front-article-title:hover { opacity: .85; text-decoration: underline; text-underline-offset: 3px; }
+.front-article-body { padding: 18px 22px; flex: 1; }
+.front-article-excerpt {
+    font-size: .82rem; color: #6b7280;
+    line-height: 1.7; margin-bottom: 16px;
+}
+.front-article-meta { display: flex; align-items: center; gap: 10px; }
+.front-avatar-img {
+    width: 38px; height: 38px; border-radius: 50%;
+    object-fit: cover; flex-shrink: 0;
+    border: 2px solid #ede9fe;
+}
+.front-avatar-fallback {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: linear-gradient(135deg, #4d65f9, #a855f7);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; color: #fff; font-size: .85rem; flex-shrink: 0;
+}
+.author-name { font-size: .8rem; font-weight: 700; color: #1e1b4b; }
+.author-date { font-size: .7rem; color: #9ca3af; }
+
+.front-article-footer {
+    padding: 12px 22px 18px;
+    display: flex; align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid #f5f5f8;
+}
+
+/* ══════════════════════════════════════════════════════════
+   LIKE BUTTON
+══════════════════════════════════════════════════════════ */
+.like-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #fff5f5; border: 1.5px solid #fecdd3;
+    color: #ef4444; border-radius: 50px;
+    padding: 6px 14px; font-size: .78rem; font-weight: 700;
+    cursor: pointer; transition: all .25s;
+}
+.like-btn:hover { background: #fee2e2; transform: scale(1.05); }
+.like-btn.liked { background: #ef4444; color: #fff; border-color: #ef4444; box-shadow: 0 4px 14px rgba(239,68,68,.35); }
+.like-btn i { transition: transform .3s cubic-bezier(.34,1.56,.64,1); }
+.like-btn:hover i, .like-btn.liked i { transform: scale(1.3); }
+
+.read-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #f0f3ff; border: 1.5px solid #c7d2fe;
+    color: #4d65f9; border-radius: 50px;
+    padding: 6px 16px; font-size: .78rem; font-weight: 700;
+    cursor: pointer; transition: all .2s;
+}
+.read-btn:hover { background: #4d65f9; color: #fff; border-color: #4d65f9; }
+
+/* ══════════════════════════════════════════════════════════
+   MODAL
+══════════════════════════════════════════════════════════ */
+.modal-content { border-radius: 24px !important; overflow: hidden; border: none !important; box-shadow: 0 32px 80px rgba(0,0,0,.25) !important; }
+.modal-header-custom {
+    background: linear-gradient(135deg, #4d65f9, #a855f7, #ff4880);
+    padding: 2rem 2.2rem; color: #fff;
+    display: flex; align-items: flex-start;
+    justify-content: space-between; gap: 1rem;
+}
+.modal-cat-badge {
+    display: inline-block;
+    background: rgba(255,255,255,.2);
+    border: 1px solid rgba(255,255,255,.3);
+    border-radius: 50px; font-size: .7rem;
+    font-weight: 800; padding: 3px 14px; margin-bottom: 8px;
+    letter-spacing: .8px; text-transform: uppercase;
+}
+.modal-titre { font-weight: 900; font-size: 1.35rem; margin: 0; line-height: 1.3; }
+.modal-meta { font-size: .82rem; opacity: .8; margin-top: 8px; }
+.modal-close-btn {
+    background: rgba(255,255,255,.15); border: none; color: #fff;
+    width: 34px; height: 34px; border-radius: 50%;
+    cursor: pointer; font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: background .2s;
+}
+.modal-close-btn:hover { background: rgba(255,255,255,.3); }
+.like-btn-modal {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: #fff5f5; border: 1.5px solid #fecdd3;
+    color: #ef4444; border-radius: 50px;
+    padding: 9px 22px; font-size: .88rem; font-weight: 700;
+    cursor: pointer; transition: all .2s;
+}
+.like-btn-modal:hover, .like-btn-modal.liked {
+    background: #ef4444; color: #fff; border-color: #ef4444;
+}
+
+/* ══════════════════════════════════════════════════════════
+   EMPTY STATE
+══════════════════════════════════════════════════════════ */
+.empty-state {
+    text-align: center; padding: 80px 20px;
+    background: #f8f9ff; border-radius: 24px;
+    border: 2px dashed #e0e7ff;
+}
+
+.btn-border-radius { border-radius: 50px !important; }
+</style>
+
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    // ─── Liked IDs from session (passed by controller) ───────
+    let likedIds = {{ likedIds|json_encode|raw }};
+
+    /* ══════════════════════════════════════════════════════════
+       MODAL LECTURE
+    ══════════════════════════════════════════════════════════ */
+    let currentArticleId = null;
+
+    function openArticleModal(d) {
+        currentArticleId = d.id;
+        document.getElementById('modalCategorie').textContent = d.categorie || '';
+        document.getElementById('modalTitre').textContent     = d.titre     || '';
+        document.getElementById('modalMeta').textContent      = `✍️ ${d.auteur} · 📅 ${d.date}`;
+        document.getElementById('modalContenu').textContent   = d.contenu   || '';
+        document.getElementById('modalLikeCount').textContent = d.likes     || 0;
+
+        const likeBtn = document.getElementById('modalLikeBtn');
+        likeBtn.classList.toggle('liked', likedIds.hasOwnProperty(d.id));
+
+        new bootstrap.Modal(document.getElementById('articleModal')).show();
+    }
+
+    // Délégation sur tous les boutons "Lire"
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.read-more-btn');
+        if (!btn) return;
+        openArticleModal(btn.dataset);
+    });
+
+    /* ══════════════════════════════════════════════════════════
+       LIKE SYSTEM
+    ══════════════════════════════════════════════════════════ */
+    // ── Données articles en mémoire pour trending temps réel ──
+    // On lit depuis les cards dans la grille
+    function getAllArticlesData() {
+        const map = {};
+        document.querySelectorAll('.article-item').forEach(item => {
+            const id = item.dataset.id;
+            if (id) map[id] = {
+                id,
+                likes:    parseInt(item.dataset.likes) || 0,
+                date:     item.dataset.date || '',
+                cat:      item.dataset.cat  || '',
+                titre:    item.querySelector('.front-article-title')?.dataset.titre || item.dataset.titre || '',
+                contenu:  item.querySelector('.front-article-title')?.dataset.contenu || '',
+                auteur:   item.querySelector('.front-article-title')?.dataset.auteur || '',
+                categorie:item.querySelector('.front-article-title')?.dataset.categorie || item.dataset.cat || '',
+                dateDisp: item.querySelector('.front-article-title')?.dataset.date || '',
+                auteurImage: item.querySelector('.front-article-title')?.dataset.auteurImage || '',
+                auteurInitial: item.querySelector('.front-avatar-fallback')?.textContent?.trim() || '?',
+                auteurHasImg:  !!item.querySelector('.front-avatar-img'),
+                auteurImgSrc:  item.querySelector('.front-avatar-img')?.src || '',
+            };
+        });
+        return map;
+    }
+
+    // ── Rebuild trending zone ─────────────────────────────────
+    function rebuildTrending() {
+        const map = getAllArticlesData();
+        const all = Object.values(map);
+        if (!all.length) return;
+
+        const maxLikes = Math.max(...all.map(a => a.likes));
+        const trending = maxLikes > 0
+            ? all.filter(a => a.likes === maxLikes).sort((a,b) => b.date.localeCompare(a.date))
+            : [];
+
+        const section  = document.querySelector('.trending-section');
+        const badge    = section?.querySelector('.trending-badge');
+        const grid     = section?.querySelector('.trending-grid');
+
+        if (!section || !grid) return;
+
+        // Met à jour le badge
+        if (badge) {
+            if (trending.length > 1) {
+                badge.innerHTML = `<i class="fas fa-fire"></i> ${trending.length} articles en co-tendance — ${maxLikes} ❤️ chacun`;
+            } else if (trending.length === 1) {
+                badge.innerHTML = `<i class="fas fa-fire"></i> Article Tendance — ${maxLikes} ❤️`;
+            }
+        }
+
+        // IDs actuellement dans la zone tendance
+        const currentIds = new Set([...grid.querySelectorAll('.trending-card-compact')].map(c => c.dataset.id));
+        const newIds     = new Set(trending.map(a => a.id));
+
+        // Supprimer ceux qui ne sont plus en tendance
+        grid.querySelectorAll('.trending-card-compact').forEach(card => {
+            if (!newIds.has(card.dataset.id)) {
+                card.style.transition = 'opacity .4s, transform .4s';
+                card.style.opacity    = '0';
+                card.style.transform  = 'scale(.9)';
+                setTimeout(() => card.remove(), 400);
+            }
+        });
+
+        // Ajouter les nouveaux
+        trending.forEach(a => {
+            if (currentIds.has(a.id)) {
+                // Juste màj le compteur
+                const el = grid.querySelector(`.trending-card-compact[data-id="${a.id}"] .trendingLikeCount`);
+                if (el) el.textContent = a.likes;
+                return;
+            }
+            // Créer la carte
+            const avatarHtml = a.auteurImgSrc
+                ? `<img src="${a.auteurImgSrc}" alt="${a.auteur}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.3);">`
+                : `<div class="trending-author-avatar" style="width:32px;height:32px;font-size:.72rem;">${a.auteurInitial}</div>`;
+
+            const card = document.createElement('div');
+            card.className   = 'trending-card-compact';
+            card.dataset.id  = a.id;
+            card.style.opacity   = '0';
+            card.style.transform = 'scale(.9)';
+            card.style.transition = 'opacity .4s, transform .4s';
+            card.innerHTML = `
+                <div class="trending-card-left">
+                    <span class="trending-cat-pill">${a.categorie}</span>
+                    <h3 class="trending-title-compact">${a.titre}</h3>
+                    <p class="trending-excerpt-compact">${(a.contenu||'').slice(0,120)}${(a.contenu||'').length>120?'...':''}</p>
+                </div>
+                <div class="trending-card-right">
+                    <div class="trending-author-row">${avatarHtml}<span class="text-white" style="font-size:.78rem;font-weight:700;">${a.auteur}</span></div>
+                    <div class="trending-likes-compact" id="trendingLikes_${a.id}" data-id="${a.id}">
+                        <i class="fas fa-heart"></i>
+                        <span class="trendingLikeCount">${a.likes}</span>
+                    </div>
+                    <button class="trending-btn-compact read-more-btn"
+                        data-id="${a.id}" data-titre="${a.titre}" data-contenu="${a.contenu||''}"
+                        data-auteur="${a.auteur}" data-categorie="${a.categorie}"
+                        data-date="${a.dateDisp}" data-likes="${a.likes}"
+                        data-auteur-image="${a.auteurImgSrc}">
+                        <i class="fas fa-book-open me-1"></i> Lire
+                    </button>
+                </div>`;
+            grid.appendChild(card);
+            requestAnimationFrame(() => {
+                card.style.opacity   = '1';
+                card.style.transform = 'scale(1)';
+            });
+        });
+
+        // Masquer/afficher la section entière
+        if (maxLikes === 0 || trending.length === 0) {
+            section.style.transition = 'opacity .4s';
+            section.style.opacity = '0';
+            setTimeout(() => section.style.display = 'none', 400);
+        } else {
+            section.style.display = '';
+            requestAnimationFrame(() => { section.style.opacity = '1'; });
+        }
+    }
+
+    async function doLike(id, countEl, btn) {
+        try {
+            const res  = await fetch(`/article/${id}/like`, { method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            const data = await res.json();
+            if (data.success) {
+                // Update card like count
+                if(countEl) countEl.textContent = data.likes;
+                if (data.liked) {
+                    likedIds[id] = true;
+                    if(btn) btn.classList.add('liked');
+                } else {
+                    delete likedIds[id];
+                    if(btn) btn.classList.remove('liked');
+                }
+                // Update dataset
+                const item = document.querySelector(`.article-item[data-id="${id}"]`);
+                if(item) item.dataset.likes = data.likes;
+
+                // ── Sync modal ─────────────
+                if (currentArticleId == id) {
+                    document.getElementById('modalLikeCount').textContent = data.likes;
+                    document.getElementById('modalLikeBtn').classList.toggle('liked', data.liked);
+                }
+
+                // ── Rebuild trending en temps réel ──
+                rebuildTrending();
+            }
+        } catch(e) { console.error('Like failed', e); }
+    }
+
+    // Like depuis les cartes
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.like-btn:not(.like-btn-modal)');
+        if (!btn) return;
+        const id       = btn.dataset.id;
+        const countEl  = btn.querySelector('.like-count');
+        doLike(id, countEl, btn);
+    });
+
+    // Like depuis la modal
+    document.getElementById('modalLikeBtn').addEventListener('click', function() {
+        if (!currentArticleId) return;
+        // Sync avec la carte dans la grille
+        const cardBtn = document.querySelector(`.like-btn[data-id="${currentArticleId}"]`);
+        const countEl = cardBtn?.querySelector('.like-count') || { textContent: 0 };
+        doLike(currentArticleId, countEl, cardBtn || document.createElement('div'));
+        // Update modal count directement via response dans doLike
+    });
+
+    /* ══════════════════════════════════════════════════════════
+       FILTRE PAR CATÉGORIE
+    ══════════════════════════════════════════════════════════ */
+    let activeCat = '';
+
+    function applyFilters() {
+        const txt = document.getElementById('searchInput').value.toLowerCase();
+        let visible = 0;
+        document.querySelectorAll('.article-item').forEach(item => {
+            const matchCat = !activeCat || item.dataset.cat === activeCat;
+            const matchTxt = !txt      || item.dataset.titre.includes(txt);
+            const show = matchCat && matchTxt;
+            item.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+        document.getElementById('articleCount').textContent = visible;
+    }
+
+    document.querySelectorAll('.cat-filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.cat-filter-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            activeCat = this.dataset.cat;
+            applyFilters();
+        });
+    });
+
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+
+    /* ══════════════════════════════════════════════════════════
+       TRI (récent / tendance)
+    ══════════════════════════════════════════════════════════ */
+    document.querySelectorAll('.sort-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+
+            const grid  = document.getElementById('articleGrid');
+            const items = [...grid.querySelectorAll('.article-item')];
+            const sort  = this.dataset.sort;
+
+            items.sort((a, b) => {
+                if (sort === 'likes') {
+                    const likeDiff = parseInt(b.dataset.likes) - parseInt(a.dataset.likes);
+                    // Si égalité de likes → le plus récent gagne
+                    if (likeDiff === 0) return b.dataset.date.localeCompare(a.dataset.date);
+                    return likeDiff;
+                } else {
+                    return b.dataset.date.localeCompare(a.dataset.date);
+                }
+            });
+
+            items.forEach(item => grid.appendChild(item));
+        });
+    });
+});
+</script>
+{% endblock %}
