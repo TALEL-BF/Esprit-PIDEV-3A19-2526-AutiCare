@@ -156,7 +156,7 @@ class SuivieController extends AbstractController
         $s->setScoreHumeur((int)($d['scoreHumeur']   ?? 0));
         $s->setScoreStress((int)($d['scoreStress']   ?? 0));
         $s->setScoreAttention((int)($d['scoreAttention'] ?? 0));
-        $s->setNiveauSeance(isset($d['niveauSeance']) && $d['niveauSeance'] !== '' && $d['niveauSeance'] !== null
+        $s->setNiveauSeance(isset($d['niveauSeance']) && $d['niveauSeance'] !== ''
             ? (int)$d['niveauSeance'] : null);
         $s->setComportement((string)($d['comportement'] ?? ''));
         $s->setInteractionSociale((string)($d['interactionSociale'] ?? ''));

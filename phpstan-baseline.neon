@@ -1,6 +1,18 @@
 parameters:
 	ignoreErrors:
 		-
+			message: '#^Property App\\Entity\\ArticleEntity\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/ArticleEntity.php
+
+		-
+			message: '#^Property App\\Entity\\ArticleEntity\:\:\$likesCount \(int\|null\) is never assigned null so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/ArticleEntity.php
+
+		-
 			message: '#^Property App\\Entity\\ClinicalNote\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
 			identifier: property.unusedType
 			count: 1
@@ -29,3 +41,15 @@ parameters:
 			identifier: property.unusedType
 			count: 1
 			path: src/Entity/SuiviTotal.php
+
+		-
+			message: '#^Property App\\Entity\\SuivieEntity\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/SuivieEntity.php
+
+		-
+			message: '#^Property App\\Entity\\TherapieEntity\:\:\$id \(int\|null\) is never assigned int so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Entity/TherapieEntity.php
