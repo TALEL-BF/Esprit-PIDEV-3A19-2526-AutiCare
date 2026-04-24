@@ -1,0 +1,52 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Ajouter un suivi{% endblock %}
+{% block page_title %}Ajouter un suivi{% endblock %}
+
+{% block body %}
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title">Nouveau suivi</h4>
+    </div>
+    <div class="card-body">
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+        <div class="mb-3">
+            {{ form_label(form.enfantId, 'Id enfant') }}
+            {{ form_widget(form.enfantId, {'attr': {'class': 'form-control'}}) }}
+            <div class="text-danger">
+                {{ form_errors(form.enfantId) }}
+            </div>
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.moyenne, 'Moyenne') }}
+            {{ form_widget(form.moyenne, {'attr': {'class': 'form-control'}}) }}
+            <div class="text-danger">
+                {{ form_errors(form.moyenne) }}
+            </div>
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.niveauJeu, 'Niveau') }}
+            {{ form_widget(form.niveauJeu, {'attr': {'class': 'form-select'}}) }}
+            <div class="text-danger">
+                {{ form_errors(form.niveauJeu) }}
+            </div>
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.remarque, 'Remarque') }}
+            {{ form_widget(form.remarque, {'attr': {'class': 'form-control', 'rows': 4}}) }}
+            <div class="text-danger">
+                {{ form_errors(form.remarque) }}
+            </div>
+        </div>
+
+        <button class="btn btn-success">Enregistrer</button>
+        <a href="{{ path('app_suivi_total_index') }}" class="btn btn-secondary">Retour</a>
+
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

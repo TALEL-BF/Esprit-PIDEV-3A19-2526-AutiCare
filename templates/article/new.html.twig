@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New ArticleEntity{% endblock %}
+
+{% block body %}
+    <h1>Create new ArticleEntity</h1>
+
+    {{ include('article/_form.html.twig') }}
+
+    <a href="{{ path('app_article_index') }}">back to list</a>
+{% endblock %}

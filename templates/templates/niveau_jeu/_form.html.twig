@@ -1,0 +1,38 @@
+{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+<div class="mb-3">
+    {{ form_label(form.libelle) }}
+    {{ form_widget(form.libelle) }}
+    <div class="text-danger">
+        {{ form_errors(form.libelle) }}
+    </div>
+</div>
+
+<div class="mb-3">
+    {{ form_label(form.minMoyenne) }}
+    {{ form_widget(form.minMoyenne) }}
+    <div class="text-danger">
+        {{ form_errors(form.minMoyenne) }}
+    </div>
+</div>
+
+<div class="mb-3">
+    {{ form_label(form.maxMoyenne) }}
+    {{ form_widget(form.maxMoyenne) }}
+    <div class="text-danger">
+        {{ form_errors(form.maxMoyenne) }}
+    </div>
+</div>
+
+<div class="mb-3">
+    {{ form_label(form.description) }}
+    {{ form_widget(form.description) }}
+    <div class="text-danger">
+        {{ form_errors(form.description) }}
+    </div>
+</div>
+
+<button class="btn btn-success">💾 Enregistrer</button>
+<a href="{{ path('app_niveau_jeu_index') }}" class="btn btn-secondary">← Retour à la liste</a>
+
+{{ form_end(form) }}

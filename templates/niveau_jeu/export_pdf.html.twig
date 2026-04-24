@@ -1,0 +1,33 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Export PDF — Niveaux de jeu{% endblock %}
+
+{% block body %}
+    <h2>Liste des niveaux de jeu</h2>
+    <table border="1" cellpadding="5" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Libellé</th>
+                <th>Min</th>
+                <th>Max</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for niveau in niveau_jeus %}
+            <tr>
+                <td>{{ niveau.id }}</td>
+                <td>{{ niveau.libelle }}</td>
+                <td>{{ niveau.minMoyenne }}</td>
+                <td>{{ niveau.maxMoyenne }}</td>
+                <td>{{ niveau.description ?: '-' }}</td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5">Aucun niveau trouvé</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

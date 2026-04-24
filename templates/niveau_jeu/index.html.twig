@@ -1,0 +1,181 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Auticare — Niveaux de jeu{% endblock %}
+{% block page_title %}Jeu — Niveaux{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .filter-input {
+        width: 260px;
+        font-size: .85rem;
+        padding: 8px 12px;
+    }
+    .badge-level {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: .75rem;
+        font-weight: 700;
+    }
+    .badge-facile {
+        background: rgba(16,185,129,.12);
+        color: #10b981;
+    }
+    .badge-moyen {
+        background: rgba(245,158,11,.14);
+        color: #d97706;
+    }
+    .badge-difficile {
+        background: rgba(239,68,68,.12);
+        color: #ef4444;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div class="page-header">
+    <h2><i class="fas fa-layer-group me-2" style="color:var(--purple-500)"></i>Niveaux de jeu</h2>
+    <p>Gérer les niveaux de difficulté des jeux éducatifs</p>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Total niveaux</div>
+                    <div class="stat-value">{{ niveau_jeus|length }}</div>
+                </div>
+                <div class="stat-icon purple"><i class="fas fa-layer-group"></i></div>
+            </div>
+            <div class="stat-change up"><i class="fas fa-arrow-up"></i> configurés</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Facile</div>
+                    <div class="stat-value">{{ niveau_jeus|filter(n => n.libelle|upper == 'FACILE')|length }}</div>
+                </div>
+                <div class="stat-icon violet"><i class="fas fa-smile"></i></div>
+            </div>
+            <div class="stat-change up">niveau débutant</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Moyen</div>
+                    <div class="stat-value">{{ niveau_jeus|filter(n => n.libelle|upper == 'MOYEN')|length }}</div>
+                </div>
+                <div class="stat-icon pink"><i class="fas fa-equals"></i></div>
+            </div>
+            <div class="stat-change up">niveau intermédiaire</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-xl-3">
+        <div class="stat-card">
+            <div class="stat-top">
+                <div>
+                    <div class="stat-label">Difficile</div>
+                    <div class="stat-value">{{ niveau_jeus|filter(n => n.libelle|upper == 'DIFFICILE')|length }}</div>
+                </div>
+                <div class="stat-icon indigo"><i class="fas fa-fire"></i></div>
+            </div>
+            <div class="stat-change up">niveau avancé</div>
+        </div>
+    </div>
+</div>
+
+<div class="card-box">
+    <div class="card-box-header">
+        <span class="card-box-title"><i class="fas fa-list"></i> Liste des niveaux</span>
+
+        <div class="d-flex gap-2 align-items-center">
+            <input type="text" class="form-control filter-input" id="niveauFilterInput" placeholder="Filtrer...">
+            <a href="{{ path('app_niveau_jeu_new') }}" class="btn-purple text-decoration-none">
+                <i class="fas fa-plus me-1"></i> Ajouter
+            </a>
+            <a href="{{ path('app_niveau_jeu_export_csv') }}" class="btn btn-success text-decoration-none" title="Exporter CSV">
+                <i class="fas fa-file-csv"></i>
+            </a>
+            <a href="{{ path('app_niveau_jeu_export_pdf') }}" class="btn btn-danger text-decoration-none" title="Exporter PDF">
+                <i class="fas fa-file-pdf"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="card-box-body p-0">
+        <div class="table-wrapper">
+            <table class="custom-table" id="niveauTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Libellé</th>
+                        <th>Min</th>
+                        <th>Max</th>
+                        <th>Description</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for niveau in niveau_jeus %}
+                    <tr>
+                        <td>{{ niveau.id }}</td>
+                        <td>
+                            {% if niveau.libelle|upper == 'FACILE' %}
+                                <span class="badge-level badge-facile">FACILE</span>
+                            {% elseif niveau.libelle|upper == 'MOYEN' %}
+                                <span class="badge-level badge-moyen">MOYEN</span>
+                            {% elseif niveau.libelle|upper == 'DIFFICILE' %}
+                                <span class="badge-level badge-difficile">DIFFICILE</span>
+                            {% else %}
+                                <span class="badge-status">{{ niveau.libelle }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ niveau.minMoyenne }}</td>
+                        <td>{{ niveau.maxMoyenne }}</td>
+                        <td>{{ niveau.description ?: '-' }}</td>
+                        <td>
+                            <a href="{{ path('app_niveau_jeu_show', {'id': niveau.id}) }}" class="btn-edit-soft text-decoration-none me-1" title="Voir">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{{ path('app_niveau_jeu_edit', {'id': niveau.id}) }}" class="btn-outline-purple text-decoration-none" title="Modifier">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center">Aucun niveau trouvé</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const filterInput = document.getElementById('niveauFilterInput');
+    filterInput?.addEventListener('input', function (e) {
+        const val = e.target.value.toLowerCase();
+        document.querySelectorAll('#niveauTable tbody tr').forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(val) ? '' : 'none';
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -39,6 +39,57 @@
             {% block body %}{% endblock %}
         </main>
 
+        <!-- ChatBot Widget -->
+        <div id="chatbot-widget" style="position:fixed;bottom:30px;right:30px;z-index:9999;">
+            <div id="chatbot-box" style="display:none;background:#fff;border-radius:16px;box-shadow:0 4px 24px #0002;width:320px;max-width:90vw;">
+                <div style="background:#4d65f9;color:#fff;padding:12px 16px;border-radius:16px 16px 0 0;font-weight:bold;">AutiBot 🤖<span style="float:right;cursor:pointer;" onclick="document.getElementById('chatbot-box').style.display='none'">&times;</span></div>
+                <div id="chatbot-messages" style="height:220px;overflow-y:auto;padding:10px;font-size:0.95em;"></div>
+                <form id="chatbot-form" style="display:flex;border-top:1px solid #eee;">
+                    <input id="chatbot-input" type="text" class="form-control" placeholder="Pose ta question..." autocomplete="off" style="border:none;border-radius:0 0 0 16px;">
+                    <button class="btn btn-primary" type="submit" style="border-radius:0 0 16px 0;">Envoyer</button>
+                </form>
+            </div>
+            <button id="chatbot-toggle" class="btn btn-primary rounded-circle shadow" style="width:56px;height:56px;font-size:1.7em;">
+                <i class="fas fa-comments"></i>
+            </button>
+        </div>
+        <script>
+        // ChatBot Widget JS
+        const chatbotToggle = document.getElementById('chatbot-toggle');
+        const chatbotBox = document.getElementById('chatbot-box');
+        chatbotToggle.onclick = () => chatbotBox.style.display = chatbotBox.style.display==='block'?'none':'block';
+        // Réponses locales simples (peut être remplacé par une API IA)
+        const botReplies = [
+            "Bonjour ! Comment puis-je t'aider ?",
+            "Je suis là pour répondre à tes questions sur les jeux ou t'encourager !",
+            "Essaie un nouveau jeu pour t'amuser et apprendre !",
+            "N'oublie pas de faire une pause et de t'amuser !",
+            "Si tu veux une astuce, demande-moi !"
+        ];
+        function botAnswer(msg) {
+            // Pour une vraie IA, remplacer ici par un appel API
+            if(msg.toLowerCase().includes('jeu')) return "Tu peux choisir un jeu dans le catalogue ou demander une astuce !";
+            if(msg.toLowerCase().includes('aide')) return "Je peux t'aider à trouver un jeu adapté ou t'expliquer une règle.";
+            if(msg.toLowerCase().includes('bonjour')||msg.toLowerCase().includes('salut')) return "Bonjour à toi ! Prêt à jouer ?";
+            return botReplies[Math.floor(Math.random()*botReplies.length)];
+        }
+        document.getElementById('chatbot-form').onsubmit = function(e) {
+            e.preventDefault();
+            const input = document.getElementById('chatbot-input');
+            const msg = input.value.trim();
+            if(!msg) return;
+            const messages = document.getElementById('chatbot-messages');
+            messages.innerHTML += `<div style='text-align:right;margin-bottom:4px;'><span style='background:#e9f0ff;padding:6px 12px;border-radius:12px;display:inline-block;'>${msg}</span></div>`;
+            input.value = '';
+            setTimeout(()=>{
+                const reply = botAnswer(msg);
+                messages.innerHTML += `<div style='text-align:left;margin-bottom:8px;'><span style='background:#f1f1f1;padding:6px 12px;border-radius:12px;display:inline-block;'>${reply}</span></div>`;
+                messages.scrollTop = messages.scrollHeight;
+            }, 600);
+            messages.scrollTop = messages.scrollHeight;
+        };
+        </script>
+
         <!-- Footer -->
         {% include 'partials/footer.html.twig' %}
 

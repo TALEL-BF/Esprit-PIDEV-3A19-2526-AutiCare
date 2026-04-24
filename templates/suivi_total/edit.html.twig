@@ -1,0 +1,30 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Auticare — Modifier un suivi{% endblock %}
+{% block page_title %}Jeu — Modifier un suivi{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <h2><i class="fas fa-pen me-2" style="color:var(--purple-500)"></i>Modifier un suivi</h2>
+    <p>Mettre à jour les informations du suivi</p>
+</div>
+
+<div class="card-box mb-4">
+    <div class="card-box-header">
+        <span class="card-box-title"><i class="fas fa-edit"></i> Édition du suivi</span>
+        <span class="form-mode-badge">Mode : Modification</span>
+    </div>
+    <div class="card-box-body">
+        {% include 'suivi_total/_form.html.twig' with {form: form, button_label: 'Modifier'} %}
+    </div>
+</div>
+
+<div class="card-box">
+    <div class="card-box-header">
+        <span class="card-box-title"><i class="fas fa-trash-alt"></i> Suppression</span>
+    </div>
+    <div class="card-box-body">
+        {% include 'suivi_total/_delete_form.html.twig' with {suivi_total: suivi_total} %}
+    </div>
+</div>
+{% endblock %}

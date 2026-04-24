@@ -1,0 +1,135 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Jeux & Niveaux{% endblock %}
+
+{% block page_title %}
+<i class="fas fa-puzzle-piece me-2"></i> Jeux & Niveaux
+{% endblock %}
+
+{% block body %}
+
+<div class="row">
+
+    <!-- STATS -->
+    <div class="col-md-3">
+        <div class="card card-stats card-round">
+            <div class="card-body">
+                <div class="numbers">
+                    <p class="card-category">Niveaux</p>
+                    <h4 class="card-title">{{ niveau_jeus|length }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card card-stats card-round">
+            <div class="card-body">
+                <div class="numbers">
+                    <p class="card-category">Facile</p>
+                    <h4 class="card-title">
+                        {{ niveau_jeus|filter(n => n.libelle == 'FACIL' or n.libelle == 'FACILE')|length }}
+                    </h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card card-stats card-round">
+            <div class="card-body">
+                <div class="numbers">
+                    <p class="card-category">Moyen</p>
+                    <h4 class="card-title">
+                        {{ niveau_jeus|filter(n => n.libelle == 'MOYEN')|length }}
+                    </h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card card-stats card-round">
+            <div class="card-body">
+                <div class="numbers">
+                    <p class="card-category">Difficile</p>
+                    <h4 class="card-title">
+                        {{ niveau_jeus|filter(n => n.libelle == 'DIFFICILE')|length }}
+                    </h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- TABLE -->
+<div class="card mt-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="card-title">Liste des niveaux</h4>
+
+        <a href="{{ path('app_niveau_jeu_new') }}" class="btn btn-primary btn-sm">
+            <i class="fa fa-plus"></i> Ajouter
+        </a>
+    </div>
+
+    <div class="card-body">
+
+        <input type="text" class="form-control mb-3" placeholder="Filtrer..."
+               onkeyup="filterTable(this.value, 'niveauTable')">
+
+        <div class="table-responsive">
+            <table class="table table-striped table-hover" id="niveauTable">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Libellé</th>
+                        <th>Min</th>
+                        <th>Max</th>
+                        <th>Description</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                {% for niveau in niveau_jeus %}
+                    <tr>
+                        <td>{{ niveau.id }}</td>
+
+                        <td>
+                            {% if niveau.libelle == 'FACIL' or niveau.libelle == 'FACILE' %}
+                                <span class="badge bg-success">FACILE</span>
+                            {% elseif niveau.libelle == 'MOYEN' %}
+                                <span class="badge bg-warning text-dark">MOYEN</span>
+                            {% elseif niveau.libelle == 'DIFFICILE' %}
+                                <span class="badge bg-danger">DIFFICILE</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ niveau.libelle }}</span>
+                            {% endif %}
+                        </td>
+
+                        <td>{{ niveau.minMoyenne }}</td>
+                        <td>{{ niveau.maxMoyenne }}</td>
+                        <td>{{ niveau.description }}</td>
+
+                        <td>
+                            <a href="{{ path('app_niveau_jeu_show', {'id': niveau.id}) }}"
+                               class="btn btn-info btn-sm">Show</a>
+
+                            <a href="{{ path('app_niveau_jeu_edit', {'id': niveau.id}) }}"
+                               class="btn btn-warning btn-sm">Edit</a>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6">Aucun niveau trouvé</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Auticare — Suivis totaux{% endblock %}
+{% block page_title %}Jeu — Suivi total{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <h2><i class="fas fa-chart-line me-2" style="color:var(--purple-500)"></i>Suivis totaux</h2>
+    <p>Suivre les moyennes et niveaux attribués aux enfants</p>
+</div>
+
+<div class="card-box">
+    <div class="card-box-header">
+        <span class="card-box-title"><i class="fas fa-list"></i> Liste des suivis</span>
+
+        <div class="d-flex gap-2 align-items-center">
+            <a href="{{ path('app_suivi_total_new') }}" class="btn-purple text-decoration-none">
+                <i class="fas fa-plus me-1"></i> Ajouter
+            </a>
+            <a href="{{ path('app_suivi_total_export_csv') }}" class="btn btn-success text-decoration-none" title="Exporter CSV">
+                <i class="fas fa-file-csv"></i>
+            </a>
+            <a href="{{ path('app_suivi_total_export_pdf') }}" class="btn btn-danger text-decoration-none" title="Exporter PDF">
+                <i class="fas fa-file-pdf"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="card-box-body p-0">
+        <div class="table-wrapper">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>ENFANT</th>
+                        <th>MOYENNE</th>
+                        <th>REMARQUE</th>
+                        <th>NIVEAU</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for suivi_total in suivi_totals %}
+                    <tr>
+                        <td>{{ suivi_total.id }}</td>
+                        <td>{{ suivi_total.enfantId }}</td>
+                        <td>{{ suivi_total.moyenne }}</td>
+                        <td>{{ suivi_total.remarque ?: '-' }}</td>
+                        <td>{{ suivi_total.niveauJeu ? suivi_total.niveauJeu.libelle : '-' }}</td>
+                        <td>
+                            <a href="{{ path('app_suivi_total_show', {'id': suivi_total.id}) }}" class="btn-edit-soft text-decoration-none me-1" title="Voir">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{{ path('app_suivi_total_edit', {'id': suivi_total.id}) }}" class="btn-outline-purple text-decoration-none" title="Modifier">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center">Aucun suivi trouvé</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
